@@ -113,6 +113,8 @@ extern void sdo_make_long_class_constant(zend_class_entry *ce, char *name, long 
 
 extern xmldas::XMLDAS *sdo_get_XMLDAS();
 
+extern function_entry sdo_exception_methods[];
+
 #endif	/* PHP_SDO_INT_H */
 
 /*
