@@ -22,11 +22,11 @@ fi
 
 PHP_CHECK_LIBRARY(sdo, SDOCheck, 
 [
-  PHP_ADD_INCLUDE(sdolib/src/sdo)
+  PHP_ADD_INCLUDE($abs_srcdir/sdolib/src/sdo)
   PHP_ADD_LIBRARY_WITH_PATH(sdo, $SDOLIBS_DIR, SDO_SHARED_LIBADD)
   AC_MSG_CHECKING(Is it a required version of sdo library)
   AC_EGREP_CPP(yes,[
-#include "sdolib/src/sdo/export.h"
+#include "$abs_srcdir/sdolib/src/sdo/export.h"
 #if SDO4CPP_VERSION >= 20050715
   yes
 #endif
@@ -43,12 +43,12 @@ PHP_CHECK_LIBRARY(sdo, SDOCheck,
 
 PHP_CHECK_LIBRARY(xmldas, XMLDASCheck,
 [
-  PHP_ADD_INCLUDE(sdolib/src/xmldas)
+  PHP_ADD_INCLUDE($abs_srcdir/sdolib/src/xmldas)
   PHP_ADD_LIBRARY_WITH_PATH(xmldas, $SDOLIBS_DIR, SDO_DAS_XML_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH(xmldas, $SDOLIBS_DIR, SDO_SHARED_LIBADD)
   AC_MSG_CHECKING(is it a required version of xmldas?)
   AC_EGREP_CPP(yes,[
-#include "sdolib/src/xmldas/XMLDASExport.h"
+#include "$abs_srcdir/sdolib/src/xmldas/XMLDASExport.h"
 #if XMLDAS4CPP_VERSION >= 20050715
   yes
 #endif
@@ -80,4 +80,5 @@ PHP_SUBST(SDO_SHARED_LIBADD)
 PHP_SUBST(SDO_DAS_XML_SHARED_LIBADD)
 PHP_NEW_EXTENSION(sdo, sdo.cpp  SDO_DAS_ChangeSummary.cpp  SDO_DAS_DataFactory.cpp  SDO_DAS_Setting.cpp  SDO_DataObject.cpp  SDO_List.cpp  SDO_Sequence.cpp  sdo_utils.cpp, $ext_shared)
 PHP_NEW_EXTENSION(sdo_das_xml, xmldas.cpp xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp, $ext_shared)
+PHP_ADD_EXTENSION_DEP(sdo_das_xml, sdo)
 fi
