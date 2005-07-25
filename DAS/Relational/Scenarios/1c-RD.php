@@ -37,7 +37,7 @@ require_once 'company_metadata.inc.php';
 *************************************************************************************/
 
 /*************************************************************************************
-* Get a Data Access Service
+ * Get and initialise a DAS with the metadata
 *************************************************************************************/
 try {
 	$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
@@ -52,7 +52,7 @@ try {
 * Find the company or companies and delete
 *************************************************************************************/
 $name = 'Acme';
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 try {
 	$root = $das->executeQuery($dbh,
 	'select name, id from company where name="' . $name . '"' ,
@@ -69,7 +69,7 @@ foreach($root['company'] as $acme) {
 
 unset($root['company']);
 
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 try {
 	$das -> applyChanges($dbh, $root);
 } catch (SDO_DAS_Relational_Exception $e) {

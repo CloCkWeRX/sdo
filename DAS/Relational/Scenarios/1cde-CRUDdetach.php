@@ -56,13 +56,10 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Empty out the three tables
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-$pdo_stmt = $dbh->prepare('DELETE FROM COMPANY;');
-$rows_affected = $pdo_stmt->execute();
-$pdo_stmt = $dbh->prepare('DELETE FROM DEPARTMENT;');
-$rows_affected = $pdo_stmt->execute();
-$pdo_stmt = $dbh->prepare('DELETE FROM EMPLOYEE;');
-$rows_affected = $pdo_stmt->execute();
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$count = $dbh->exec('DELETE FROM company');
+$count = $dbh->exec('DELETE FROM department');
+$count = $dbh->exec('DELETE FROM employee');
 
 
 /*************************************************************************************
@@ -70,10 +67,10 @@ $rows_affected = $pdo_stmt->execute();
 * The company name is Acme.
 * There are two departments, Shoe and IT.
 * There are two employees, Sue and Billy.
-* // The employee of the month is Sue.
+* The employee of the month is Sue.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $root 			= $das  -> createRootDataObject();
 $acme 			= $root -> createDataObject('company');
@@ -88,7 +85,7 @@ $sue 			= $shoe -> createDataObject('employee');
 $sue -> name 	= 'Sue';
 $billy 			= $it   -> createDataObject('employee');
 $billy -> name 	= 'Billy';
-// $acme -> employee_of_the_month = $sue;
+$acme -> employee_of_the_month = $sue;
 $das -> applyChanges($dbh, $root);
 
 echo "Wrote back company with name Acme, two departments, and two employees\n";
@@ -99,7 +96,7 @@ echo "Wrote back company with name Acme, two departments, and two employees\n";
 * Then write it back again.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 $name = 'Acme';
 $root = $das->executeQuery($dbh,
 'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
@@ -115,7 +112,6 @@ echo "First employee had name = " . $acme2->department[0]->employee[0]->name . "
 echo "Second department had name = " . $acme2->department[1]->name . "\n";
 echo "Second employee had name = " . $acme2->department[1]->employee[0]->name . "\n";
 
-var_dump($root);
 // Swap Sue and Billy
 // Since we have sue and billy safely in variables, remove them from their departments
 unset($shoe['employee'][0]);
@@ -130,24 +126,24 @@ $das -> applyChanges($dbh, $root);
 /*************************************************************************************
 * Find the company again and check that they are swapped
 *************************************************************************************/
-//$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-//$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-//$name = 'Acme';
-//$root = $das->executeQuery($dbh,
-//'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
-//array('company.id','company.name','department.id','department.name','employee.id','employee.name'));
-//var_dump($root);
-//$acme3 = $root['company'][0];
-////$shoe = $acme3['department'][0];
-////$it = $acme3['department'][1];
-////$sue = $shoe['employee'][0];
-////$billy = $it['employee'][0];
-//echo "Looked for Acme and found company with name = $acme3->name and id $acme3->id\n";
-//echo "First department had name = " . $acme3->department[0]->name . "\n";
-//echo "First employee had name = " . $acme3->department[0]->employee[0]->name . "\n";
-//echo "Second department had name = " . $acme3->department[1]->name . "\n";
-//echo "Second employee had name = " . $acme3->department[1]->employee[0]->name . "\n";
-//
+$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$name = 'Acme';
+$root = $das->executeQuery($dbh,
+'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
+array('company.id','company.name','department.id','department.name','employee.id','employee.name'));
+var_dump($root);
+$acme3 = $root['company'][0];
+//$shoe = $acme3['department'][0];
+//$it = $acme3['department'][1];
+//$sue = $shoe['employee'][0];
+//$billy = $it['employee'][0];
+echo "Looked for Acme and found company with name = $acme3->name and id $acme3->id\n";
+echo "First department had name = " . $acme3->department[0]->name . "\n";
+echo "First employee had name = " . $acme3->department[0]->employee[0]->name . "\n";
+echo "Second department had name = " . $acme3->department[1]->name . "\n";
+echo "Second employee had name = " . $acme3->department[1]->employee[0]->name . "\n";
+
 
 
 

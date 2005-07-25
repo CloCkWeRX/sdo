@@ -36,12 +36,11 @@ require_once 'company_metadata.inc.php';
  *   primary key(id) ); 
  */
 
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-$pdo_stmt = $dbh->prepare('DELETE FROM COMPANY;');
-$rows_affected = $pdo_stmt->execute();
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$count = $dbh->exec('DELETE FROM company;');
 
 /**************************************************************
- * GET AND INITIALISE A DAS WITH THE METADATA
+ * Get and initialise a DAS with the metadata
  ***************************************************************/
 try {
     $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
@@ -53,7 +52,7 @@ try {
 }
 
 /**************************************************************
- * CREATE THREE COMPANY OBJECTS UNDER THE SAME ROOT
+ * Create three company data objects under the same root
  ***************************************************************/
 
 $root = $das->createRootDataObject();
@@ -66,7 +65,7 @@ $megacorp->name = 'MegaCorp';
 $ultracorp = $root->createDataObject('company');
 $ultracorp->name = 'UltraCorp';
 
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 try {
     $das -> applyChanges($dbh, $acme);

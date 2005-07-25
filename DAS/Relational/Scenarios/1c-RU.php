@@ -31,7 +31,7 @@ require_once 'company_metadata.inc.php';
  */
 
 /**************************************************************
-* GET AND INITIALISE A DAS WITH THE METADATA
+ * Get and initialise a DAS with the metadata
 ***************************************************************/
 try {
 	$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
@@ -43,12 +43,12 @@ try {
 }
 
 /**************************************************************
-* GET A DATABASE CONNECTION
+* Get a database connection
 ***************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
-* ISSUE A QUERY TO OBTAIN A COMPANY OBJECT
+* Issue a query to obtain a company data object
 ***************************************************************/
 
 try {
@@ -68,15 +68,6 @@ assert($company->name == 'Acme' || $company->name == 'emcA');
 echo "obtained a company with name of " . $company->name . "\n";
 
 $company->name = 'Acme';
-//$company->name = strrev($company->name);
-
-//var_dump($root);
-//
-//echo "checking : " . isset($root['company'][0]['department']) . "\n";
-//
-//foreach ($company as $name => $value) {
-//	echo "$name => $value \n";
-//}
 
 $das->applyChanges($dbh,$root);
 

@@ -62,10 +62,9 @@ $database_metadata = array($employee_table);
 /*************************************************************************************
 * Empty out the company table
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-$pdo_stmt = $dbh->prepare('DELETE FROM EMPLOYEE;');
-$rows_affected = $pdo_stmt->execute();
-echo "Emptied out the employee table with DELETE FROM EMPLOYEE\n";
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$count = $dbh->exec('DELETE FROM employee');
+echo "Emptied out the employee table with DELETE FROM employee\n";
 
 
 /*************************************************************************************
@@ -73,7 +72,7 @@ echo "Emptied out the employee table with DELETE FROM EMPLOYEE\n";
 * Set the company name to 'Acme'.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $root 		= $das  -> createRootDataObject();
 $employee 	= $root -> createDataObject('employee');
@@ -87,7 +86,7 @@ echo "Created an employee with name Sue and wrote it to the database\n";
 * Then update it and write it back again.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Sue';
 $root = $das->executeQuery($dbh,'select id, name, SN from employee where name="' . $name . '";');
@@ -102,7 +101,7 @@ echo "Wrote back employee with name changed to Susan\n";
 * Find it again under its new name, and delete it.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Susan';
 $root = $das->executeQuery($dbh,'select id, name, SN from employee where name="' . $name . '";');
@@ -115,11 +114,10 @@ echo "Deleted the employee and wrote the changes back to the database\n";
 /*************************************************************************************
 * Check the row is really gone
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-
-foreach($dbh->query('SELECT * FROM EMPLOYEE') as $row) {
-	assert(false); 	// better not get to here!
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+foreach($dbh->query('select * from employee') as $row) {
+  assert(false); // There had better be no such rows. 
 }
-echo "Checked that the table was truly empty with SELECT * FROM EMPLOYEE. Nothing was found so the delete was successful.\n";
+echo "Checked that the table was truly empty with SELECT * FROM employee. Nothing was found so the delete was successful.\n";
 
 ?>

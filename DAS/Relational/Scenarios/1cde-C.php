@@ -28,16 +28,11 @@ require_once 'company_metadata.inc.php';
  * Scenario - Various creates
  *
  */
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-$pdo_stmt = $dbh->prepare('DELETE FROM COMPANY;');
-$rows_affected = $pdo_stmt->execute();
-$pdo_stmt = $dbh->prepare('DELETE FROM DEPARTMENT;');
-$rows_affected = $pdo_stmt->execute();
-$pdo_stmt = $dbh->prepare('DELETE FROM EMPLOYEE;');
-$rows_affected = $pdo_stmt->execute();
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$count = $dbh->exec('DELETE FROM company');
+$count = $dbh->exec('DELETE FROM department');
+$count = $dbh->exec('DELETE FROM employee');
 
-
-///////////////////////////////////////////////////////////////////////////////
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
 $root = $das -> createRootDataObject();
 $acme = $root -> createDataObject('company');
@@ -52,9 +47,9 @@ $sue->name = 'Sue';
 $ron = $it->createDataObject('employee');
 $ron->name = 'Ron';
 
-//$acme->employee_of_the_month=$ron;
+$acme->employee_of_the_month=$ron;
 
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 $das -> applyChanges($dbh, $acme);
 echo "company, departments, and employees all written to the database\n";
 

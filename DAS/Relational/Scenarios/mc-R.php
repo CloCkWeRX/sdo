@@ -31,8 +31,8 @@ require_once 'company_metadata.inc.php';
  */
 
 /**************************************************************
-* GET AND INITIALISE A DAS WITH THE METADATA
-***************************************************************/
+ * Get and initialise a DAS with the metadata
+ ***************************************************************/
 try {
 	$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
 } catch (SDO_DAS_Relational_Exception $e) {
@@ -43,13 +43,13 @@ try {
 }
 
 /**************************************************************
-* GET A DATABASE CONNECTION
-***************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+ * Get a PDO database connection
+ ***************************************************************/
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
-* ISSUE A QUERY TO OBTAIN A COMPANY OBJECT
-***************************************************************/
+ * Issue a query to obtain the company data objects
+ ***************************************************************/
 
 try {
 	$root = $das->executeQuery($dbh, 'select name, id from company',array('company.name','company.id') );

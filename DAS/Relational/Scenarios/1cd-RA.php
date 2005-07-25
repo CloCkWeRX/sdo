@@ -30,7 +30,7 @@ require_once 'company_metadata.inc.php';
  */
 
 /**************************************************************
- * GET AND INITIALISE A DAS WITH THE METADATA
+ * Get and initialise a DAS with the metadata
  ***************************************************************/
 try {
     $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
@@ -42,9 +42,9 @@ try {
 }
 
 /**************************************************************
- * RETRIEVE THE COMPANY OBJECT
+ * Issue a query to obtain the company data object
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 try {
 	$root = $das->executeQuery($dbh,
@@ -68,12 +68,12 @@ $it->name = 'IT';
 echo "Changed a department and added one and wrote both back - should now have two departments\n";
 
 /**************************************************************
- * GET A DATABASE CONNECTION
+ * Get a database connection
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
- * WRITE THE CHANGES OUT
+ * Write the changes out
  ***************************************************************/
 try {
     $das -> applyChanges($dbh, $root);

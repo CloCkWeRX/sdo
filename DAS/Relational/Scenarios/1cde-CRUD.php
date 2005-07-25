@@ -56,13 +56,10 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Empty out the three tables
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-$pdo_stmt = $dbh->prepare('DELETE FROM COMPANY;');
-$rows_affected = $pdo_stmt->execute();
-$pdo_stmt = $dbh->prepare('DELETE FROM DEPARTMENT;');
-$rows_affected = $pdo_stmt->execute();
-$pdo_stmt = $dbh->prepare('DELETE FROM EMPLOYEE;');
-$rows_affected = $pdo_stmt->execute();
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$count = $dbh->exec("DELETE FROM company");
+$count = $dbh->exec("DELETE FROM department");
+$count = $dbh->exec("DELETE FROM employee");
 
 /*************************************************************************************
 * Create a tiny but complete company.
@@ -72,7 +69,7 @@ $rows_affected = $pdo_stmt->execute();
 * The employee of the month is Sue.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $root 			= $das  -> createRootDataObject();
 $acme 			= $root -> createDataObject('company');
@@ -95,7 +92,7 @@ echo "Wrote back Acme with one department and one employee\n";
 * Change the employee of the month.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Acme';
 $root = $das->executeQuery($dbh,
@@ -124,7 +121,7 @@ echo "Wrote back company with extra department and employee and all the names ch
 * Find it again under its new name and check names and e.o.t.m are right
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'MegaCorp';
 $root = $das->executeQuery($dbh,
@@ -149,7 +146,7 @@ assert	($megacorp->employee_of_the_month['name'] == 'Billy');
 * reassigning. For safety here we delete the company all in one go. 
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 
 $name='MegaCorp';
 $root = $das->executeQuery($dbh,

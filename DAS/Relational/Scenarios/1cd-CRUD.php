@@ -31,17 +31,15 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Empty out the two tables
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
-$pdo_stmt = $dbh->prepare('DELETE FROM COMPANY;');
-$rows_affected = $pdo_stmt->execute();
-$pdo_stmt = $dbh->prepare('DELETE FROM DEPARTMENT;');
-$rows_affected = $pdo_stmt->execute();
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$count = $dbh->exec('DELETE FROM company');
+$count = $dbh->exec('DELETE FROM department');
 
 
 /**************************************************************
 * Create company with name Acme and one department, Shoe
 ***************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
 
 $root = $das -> createRootDataObject();
@@ -58,7 +56,7 @@ echo "\nCompany Acme has been written to the database\n";
 /**************************************************************
 * Retrieve the company and Shoe department, then delete Shoe and add IT
 ***************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
 
 $root = $das->executeQuery($dbh,
@@ -80,7 +78,7 @@ echo "Deleted a department and added one\n";
 /**************************************************************
 * Retrieve the company and IT department, then delete the whole company
 ***************************************************************/
-$dbh = new PDO("mysql:dbname=COMPANYDB;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
 
 $root = $das->executeQuery($dbh,
