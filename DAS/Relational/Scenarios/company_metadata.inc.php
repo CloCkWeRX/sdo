@@ -21,8 +21,19 @@
 
 */
 
+
+/***********************************************************************
+ * Enter your own database password in the second define and then remove the 
+ * echos and exit to leave just the two DEFINEs.
+ **********************************************************************/
+echo "*************************************************************************************************\n";
+echo "\n";
+echo "You need to supply a database user and password in SDO/DAS/Relational/Scenarios/company_metadata.inc.php\n";
+echo "\n";
+echo "*************************************************************************************************\n";
+exit;
 define('DATABASE_USER','root');
-define ('DATABASE_PASSWORD','qpoiqpoi');
+define ('DATABASE_PASSWORD','YOUR_DATABASE_PASSWORD_HERE');
 
 
 /*****************************************************************
