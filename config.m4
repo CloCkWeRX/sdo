@@ -1,3 +1,5 @@
+dnl $Id$
+
 PHP_ARG_ENABLE(sdo, sdo ,
 [  --enable-sdo Enable sdo support])
 
