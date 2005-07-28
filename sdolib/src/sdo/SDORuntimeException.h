@@ -1,22 +1,22 @@
-/* 
+/*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  | 
+| (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+ 
-|                                                                      | 
-| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
-| may not use this file except in compliance with the License. You may | 
-| obtain a copy of the License at                                      | 
++----------------------------------------------------------------------+
+|                                                                      |
+| Licensed under the Apache License, Version 2.0 (the "License"); you  |
+| may not use this file except in compliance with the License. You may |
+| obtain a copy of the License at                                      |
 |  http://www.apache.org/licenses/LICENSE-2.0                          |
-|                                                                      | 
-| Unless required by applicable law or agreed to in writing, software  | 
-| distributed under the License is distributed on an "AS IS" BASIS,    | 
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
-| implied. See the License for the specific language governing         | 
-| permissions and limitations under the License.                       | 
-+----------------------------------------------------------------------+ 
-| Author: Pete Robbins / Ed Slattery                                                  | 
-+----------------------------------------------------------------------+ 
+|                                                                      |
+| Unless required by applicable law or agreed to in writing, software  |
+| distributed under the License is distributed on an "AS IS" BASIS,    |
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+| implied. See the License for the specific language governing         |
+| permissions and limitations under the License.                       |
++----------------------------------------------------------------------+
+| Author: Pete Robbins / Ed Slattery                                                  |
++----------------------------------------------------------------------+
 
 */
 /* $Id$ */
@@ -25,7 +25,7 @@
 #define SDO_EXCEPTIONS_H
 
 #include "export.h"
- 
+
 
 #include <string>
 #include <iostream>
@@ -34,20 +34,20 @@ using namespace std;
 
 
 // ***************************************************************************
-// 
-// Class : SDORuntimeException     
+//
+// Class : SDORuntimeException
 // --------------------
-//               
+//
 // Description :
 // -------------
 //   SDO exception class definition
 //
 //   This is intended as a base class.
 //
-// Parent Classes : 
-// ---------------- 
+// Parent Classes :
+// ----------------
 //   none
-// 
+//
 // Public Member functions:
 // ------------------------
 //
@@ -57,7 +57,7 @@ using namespace std;
 //
 //       creates the exception object. Parameters are:
 //         sev: the severity of the exception (Error, Severe)
-//         msg_text:  descriptive message_text 
+//         msg_text:  descriptive message_text
 //
 //     copy constructor not necessary
 //
@@ -75,8 +75,8 @@ using namespace std;
 //     come from a message catalog as it may be written to stdout/stderr at
 //     some point)
 //
-//   void setExceptionLocation(const char* file,        
-//                             unsigned long line,           
+//   void setExceptionLocation(const char* file,
+//                             unsigned long line,
 //                             const char* function="");
 //
 //     adds the location of the exception. Parameters
@@ -104,11 +104,11 @@ using namespace std;
 // Protected Member functions:
 // ---------------------------
 //       none
-//        
+//
 // Private Member functions:
 // -------------------------
 //       none
-//        
+//
 // Public Data Members :
 // ---------------------
 //       none
@@ -126,8 +126,8 @@ using namespace std;
 //   string           function_name;    // Function name
 //
 // ***************************************************************************
-class  SDORuntimeException 
-{ 
+class  SDORuntimeException
+{
   public:
     // Constructor
     enum severity_level
@@ -143,13 +143,13 @@ class  SDORuntimeException
                  const char* msg_text="");
 
     SDO_API SDORuntimeException(const SDORuntimeException& c);
- 
+
     // Destructor
     virtual  SDO_API ~SDORuntimeException();
 
     // Return class name of this exception
     SDO_API const char* getEClassName() const;
-    
+
     // Return severity
     SDO_API severity_level getSeverity() const;
 
@@ -171,32 +171,32 @@ class  SDORuntimeException
 
     // set the message text associated with exception
     SDO_API void setMessageText(const char* msg_text);
-    
+
 
     // set exception location
     SDO_API void setExceptionLocation(const char* file,
                                 unsigned long line,
-                                const char* function=""); 
+                                const char* function="");
 
     // set location
     SDO_API void setLocation(const char* file,
                                 unsigned long line,
-                                const char* function=""); 
+                                const char* function="");
 
     // Trace the exception
     SDO_API void trace(const char* text="%1:\n  %3 %4 %2");
 
     // append exception details to ostream
     SDO_API virtual ostream& PrintSelf(ostream &os) const;
-    
+
     // ostream operator <<
-    friend ostream& operator<< (ostream &os, const SDORuntimeException &except);
+    SDO_API friend ostream& operator<< (ostream &os, const SDORuntimeException &except);
   protected:
 
   private:
-                 
+
 	char*        class_name;
-	
+
     severity_level   severity;         // Severity of exception
 
     char*        message_text;     // Description of exception
@@ -223,150 +223,150 @@ class  SDORuntimeException
 
 // ***************************************************************************
 //
-// General exception for no-storage 
-// 
+// General exception for no-storage
+//
 // ***************************************************************************
 class SDOOutOfMemoryException: public SDORuntimeException
 {
   public:
     SDOOutOfMemoryException(unsigned long size)
-      : SDORuntimeException("SDOOutOfMemoryException", Severe,                                 
+      : SDORuntimeException("SDOOutOfMemoryException", Severe,
                      "Unable to obtain storage of length " + size)
     {
     }
-  private: 
+  private:
 }; // End SDOOutOfMemory class definition
 
 // ***************************************************************************
 //
-// General exception for bad path 
-// 
+// General exception for bad path
+//
 // ***************************************************************************
 class SDOPathNotFoundException: public SDORuntimeException
 {
   public:
     SDOPathNotFoundException(const char* path)
-      : SDORuntimeException("SDOPathNotFoundException", Warning,                                 
+      : SDORuntimeException("SDOPathNotFoundException", Warning,
                      path)
     {
     }
-  private: 
+  private:
 }; // End SDOPathNotFoundException class definition
 
 // ***************************************************************************
 //
-// General exception for property not found 
-// 
+// General exception for property not found
+//
 // ***************************************************************************
 class SDOPropertyNotFoundException: public SDORuntimeException
 {
   public:
     SDOPropertyNotFoundException(const char* name)
-      : SDORuntimeException("SDOPropertyNotFoundException", Warning,                                 
+      : SDORuntimeException("SDOPropertyNotFoundException", Warning,
                       name)
     {
     }
-  private: 
+  private:
 }; // End SDOPropertyNotFoundException class definition
 
 // ***************************************************************************
 //
-// General exception for type not found 
-// 
+// General exception for type not found
+//
 // ***************************************************************************
 class SDOTypeNotFoundException: public SDORuntimeException
 {
   public:
     SDOTypeNotFoundException(const char* name)
-      : SDORuntimeException("SDOTypeNotFoundException", Warning,                                 
+      : SDORuntimeException("SDOTypeNotFoundException", Warning,
                      name)
     {
     }
-  private: 
+  private:
 }; // End SDOTypeNotFoundException class definition
 
 // ***************************************************************************
 //
-// General invalid action for type not found 
-// 
+// General invalid action for type not found
+//
 // ***************************************************************************
 class SDOUnsupportedOperationException: public SDORuntimeException
 {
   public:
     SDOUnsupportedOperationException(const char* name)
-      : SDORuntimeException("SDOUnsupportedOperationException", Warning,                                 
+      : SDORuntimeException("SDOUnsupportedOperationException", Warning,
                       name)
     {
     }
-  private: 
+  private:
 }; // End SDOTypeNotFoundException class definition
 
 // ***************************************************************************
 //
-// General invalid conversion for type not found 
-// 
+// General invalid conversion for type not found
+//
 // ***************************************************************************
 class SDOInvalidConversionException: public SDORuntimeException
 {
   public:
     SDOInvalidConversionException(const char* name)
-      : SDORuntimeException("SDOInvalidConversionException", Warning,                                 
+      : SDORuntimeException("SDOInvalidConversionException", Warning,
                       name)
     {
     }
-  private: 
+  private:
 }; // End SDOTypeNotFoundException class definition
 // ***************************************************************************
 //
-// General invalid argument 
-// 
+// General invalid argument
+//
 // ***************************************************************************
 class SDOIllegalArgumentException: public SDORuntimeException
 {
   public:
     SDOIllegalArgumentException(const char* name)
-      : SDORuntimeException("SDOIllegalArgumentException", Warning,                                 
+      : SDORuntimeException("SDOIllegalArgumentException", Warning,
                       name)
     {
     }
-  private: 
+  private:
 }; // End SDOTypeNotFoundException class definition
 // ***************************************************************************
 //
-// General invalid conversion for type not found 
-// 
+// General invalid conversion for type not found
+//
 // ***************************************************************************
 class SDOIndexOutOfRangeException: public SDORuntimeException
 {
   public:
     SDOIndexOutOfRangeException(const char* name)
-      : SDORuntimeException("SDOIndexOutOfRangeException", Warning,                                 
+      : SDORuntimeException("SDOIndexOutOfRangeException", Warning,
                       name)
     {
     }
-  private: 
+  private:
 }; // End SDOTypeNotFoundException class definition
 
 // ***************************************************************************
 //
 // XMLPaerser error
-// 
+//
 // ***************************************************************************
 class SDOXMLParserException: public SDORuntimeException
 {
   public:
     SDOXMLParserException(const char* name)
-      : SDORuntimeException("SDOXMLParserException", Warning,                                 
+      : SDORuntimeException("SDOXMLParserException", Warning,
                       name)
     {
     }
-  private: 
+  private:
 }; // End SDOTypeNotFoundException class definition
 
 // ***************************************************************************
 //
-// Macro definitions 
-// 
+// Macro definitions
+//
 // ***************************************************************************
 
   // =========================================================================
@@ -376,10 +376,10 @@ class SDOXMLParserException: public SDORuntimeException
   // then throws the exception.
   // The parameter 'function_name' should be the name of the function throwing
   // this exception.
-  // The parameter 'type' is the class of exception to throw and must be a 
+  // The parameter 'type' is the class of exception to throw and must be a
   // SDORuntimeException or a class derived from SDORuntimeException.
   // The parameter 'parameter' is the construction parameter for the exception
-  // =========================================================================   
+  // =========================================================================
   #define SDO_THROW_EXCEPTION(function_name, type, parameter )  \
 	{\
 	 type ex(parameter); \
@@ -394,7 +394,7 @@ class SDOXMLParserException: public SDORuntimeException
   // then re-throws the exception.
   // The parameter 'function_name' should be the name of the function throwing
   // this exception.
-  // =========================================================================   
+  // =========================================================================
   #define SDO_RETHROW_EXCEPTION(function_name, exception)  \
      (exception).setLocation(__FILE__,__LINE__,#function_name); \
      throw;
@@ -406,7 +406,7 @@ class SDOXMLParserException: public SDORuntimeException
   // Writes an exception trace entry then continues.
   // The parameter 'function_name' should be the name of the function handling
   // this exception.
-  // =========================================================================   
+  // =========================================================================
   #define SDO_HANDLE_EXCEPTION(function_name, exception)  \
 	{\
      (exception).setLocation(__FILE__,__LINE__,#function_name); \
