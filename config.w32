@@ -1,0 +1,45 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("sdo", "enable sdo support", "no");
+
+if (PHP_SDO != "no") {
+	if (CHECK_LIB('iconv.lib', 'sdo') && CHECK_LIB('zlib.lib', 'sdo') && CHECK_LIB('libxml2.lib', 'sdo') &&
+		CHECK_HEADER_ADD_INCLUDE('SDOSPI.h', 'CFLAGS_SDO', configure_module_dirname + '\\sdolib\\src\\sdo') &&
+		CHECK_HEADER_ADD_INCLUDE('XMLDAS.h', 'CFLAGS_SDO', configure_module_dirname + '\\sdolib\\src\\xmldas')) {
+		
+		/* first build the sdo core extension ... */
+		EXTENSION('sdo', 
+			'sdo.cpp SDO_DAS_ChangeSummary.cpp  SDO_DAS_DataFactory.cpp  SDO_DAS_Setting.cpp  SDO_DataObject.cpp  SDO_List.cpp  SDO_Sequence.cpp sdo_utils.cpp',
+			'yes',
+			'/GX /D SDO_EXPORTS /D XMLDAS_EXPORTS');
+	
+		ADD_SOURCES(configure_module_dirname + '\\sdolib\\src\\sdo', 
+			'ChangeSummary.cpp ChangeSummaryImpl.cpp ChangedDataObjectList.cpp ChangedDataObjectListImpl.cpp CopyHelper.cpp DASDataFactory.cpp DASDataFactoryImpl.cpp DASDataObject.cpp DASProperty.cpp DASType.cpp DASValue.cpp DASValues.cpp DataFactory.cpp DataObject.cpp DataObjectImpl.cpp DataObjectList.cpp DataObjectListImpl.cpp EqualityHelper.cpp Logger.cpp Property.cpp PropertyImpl.cpp PropertyList.cpp RefCountingObject.cpp RefCountingPointer.cpp SDORuntimeException.cpp SdoCheck.cpp SdoRuntime.cpp Sequence.cpp SequenceImpl.cpp Setting.cpp SettingList.cpp Type.cpp TypeHelper.cpp TypeImpl.cpp TypeList.cpp XMLDocument.cpp XMLHelper.cpp XSDHelper.cpp XpathHelper.cpp', 
+			'sdo');
+	
+		ADD_SOURCES(configure_module_dirname + '\\sdolib\\src\\xmldas', 
+			'HelperProvider.cpp PropertyDefinition.cpp PropertySetting.cpp SAX2Attribute.cpp SAX2Attributes.cpp SAX2Namespaces.cpp SAX2Parser.cpp SDOSAX2Parser.cpp SDOSchemaSAX2Parser.cpp SDOXMLBufferWriter.cpp SDOXMLFileWriter.cpp SDOXMLStreamWriter.cpp SDOXMLString.cpp SDOXMLWriter.cpp SDOXSDBufferWriter.cpp SDOXSDFileWriter.cpp SDOXSDStreamWriter.cpp SDOXSDWriter.cpp SchemaInfo.cpp TypeDefinition.cpp TypeDefinitions.cpp XMLDAS.cpp XMLDASCheck.cpp XMLDASImpl.cpp XMLDocumentImpl.cpp XMLHelperImpl.cpp XMLQName.cpp XSDHelperImpl.cpp XSDPropertyInfo.cpp XSDTypeInfo.cpp',
+			'sdo');
+			
+		/* ... then the sdo xml das extension */			
+		if (PHP_SDO_SHARED) {
+		    PHP_SDO_DAS_XML_SHARED = PHP_SDO_SHARED;
+		} else {
+		    PHP_SDO_DAS_XML_SHARED = 'no';
+		}
+
+		ADD_FLAG('CFLAGS_SDO_DAS_XML', '/I ' + configure_module_dirname + '\\sdolib\\src\\sdo');
+		ADD_FLAG('CFLAGS_SDO_DAS_XML', '/I ' + configure_module_dirname + '\\sdolib\\src\\xmldas');	
+	
+		EXTENSION('sdo_das_xml', 
+			'xmldas.cpp xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp',
+			'yes',
+			'/GX');
+		
+		ADD_EXTENSION_DEP('sdo_das_xml', 'sdo');
+	} else {
+		WARNING("sdo not enabled; libraries and headers not found");
+	}
+
+}
