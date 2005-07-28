@@ -20,6 +20,7 @@
 
 */
 
+/* $Id$ */
 /*
  * Utility functions for internal use by the SDO extension
  */
