@@ -19,11 +19,18 @@
 +----------------------------------------------------------------------+
 
 */
+#ifdef PHP_WIN32
+/* disable warning about identifier lengths in browser information */
+#pragma warning(disable: 4786)
+#include <iostream>
+#include <math.h>
+#include "zend_config.w32.h"
+#endif
 
 #include "php_sdo_das_xml.h"
 
 
-extern 
+extern
 zval* sdo_das_dfdefault_get_data_object(zend_object *me, void *doh TSRMLS_DC);
 
 zend_class_entry* sdo_das_xml_doc_cls_entry;
@@ -52,7 +59,7 @@ ZEND_END_ARG_INFO();
 /* argument definations of SDO_DAS_XML_Document class, end */
 
 /* {{{ sdo_xmldocument_methods
- * 
+ *
  * Every method of SDO_DAS_XML_Document class needs to be defined here
  */
 function_entry sdo_das_xml_document_methods[] = {
@@ -60,20 +67,20 @@ function_entry sdo_das_xml_document_methods[] = {
     ZEND_ME(SDO_DAS_XML_Document, getRootElementURI, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, getRootElementName, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, getEncoding, 0, ZEND_ACC_PUBLIC)
-    ZEND_ME(SDO_DAS_XML_Document, setEncoding, 
+    ZEND_ME(SDO_DAS_XML_Document, setEncoding,
             sdo_xmldoc_setEncoding_args, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, getXMLDeclaration, 0, ZEND_ACC_PUBLIC)
-    ZEND_ME(SDO_DAS_XML_Document, setXMLDeclaration, 
+    ZEND_ME(SDO_DAS_XML_Document, setXMLDeclaration,
             sdo_xmldoc_setXMLDeclaration_args, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, getXMLVersion, 0, ZEND_ACC_PUBLIC)
-    ZEND_ME(SDO_DAS_XML_Document, setXMLVersion, 
+    ZEND_ME(SDO_DAS_XML_Document, setXMLVersion,
             sdo_xmldoc_setXMLVersion_args, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, getSchemaLocation, 0, ZEND_ACC_PUBLIC)
-    ZEND_ME(SDO_DAS_XML_Document, setSchemaLocation, 
+    ZEND_ME(SDO_DAS_XML_Document, setSchemaLocation,
             sdo_xmldoc_setSchemaLocation_args, ZEND_ACC_PUBLIC)
-    ZEND_ME(SDO_DAS_XML_Document, getNoNamespaceSchemaLocation, 0, 
+    ZEND_ME(SDO_DAS_XML_Document, getNoNamespaceSchemaLocation, 0,
             ZEND_ACC_PUBLIC)
-    ZEND_ME(SDO_DAS_XML_Document, setNoNamespaceSchemaLocation, 
+    ZEND_ME(SDO_DAS_XML_Document, setNoNamespaceSchemaLocation,
             sdo_xmldoc_setNoNamespaceSchemaLocation_args, ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
@@ -81,15 +88,16 @@ function_entry sdo_das_xml_document_methods[] = {
 
 
 /* {{{ initialize_sdo_das_xml_document_class
- * 
+ *
  * Initializes SDO_DAS_XML_Document class
  */
 void
-initialize_sdo_das_xml_document_class(zend_class_entry ce TSRMLS_DC) {
+initialize_sdo_das_xml_document_class(TSRMLS_D) {
+    zend_class_entry ce;
     INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_Document", sdo_das_xml_document_methods);
     ce.create_object = sdo_das_xml_document_object_create;
     sdo_das_xml_doc_cls_entry = zend_register_internal_class(&ce TSRMLS_CC);
-    memcpy(&sdo_das_xml_doc_object_handlers, zend_get_std_object_handlers(), 
+    memcpy(&sdo_das_xml_doc_object_handlers, zend_get_std_object_handlers(),
            sizeof(zend_object_handlers));
     sdo_das_xml_doc_object_handlers.clone_obj = NULL;
 }
@@ -98,11 +106,11 @@ initialize_sdo_das_xml_document_class(zend_class_entry ce TSRMLS_DC) {
 
 /* {{{ sdo_das_xml_document_object_create
  */
-zend_object_value 
+zend_object_value
 sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC) {
     zend_object_value retval;
     zval *tmp;
-    xmldocument_object *obj = (xmldocument_object *) 
+    xmldocument_object *obj = (xmldocument_object *)
                               emalloc(sizeof(xmldocument_object));
     memset(obj, 0, sizeof(xmldocument_object));
 
@@ -111,10 +119,10 @@ sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC) {
     obj->z_obj.in_set = 0;
     ALLOC_HASHTABLE(obj->z_obj.properties);
     zend_hash_init(obj->z_obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-    zend_hash_copy(obj->z_obj.properties, &ce->default_properties, 
-                   (copy_ctor_func_t) zval_add_ref, (void *) &tmp, 
+    zend_hash_copy(obj->z_obj.properties, &ce->default_properties,
+                   (copy_ctor_func_t) zval_add_ref, (void *) &tmp,
                    sizeof(zval *));
-    retval.handle = zend_objects_store_put(obj, NULL, 
+    retval.handle = zend_objects_store_put(obj, NULL,
                                            sdo_das_xml_document_object_free_storage,
                                            NULL TSRMLS_CC);
     retval.handlers = &sdo_das_xml_doc_object_handlers;
@@ -125,7 +133,7 @@ sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC) {
 
 /* {{{ sdo_das_xml_document_free_storage
  */
-void 
+void
 sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC) {
 
     xmldocument_object *obj = (xmldocument_object *) object;
@@ -149,10 +157,10 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject) {
     zval *retval = NULL;
     zend_object *php_das_obj = NULL;
     DataObject *root_do = NULL;
-    obj = (xmldocument_object *) 
+    obj = (xmldocument_object *)
           zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getRootDataObject - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -160,7 +168,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject) {
         root_do = obj->xdoch->getRootDataObject();
         retval = (zval *) root_do->getUserData();
         if (!retval) {
-            php_error(E_ERROR, 
+            php_error(E_ERROR,
                       "SDO_DAS_XML_Document::getRootDataObject - Unable to find php version of root DataObject");
             RETURN_NULL();
         }
@@ -185,7 +193,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootElementURI) {
     }
     obj = (xmldocument_object *)zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getRootElementURI - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -217,7 +225,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootElementName) {
     }
     obj = (xmldocument_object *)zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getRootElementName - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -248,7 +256,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getEncoding) {
     }
     obj = (xmldocument_object *)zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getEncoding - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -279,7 +287,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getXMLDeclaration) {
     }
     obj = (xmldocument_object *)zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getXMLDeclaration - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -306,7 +314,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getXMLVersion) {
     }
     obj = (xmldocument_object *)zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getXMLVersion - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -337,7 +345,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getSchemaLocation) {
     }
     obj = (xmldocument_object *)zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getSchemaLocation - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -368,7 +376,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getNoNamespaceSchemaLocation) {
     }
     obj = (xmldocument_object *)zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::getNoNamespaceSchemaLocation - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -401,7 +409,7 @@ PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration) {
     }
     obj = (xmldocument_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::setXMLDeclaration - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_FALSE;
     }
@@ -431,7 +439,7 @@ PHP_METHOD(SDO_DAS_XML_Document, setXMLVersion) {
     }
     obj = (xmldocument_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::setXMLVersion - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -461,7 +469,7 @@ PHP_METHOD(SDO_DAS_XML_Document, setSchemaLocation) {
     }
     obj = (xmldocument_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::setSchemaLocation - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -486,14 +494,14 @@ PHP_METHOD(SDO_DAS_XML_Document, setNoNamespaceSchemaLocation) {
     if (ZEND_NUM_ARGS() != 1) {
         WRONG_PARAM_COUNT;
     }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", 
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
                               &nnSchemaLocation, &len) == FAILURE) {
         RETURN_FALSE;
     }
-    obj = (xmldocument_object *) 
+    obj = (xmldocument_object *)
           zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::setNoNamespaceSchemaLocation - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }
@@ -517,14 +525,14 @@ PHP_METHOD(SDO_DAS_XML_Document, setEncoding) {
     if (ZEND_NUM_ARGS() != 1) {
         WRONG_PARAM_COUNT;
     }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", 
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
                               &encoding, &len) == FAILURE) {
         RETURN_FALSE;
     }
-    obj = (xmldocument_object *) 
+    obj = (xmldocument_object *)
           zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR, 
+        php_error(E_ERROR,
                   "SDO_DAS_XML_Document::setEncoding - Unable to get SDO_DAS_XML_Document Object from object store");
         RETURN_NULL();
     }

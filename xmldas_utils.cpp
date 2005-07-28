@@ -19,24 +19,31 @@
 +----------------------------------------------------------------------+
 
 */
+#ifdef PHP_WIN32
+/* disable warning about identifier lengths in browser information */
+#pragma warning(disable: 4786)
+#include <iostream>
+#include <math.h>
+#include "zend_config.w32.h"
+#endif
 
 #include "php_sdo_das_xml.h"
 
 /* {{{ sdo_das_xml_throw_exception
  * Throws C++ SDO exception as PHP exception
  */
-static void 
+static void
 sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *extra TSRMLS_DC)
 {
     if (extra) {
         zend_throw_exception_ex(ce, 0 TSRMLS_CC, "%s: %s\n Filename %s\n At line %ld in function %s\n Message %s\n",
-                                extra, e->getEClassName(), e->getFileName(), 
-                                e->getLineNumber(), e->getFunctionName(), 
+                                extra, e->getEClassName(), e->getFileName(),
+                                e->getLineNumber(), e->getFunctionName(),
                                 e->getMessageText());
     } else {
         zend_throw_exception_ex(ce, 0 TSRMLS_CC, "%s\n Filename %s\n At line %ld in function %s\n Message %s\n",
-                                e->getEClassName(), e->getFileName(), 
-                                e->getLineNumber(), e->getFunctionName(), 
+                                e->getEClassName(), e->getFileName(),
+                                e->getLineNumber(), e->getFunctionName(),
                                 e->getMessageText());
     }
 }
@@ -46,7 +53,7 @@ sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *
  * This is an added functionality for PHP SDO's sdo_throw_runtimeexception
  * to capture C++ SDOXMLParserException
  */
-void 
+void
 sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC)
 {
         zend_class_entry *exception_class;

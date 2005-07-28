@@ -30,6 +30,7 @@
 #include "XMLDAS.h"
 #include "XMLDocument.h"
 
+
 using namespace commonj;
 using namespace sdo;
 using namespace xmldas;
@@ -59,9 +60,9 @@ extern zend_class_entry* sdo_das_xml_doc_cls_entry;
 extern zend_class_entry* sdo_xmlparserexcep_ce;
 extern zend_class_entry* sdo_das_xml_class_entry;
 
-void initialize_sdo_das_xml_class(zend_class_entry ce TSRMLS_DC);
+void initialize_sdo_das_xml_class(TSRMLS_D);
 void sdo_das_xml_object_free_storage(void *object TSRMLS_DC);
-void initialize_sdo_das_xml_document_class(zend_class_entry ce TSRMLS_DC);
+void initialize_sdo_das_xml_document_class(TSRMLS_D);
 void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC);
 
 extern void sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
@@ -69,14 +70,14 @@ extern void sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC)
 static void
 sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *extra TSRMLS_DC);
 
-zend_object_value 
+zend_object_value
 sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC);
 
-zend_object_value 
+zend_object_value
 sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC);
 
 /*
- * Redefine the sdo_das_df_object here, as converting from DataFactoryPtr 
+ * Redefine the sdo_das_df_object here, as converting from DataFactoryPtr
  * to DASDataFactory is not allowed.
  */
 

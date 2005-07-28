@@ -19,6 +19,13 @@
 +----------------------------------------------------------------------+
 
 */
+#ifdef PHP_WIN32
+/* disable warning about identifier lengths in browser information */
+#pragma warning(disable: 4786)
+#include <iostream>
+#include <math.h>
+#include "zend_config.w32.h"
+#endif
 
 #include "php_sdo_das_xml.h"
 
@@ -60,12 +67,12 @@ PHP_MINIT_FUNCTION(sdo_das_xml)
 
     zend_class_entry ce;
     /* Initializes sdo_das_xml class*/
-    initialize_sdo_das_xml_class(ce TSRMLS_CC);
+    initialize_sdo_das_xml_class(TSRMLS_C);
     /*Initializes sdo_xmldocument class*/
-    initialize_sdo_das_xml_document_class(ce TSRMLS_CC);
+    initialize_sdo_das_xml_document_class(TSRMLS_C);
 
     /* SDO_XMLParserException extends SDO_Exception */
-    INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_ParserException", sdo_exception_methods);
+    INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_ParserException", sdo_get_exception_methods());
     sdo_xmlparserexcep_ce = zend_register_internal_class_ex(
                             &ce, NULL,
                             "sdo_exception" TSRMLS_CC);

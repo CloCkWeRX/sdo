@@ -1,24 +1,25 @@
-/* 
+/*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  | 
+| (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+ 
-|                                                                      | 
-| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
-| may not use this file except in compliance with the License. You may | 
-| obtain a copy of the License at                                      | 
++----------------------------------------------------------------------+
+|                                                                      |
+| Licensed under the Apache License, Version 2.0 (the "License"); you  |
+| may not use this file except in compliance with the License. You may |
+| obtain a copy of the License at                                      |
 | http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      | 
-| Unless required by applicable law or agreed to in writing, software  | 
-| distributed under the License is distributed on an "AS IS" BASIS,    | 
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
-| implied. See the License for the specific language governing         | 
-| permissions and limitations under the License.                       | 
-+----------------------------------------------------------------------+ 
-| Author: Caroline Maynard                                             | 
-+----------------------------------------------------------------------+ 
+|                                                                      |
+| Unless required by applicable law or agreed to in writing, software  |
+| distributed under the License is distributed on an "AS IS" BASIS,    |
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+| implied. See the License for the specific language governing         |
+| permissions and limitations under the License.                       |
++----------------------------------------------------------------------+
+| Author: Caroline Maynard                                             |
++----------------------------------------------------------------------+
 
 */
+
 #ifdef PHP_WIN32
 #include <iostream>
 #include <math.h>
@@ -40,35 +41,35 @@
 
 /* {{{ zend_class_entry declarations
  */
-zend_class_entry *sdo_propertyaccess_class_entry;
-zend_class_entry *sdo_dataobject_class_entry;
-zend_class_entry *sdo_sequence_class_entry;
-zend_class_entry *sdo_list_class_entry;
-zend_class_entry *sdo_datafactory_class_entry;
-zend_class_entry *sdo_das_dataobject_class_entry;
-zend_class_entry *sdo_das_datafactory_class_entry;
-zend_class_entry *sdo_das_changesummary_class_entry;
-zend_class_entry *sdo_das_setting_class_entry;
-zend_class_entry *sdo_das_datafactoryimpl_class_entry;
-zend_class_entry *sdo_dataobjectimpl_class_entry;
-zend_class_entry *sdo_dataobjectlist_class_entry;
-zend_class_entry *sdo_changeddataobjectlist_class_entry;
-zend_class_entry *sdo_das_settinglist_class_entry;
-zend_class_entry *sdo_sequenceimpl_class_entry;
-zend_class_entry *sdo_exception_class_entry;
-zend_class_entry *sdo_propertynotsetexception_class_entry;
-zend_class_entry *sdo_propertynotfoundexception_class_entry;
-zend_class_entry *sdo_typenotfoundexception_class_entry;
-zend_class_entry *sdo_invalidconversionexception_class_entry;
-zend_class_entry *sdo_indexoutofboundsexception_class_entry;
-zend_class_entry *sdo_unsupportedoperationexception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_propertyaccess_class_entry;
+PHP_SDO_API zend_class_entry *sdo_dataobject_class_entry;
+PHP_SDO_API zend_class_entry *sdo_sequence_class_entry;
+PHP_SDO_API zend_class_entry *sdo_list_class_entry;
+PHP_SDO_API zend_class_entry *sdo_datafactory_class_entry;
+PHP_SDO_API zend_class_entry *sdo_das_dataobject_class_entry;
+PHP_SDO_API zend_class_entry *sdo_das_datafactory_class_entry;
+PHP_SDO_API zend_class_entry *sdo_das_changesummary_class_entry;
+PHP_SDO_API zend_class_entry *sdo_das_setting_class_entry;
+PHP_SDO_API zend_class_entry *sdo_das_datafactoryimpl_class_entry;
+PHP_SDO_API zend_class_entry *sdo_dataobjectimpl_class_entry;
+PHP_SDO_API zend_class_entry *sdo_dataobjectlist_class_entry;
+PHP_SDO_API zend_class_entry *sdo_changeddataobjectlist_class_entry;
+PHP_SDO_API zend_class_entry *sdo_das_settinglist_class_entry;
+PHP_SDO_API zend_class_entry *sdo_sequenceimpl_class_entry;
+PHP_SDO_API zend_class_entry *sdo_exception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_propertynotsetexception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_propertynotfoundexception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_typenotfoundexception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_invalidconversionexception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_indexoutofboundsexception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_unsupportedoperationexception_class_entry;
 /* }}} */
 
 /* {{{ SDO_PropertyAccess methods */
 static ZEND_BEGIN_ARG_INFO(arginfo___get, 0)
     ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
-   
+
 static ZEND_BEGIN_ARG_INFO(arginfo___set, 0)
     ZEND_ARG_INFO(0, name)
     ZEND_ARG_INFO(0, value)
@@ -91,7 +92,7 @@ function_entry sdo_dataobject_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_DataObject, clear, 0)
 	ZEND_ABSTRACT_ME(SDO_DataObject, getContainer, 0)
 	ZEND_ABSTRACT_ME(SDO_DataObject, getContainmentPropertyName, 0)
-	{NULL, NULL, NULL}	
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -121,12 +122,12 @@ function_entry sdo_sequence_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_Sequence, move, arginfo_sdo_sequence_move)
 	ZEND_ABSTRACT_ME(SDO_Sequence, insert, arginfo_sdo_sequence_insert)
 	ZEND_ABSTRACT_ME(SDO_Sequence, count, 0)
-	{NULL, NULL, NULL}	
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
 /* {{{ SDO_List methods */
-static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_list_insert, 0, ZEND_RETURN_VALUE, 1) 
+static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_list_insert, 0, ZEND_RETURN_VALUE, 1)
     ZEND_ARG_INFO(0, value)
     ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
@@ -225,9 +226,9 @@ function_entry sdo_das_df_methods[] = {
 /* {{{ SDO_DataObjectImpl methods */
 function_entry sdo_dataobjectimpl_methods[] = {
 	ZEND_ME(SDO_DataObjectImpl, __construct, 0, ZEND_ACC_PRIVATE) /* can't be newed */
-	ZEND_ME(SDO_DataObjectImpl, __get, arginfo___get, ZEND_ACC_PUBLIC) 
-	ZEND_ME(SDO_DataObjectImpl, __set, arginfo___set, ZEND_ACC_PUBLIC) 
-	ZEND_ME(SDO_DataObjectImpl, count, 0, ZEND_ACC_PUBLIC) 
+	ZEND_ME(SDO_DataObjectImpl, __get, arginfo___get, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_DataObjectImpl, __set, arginfo___set, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_DataObjectImpl, count, 0, ZEND_ACC_PUBLIC)
 	/* inherited from SDO_DataObject ... */
 	ZEND_ME(SDO_DataObjectImpl, getType, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DataObjectImpl, getSequence, 0, ZEND_ACC_PUBLIC)
@@ -237,7 +238,7 @@ function_entry sdo_dataobjectimpl_methods[] = {
 	ZEND_ME(SDO_DataObjectImpl, getContainmentPropertyName, 0, ZEND_ACC_PUBLIC)
 	/* inherited from SDO_DAS_DataObject ... */
 	ZEND_ME(SDO_DataObjectImpl, getChangeSummary, 0, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}	
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -248,16 +249,24 @@ function_entry sdo_sequenceimpl_methods[] = {
 	ZEND_ME(SDO_SequenceImpl, move, arginfo_sdo_sequence_move, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, insert, arginfo_sdo_sequence_insert, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, count, 0, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}	
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
-/* {{{ SDO_Exception methods 
- * These areused for all SDO exceptions, none of them have any methods other than inherited ones
+/* {{{ SDO_Exception methods
+ * These are used for all SDO exceptions, none of them have any methods other than inherited ones
  */
 function_entry sdo_exception_methods[] = {
 	{NULL, NULL, NULL}
 };
+/* }}} */
+
+/* {{{ sdo_get_exception_methods
+ */
+PHP_SDO_API function_entry *sdo_get_exception_methods()
+{
+    return sdo_exception_methods;
+}
 /* }}} */
 
 /* {{{ sdo_module_entry
@@ -274,7 +283,7 @@ zend_module_entry sdo_module_entry = {
 		NULL, /* rshutdown */
 		PHP_MINFO(sdo),
 #if ZEND_MODULE_API_NO >= 20010901
-		SDO_VERSION, 
+		SDO_VERSION,
 #endif
 		STANDARD_MODULE_PROPERTIES
 };
@@ -290,8 +299,8 @@ END_EXTERN_C()
 */
 PHP_MINIT_FUNCTION(sdo)
 {
-	zend_class_entry ce;	
-	
+	zend_class_entry ce;
+
 	/*
 	 * Check the level of the C++ library
 	 */
@@ -299,7 +308,7 @@ PHP_MINIT_FUNCTION(sdo)
 		php_error (E_ERROR, "SDO: incompatible versions of SDO extension and SDO library");
 	}
 
-	/* TODO I'd like this to be extern rather than have to redefine it 
+	/* TODO I'd like this to be extern rather than have to redefine it
 	 * REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", (char *)Type::SDOTypeNamespaceURI, CONST_CS | CONST_PERSISTENT);
 	 */
 	REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", "commonj.sdo", CONST_CS | CONST_PERSISTENT);
@@ -312,7 +321,7 @@ PHP_MINIT_FUNCTION(sdo)
 	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_MODIFICATION", CS_MODIFICATION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_ADDITION", CS_ADDITION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_DELETION", CS_DELETION, CONST_CS | CONST_PERSISTENT);
-  
+
 	/* interface SDO_PropertyAccess */
 	INIT_CLASS_ENTRY(ce, "SDO_PropertyAccess", sdo_propertyaccess_methods);
 	sdo_propertyaccess_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
@@ -320,7 +329,7 @@ PHP_MINIT_FUNCTION(sdo)
 	/* interface SDO_DataObject extends Traversable, SDO_PropertyAccess */
 	INIT_CLASS_ENTRY(ce, "SDO_DataObject", sdo_dataobject_methods);
 	sdo_dataobject_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
-	zend_class_implements(sdo_dataobject_class_entry TSRMLS_CC, 2, 
+	zend_class_implements(sdo_dataobject_class_entry TSRMLS_CC, 2,
 		zend_ce_traversable, sdo_propertyaccess_class_entry);
 
 	/* interface SDO_Sequence extends Traversable */
@@ -401,7 +410,7 @@ PHP_MINIT_FUNCTION(sdo)
     sdo_unsupportedoperationexception_class_entry = zend_register_internal_class_ex(
         &ce, sdo_exception_class_entry, NULL TSRMLS_CC);
 
-	/* class SDO_DAS_DataFactoryImpl implements SDO_DAS_DataFactory */	
+	/* class SDO_DAS_DataFactoryImpl implements SDO_DAS_DataFactory */
     INIT_CLASS_ENTRY(ce, "SDO_DAS_DataFactoryImpl", sdo_das_df_methods);
 	sdo_das_df_minit(&ce TSRMLS_CC);
 
@@ -414,7 +423,7 @@ PHP_MINIT_FUNCTION(sdo)
 	sdo_sequence_minit(&ce TSRMLS_CC);
 
    return SUCCESS;
-	
+
 }
 /* }}} */
 
