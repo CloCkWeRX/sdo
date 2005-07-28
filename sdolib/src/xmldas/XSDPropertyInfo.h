@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _XSDPropertyInfo_H_
 #define _XSDPropertyInfo_H_

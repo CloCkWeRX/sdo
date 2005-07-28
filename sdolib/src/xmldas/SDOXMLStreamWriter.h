@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _SDOXMLSTREAMWRITER_H_
 #define _SDOXMLSTREAMWRITER_H_

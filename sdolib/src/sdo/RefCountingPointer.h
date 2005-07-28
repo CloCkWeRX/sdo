@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _REFCOUNTINGPOINTER_H
 #define _REFCOUNTINGPOINTER_H

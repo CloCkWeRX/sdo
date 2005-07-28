@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _SDOXMLFILEWRITER_H_
 #define _SDOXMLFILEWRITER_H_

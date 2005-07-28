@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 // XMLDASImpl.cpp: implementation of the XMLDASImpl class.
 //

@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 // SDOSaxHandler.h: interface for the SDOSaxHandler class.
 //

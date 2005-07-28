@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 // XMLHelperImpl.cpp: implementation of the XMLHelperImpl class.
 //

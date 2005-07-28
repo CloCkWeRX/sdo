@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _PROPERTYSETTING_H_
 #define _PROPERTYSETTING_H_

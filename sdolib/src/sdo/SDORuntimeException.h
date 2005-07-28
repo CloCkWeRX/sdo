@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #if !defined SDO_EXCEPTIONS_H
 #define SDO_EXCEPTIONS_H

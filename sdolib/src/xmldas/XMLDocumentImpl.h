@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _XMLDocumentImpl_H_
 #define _XMLDocumentImpl_H_

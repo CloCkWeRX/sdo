@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #include "SDOXMLBufferWriter.h"
 #include "SDORuntimeException.h"

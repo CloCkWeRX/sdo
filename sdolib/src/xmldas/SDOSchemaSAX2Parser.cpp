@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #include "SDOSchemaSAX2Parser.h"
 #include "XSDPropertyInfo.h"

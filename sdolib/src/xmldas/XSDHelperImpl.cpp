@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 // XSDHelperImpl.cpp: implementation of the XSDHelperImpl class.
 //

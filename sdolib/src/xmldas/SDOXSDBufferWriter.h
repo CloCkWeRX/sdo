@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _SDOXSDBUFFERWRITER_H_
 #define _SDOXSDBUFFERWRITER_H_

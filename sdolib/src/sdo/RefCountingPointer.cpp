@@ -19,8 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
-
-
+/* $Id$ */
 
 #include "RefCountingPointer.h"
 #include "DASDataFactory.h"

@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _CHANGESUMMARYIMPL_H_
 #define _CHANGESUMMARYIMPL_H_

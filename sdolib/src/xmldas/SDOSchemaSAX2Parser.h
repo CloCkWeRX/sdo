@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _SDOSCHEMASAX2PARSER_H_
 #define _SDOSCHEMASAX2PARSER_H_

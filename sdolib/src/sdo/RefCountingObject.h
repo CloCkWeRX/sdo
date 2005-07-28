@@ -19,6 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
+/* $Id$ */
 
 #ifndef _REFCOUNTINGOBJECT_H
 #define _REFCOUNTINGOBJECT_H
