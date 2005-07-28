@@ -36,7 +36,7 @@ require_once 'company_metadata.inc.php';
  *   primary key(id) ); 
  */
 
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company;');
 
 /**************************************************************
@@ -65,7 +65,7 @@ $megacorp->name = 'MegaCorp';
 $ultracorp = $root->createDataObject('company');
 $ultracorp->name = 'UltraCorp';
 
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 try {
     $das -> applyChanges($dbh, $acme);

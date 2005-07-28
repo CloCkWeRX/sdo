@@ -51,7 +51,7 @@ try {
 	exit();
 }
 
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $root = $das->executeQuery($dbh,
 'select name, id from company where name="Acme"',array('company.name', 'company.id') );
 
@@ -70,7 +70,7 @@ $new_company->id = $id;
 /**************************************************************
  * Get a PDO database connection
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
 * Write the changes out

@@ -32,7 +32,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
  * Empty out the two tables
  *************************************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company');
 $count = $dbh->exec('DELETE FROM department');
 
@@ -63,7 +63,7 @@ $shoe->name = 'Shoe';
 /**************************************************************
  * Get a database connection
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
  * Write the changes out

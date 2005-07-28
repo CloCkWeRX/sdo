@@ -43,7 +43,7 @@ try {
 /**************************************************************
  * Issue a query - get all companies in the database
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 try {
 	$root = $das->executeQuery($dbh,

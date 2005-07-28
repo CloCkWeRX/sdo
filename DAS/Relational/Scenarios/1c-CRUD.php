@@ -44,7 +44,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Empty out the company table
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company;');
 echo "Emptied out the company table with DELETE FROM company\n";
 
@@ -54,7 +54,7 @@ echo "Emptied out the company table with DELETE FROM company\n";
 * Set the company name to 'Acme'.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $root 		= $das  -> createRootDataObject();
 $company 	= $root -> createDataObject('company');
@@ -67,7 +67,7 @@ echo "Created a company with name Acme and wrote it to the database\n";
 * Then update it and write it back again.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Acme';
 $root = $das->executeQuery($dbh,'select name, id from company where name="' . $name . '";' ,array('company.name', 'company.id'));
@@ -81,7 +81,7 @@ echo "Wrote back Acme with name changed to MegaCorp\n";
 * Find it again under its new name, and delete it.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'MegaCorp';
 $root = $das->executeQuery($dbh,'select name, id from company where name="' . $name . '";' ,array('company.name', 'company.id'));
@@ -94,7 +94,7 @@ echo "Deleted the company and wrote the changes back to the database\n";
 /*************************************************************************************
 * Check the row is really gone
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 foreach($dbh->query('select * from company') as $row) {
   assert(false); // There had better be no such rows. 

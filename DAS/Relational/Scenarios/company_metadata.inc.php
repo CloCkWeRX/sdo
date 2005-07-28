@@ -23,15 +23,32 @@
 
 
 /***********************************************************************
- * Enter your own database password in the second define and then remove the 
- * echos and exit to leave just the two DEFINEs.
+ * You need three working defines below. 
+ * Enter meaningful values, then remove the  
+ * echos **AND THE ASSERT**!!! 
  **********************************************************************/
-echo "*************************************************************************************************\n";
 echo "\n";
-echo "You need to supply a database user and password in SDO/DAS/Relational/Scenarios/company_metadata.inc.php\n";
 echo "\n";
-echo "*************************************************************************************************\n";
-exit;
+echo "\n";
+echo "          ***********************************************************\n";
+echo "          ***********************************************************\n";
+echo "          ***********************************************************\n";
+echo "\n";
+echo "          You need to supply a PDO data source name, a database username,";
+echo "          and a password in SDO/DAS/Relational/Scenarios/company_metadata.inc.php\n";
+echo "\n";
+echo "          ***********************************************************\n";
+echo "          ***********************************************************\n";
+echo "          ***********************************************************\n";
+echo "\n";
+echo "\n";
+echo "\n";
+
+assert(false); // remove this once you have meaningful defines 
+// this one works with MySQL
+define ('PDO_DSN','mysql:dbname=companydb;host=localhost');
+// this one works with IBM DB2
+//define ('PDO_DSN','odbc:company');
 define('DATABASE_USER','root');
 define ('DATABASE_PASSWORD','YOUR_DATABASE_PASSWORD_HERE');
 

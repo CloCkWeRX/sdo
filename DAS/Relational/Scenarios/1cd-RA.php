@@ -44,7 +44,7 @@ try {
 /**************************************************************
  * Issue a query to obtain the company data object
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 try {
 	$root = $das->executeQuery($dbh,
@@ -70,7 +70,7 @@ echo "Changed a department and added one and wrote both back - should now have t
 /**************************************************************
  * Get a database connection
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
  * Write the changes out

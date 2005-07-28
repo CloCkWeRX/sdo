@@ -41,7 +41,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
  * Empty out the company table
  *************************************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company;');
 
 /*************************************************************************************
@@ -92,7 +92,7 @@ echo "Looked for MegaCorp and found company with name = " . $company3->name . " 
  * After getting the root object we get and return the first company object underneath it.
  *************************************************************************************/
 function findCompany($das,$name) {
-	$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+	$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 	try {
 		$root = $das->executeQuery($dbh,
 		'select name, id from company where name="' . $name . '";' ,
@@ -113,7 +113,7 @@ function findCompany($das,$name) {
  * disconnected nature of the data graph.
  *************************************************************************************/
 function writeBack($das, $data_object) {
-	$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+	$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 	try {
 		$das -> applyChanges($dbh, $data_object);
 	} catch (SDO_DAS_Relational_Exception $e) {

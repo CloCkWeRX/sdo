@@ -35,7 +35,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
  * Empty out the three tables
  *************************************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company');
 $count = $dbh->exec('DELETE FROM department');
 $count = $dbh->exec('DELETE FROM employee');
@@ -111,7 +111,7 @@ echo "First employee had name = " . $first_emp->name . "\n";
 
 function findCompanyCDE($das,$name) 
 {
-	$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+	$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 	try {
 		$root = $das->executeQuery($dbh,
 		'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
@@ -127,7 +127,7 @@ function findCompanyCDE($das,$name)
 
 function writeBackCDE($das, $data_object) 
 {
-	$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+	$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 	try {
 		$das -> applyChanges($dbh, $data_object);
 	} catch (SDO_DAS_Relational_Exception $e) {

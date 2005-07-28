@@ -48,7 +48,7 @@ try {
 /**************************************************************
 * Get a database connection
 ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
 * Issue a query to obtain a company data object

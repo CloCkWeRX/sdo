@@ -28,7 +28,7 @@ require_once 'company_metadata.inc.php';
  * Scenario - Various creates
  *
  */
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company');
 $count = $dbh->exec('DELETE FROM department');
 $count = $dbh->exec('DELETE FROM employee');
@@ -49,7 +49,7 @@ $ron->name = 'Ron';
 
 $acme->employee_of_the_month=$ron;
 
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $das -> applyChanges($dbh, $acme);
 echo "company, departments, and employees all written to the database\n";
 

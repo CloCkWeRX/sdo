@@ -56,7 +56,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Empty out the three tables
 *************************************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company');
 $count = $dbh->exec('DELETE FROM department');
 $count = $dbh->exec('DELETE FROM employee');
@@ -70,7 +70,7 @@ $count = $dbh->exec('DELETE FROM employee');
 * The employee of the month is Sue.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $root 			= $das  -> createRootDataObject();
 $acme 			= $root -> createDataObject('company');
@@ -96,7 +96,7 @@ echo "Wrote back company with name Acme, two departments, and two employees\n";
 * Then write it back again.
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $name = 'Acme';
 $root = $das->executeQuery($dbh,
 'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
@@ -127,7 +127,7 @@ $das -> applyChanges($dbh, $root);
 * Find the company again and check that they are swapped
 *************************************************************************************/
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $name = 'Acme';
 $root = $das->executeQuery($dbh,
 'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,

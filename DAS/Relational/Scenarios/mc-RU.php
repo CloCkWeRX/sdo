@@ -45,7 +45,7 @@ try {
 /**************************************************************
  * Get a PDO database connection
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 /**************************************************************
 * Issue a query to obtain the company data object
@@ -66,7 +66,7 @@ foreach($companies as $company) {
 	$company->name = strrev($company->name);
 }
 
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 try {
 	$das -> applyChanges($dbh, $root);
 } catch (SDO_DAS_Relational_Exception $e) {

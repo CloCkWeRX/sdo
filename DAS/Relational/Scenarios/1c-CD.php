@@ -42,7 +42,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
  * Empty out the company table
  *************************************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $count = $dbh->exec('DELETE FROM company;');
 
 
@@ -75,7 +75,8 @@ unset($root['company'][0]);
 /**************************************************************
  * Get a PDO database connection
  ***************************************************************/
-$dbh = new PDO("mysql:dbname=companydb;host=localhost",DATABASE_USER,DATABASE_PASSWORD);
+$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
+
 
 /**************************************************************
  * Write the changes out
