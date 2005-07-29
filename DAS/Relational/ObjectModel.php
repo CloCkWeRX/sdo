@@ -77,12 +77,14 @@ class SDO_DAS_Relational_ObjectModel {
 	}
 
 	// TODO copied in from database model hence betrays heritage - confused over table/type, prop/column
-	public function getTypesByPropertyName($property_name) 
+	public function getTypesByColumnNameIgnoreCase($column_name) 
 	{
 		foreach ($this->containment_references_model->getActiveTypes() as $type) {
 			$columns = $this->database_model->getColumns($type);
-			if (in_array($property_name,$columns)) {
-				$table_names_containing_column[] = $type;
+			foreach ($columns as $col) {
+				if (0==strcasecmp($col,$column_name)) {
+					$table_names_containing_column[$type] = $col;
+				}
 			}
 		}
 		return $table_names_containing_column;

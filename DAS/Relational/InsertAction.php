@@ -58,7 +58,10 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 		$spawned_actions 	= $this->spawnLaterUpdatesForNonContainmentReferences($this->do);
 
 		$stmt = $this->toSQL($name_value_pairs);
-		$this->executeStatement($dbh,$stmt);
+		foreach($name_value_pairs as $name => $value) {
+			$value_list[] = $value;
+		}
+		$this->executeStatement($dbh,$stmt,$value_list);
 		$this->storeThisObjectsPrimaryKey($dbh);
 
 		return $spawned_actions;
@@ -100,13 +103,13 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 	{
 		foreach($name_value_pairs as $name => $value) {
 			$name_list[] = $name;
-			$value_list[] = '"' . $value . '"';
+			$placeholder_list[] = "?";
 		}
 		$table_name = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
 		$stmt  = 'INSERT INTO ' . $table_name;
 		$stmt .= " (" . implode( "," , $name_list ) . ") ";
 		$stmt .= "VALUES ";
-		$stmt .= "(" . implode( "," , $value_list ) . ")";
+		$stmt .= "(" . implode( "," , $placeholder_list ) . ")";
 		$stmt .= ";";
 		return $stmt;
 	}
@@ -116,15 +119,25 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
 		$pk_property_name = $this->object_model->getPropertyRepresentingPrimaryKeyFromType($type);
 		if (!isset($this->do[$pk_property_name]) /* && not null */) {
-			$last_insert_id = $dbh->lastInsertId();
-			if ($last_insert_id == "%ld") {
-				$bug_msg = "A call to PDO's lastInsertId() method returned the string '%ld'. ";
-				$bug_msg .= "This is a known problem in PHP 5.1 beta. ";
-				$bug_msg .= "You will need to move to a more recent version of PHP 5.1. ";
-				$bug_msg .= "This problem was known to be fixed in the 200507110630 build of PHP 5.1. ";
-				$bug_msg .= "Please see http://bugs.php.net/bug.php?id=33618";
-				throw new SDO_DAS_Relational_Exception($bug_msg);
+			$pdo_client_version = $dbh->getAttribute(PDO_ATTR_CLIENT_VERSION);
+			if (substr($pdo_client_version,0,4) == 'ODBC') {
+				// looks like DB2
+				foreach($dbh->query('values identity_val_local()') as $row) {
+  					$last_insert_id = $row[1]; 
+				}				
+			} else {
+				// assume MySQL
+				$last_insert_id = $dbh->lastInsertId();
+				if ($last_insert_id == "%ld") {
+					$bug_msg = "A call to PDO's lastInsertId() method returned the string '%ld'. ";
+					$bug_msg .= "This is a known problem in PHP 5.1 beta. ";
+					$bug_msg .= "You will need to move to a more recent version of PHP 5.1. ";
+					$bug_msg .= "This problem was known to be fixed in the 200507110630 build of PHP 5.1. ";
+					$bug_msg .= "Please see http://bugs.php.net/bug.php?id=33618";
+					throw new SDO_DAS_Relational_Exception($bug_msg);
+				}
 			}
+			
 			if (SDO_DAS_Relational::DEBUG_EXECUTE_PLAN) {
 				echo "executed obtainLastInsertId() and obtained $last_insert_id\n";
 			}

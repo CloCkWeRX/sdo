@@ -28,29 +28,7 @@ require_once 'company_metadata.inc.php';
 * Use SDO to perform create, retrieve and update operations on an entire company.
 * The SDO will contain company, department, and employee objects in one graph.
 *
-* The three tables are defined like this to MySQL:
-* create table company (
-*   id integer auto_increment,
-*   name char(20),
-*   employee_of_the_month integer,
-*   primary key(id)
-* );
-* create table department (
-*   id integer auto_increment,
-*   name char(20),
-*   location char(10),
-*   number integer(3),
-*   co_id integer,
-*   primary key(id)
-* );
-* create table employee (
-*   id integer auto_increment,
-*   name char(20),
-*   SN char(4),
-*   manager tinyint(1),
-*   dept_id integer,
-*   primary key(id)
-* );
+ * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
 *************************************************************************************/
 
 /*************************************************************************************
@@ -95,9 +73,12 @@ $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metad
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Acme';
-$root = $das->executeQuery($dbh,
-'select c.id, c.name, c.employee_of_the_month, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
-array('company.id','company.name','company.employee_of_the_month','department.id','department.name','employee.id','employee.name'));
+$pdo_stmt = $dbh->prepare('select c.id, c.name, c.employee_of_the_month, d.id, d.name, e.id ,' .
+		'e.name from company c, department d, employee e ' .
+		'where e.dept_id = d.id and d.co_id = c.id and c.name=?');
+$root = $das->executePreparedQuery($dbh,$pdo_stmt,array($name),
+	array('company.id','company.name','company.employee_of_the_month',
+			'department.id','department.name','employee.id','employee.name'));
 $acme 	= $root['company'][0];
 
 $shoe	= $acme->department[0];
@@ -119,19 +100,19 @@ echo "Wrote back company with extra department and employee and all the names ch
 
 /*************************************************************************************
 * Find it again under its new name and check names and e.o.t.m are right
+* Reuse the prepared query
+* Just for a change, and because we do not know the order in which department and 
+* employees are returned use XPath to locate the objects
 *************************************************************************************/
-$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'MegaCorp';
-$root = $das->executeQuery($dbh,
-'select c.id, c.name, c.employee_of_the_month, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
-array('company.id','company.name','company.employee_of_the_month','department.id','department.name','employee.id','employee.name'));
+$root = $das->executePreparedQuery($dbh,$pdo_stmt,array($name),
+	array('company.id','company.name','company.employee_of_the_month','department.id','department.name','employee.id','employee.name'));
 $megacorp 	= $root['company'][0];
-$footwear 	= $megacorp->department[0];
-$it 		= $megacorp->department[1];
-$susan 		= $footwear->employee[0];
-$billy 		= $it->employee[0];
+$footwear 	= $megacorp['department[name="Footwear"]'];
+$it 		= $megacorp['department[name="IT"]'];
+$susan 		= $megacorp['department[name="Footwear"]/employee[name="Susan"]'];
+$billy 		= $megacorp['department[name="IT"]/employee[name="Billy"]'];
 assert	($megacorp->name == 'MegaCorp');
 assert	($footwear->name == 'Footwear');
 assert	($it->name == 'IT');
@@ -145,12 +126,9 @@ assert	($megacorp->employee_of_the_month['name'] == 'Billy');
 * care is needed to keep closure - you cannot delete the employee who is eotm without
 * reassigning. For safety here we delete the company all in one go. 
 *************************************************************************************/
-$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name='MegaCorp';
-$root = $das->executeQuery($dbh,
-	'select c.id, c.name, c.employee_of_the_month, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
+$root = $das->executePreparedQuery($dbh,$pdo_stmt,array($name),
 	array('company.id','company.name','company.employee_of_the_month','department.id','department.name','employee.id','employee.name'));
 $megacorp = $root['company'][0];
 

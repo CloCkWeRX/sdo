@@ -32,11 +32,7 @@ require_once 'company_metadata.inc.php';
  *
  * Create one company row in the company table.
  *
- * create table company (
- *   id integer auto_increment,
- *   name char(20),
- *   employee_of_the_month integer,
- *   primary key(id) ); 
+ * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
  */
 
 /**************************************************************
@@ -53,7 +49,7 @@ try {
 
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $root = $das->executeQuery($dbh,
-'select name, id from company where name="Acme"',array('company.name', 'company.id') );
+"select name, id from company where name='Acme'",array('company.name', 'company.id') );
 
 $company = $root['company'][0];
 

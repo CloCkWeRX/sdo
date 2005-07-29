@@ -117,7 +117,13 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
 		// correspond to a column or if properties were updated but old == new
 		if (count($all_changed_settings) > 0) {
 			$stmt = $this->toSQL($all_changed_settings, $all_original_settings);
-			$this->executeStatement($dbh,$stmt);
+			foreach($all_changed_settings as $name => $value) {
+				$value_list[] = $value;
+			}
+			foreach($all_original_settings as $name => $value) {
+				$value_list[] = $value;
+			}
+			$this->executeStatement($dbh,$stmt,$value_list);
 		}
 		return $spawned_actions;
 	}
@@ -171,7 +177,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
 		//			}
 		//			return $sql_setting;
 		//		}
-		$sql_setting = $name . '="' . $value . '"';
+		$sql_setting = "$name = ?";
 		return $sql_setting;
 	}
 
@@ -193,7 +199,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
 		//			}
 		//			return $sql_setting;
 		//		}
-		$sql_setting = $name . '="' . $value . '"';
+		$sql_setting = "$name = ?";
 		return $sql_setting;
 	}
 

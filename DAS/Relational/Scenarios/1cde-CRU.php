@@ -7,29 +7,7 @@ require_once 'company_metadata.inc.php';
  * Use SDO to perform create, retrieve and update operations on an entire company.
  * The SDO will contain company, department, and employee objects in one graph.
  * 
- * The company table is defined like this to MySQL:
- * create table company (
- *   id integer auto_increment,
- *   name char(20),
- *   employee_of_the_month integer,
- *   primary key(id) 
- * ); 
- * create table department (
- *   id integer auto_increment,
- *   name char(20),
- *   location char(10),
- *   number integer(3),
- *   co_id integer,
- *   primary key(id)
- * );
- * create table employee (
- *   id integer auto_increment,
- *   name char(20),
- *   SN char(4),
- *   manager tinyint(1),
- *   dept_id integer,
- *   primary key(id)
- * );
+ * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
  *************************************************************************************/
 
 /*************************************************************************************
@@ -108,14 +86,22 @@ echo "\nLooked for MegaCorp and found company with id " . $megacorp->id . "\n";
 echo "First department had name = " . $first_dept->name . "\n";
 echo "First employee had name = " . $first_emp->name . "\n";
 
-
+/**
+ * FindCompanyCDE - find a whole company/department/employee structure given the company name
+ * 
+ * Since we want to put a variable into the SQL, use the prepared statement interface
+ * and a placeholder to ensure invalid SQL cannot be injected, regardless of what is 
+ * passed in $name. 
+ */
 function findCompanyCDE($das,$name) 
 {
 	$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 	try {
-		$root = $das->executeQuery($dbh,
-		'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
-		array('company.id','company.name','department.id','department.name','employee.id','employee.name'));
+		$pdo_stmt = $dbh->prepare('select c.id, c.name, d.id, d.name, e.id, e.name from' .
+				' company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id ' .
+				'and c.name=?');
+		$root = $das->executePreparedQuery($dbh,$pdo_stmt, array($name),
+				array('company.id','company.name','department.id','department.name','employee.id','employee.name'));
 	} catch (SDO_DAS_Relational_Exception $e) {
 		echo "SDO_DAS_Relational_Exception raised when trying to retrieve data from the database.";
 		echo "Probably something wrong with the SQL query.";

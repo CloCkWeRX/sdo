@@ -106,11 +106,18 @@ class SDO_DAS_Relational {
 		}
 	}
 
+	public function ensureValueListIsNullOrAnArray($value_list)
+	{
+		if ($value_list != NULL && gettype($value_list) != 'array') {
+			throw new SDO_DAS_Relational_Exception('The value list (third argument) passed to executeQuery* must be null or an array');
+		}
+	}
+
 	public function ensureColumnSpecifierContainsOnlyValidTableAndColumnNames($column_specifier)
 	{
 		if ($column_specifier != null) {
 			if (gettype($column_specifier) != 'array') {
-				throw new SDO_DAS_Relational_Exception('The column specifier (third argument) passed to executeQuery must be an array');
+				throw new SDO_DAS_Relational_Exception('The column specifier (fourth argument) passed to executeQuery must be an array');
 			}
 			foreach($column_specifier as $cs) {
 				if (gettype($cs) != 'string') {
@@ -125,23 +132,41 @@ class SDO_DAS_Relational {
 	}
 
 	/**
-	 * Given an SQL query, execute it, normalise the result set into a data graph and return it.
+	 * Given an SQL query in the form of a prepared stament and a value list, execute it, 
+	 * normalise the result set into a data graph and return it.
 	 */
 	public function executeQuery($dbh, $stmt, $column_specifier = null)
 	{
 		$this->ensureStatementIsAString($stmt);
 		$this->ensureColumnSpecifierContainsOnlyValidTableAndColumnNames($column_specifier);
-//		$dbh->setAttribute(PDO_ATTR_CASE,PDO_CASE_LOWER); // so that column names in the result set are lower case
 		$dbh->beginTransaction();
 		$pdo_stmt 		= $dbh->prepare($stmt);
 		$rows_affected 	= $pdo_stmt->execute();
+		$root = $this->normaliseResultSet($pdo_stmt, $column_specifier);
+		$dbh->commit();
+		return $root;
+	}
+	
+	/**
+	 * Given an SQL query as a string, execute it, normalise the result set into a data graph and return it.
+	 */
+	public function executePreparedQuery($dbh, PDOStatement $pdo_stmt, $value_list, $column_specifier = null)
+	{
+		$this->ensureValueListIsNullOrAnArray($value_list);
+		$this->ensureColumnSpecifierContainsOnlyValidTableAndColumnNames($column_specifier);
+		$dbh->beginTransaction();
+		$rows_affected 	= $pdo_stmt->execute($value_list);
+		$root = $this->normaliseResultSet($pdo_stmt, $column_specifier);
+		$dbh->commit();
+		return $root;
+	}
+	
+	public function normaliseResultSet($pdo_stmt, $column_specifier) {
 		if ($column_specifier == null) {
 			$all_rows = $pdo_stmt->fetchAll(PDO_FETCH_ASSOC);
 		} else {
 			$all_rows = $pdo_stmt->fetchAll(PDO_FETCH_NUM);
-
 		}
-		$dbh->commit();
 		$root		 			= self::createRoot($this->data_factory);
 		$table_names = $this->database_model->getAllTableNames();	//TODO make sure they come back in graph order
 		assert ($table_names[0] == $this->application_root_type);
@@ -207,13 +232,13 @@ class SDO_DAS_Relational {
 	{
 		$parsed_row = array();
 		foreach($row as $col => $value) {
-			$table_names_with_this_column = $this->object_model->getTypesByPropertyName($col);
+			$table_names_with_this_column = $this->object_model->getTypesByColumnNameIgnoreCase($col);
 			switch (count($table_names_with_this_column)) {
 				case 0:
 				throw new SDO_DAS_Relational_Exception('The result set from ExecuteQuery contained a column with name ' . $col . ' but there is no table with a column with this name.');
 				case 1:
-				$table_name = $table_names_with_this_column[0];
-				$parsed_row[$table_name][$col] = $value;
+				foreach ($table_names_with_this_column as $table_name => $property_name) // only one entry
+					$parsed_row[$table_name][$property_name] = $value;
 				break;
 				default:
 				throw new SDO_DAS_Relational_Exception('The result set from ExecuteQuery contained a column with name ' . $col . ' but there is more than one table with a column with this name. You need to pass a column specifier to resolve the ambiguity.');

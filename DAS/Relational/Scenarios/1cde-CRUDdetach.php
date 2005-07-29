@@ -28,29 +28,7 @@ require_once 'company_metadata.inc.php';
 * Use SDO to perform create, retrieve and update operations on an entire company.
 * The SDO will contain company, department, and employee objects in one graph.
 *
-* The company table is defined like this to MySQL:
-* create table company (
-*   id integer auto_increment,
-*   name char(20),
-*   employee_of_the_month integer,
-*   primary key(id)
-* );
-* create table department (
-*   id integer auto_increment,
-*   name char(20),
-*   location char(10),
-*   number integer(3),
-*   co_id integer,
-*   primary key(id)
-* );
-* create table employee (
-*   id integer auto_increment,
-*   name char(20),
-*   SN char(4),
-*   manager tinyint(1),
-*   dept_id integer,
-*   primary key(id)
-* );
+* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
 *************************************************************************************/
 
 /*************************************************************************************
@@ -98,9 +76,12 @@ echo "Wrote back company with name Acme, two departments, and two employees\n";
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $name = 'Acme';
-$root = $das->executeQuery($dbh,
-'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
-array('company.id','company.name','department.id','department.name','employee.id','employee.name'));
+$pdo_stmt = $dbh->prepare('select c.id, c.name, c.employee_of_the_month, d.id, d.name, e.id ,' .
+		'e.name from company c, department d, employee e ' .
+		'where e.dept_id = d.id and d.co_id = c.id and c.name=?');
+$root = $das->executePreparedQuery($dbh,$pdo_stmt,array($name),
+		array('company.id','company.name','company.employee_of_the_month',
+				'department.id','department.name','employee.id','employee.name'));
 $acme2 = $root['company'][0];
 $shoe = $acme2['department'][0];
 $it = $acme2['department'][1];
@@ -125,14 +106,15 @@ $das -> applyChanges($dbh, $root);
 
 /*************************************************************************************
 * Find the company again and check that they are swapped
+* Reuse the database handle and prepared statement
 *************************************************************************************/
-$das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
-$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $name = 'Acme';
-$root = $das->executeQuery($dbh,
-'select c.id, c.name, d.id, d.name, e.id, e.name from company c, department d, employee e where e.dept_id = d.id and d.co_id = c.id and c.name="' . $name . '";' ,
-array('company.id','company.name','department.id','department.name','employee.id','employee.name'));
-var_dump($root);
+$pdo_stmt = $dbh->prepare('select c.id, c.name, c.employee_of_the_month, d.id, d.name, e.id ,' .
+		'e.name from company c, department d, employee e ' .
+		'where e.dept_id = d.id and d.co_id = c.id and c.name=?');
+$root = $das->executePreparedQuery($dbh,$pdo_stmt,array($name),
+		array('company.id','company.name','company.employee_of_the_month',
+				'department.id','department.name','employee.id','employee.name'));
 $acme3 = $root['company'][0];
 //$shoe = $acme3['department'][0];
 //$it = $acme3['department'][1];

@@ -55,6 +55,7 @@ echo "\nCompany Acme has been written to the database\n";
 
 /**************************************************************
 * Retrieve the company and Shoe department, then delete Shoe and add IT
+* We are not injecting anything into the SQL statement so safe to use the simple executeQuery
 ***************************************************************/
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
@@ -77,6 +78,7 @@ echo "Deleted a department and added one\n";
 
 /**************************************************************
 * Retrieve the company and IT department, then delete the whole company
+* We are not injecting anything into the SQL statement so safe to use the simple executeQuery
 ***************************************************************/
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);

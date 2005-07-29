@@ -27,14 +27,7 @@ require_once 'company_metadata.inc.php'; // will override most of this this time
 /*************************************************************************************
 * Use SDO to perform create, retrieve, update, and delete operations on a row of the employee table.
 *
-* create table employee (
-*   id integer auto_increment,
-*   name char(20),
-*   SN char(4),
-*   manager tinyint(1),
-*   dept_id integer,
-*   primary key(id)
-* );
+* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
 * 
 * This example works against one table with no foreign keys or containment relationships and shows how in 
 * this case the arguments to the SDO_DAS_Relational constructor and executeQuery can be simplified. 
@@ -89,7 +82,8 @@ $das = new SDO_DAS_Relational ($database_metadata);
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Sue';
-$root = $das->executeQuery($dbh,'select id, name, SN from employee where name="' . $name . '";');
+$pdo_stmt = $dbh->prepare('select id, name, SN from employee where name=?');
+$root = $das->executePreparedQuery($dbh,$pdo_stmt,array($name));
 $sue = $root['employee'][0];
 echo "Looked for Sue and found employee with name = " . $sue->name . " and SN " . $sue->SN . "\n";
 $sue->name = 'Susan';
@@ -99,12 +93,11 @@ echo "Wrote back employee with name changed to Susan\n";
 
 /*************************************************************************************
 * Find it again under its new name, and delete it.
+* Reuse the prepared query
 *************************************************************************************/
-$das = new SDO_DAS_Relational ($database_metadata);
-$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Susan';
-$root = $das->executeQuery($dbh,'select id, name, SN from employee where name="' . $name . '";');
+$root = $das->executePreparedQuery($dbh,$pdo_stmt,array($name));
 $susan = $root['employee'][0];
 echo "Looked for Susan and found employee with name = " . $susan->name . " and SN " . $susan->SN . "\n";
 unset($root['employee'][0]); // do not make the mistake of doing unset($company3) - this will just destroy the $company3 variable

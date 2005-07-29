@@ -51,13 +51,17 @@ abstract class SDO_DAS_Relational_Action {
 //		return SDO_DAS_Relational_DataObjectHelper::getCurrentPrimitiveSettings($do,$this->object_model);
 //	}
 
-	public function executeStatement($dbh,$stmt)
+	public function executeStatement($dbh,$stmt,$value_list)
 	{
 		if (SDO_DAS_Relational::DEBUG_EXECUTE_PLAN) {
 			echo "executing the following SQL statement:\n" . $stmt . "\n";
+			echo "using the following list of values:\n";
+			foreach ($value_list as $value) {
+				echo "   $value\n";
+			}
 		}
 		$pdo_stmt = $dbh->prepare($stmt);
-		$rows_affected = $pdo_stmt->execute();
+		$rows_affected = $pdo_stmt->execute($value_list);
 		if ($rows_affected != 1) {
 			$pdo_error_info = $pdo_stmt->errorInfo();
 			$msg = "\nSDO/DAS/Relational.php::applyChanges encountered an error when attempting to execute $stmt";

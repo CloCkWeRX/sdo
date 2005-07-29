@@ -29,11 +29,7 @@ require_once 'company_metadata.inc.php';
  *
  * Create multiple company rows in the company table.
  *
- * create table company (
- *   id integer auto_increment,
- *   name char(20),
- *   employee_of_the_month integer,
- *   primary key(id) ); 
+ * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
  */
 
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);

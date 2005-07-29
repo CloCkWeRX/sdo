@@ -30,12 +30,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
  * Use SDO to perform create, retrieve and update operations on a row of the company table.
  * 
- * The company table is defined like this to MySQL:
- * create table company (
- *   id integer auto_increment,
- *   name char(20),
- *   employee_of_the_month integer,
- *   primary key(id) ); 
+ * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
  *************************************************************************************/
 
 /*************************************************************************************
@@ -89,14 +84,17 @@ echo "Looked for MegaCorp and found company with name = " . $company3->name . " 
  * We could reuse a connection but in this case we get a new one to illustrate the
  * disconnected nature of the data graph.
  * 
+ * Since we want to put a variable into the SQL, use the prepared statement interface
+ * and a placeholder to ensure invalid SQL cannot be injected, regardless of what is 
+ * passed in $name. 
+ * 
  * After getting the root object we get and return the first company object underneath it.
  *************************************************************************************/
 function findCompany($das,$name) {
 	$dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 	try {
-		$root = $das->executeQuery($dbh,
-		'select name, id from company where name="' . $name . '";' ,
-		array('company.name', 'company.id', 'company.employee_of_the_month'));
+		$pdo_stmt = $dbh->prepare('select name, id from company where name=?');
+		$root = $das->executePreparedQuery($dbh, $pdo_stmt ,array($name), array('company.name', 'company.id'));
 	} catch (SDO_DAS_Relational_Exception $e) {
 		echo "SDO_DAS_Relational_Exception raised when trying to retrieve data from the database.";
 		echo "Probably something wrong with the SQL query.";

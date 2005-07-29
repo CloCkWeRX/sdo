@@ -28,9 +28,9 @@ class SDO_DAS_Relational_UpdateNonContainmentReferenceAction extends SDO_DAS_Rel
 	/**
 	* execute self
 	*/
-	private $from_who;
-	private $property_name;
-	private $who_to;
+	private $from_who;       // the object containing the n-c-ref 
+	private $property_name;  // the name of the property which is the n-c-ref
+	private $who_to;         // the object it points to
 	
 	public function __construct($object_model, $from_who, $property_name, $who_to) 
 	{
@@ -46,12 +46,10 @@ class SDO_DAS_Relational_UpdateNonContainmentReferenceAction extends SDO_DAS_Rel
 		$pk_from 	= SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model,$this->from_who);
 		$pk_to 		= SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model,$this->who_to);
 		$type_name 	= SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->from_who);
-		$str 	=  "UPDATE $type_name set $this->property_name = " ;
-		$str 	.= '"' . $pk_to . '"' ;
-		$str 	.= ' where ';
 		$name_of_the_pk_column = $this->object_model->getPropertyRepresentingPrimaryKeyFromType($type_name);
-		$str 	.= $name_of_the_pk_column . '=' . $pk_from;
-		$this->executeStatement($dbh,$str);
+		$stmt 	=  "UPDATE $type_name set $this->property_name = ? where $name_of_the_pk_column = ?" ;
+		$value_list = array($pk_to, $pk_from);
+		$this->executeStatement($dbh,$stmt,$value_list);
 	}
 	
 	public function toString() 

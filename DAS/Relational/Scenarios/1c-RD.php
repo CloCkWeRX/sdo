@@ -28,12 +28,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Use SDO to retrieve then delete row of the company table.
 *
-* The company table is defined like this to MySQL:
-* create table company (
-*   id integer auto_increment,
-*   name char(20),
-*   employee_of_the_month integer,
-*   primary key(id) );
+* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
 *************************************************************************************/
 
 /*************************************************************************************
@@ -51,11 +46,10 @@ try {
 /*************************************************************************************
 * Find the company or companies and delete
 *************************************************************************************/
-$name = 'Acme';
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 try {
 	$root = $das->executeQuery($dbh,
-	'select name, id from company where name="' . $name . '"' ,
+	"select name, id from company where name='Acme'",
 	array('company.name', 'company.id', 'company.employee_of_the_month'));
 } catch (SDO_DAS_Relational_Exception $e) {
 	echo "SDO_DAS_Relational_Exception raised when trying to retrieve data from the database.";

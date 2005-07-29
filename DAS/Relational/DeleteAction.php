@@ -79,7 +79,10 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
 		// correspond to a column
 		if (count($all_original_settings) > 0) {
 			$stmt = $this->toSQL($all_original_settings);
-			$this->executeStatement($dbh,$stmt);
+			foreach($all_original_settings as $name => $value) {
+				$value_list[] = $value;
+			}
+			$this->executeStatement($dbh,$stmt,$value_list);
 		}
 		$spawned_actions = array();
 		return $spawned_actions;
@@ -154,7 +157,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
 		//			}
 		//			return $sql_setting;
 		//		}
-		$sql_setting = $name . '="' . $value . '"';
+		$sql_setting = "$name = ?";
 		return $sql_setting;
 	}
 
