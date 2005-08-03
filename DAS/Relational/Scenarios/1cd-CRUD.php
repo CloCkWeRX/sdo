@@ -18,7 +18,7 @@
 +----------------------------------------------------------------------+
 | Author: Matthew Peters                                               |
 +----------------------------------------------------------------------+
-
+$Id$
 */
 require_once 'SDO/DAS/Relational.php';
 require_once 'company_metadata.inc.php';
