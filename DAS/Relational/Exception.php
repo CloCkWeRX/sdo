@@ -18,7 +18,7 @@
 +----------------------------------------------------------------------+
 | Author: Matthew Peters                                               |
 +----------------------------------------------------------------------+
-
+$Id$
 */
 /**
  * Exception class to support SDO Relational Data Access Service

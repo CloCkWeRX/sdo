@@ -18,9 +18,9 @@
 +----------------------------------------------------------------------+
 | Author: Matthew Peters                                               |
 +----------------------------------------------------------------------+
+$Id$
 */
 
-/* $Id$  */
 require_once 'SDO/DAS/Relational/Exception.php';
 require_once 'SDO/DAS/Relational/DatabaseModel.php';
 require_once 'SDO/DAS/Relational/ContainmentReferencesModel.php';
