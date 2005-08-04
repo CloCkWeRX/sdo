@@ -33,7 +33,7 @@ if (PHP_SDO != "no") {
 		ADD_FLAG('CFLAGS_SDO_DAS_XML', '/I ' + configure_module_dirname + '\\sdolib\\src\\xmldas');	
 	
 		EXTENSION('sdo_das_xml', 
-			'xmldas.cpp xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp',
+			'das_xml.cpp xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp',
 			'yes',
 			'/GX');
 		

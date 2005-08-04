@@ -279,7 +279,7 @@
        <file role="src" name="SDO_List.cpp"/>
        <file role="src" name="SDO_Sequence.cpp"/>
        <file role="src" name="sdo_utils.cpp"/>
-       <file role="src" name="xmldas.cpp"/>
+       <file role="src" name="das_xml.cpp"/>
        <file role="src" name="xmldas_utils.cpp"/>
       </dir> <!-- / -->
     </filelist>

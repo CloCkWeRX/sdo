@@ -30,6 +30,6 @@ sdo_lib_srcs="sdolib/src/sdo/ChangeSummary.cpp sdolib/src/sdo/ChangeSummaryImpl.
 PHP_NEW_EXTENSION(sdo, sdo.cpp  SDO_DAS_ChangeSummary.cpp  SDO_DAS_DataFactory.cpp  SDO_DAS_Setting.cpp  SDO_DataObject.cpp  SDO_List.cpp  SDO_Sequence.cpp  sdo_utils.cpp $sdo_lib_srcs, $ext_shared,,-I@ext_srcdir@/sdolib/src/sdo -I@ext_srcdir@/sdolib/src/xmldas)
 PHP_ADD_BUILD_DIR($ext_builddir/sdolib/src/sdo)
 PHP_ADD_BUILD_DIR($ext_builddir/sdolib/src/xmldas)
-PHP_NEW_EXTENSION(sdo_das_xml, xmldas.cpp xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp, $ext_shared,,-I@ext_srcdir@/sdolib/src/sdo -I@ext_srcdir@/sdolib/src/xmldas)
+PHP_NEW_EXTENSION(sdo_das_xml, das_xml.cpp xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp, $ext_shared,,-I@ext_srcdir@/sdolib/src/sdo -I@ext_srcdir@/sdolib/src/xmldas)
 PHP_ADD_EXTENSION_DEP(sdo_das_xml, sdo)
 fi
