@@ -3,3 +3,6 @@ $Id$
 See http://docs.php.net/en/ref.sdo.html for API documentation.
 
 See INSTALL (in this directory) for installation instructions.
+
+We've published an introductory article about using SDO for PHP at 
+http://www-128.ibm.com/developerworks/opensource/library/os-sdophp/.
