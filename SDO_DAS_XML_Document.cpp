@@ -167,6 +167,11 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject) {
     }
     try {
         root_do = obj->xdoch->getRootDataObject();
+		if (!root_do) {
+            php_error(E_ERROR,
+                      "SDO_DAS_XML_Document::getRootDataObject - Unable to find root DataObject");
+            RETURN_NULL();
+        }
         retval = (zval *) root_do->getUserData();
         if (!retval) {
             php_error(E_ERROR,

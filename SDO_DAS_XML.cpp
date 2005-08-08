@@ -342,7 +342,7 @@ PHP_METHOD(SDO_DAS_XML, loadFromFile) {
         try {
             doc_obj->xdoch = xmldas_obj->xdh->loadFile(file_name);
             /*TODO : Throw appropriate exception*/
-            if (doc_obj->xdoch) {
+            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject()) {
                 create_dataobject_tree(doc_obj->xdoch->getRootDataObject()
                                        TSRMLS_CC);
             } else {
