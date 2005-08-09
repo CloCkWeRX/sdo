@@ -38,7 +38,7 @@
 #    define EXPIMP extern
 #endif
 
-#elif defined( __linux__ )
+#else
 #include <sys/time.h>
 #include <inttypes.h> 
 #include <stdlib.h>

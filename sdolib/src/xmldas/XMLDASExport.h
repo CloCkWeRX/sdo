@@ -32,7 +32,7 @@
 #else
 #define XMLDAS_API __declspec(dllimport)
 #endif
-#elif defined( __linux__ )
+#else
 #define XMLDAS_API
 #endif
 

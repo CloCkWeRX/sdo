@@ -1284,10 +1284,10 @@ namespace sdo {
 
 			case  Type::LongType:
 				{
-#if defined (__linux__)
-                                        int64_t lic = (int64_t)strtoll(eq, NULL, 0);
-#else
+#if defined(WIN32)  || defined (_WINDOWS)
                                         int64_t lic = (int64_t)_atoi64(eq);
+#else
+                                        int64_t lic = (int64_t)strtoll(eq, NULL, 0);
 #endif
 
 					if (lic == list[li]->getLong(p)) ok = 1;

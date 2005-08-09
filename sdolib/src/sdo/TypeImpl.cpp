@@ -724,10 +724,10 @@ namespace sdo{
 		case LongType:   
 			if (*value != 0) delete ((char*)*value);
 			*value = new char[sizeof(int64_t)];
-#if defined (__linux__)
-			*(int64_t*)*value = (int64_t)strtoll(c, NULL, 0);
-#else 
+#if defined(WIN32)  || defined (_WINDOWS)
 			*(int64_t*)*value = (int64_t)_atoi64(c);
+#else 
+			*(int64_t*)*value = (int64_t)strtoll(c, NULL, 0);
 #endif
 			return sizeof(int64_t);
 
@@ -1038,7 +1038,7 @@ namespace sdo{
 	// setInteger
 	unsigned int TypeImpl::convert(void** value,const long i) const
 	{
-#if defined  (__linux__)
+#if ! defined(WIN32)  &&  ! defined (_WINDOWS)
             char *tmp = new char[MAX_LONG_SIZE];
             int j = 0;
 #endif
@@ -1086,7 +1086,10 @@ namespace sdo{
 				if (*value != 0) delete ((wchar_t*)*value);
 				*value = new wchar_t[MAX_LONG_SIZE];
 				// TODO - whats the equivalent of _ltow on linux?
-#if defined  (__linux__)
+#if defined(WIN32)  || defined (_WINDOWS)
+				_ltow(i,(wchar_t*)*value,10);
+				return wcslen((wchar_t*)(*value));
+#else
 				sprintf(tmp,"%d", i);
 				for (j=0; j< strlen(tmp); j++) 
 				{
@@ -1095,9 +1098,6 @@ namespace sdo{
                                 ((wchar_t*)(*value))[strlen(tmp)] = 0;
  				delete tmp;
 				return j;
-#else
-				_ltow(i,(wchar_t*)*value,10);
-				return wcslen((wchar_t*)(*value));
 #endif
 						
 			}
@@ -1130,7 +1130,7 @@ namespace sdo{
 
 	unsigned int TypeImpl::convert(void** value,const int64_t l) const
 	{	
-#if defined  (__linux__)
+#if ! defined(WIN32)  &&  ! defined (_WINDOWS)
         char *tmp = new char[MAX_LONG_SIZE];
         int j = 0;
 #endif
@@ -1178,7 +1178,10 @@ namespace sdo{
 				if (*value != 0) delete ((wchar_t*)*value);
 				*value = new wchar_t[MAX_LONG_SIZE];
 				// TODO - whats the equivalent of _ltow on linux?
-#if defined  (__linux__)
+#if defined(WIN32)  || defined (_WINDOWS)
+				_i64tow(l,(wchar_t*)*value,10);
+				return wcslen((wchar_t*)(*value));
+#else
 				sprintf(tmp, "%lld", l);
 				for (j=0; j< strlen(tmp); j++) 
 				{
@@ -1187,9 +1190,6 @@ namespace sdo{
 				((wchar_t*)(*value))[strlen(tmp)] = 0;
 				delete tmp;
 				return j;
-#else
-				_i64tow(l,(wchar_t*)*value,10);
-				return wcslen((wchar_t*)(*value));
 #endif
 						
 			}
@@ -1198,10 +1198,10 @@ namespace sdo{
 			{
 				if (*value != 0) delete ((char*)*value);
 				*value = new char[MAX_LONG_SIZE];
-#if defined  (__linux__)
-				sprintf((char*)*value, "%lld", l);
-#else
+#if defined(WIN32)  || defined (_WINDOWS)
 				_i64toa(l,(char*)*value,10);
+#else
+				sprintf((char*)*value, "%lld", l);
 #endif
 				return strlen((char*)(*value));
 						
@@ -1435,7 +1435,7 @@ namespace sdo{
 	unsigned int TypeImpl::convertToString(void* value, wchar_t* outval, unsigned int len,
 		unsigned int max) const
 	{
-#if defined  (__linux__)
+#if ! defined(WIN32)  && ! defined (_WINDOWS)
             char* tmpstr = new char[MAX_LONG_SIZE];
             int j = 0;
 #endif
@@ -1510,7 +1510,13 @@ namespace sdo{
 			{
 				if (value == 0) return 0;
 				long tmp = *(long*)value;
-#if defined  (__linux__)
+#if defined(WIN32)  || defined (_WINDOWS)				
+				wchar_t* tmpstr = new wchar_t[MAX_LONG_SIZE];
+				_ltow(tmp,tmpstr,10);
+				if (wcslen(tmpstr) > max) return 0;
+				_ltow(tmp,outval,10);
+				return wcslen(outval);
+#else
 				sprintf(tmpstr, "%ld", tmp);
 				if (strlen(tmpstr) > max) return 0;
 				for (j=0; j< strlen(tmpstr); j++) 
@@ -1519,12 +1525,6 @@ namespace sdo{
 				}
 				delete tmpstr;
 				return j;
-#else				
-				wchar_t* tmpstr = new wchar_t[MAX_LONG_SIZE];
-				_ltow(tmp,tmpstr,10);
-				if (wcslen(tmpstr) > max) return 0;
-				_ltow(tmp,outval,10);
-				return wcslen(outval);
 #endif
 			}
 
@@ -1533,16 +1533,7 @@ namespace sdo{
 			{
 				if (value == 0) return 0;
 				int64_t tmp = *(int64_t*)value;
-#if defined  (__linux__)
-				sprintf(tmpstr, "%lld", tmp);
-				if (strlen(tmpstr) > max) return 0;
-				for (j=0; j< strlen(tmpstr); j++) 
-				{
-					outval[j] = (wchar_t)tmpstr[j];
-				}
-				delete tmpstr;
-				return j;
-#else				
+#if defined(WIN32)  || defined (_WINDOWS)				
 				wchar_t* tmpstr = new wchar_t[MAX_LONG_SIZE];
 				_i64tow(tmp,tmpstr,10);
 				if (wcslen(tmpstr) > max) 
@@ -1552,6 +1543,15 @@ namespace sdo{
 				}
 				_i64tow(tmp,outval,10);
 				return wcslen(outval);
+#else	
+				sprintf(tmpstr, "%lld", tmp);
+				if (strlen(tmpstr) > max) return 0;
+				for (j=0; j< strlen(tmpstr); j++) 
+				{
+					outval[j] = (wchar_t)tmpstr[j];
+				}
+				delete tmpstr;
+				return j;
 #endif
 			}
 
@@ -1576,10 +1576,10 @@ namespace sdo{
 				fmt[2] = (wchar_t)'3';
 				fmt[3] = (wchar_t)'e';
 				fmt[4] = (wchar_t)0;
-#if defined (__linux__)
-				swprintf((wchar_t*)outval, wcslen((wchar_t*)outval), fmt, *(long double*)value);
-#else
+#if defined(WIN32)  || defined (_WINDOWS)	
 				swprintf((wchar_t*)outval,fmt,*(long double*)value);
+#else
+				swprintf((wchar_t*)outval, wcslen((wchar_t*)outval), fmt, *(long double*)value);
 #endif
 				delete fmt;
 
@@ -1595,10 +1595,10 @@ namespace sdo{
 				fmt[2] = (wchar_t)'3';
 				fmt[3] = (wchar_t)'e';
 				fmt[4] = (wchar_t)0;
-#if defined (__linux__)
-				swprintf(outval, wcslen(outval), fmt, *(float*)value);
-#else
+#if defined(WIN32)  || defined (_WINDOWS)
 				swprintf(outval,fmt,*(float*)value);
+#else
+				swprintf(outval, wcslen(outval), fmt, *(float*)value);
 #endif
 				delete fmt;
 
@@ -1845,10 +1845,10 @@ namespace sdo{
 				return *asstringbuf;
 			}
 			int64_t temp = *(int64_t*)value;
-#if defined (__linux__)
-			sprintf(*asstringbuf,"%lld", temp);
-#else
+#if defined(WIN32)  || defined (_WINDOWS)
 			sprintf(*asstringbuf,"%I64d", temp);
+#else
+			sprintf(*asstringbuf,"%lld", temp);
 #endif
 			return *asstringbuf;
 			}
@@ -2170,7 +2170,7 @@ namespace sdo{
 	}
 	const short TypeImpl::convertToShort(void* value, unsigned int len) const
 	{
-#if defined (__linux__)
+#if ! defined(WIN32)  && !defined (_WINDOWS)
             char* tmpstr = new char[len+1];
             short s = 0;
 #endif
@@ -2230,7 +2230,9 @@ namespace sdo{
 				// by the default Setting code as well
 				return 0;
 			}
-#if defined (__linux__)
+#if defined(WIN32)  || defined (_WINDOWS)
+			return (short)_wtoi((wchar_t*)value);
+#else
 			for (int j=0;j< len;j++)
 			{
 				tmpstr[j] = (char)((char *)value)[j];
@@ -2239,8 +2241,6 @@ namespace sdo{
 			s = (short) atoi(tmpstr);
 			delete tmpstr;
 			return s;
-#else
-			return (short)_wtoi((wchar_t*)value);
 #endif
 
 
@@ -2317,7 +2317,9 @@ namespace sdo{
 				// by the default Setting code as well
 				return 0;
 			}
-#if defined (__linux__)
+#if defined(WIN32)  || defined (_WINDOWS)
+			return (int)_wtoi((wchar_t*)value);
+#else
 			char* tmp = new char[len+1];
 			int j = 0;;
 			for (j=0;j<len;j++)
@@ -2328,8 +2330,6 @@ namespace sdo{
 			j = atoi(tmp);
 			delete tmp;
 			return j;
-#else
-			return (int)_wtoi((wchar_t*)value);
 #endif
 	 
 		case BytesType:
@@ -2357,7 +2357,7 @@ namespace sdo{
   */
 	const long TypeImpl::convertToInteger(void* value, unsigned int len) const
 	{
-#if defined (__linux__)
+#if ! defined(WIN32)  && ! defined (_WINDOWS)
             char* tmp = new char[len+1];
             int j = 0;
             long l = 0;
@@ -2418,7 +2418,9 @@ namespace sdo{
 				// by the default Setting code as well
 				return 0;
 			}
-#if defined (__linux__)
+#if defined(WIN32)  || defined (_WINDOWS)
+			return (long)_wtol((wchar_t*)value);
+#else
 			for (j=0;j<len;j++)
 			{
 				tmp[j] = (char)((wchar_t*)value)[j];
@@ -2427,8 +2429,6 @@ namespace sdo{
 			l = atol(tmp);
 			delete tmp;
 			return l;
-#else
-			return (long)_wtol((wchar_t*)value);
 #endif
 	 
 		case BytesType:
@@ -2454,7 +2454,7 @@ namespace sdo{
 	}
 	const int64_t TypeImpl::convertToLong(void* value, unsigned int len) const 
 	{
-#if defined (__linux__)
+#if ! defined(WIN32)  && ! defined (_WINDOWS)
             char* tmp = new char[len+1];
             int j = 0;
             int64_t l = 0;
@@ -2515,7 +2515,9 @@ namespace sdo{
 				// by the default Setting code as well
 				return 0;
 			}
-#if defined (__linux__)
+#if defined(WIN32)  || defined (_WINDOWS)
+			return (long)_wtol((wchar_t*)value);
+#else
 			for (j=0;j<len;j++)
 			{
 				tmp[j] = (char)((wchar_t*)value)[j];
@@ -2524,8 +2526,6 @@ namespace sdo{
 			l = strtoll(tmp, NULL, 0);
 			delete tmp;
 			return l;
-#else
-			return (long)_wtol((wchar_t*)value);
 #endif
 
 
@@ -2536,10 +2536,10 @@ namespace sdo{
 				// by the default Setting code as well
 				return 0;
 			}
-#if defined (__linux__)
-			return  strtoll((char*)value, NULL, 0);
-#else
+#if defined(WIN32)  || defined (_WINDOWS)
 			return _atoi64((char*)value);
+#else
+			return  strtoll((char*)value, NULL, 0);
 #endif
 
 		case OtherTypes:
