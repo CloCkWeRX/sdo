@@ -413,10 +413,14 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 			break;
 		case Type::DateType:
 			convert_to_long(&temp_zval);
+			/*TODO The use of long here is questionable. It is done to 
+			 * avoid issues on some platforms where a time_t is not
+			 * defined as a long int.
+			 */
 			if (write_type == TYPE_APPEND)
-				dol.append((time_t)Z_LVAL(temp_zval));
+				dol.append((long)Z_LVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
-				dol.insert(index, (time_t)Z_LVAL(temp_zval));
+				dol.insert(index, (long)Z_LVAL(temp_zval));
 			else
 				dol.setDate(index, (time_t)Z_LVAL(temp_zval));
 			break;
