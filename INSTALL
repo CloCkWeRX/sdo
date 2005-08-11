@@ -1,14 +1,16 @@
+$Id$
+
 Linux installation steps
 ========================
 
 The sdo and sdo_das_xml extensions are supplied as a PECL module, which
 you should be able to download and install in one step as follows:
 
-pear install sdo 
+pear install sdo
 
 (Depending on your php environment, you may need to be root to do this.)
 
-Make sure that these modules are loaded by PHP, by adding  
+Make sure that these modules are loaded by PHP, by adding:
 
 extension=sdo.so
 extension=sdo_das_xml.so 
@@ -20,13 +22,13 @@ The PEAR installer will also install the Relational DAS in your PEAR directory.
 If you cannot use the PEAR installer, you can download the extension and build
 it manually:
 
-pear download sdo
-tar -xzf sdo-0.5.0.tgz
-cd sdo-0.5.0
+pear download sdo          #downloads sdo-<version>.tgz
+tar -xzf sdo-<version>.tgz
+cd sdo-<version>
 phpize
 ./configure
 make 
-make install               (you may need to be root for this step)
+make install               #you may need to be root for this step
 
 To work with the very latest source, you'll need to extract it from cvs and
 build manually as above.
@@ -36,4 +38,20 @@ If you have any problems, you are welcome to contact the maintainers.
 Windows installation steps
 ==========================
 
-Windows binaries will be made available soon.
+The latest Windows binaries for the sdo and sdo_das_xml extensions can
+be downloaded to your extension directory from:
+
+http://snaps.php.net/win32/PECL_UNSTABLE/php_sdo.dll
+http://snaps.php.net/win32/PECL_UNSTABLE/php_sdo_das_xml.dll
+
+Make sure that these modules are loaded by PHP, by adding:  
+
+extension=php_sdo.dll
+extension=php_sdo_das_xml.dll
+
+to your php.ini file, in that order.
+
+To install the Relational DAS in your PEAR directory, use:
+pear install -B sdo
+
+If you have any problems, you are welcome to contact the maintainers.
