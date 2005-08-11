@@ -535,7 +535,7 @@ void DataObjectListImpl::validateIndex(int index) const
 	{
 		char val[32];
 		string msg("Index out of range:");
-		itoa(index,val,10);
+		sprintf(val,"%d",index);
 		msg += val;
 		SDO_THROW_EXCEPTION("validateIndex", SDOIndexOutOfRangeException,
 			msg.c_str());

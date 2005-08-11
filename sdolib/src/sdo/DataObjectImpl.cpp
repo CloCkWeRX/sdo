@@ -2804,7 +2804,8 @@ namespace sdo {
 					if (dol[i] == thisob)
 					{
 						char index[64];
-						asXPathBuffer = itoa(i, index,10) + asXPathBuffer;
+						sprintf(index,"%d",i);
+						asXPathBuffer = index + asXPathBuffer;
 						asXPathBuffer = "." + asXPathBuffer;
 						break;
 					}
