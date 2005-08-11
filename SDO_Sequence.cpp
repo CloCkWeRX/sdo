@@ -94,7 +94,7 @@ static int sdo_sequence_valid(sdo_seq_object *my_object, long sequenceIndex, int
 				return_value = seq.getBooleanValue(sequenceIndex);
 				break;
 			case Type::DateType:
-				return_value = (seq.getDateValue(sequenceIndex) != 0);
+				return_value = (seq.getDateValue(sequenceIndex).getTime() != 0);
 				break;
 			case Type::DoubleType:
 			case Type::FloatType:
@@ -175,7 +175,7 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequenceInd
 			RETVAL_STRINGL(&char_value, 1, 1);
 			break;
 		case Type::DateType:
-			RETVAL_LONG(seq.getDateValue(sequenceIndex));
+			RETVAL_LONG(seq.getDateValue(sequenceIndex).getTime());
 			break;
 		case Type::DoubleType:
 			RETVAL_DOUBLE(seq.getDoubleValue(sequenceIndex));
@@ -319,11 +319,11 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, long sequenceInd
 		case Type::DateType:
 			convert_to_long(&temp_zval);
 			if (write_type == TYPE_APPEND)
-				seq.addDate(*property, (time_t)Z_LVAL(temp_zval));
+				seq.addDate(*property, (SDODate)Z_LVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
-				seq.addDate(sequenceIndex, *property, (time_t)Z_LVAL(temp_zval));
+				seq.addDate(sequenceIndex, *property, (SDODate)Z_LVAL(temp_zval));
 			else 
-				seq.setDateValue(sequenceIndex, (int)Z_LVAL(temp_zval));
+				seq.setDateValue(sequenceIndex, (SDODate)Z_LVAL(temp_zval));
 			break;
 		case Type::DoubleType:
 			convert_to_double(&temp_zval);

@@ -1018,7 +1018,7 @@ namespace sdo{
 		return convert(value,(long)i);
  	}
 */
-	unsigned int TypeImpl::convertDate(void** value, time_t i) const
+	unsigned int TypeImpl::convertDate(void** value, const SDODate i) const
 	{
 		switch (typeEnum)
 		{
@@ -1031,7 +1031,7 @@ namespace sdo{
 			break;
 			}
         default:
-			return convert(value, (long)i);
+			return convert(value, (long)(i.getTime()));
 		}
 	}
 
@@ -2835,7 +2835,7 @@ namespace sdo{
 			}
 		}
 	}
-	const time_t TypeImpl::convertToDate(void* value, unsigned int len) const
+	const SDODate TypeImpl::convertToDate(void* value, unsigned int len) const
 	{
 	switch (typeEnum) 
 		{

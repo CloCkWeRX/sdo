@@ -27,7 +27,7 @@
 #include "export.h"
 #include "RefCountingPointer.h"
 #include "DataObject.h"
-
+#include "SDODate.h"
 #include <wchar.h>
 
 
@@ -57,7 +57,7 @@ public:
     virtual SDO_API int64_t getLong(unsigned int index) const = 0;
     virtual SDO_API float getFloat(unsigned int index) const = 0;
     virtual SDO_API long double getDouble(unsigned int index) const = 0;
-    virtual SDO_API time_t  getDate(unsigned int index) const = 0;
+    virtual SDO_API const SDODate  getDate(unsigned int index) const = 0;
 	virtual SDO_API const char*  getCString(unsigned int index) const = 0;
 	virtual SDO_API DataObjectPtr  getDataObject(unsigned int index) const = 0;
 
@@ -71,7 +71,7 @@ public:
     virtual SDO_API void setLong(unsigned int index, int64_t d)  = 0;
     virtual SDO_API void setFloat(unsigned int index, float d)  = 0;
     virtual SDO_API void setDouble(unsigned int index, long double d)  = 0;
-    virtual SDO_API void setDate(unsigned int index, time_t d)  = 0;
+    virtual SDO_API void setDate(unsigned int index, const SDODate d)  = 0;
 	virtual SDO_API void setCString(unsigned int index, char* d)  = 0;
 	virtual SDO_API void setDataObject(unsigned int index, DataObjectPtr dob)  = 0;
 
@@ -102,6 +102,8 @@ public:
 	virtual SDO_API void insert (unsigned int index, short d) = 0;
 	virtual SDO_API void append (short d) = 0;
 
+	virtual SDO_API void insert (unsigned int index, const SDODate d) = 0;
+	virtual SDO_API void append (const SDODate d) = 0;
 
 	virtual SDO_API void insert (unsigned int index, long d) = 0;
 	virtual SDO_API void append (long d) = 0;

@@ -28,6 +28,7 @@
 using namespace std;
 
 #include "Sequence.h"
+#include "SDODate.h"
 
 #define SequenceImplPtr RefCountingPointer<SequenceImpl> 
 
@@ -83,7 +84,7 @@ class SequenceImpl : public Sequence
 	virtual int64_t     getLongValue(unsigned int index);
 	virtual float       getFloatValue(unsigned int index);
 	virtual long double getDoubleValue(unsigned int index);
-	virtual time_t      getDateValue(unsigned int index);
+	virtual const SDODate   getDateValue(unsigned int index);
 	virtual DataObjectPtr getDataObjectValue(unsigned int index);
 
     virtual unsigned int getLength(unsigned int index);
@@ -105,7 +106,7 @@ class SequenceImpl : public Sequence
 	virtual void setLongValue(  unsigned int index, int64_t     l );
 	virtual void setFloatValue(     unsigned int index, float       f );
 	virtual void setDoubleValue(    unsigned int index, long double d );
-	virtual void setDateValue(    unsigned int index, time_t t );
+	virtual void setDateValue(    unsigned int index, const SDODate t );
 	virtual void setDataObjectValue(unsigned int index, DataObjectPtr d );
 	
 
@@ -126,7 +127,7 @@ class SequenceImpl : public Sequence
 	virtual bool addLong(      const char* propertyName,int64_t     l );
 	virtual bool addFloat(     const char* propertyName,float       f );
 	virtual bool addDouble(    const char* propertyName,long double d );
-	virtual bool addDate(      const char* propertyName,time_t t );
+	virtual bool addDate(      const char* propertyName,const SDODate t );
 	virtual bool addDataObject(const char* propertyName,DataObjectPtr d );
 
 	
@@ -147,7 +148,7 @@ class SequenceImpl : public Sequence
 	virtual bool addLong(      unsigned int propertyIndex,int64_t     l );
 	virtual bool addFloat(     unsigned int propertyIndex,float       f );
 	virtual bool addDouble(    unsigned int propertyIndex,long double d );
-	virtual bool addDate(      unsigned int propertyIndex,time_t t );
+	virtual bool addDate(      unsigned int propertyIndex,const SDODate t );
 	virtual bool addDataObject(unsigned int propertyIndex,DataObjectPtr d );
 
 
@@ -169,7 +170,7 @@ class SequenceImpl : public Sequence
 	virtual bool addLong(      const Property& property,int64_t     l );
 	virtual bool addFloat(     const Property& property,float       f );
 	virtual bool addDouble(    const Property& property,long double d );
-	virtual bool addDate(      const Property& property,time_t t );
+	virtual bool addDate(      const Property& property,const SDODate t );
 	virtual bool addDataObject(const Property& property,DataObjectPtr d );
 
 
@@ -191,7 +192,7 @@ class SequenceImpl : public Sequence
 	virtual bool addLong(      unsigned int index,const char* propertyName,int64_t     l );
 	virtual bool addFloat(     unsigned int index,const char* propertyName,float       f );
 	virtual bool addDouble(    unsigned int index,const char* propertyName,long double d );
-	virtual bool addDate(      unsigned int index,const char* propertyName,time_t t );
+	virtual bool addDate(      unsigned int index,const char* propertyName,const SDODate t );
 	virtual bool addDataObject(unsigned int index,const char* propertyName,DataObjectPtr d );
 
 
@@ -213,7 +214,7 @@ class SequenceImpl : public Sequence
 	virtual bool addLong(      unsigned int index,unsigned int propertyIndex,int64_t     l );
 	virtual bool addFloat(     unsigned int index,unsigned int propertyIndex,float       f );
 	virtual bool addDouble(    unsigned int index,unsigned int propertyIndex,long double d );
-	virtual bool addDate(      unsigned int index,unsigned int propertyIndex,time_t t );
+	virtual bool addDate(      unsigned int index,unsigned int propertyIndex,const SDODate t );
 	virtual bool addDataObject(unsigned int index,unsigned int propertyIndex,DataObjectPtr d );
 
 
@@ -235,7 +236,7 @@ class SequenceImpl : public Sequence
 	virtual bool addLong(      unsigned int index,const Property& property,int64_t     l );
 	virtual bool addFloat(     unsigned int index,const Property& property,float       f );
 	virtual bool addDouble(    unsigned int index,const Property& property,long double d );
-	virtual bool addDate(      unsigned int index,const Property& property,time_t t );
+	virtual bool addDate(      unsigned int index,const Property& property,const SDODate t );
 	virtual bool addDataObject(unsigned int index,const Property& property,DataObjectPtr d );
 
  

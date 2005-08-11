@@ -393,7 +393,7 @@ namespace sdo{
 				break;
 			case Type::DateType:
 				*value = new long;
-				*(long*)*value = (long)ob->getDate(prop);
+				*(long*)*value = (long)(ob->getDate(prop).getTime());
 				break;
 			case Type::BigDecimalType: 
 			case Type::BigIntegerType: 
@@ -475,7 +475,7 @@ namespace sdo{
 				break;
 			case Type::DateType:
 				*value = new long;
-				*(long*)*value = (long)ob->getDate();
+				*(long*)*value = (long)(ob->getDate().getTime());
 				break;
 			case Type::BigDecimalType: 
 			case Type::BigIntegerType: 
@@ -750,7 +750,7 @@ namespace sdo{
 							cout << "Int64: (cant print)"; // << (*sl)[j]->getLongValue();
 						break;
 						case Type::DateType:
-							cout << "Date:" << sl[j].getDateValue();
+							cout << "Date:" << sl[j].getDateValue().getTime();
 						break;
 						case Type::BigDecimalType: 
 						case Type::BigIntegerType: 

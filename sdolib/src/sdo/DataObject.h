@@ -34,7 +34,7 @@
 #include "Sequence.h"
 #include "DataObjectList.h"
 #include "PropertyList.h"
-
+#include "SDODate.h"
 
 namespace commonj{
 namespace sdo{
@@ -214,13 +214,13 @@ class DataObject : public RefCountingObject
 	virtual SDO_API void setString(unsigned int propindex, const wchar_t* c, unsigned int length) = 0;
 	virtual SDO_API void setString(const Property& p, const wchar_t* c, unsigned int length) = 0;
 
-	virtual SDO_API time_t getDate(const char* path) = 0;
-	virtual SDO_API time_t getDate(unsigned int propindex) = 0;
-	virtual SDO_API time_t getDate(const Property& p) = 0;
+	virtual SDO_API const SDODate getDate(const char* path) = 0;
+	virtual SDO_API const SDODate getDate(unsigned int propindex) = 0;
+	virtual SDO_API const SDODate getDate(const Property& p) = 0;
     
-	virtual SDO_API void setDate(const char* path, time_t d) = 0;
-	virtual SDO_API void setDate(unsigned int propindex, time_t d) = 0;
-	virtual SDO_API void setDate(const Property& p, time_t d) = 0;
+	virtual SDO_API void setDate(const char* path, const SDODate d) = 0;
+	virtual SDO_API void setDate(unsigned int propindex, const SDODate d) = 0;
+	virtual SDO_API void setDate(const Property& p, const SDODate d) = 0;
 
 	virtual SDO_API long double getDouble(const char* path) = 0;
 	virtual SDO_API long double getDouble(unsigned int propindex) = 0;

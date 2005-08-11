@@ -441,6 +441,24 @@ void DataObjectListImpl::append (long d)
 }
 
 
+void DataObjectListImpl::insert (unsigned int index, const SDODate d)
+{
+	if (theFactory == 0) return;
+	RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
+	DataObject* dob = dol;
+	((DataObjectImpl*)dob)->setDate(d);
+    insert(index, dol);
+}
+
+void DataObjectListImpl::append (const SDODate d)
+{
+	if (theFactory == 0) return;
+	RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
+	DataObject* dob = dol;
+	((DataObjectImpl*)dob)->setDate(d);
+    append( dol);
+}
+
 void DataObjectListImpl::insert (unsigned int index, int64_t d)
 {
 	if (theFactory == 0) return;
@@ -515,8 +533,10 @@ void DataObjectListImpl::validateIndex(int index) const
 {
 	if ((index < 0) || (index >= size()))
 	{
+		char val[32];
 		string msg("Index out of range:");
-		msg += index;
+		itoa(index,val,10);
+		msg += val;
 		SDO_THROW_EXCEPTION("validateIndex", SDOIndexOutOfRangeException,
 			msg.c_str());
 
@@ -594,7 +614,7 @@ long double DataObjectListImpl::getDouble(unsigned int index) const
 	DataObject* dob = d;
 	return ((DataObjectImpl*)dob)->getDouble();
 }
-time_t      DataObjectListImpl::getDate(unsigned int index) const
+const SDODate      DataObjectListImpl::getDate(unsigned int index) const
 {
 	validateIndex(index);
 	RefCountingPointer<DataObject> d = ((*this)[index]);
@@ -727,7 +747,7 @@ void DataObjectListImpl::setDouble(unsigned int index, long double d)
 	DataObject* dob = dd;
 	((DataObjectImpl*)dob)->setDouble(d);
 }
-void DataObjectListImpl::setDate(unsigned int index, time_t d) 
+void DataObjectListImpl::setDate(unsigned int index, const SDODate d) 
 {
 	validateIndex(index);
 	if (container != 0)

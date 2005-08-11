@@ -31,6 +31,9 @@
 #include <list>
 #include <map>
 
+#include <string>
+
+
 #include "Property.h"
 #include "TypeImpl.h"
 #include "DASDataFactory.h"
@@ -40,6 +43,7 @@
 
 #include "RefCountingPointer.h"
 #include "ChangeSummaryImpl.h"
+#include "SDODate.h"
 
 namespace commonj{
 namespace sdo{
@@ -228,13 +232,13 @@ class DataObjectImpl : public DASDataObject
 	virtual void setString(unsigned int propindex, const wchar_t* c,unsigned int len) ;
 	virtual void setString(const Property& p, const wchar_t* c,unsigned int len) ;
 
-	virtual time_t getDate(const char* path);
-	virtual time_t getDate(unsigned int propindex);
-	virtual time_t getDate(const Property& p);
+	virtual const SDODate getDate(const char* path);
+	virtual const SDODate getDate(unsigned int propindex);
+	virtual const SDODate getDate(const Property& p);
     
-	virtual void setDate(const char* path, time_t d);
-	virtual void setDate(unsigned int propindex, time_t d);
-	virtual void setDate(const Property& p, time_t d);
+	virtual void setDate(const char* path, const SDODate d);
+	virtual void setDate(unsigned int propindex, const SDODate d);
+	virtual void setDate(const Property& p, const SDODate d);
 
 	virtual long double getDouble(const char* path);
 	virtual long double getDouble(unsigned int propindex);
@@ -386,8 +390,8 @@ class DataObjectImpl : public DASDataObject
 	virtual void setFloat(float b);
 	virtual long double getDouble();
 	virtual void setDouble(long double d);
-	virtual time_t getDate();
-	virtual void setDate(time_t d);
+	virtual const SDODate getDate();
+	virtual void setDate(const SDODate d);
 	virtual const char*  getCString();
 	virtual void setCString(const char* s);
 	virtual DataObjectImpl* getDataObject();
@@ -424,7 +428,7 @@ class DataObjectImpl : public DASDataObject
     DataObjectImpl* getContainerImpl();
 
 	// builds a temporary XPath for this object.
-	char* objectToXPath();
+	const char* objectToXPath();
 
 	// The data factory can be used to create new data objects within
     // the Type system of this data object
@@ -498,7 +502,7 @@ private:
 	char* asStringBuffer; 
 
 	// holds the Xpath to this object if requested.
-	char* asXPathBuffer;
+	std::string asXPathBuffer;
 
 	// The data object holds a counted reference to the data factory.
 	DASDataFactoryPtr factory;

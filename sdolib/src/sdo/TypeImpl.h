@@ -29,7 +29,7 @@
 #include <vector>
 #include "DASType.h"
 #include "PropertyImpl.h"
-
+#include "SDODate.h"
 //#include "ChangeSummary.h"
 
 
@@ -72,7 +72,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	 
-	 unsigned int convertDate(		void ** value, time_t i) const;
+	 unsigned int convertDate(		void ** value, const SDODate i) const;
 	 unsigned int convert(	void ** value,const char* s) const; 
 	 unsigned int convert(	void ** value,const wchar_t* s, unsigned int len) const; 
 	 unsigned int convert(	void ** value,const char* s, unsigned int len) const; 
@@ -100,7 +100,7 @@ public:
 	 const float          convertToFloat(     void* value ,unsigned int len) const; 
 	 const long double    convertToDouble(void* value ,unsigned int len) const; 
 	 DataObject*		  convertToDataObject(void* value ,unsigned int len) const; 
-	 const time_t         convertToDate      (void* value ,unsigned int len) const; 
+	 const SDODate         convertToDate      (void* value ,unsigned int len) const; 
 
  	///////////////////////////////////////////////////////////////////////////
     // Equals 

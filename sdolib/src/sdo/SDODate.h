@@ -21,40 +21,48 @@
 */
 /* $Id$ */
 
-#ifndef _DASDATAOBJECT_H_
-#define _DASDATAOBJECT_H_
-#include "DataObject.h"
-#include "RefCountingPointer.h"
+#ifndef _SDO_SDODATE_H_
+#define _SDO_SDODATE_H_
+
+#include "export.h"
+#include "time.h"
+
 
 namespace commonj{
 namespace sdo{
-	
 
-	class DASDataObject : public DataObject
+
+	///////////////////////////////////////////////////////////////////////////
+    // A representation of the type of a date.
+	///////////////////////////////////////////////////////////////////////////
+
+
+class SDODate
 {
- 	public:
 
-	virtual ~DASDataObject();
+public:
 
+
+	virtual SDO_API ~SDODate();
+
+	SDO_API SDODate(time_t inval);
 
 	///////////////////////////////////////////////////////////////////////////
-	// Change Summary
+    // Returns the time_t.
 	///////////////////////////////////////////////////////////////////////////
-	
-	SDO_API virtual ChangeSummaryPtr getChangeSummary() = 0;
-	SDO_API virtual ChangeSummaryPtr getChangeSummary(const char* path) = 0;
-    SDO_API virtual ChangeSummaryPtr getChangeSummary(unsigned int propIndex) = 0;
-    SDO_API virtual ChangeSummaryPtr getChangeSummary(const Property& prop) = 0;
+    virtual SDO_API const time_t getTime() const;
 
- 	//////////////////////////////////////////////////////////////////////////
-	// get the XPAth to this object
-	//////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////
+    // A default formatter for testing.
+	///////////////////////////////////////////////////////////////////////////
+	virtual const char* ascTime(void) const;
+  
 
-	virtual SDO_API const char* objectToXPath() = 0;
-
+private:
+	time_t value;
+};
 
 };
 };
-};
- 
-#endif //_DASDATAOBJECT_H_
+#endif //_SDO_SDODATE_H_
+

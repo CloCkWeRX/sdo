@@ -28,7 +28,7 @@
 using namespace std;
 
 #include "DASProperty.h"
-
+#include "SDODate.h"
 
 namespace commonj{
 namespace sdo{
@@ -148,7 +148,7 @@ class PropertyImpl :public DASProperty
 	SDO_API void setDefaultLong(const int64_t l);
 	SDO_API void setDefaultFloat(   const float f  );
 	SDO_API void setDefaultDouble(  const long double d );
-	SDO_API void setDefaultDate(    const time_t d );
+	SDO_API void setDefaultDate(    const SDODate d );
 
 	SDO_API const char*	    getCStringDefault() ;
 	SDO_API unsigned int 	getStringDefault(wchar_t* val, unsigned int max) ;
@@ -161,7 +161,7 @@ class PropertyImpl :public DASProperty
 	SDO_API int64_t     getLongDefault() const;
 	SDO_API float       getFloatDefault() const;
 	SDO_API long double getDoubleDefault() const;
-	SDO_API time_t      getDateDefault() const;
+	SDO_API const SDODate  getDateDefault() const;
 
 	///////////////////////////////////////////////////////////////////////////
     // Returns true if values for this Property cannot be modified using the SDO APIs.

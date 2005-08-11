@@ -27,6 +27,7 @@
 #include "export.h"
 #include "RefCountingObject.h"
 #include "RefCountingPointer.h"
+#include "SDODate.h"
 #include "Type.h"
 
 
@@ -81,7 +82,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual int64_t     getLongValue(unsigned int index) = 0;
 	SDO_API virtual float       getFloatValue(unsigned int index) = 0;
 	SDO_API virtual long double getDoubleValue(unsigned int index) = 0;
-	SDO_API virtual time_t      getDateValue(unsigned int index) = 0;
+	SDO_API virtual const SDODate      getDateValue(unsigned int index) = 0;
 	SDO_API virtual DataObjectPtr getDataObjectValue(unsigned int index) = 0;
 
     SDO_API virtual unsigned int getLength(unsigned int index) = 0;
@@ -104,7 +105,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual void setLongValue(  unsigned int index, int64_t     l ) = 0;
 	SDO_API virtual void setFloatValue(     unsigned int index, float       f ) = 0;
 	SDO_API virtual void setDoubleValue(unsigned int index, long double d ) = 0;
-	SDO_API virtual void setDateValue(unsigned int index, time_t t ) = 0;
+	SDO_API virtual void setDateValue(unsigned int index, const SDODate t ) = 0;
 	SDO_API virtual void setDataObjectValue(unsigned int index, DataObjectPtr d ) = 0;
 
 
@@ -125,7 +126,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual bool addLong(  const char* propertyName,int64_t     l ) = 0;
 	SDO_API virtual bool addFloat(     const char* propertyName,float       f ) = 0;
 	SDO_API virtual bool addDouble(const char* propertyName,long double d ) = 0;
-	SDO_API virtual bool addDate(const char* propertyName,time_t t ) = 0;
+	SDO_API virtual bool addDate(const char* propertyName,const SDODate t ) = 0;
 	SDO_API virtual bool addDataObject(const char* propertyName,DataObjectPtr d ) = 0;
 
  
@@ -146,7 +147,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual bool addLong(  unsigned int propertyIndex,int64_t     l ) = 0;
 	SDO_API virtual bool addFloat(     unsigned int propertyIndex,float       f ) = 0;
 	SDO_API virtual bool addDouble(unsigned int propertyIndex,long double d ) = 0;
-	SDO_API virtual bool addDate(unsigned int propertyIndex,time_t t ) = 0;
+	SDO_API virtual bool addDate(unsigned int propertyIndex,const SDODate t ) = 0;
 	SDO_API virtual bool addDataObject(unsigned int propertyIndex,DataObjectPtr d ) = 0;
 
 
@@ -168,7 +169,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual bool addLong(  const Property& property,int64_t     l ) = 0;
 	SDO_API virtual bool addFloat(     const Property& property,float       f ) = 0;
 	SDO_API virtual bool addDouble(const Property& property,long double d ) = 0;
-	SDO_API virtual bool addDate(const Property& property,time_t t ) = 0;
+	SDO_API virtual bool addDate(const Property& property,const SDODate t ) = 0;
 	SDO_API virtual bool addDataObject(const Property& property,DataObjectPtr d ) = 0;
 
 
@@ -190,7 +191,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual bool addLong(  unsigned int index,const char* propertyName,int64_t     l ) = 0;
 	SDO_API virtual bool addFloat(     unsigned int index,const char* propertyName,float       f ) = 0;
 	SDO_API virtual bool addDouble(unsigned int index,const char* propertyName,long double d ) = 0;
-	SDO_API virtual bool addDate(unsigned int index,const char* propertyName,time_t t ) = 0;
+	SDO_API virtual bool addDate(unsigned int index,const char* propertyName,const SDODate t ) = 0;
 	SDO_API virtual bool addDataObject(unsigned int index,const char* propertyName,DataObjectPtr d ) = 0;
 
 
@@ -212,7 +213,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual bool addLong(  unsigned int index,unsigned int propertyIndex,int64_t     l ) = 0;
 	SDO_API virtual bool addFloat(     unsigned int index,unsigned int propertyIndex,float       f ) = 0;
 	SDO_API virtual bool addDouble(unsigned int index,unsigned int propertyIndex,long double d ) = 0;
-	SDO_API virtual bool addDate(unsigned int index,unsigned int propertyIndex,time_t t ) = 0;
+	SDO_API virtual bool addDate(unsigned int index,unsigned int propertyIndex,const SDODate t ) = 0;
 	SDO_API virtual bool addDataObject(unsigned int index,unsigned int propertyIndex,DataObjectPtr d ) = 0;
 
 
@@ -234,7 +235,7 @@ class Sequence : public RefCountingObject
 	SDO_API virtual bool addLong(  unsigned int index,const Property& property,int64_t     l ) = 0;
 	SDO_API virtual bool addFloat(     unsigned int index,const Property& property,float       f ) = 0;
 	SDO_API virtual bool addDouble(unsigned int index,const Property& property,long double d ) = 0;
-	SDO_API virtual bool addDate(unsigned int index,const Property& property,time_t t ) = 0;
+	SDO_API virtual bool addDate(unsigned int index,const Property& property,const SDODate t ) = 0;
 	SDO_API virtual bool addDataObject(unsigned int index,const Property& property,DataObjectPtr d ) = 0;
 
  

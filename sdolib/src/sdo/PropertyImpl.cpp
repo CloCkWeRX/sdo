@@ -323,7 +323,7 @@ namespace sdo{
 	{
 		return getTypeImpl().convertToDouble(defvalue,defvaluelength);
 	}
-	time_t      PropertyImpl::getDateDefault() const 
+	const SDODate      PropertyImpl::getDateDefault() const 
 	{
 		return getTypeImpl().convertToDate(defvalue,defvaluelength);
 	}
@@ -388,9 +388,9 @@ namespace sdo{
 	{
 		defvaluelength = getTypeImpl().convert(&defvalue,d); 
 	}
-	void PropertyImpl::setDefaultDate(    const time_t d )
+	void PropertyImpl::setDefaultDate(    const SDODate d )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,d); 
+		defvaluelength = getTypeImpl().convertDate(&defvalue,d); 
 	}
 
 	///////////////////////////////////////////////////////////////////////////

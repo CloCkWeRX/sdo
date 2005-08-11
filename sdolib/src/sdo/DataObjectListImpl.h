@@ -25,7 +25,7 @@
 #define _DATAOBJECTLISTIMPL_H_
 
 #include "DataObjectList.h"
-
+#include "SDODate.h"
 
 
 #include <vector>
@@ -66,7 +66,7 @@ public:
     virtual int64_t getLong(unsigned int index) const;
     virtual float getFloat(unsigned int index) const;
     virtual long double getDouble(unsigned int index) const;
-    virtual time_t  getDate(unsigned int index) const;
+    virtual const SDODate  getDate(unsigned int index) const;
 	virtual const char*  getCString(unsigned int index) const;
 	virtual DataObjectPtr getDataObject(unsigned int index) const;
 
@@ -80,7 +80,7 @@ public:
     virtual void setLong(unsigned int index, int64_t d);
     virtual void setFloat(unsigned int index, float d);
     virtual void setDouble(unsigned int index, long double d);
-    virtual void setDate(unsigned int index, time_t d);
+    virtual void setDate(unsigned int index, const SDODate d);
 	virtual void setCString(unsigned int index, char* d);
 	virtual void setDataObject(unsigned int index, DataObjectPtr dob);
 
@@ -111,6 +111,9 @@ public:
 
 	virtual  void insert (unsigned int index, short d) ;
 	virtual  void append (short d) ;
+
+	virtual  void insert (unsigned int index, const SDODate d) ;
+	virtual  void append (const SDODate d) ;
 
 	virtual  void insert (unsigned int index, long d) ;
 	virtual  void append (long d) ;

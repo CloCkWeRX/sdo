@@ -227,7 +227,7 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 				RETVAL_STRINGL(&char_value, 1, 1);
 				break;
 			case Type::DateType:
-				RETVAL_LONG(dol.getDate(index));
+				RETVAL_LONG(dol.getDate(index).getTime());
 				break;
 			case Type::DoubleType:
 				RETVAL_DOUBLE(dol.getDouble(index));
@@ -413,16 +413,12 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 			break;
 		case Type::DateType:
 			convert_to_long(&temp_zval);
-			/*TODO The use of long here is questionable. It is done to 
-			 * avoid issues on some platforms where a time_t is not
-			 * defined as a long int.
-			 */
 			if (write_type == TYPE_APPEND)
-				dol.append((long)Z_LVAL(temp_zval));
+				dol.append((SDODate)Z_LVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
-				dol.insert(index, (long)Z_LVAL(temp_zval));
+				dol.insert(index, (SDODate)Z_LVAL(temp_zval));
 			else
-				dol.setDate(index, (time_t)Z_LVAL(temp_zval));
+				dol.setDate(index, (SDODate)Z_LVAL(temp_zval));
 			break;
 		case Type::DoubleType:
 			convert_to_double(&temp_zval);
@@ -554,7 +550,7 @@ static int sdo_dataobjectlist_valid(sdo_list_object *my_object, long index, int 
 				return_value = dol.getBoolean(index);
 				break;
 			case Type::DateType:
-				return_value = (dol.getDate(index) != 0);
+				return_value = (dol.getDate(index).getTime() != 0);
 				break;
 			case Type::DoubleType:
 			case Type::FloatType:

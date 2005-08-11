@@ -33,4 +33,5 @@
 #include "XMLHelper.h"
 #include "XpathHelper.h"
 #include "SdoRuntime.h"
+#include "SDODate.h"
 #include "export.h"

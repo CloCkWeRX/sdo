@@ -21,40 +21,36 @@
 */
 /* $Id$ */
 
-#ifndef _DASDATAOBJECT_H_
-#define _DASDATAOBJECT_H_
-#include "DataObject.h"
-#include "RefCountingPointer.h"
+#include "SDODate.h"
 
 namespace commonj{
 namespace sdo{
-	
 
-	class DASDataObject : public DataObject
-{
- 	public:
 
-	virtual ~DASDataObject();
+	 SDODate::~SDODate()
+	 {
+	 }
 
+	 SDODate::SDODate(time_t inval)
+	 {
+		 value = inval;
+	 }
 
 	///////////////////////////////////////////////////////////////////////////
-	// Change Summary
+	//
 	///////////////////////////////////////////////////////////////////////////
-	
-	SDO_API virtual ChangeSummaryPtr getChangeSummary() = 0;
-	SDO_API virtual ChangeSummaryPtr getChangeSummary(const char* path) = 0;
-    SDO_API virtual ChangeSummaryPtr getChangeSummary(unsigned int propIndex) = 0;
-    SDO_API virtual ChangeSummaryPtr getChangeSummary(const Property& prop) = 0;
 
- 	//////////////////////////////////////////////////////////////////////////
-	// get the XPAth to this object
-	//////////////////////////////////////////////////////////////////////////
+	const time_t SDODate::getTime(void) const
+	{
+		return value;
+	}
 
-	virtual SDO_API const char* objectToXPath() = 0;
-
+	const char* SDODate::ascTime(void) const
+	{
+		return asctime(localtime(&value));
+	}
 
 };
 };
-};
- 
-#endif //_DASDATAOBJECT_H_
+// end - namespace sdo
+

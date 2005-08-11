@@ -78,7 +78,7 @@ namespace sdo {
 				break;
 			case Type::DateType:
 				value = new long;
-				*(long*)value = s.getDateValue();
+				*(long*)value = long(s.getDateValue().getTime());
 				break;
 			case Type::BigDecimalType: 
 			case Type::BigIntegerType: 
@@ -249,11 +249,10 @@ namespace sdo {
 		//return (float)*(float*)value;
 	}
 
-	time_t Setting::getDateValue() const
+	const SDODate Setting::getDateValue() const
 	{
 		TypeImpl* t = (TypeImpl*)&(getType());
 		return t->convertToDate(value, length);
-		//return (time_t)*(time_t*)value;
 	}
 
 

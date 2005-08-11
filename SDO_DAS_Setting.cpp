@@ -219,7 +219,7 @@ PHP_METHOD(SDO_DAS_Setting, getValue)
 			RETVAL_STRINGL(&char_value, 1, 1);
 			break;
 		case Type::DateType:
-			RETVAL_LONG(setting->getDateValue());
+			RETVAL_LONG(setting->getDateValue().getTime());
 			break;
 		case Type::DoubleType:
 			RETVAL_DOUBLE(setting->getDoubleValue());

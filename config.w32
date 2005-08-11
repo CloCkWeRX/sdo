@@ -15,7 +15,7 @@ if (PHP_SDO != "no") {
 			'/GX /D SDO_EXPORTS /D XMLDAS_EXPORTS');
 	
 		ADD_SOURCES(configure_module_dirname + '\\sdolib\\src\\sdo', 
-			'ChangeSummary.cpp ChangeSummaryImpl.cpp ChangedDataObjectList.cpp ChangedDataObjectListImpl.cpp CopyHelper.cpp DASDataFactory.cpp DASDataFactoryImpl.cpp DASDataObject.cpp DASProperty.cpp DASType.cpp DASValue.cpp DASValues.cpp DataFactory.cpp DataObject.cpp DataObjectImpl.cpp DataObjectList.cpp DataObjectListImpl.cpp EqualityHelper.cpp Logger.cpp Property.cpp PropertyImpl.cpp PropertyList.cpp RefCountingObject.cpp RefCountingPointer.cpp SDORuntimeException.cpp SdoCheck.cpp SdoRuntime.cpp Sequence.cpp SequenceImpl.cpp Setting.cpp SettingList.cpp Type.cpp TypeHelper.cpp TypeImpl.cpp TypeList.cpp XMLDocument.cpp XMLHelper.cpp XSDHelper.cpp XpathHelper.cpp', 
+			'ChangeSummary.cpp ChangeSummaryImpl.cpp ChangedDataObjectList.cpp ChangedDataObjectListImpl.cpp CopyHelper.cpp DASDataFactory.cpp DASDataFactoryImpl.cpp DASDataObject.cpp DASProperty.cpp DASType.cpp DASValue.cpp DASValues.cpp DataFactory.cpp DataObject.cpp DataObjectImpl.cpp DataObjectList.cpp DataObjectListImpl.cpp EqualityHelper.cpp Logger.cpp Property.cpp PropertyImpl.cpp PropertyList.cpp RefCountingObject.cpp RefCountingPointer.cpp SDODate.cpp SDORuntimeException.cpp SdoCheck.cpp SdoRuntime.cpp Sequence.cpp SequenceImpl.cpp Setting.cpp SettingList.cpp Type.cpp TypeHelper.cpp TypeImpl.cpp TypeList.cpp XMLDocument.cpp XMLHelper.cpp XSDHelper.cpp XpathHelper.cpp', 
 			'sdo');
 	
 		ADD_SOURCES(configure_module_dirname + '\\sdolib\\src\\xmldas', 

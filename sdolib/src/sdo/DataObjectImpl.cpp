@@ -41,6 +41,9 @@
 
 #include "ChangeSummaryImpl.h"
 
+#include <string>
+using std::string;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Macro versions  of the getter/setter interfaces 
 ///////////////////////////////////////////////////////////////////////////////
@@ -614,7 +617,7 @@ namespace sdo {
 	getPrimitiveFromPath(Long,int64_t,0L);
 	getPrimitiveFromPath(Double,long double,0.0);
 	getPrimitiveFromPath(Float,float,0.0);
-	getPrimitiveFromPath(Date,time_t,0);
+	getPrimitiveFromPath(Date,const SDODate,0);
 
 
 	setPrimitiveFromPath(Boolean,bool);
@@ -625,7 +628,7 @@ namespace sdo {
 	setPrimitiveFromPath(Long,int64_t);
 	setPrimitiveFromPath(Float,float);
 	setPrimitiveFromPath(Double,long double);
-	setPrimitiveFromPath(Date,time_t);
+	setPrimitiveFromPath(Date,const SDODate);
 
 
 	getPrimitiveFromProperty(Boolean,bool);
@@ -636,7 +639,7 @@ namespace sdo {
 	getPrimitiveFromProperty(Long,int64_t);
 	getPrimitiveFromProperty(Double,long double);
 	getPrimitiveFromProperty(Float,float);
-	getPrimitiveFromProperty(Date,time_t);
+	getPrimitiveFromProperty(Date,const SDODate);
 
 	setPrimitiveFromProperty(Boolean,bool);
 	setPrimitiveFromProperty(Byte,char);
@@ -646,7 +649,7 @@ namespace sdo {
 	setPrimitiveFromProperty(Long,int64_t);
 	setPrimitiveFromProperty(Float,float);
 	setPrimitiveFromProperty(Double,long double);
-	setPrimitiveFromProperty(Date,time_t);
+	setPrimitiveFromProperty(Date,const SDODate);
 
 	getPrimitive(Boolean,bool,false);
 	getPrimitive(Byte,char,0);
@@ -656,7 +659,7 @@ namespace sdo {
 	getPrimitive(Long,int64_t,0L);
 	getPrimitive(Double,long double,0.0);
 	getPrimitive(Float,float,0.0);
-	getPrimitive(Date,time_t,0);
+	getPrimitive(Date,const SDODate,0);
 
 	setPrimitive(Boolean,bool,"Boolean");
 	setPrimitive(Byte,char, "Byte");
@@ -666,7 +669,7 @@ namespace sdo {
 	setPrimitive(Long,int64_t,"Long");
 	setPrimitive(Float,float,"Float");
 	setPrimitive(Double,long double,"Double");
-	setPrimitive(Date,time_t,"Date");
+	setPrimitive(Date,const SDODate,"Date");
 
 
 	// Used to return empty values - remove when defaults are there.
@@ -1263,7 +1266,7 @@ namespace sdo {
 			case  Type::DateType: 
 				{
 					long  dc =  atol(eq);
-					if (dc == list[li]->getDate(p)) ok = 1;
+					if (dc == (long)(list[li]->getDate(p).getTime())) ok = 1;
 				}
 				break;
 				
@@ -2391,7 +2394,7 @@ namespace sdo {
 
 	}
 
-	time_t DataObjectImpl::getDate()
+	const SDODate DataObjectImpl::getDate()
 	{
 		Logger::log("DataObject.getDate()\n");
 		return getTypeImpl().convertToDate(value, valuelength); /* time_t == long*/
@@ -2490,7 +2493,7 @@ namespace sdo {
 		return;
 	}
 
-	void DataObjectImpl::setDate(time_t invalue)
+	void DataObjectImpl::setDate(const SDODate invalue)
 	{
 		Logger::log("DataObject.setDate()\n");
 		valuelength = getTypeImpl().convertDate(&value,invalue); /* time_t == long*/
@@ -2526,7 +2529,7 @@ namespace sdo {
 		value = 0; /* Will be initialized when used */
 		valuelength = 0;
 		asStringBuffer = 0;
-		asXPathBuffer = 0;
+//		asXPathBuffer = 0;
 		isnull = false;
 		userdata = (void*)0xFFFFFFFF;
 
@@ -2554,7 +2557,7 @@ namespace sdo {
 		value = 0;
 		valuelength = 0;
 		asStringBuffer = 0;
-        asXPathBuffer = 0;
+//        asXPathBuffer = 0;
 		isnull = false;
 		userdata = (void*)0xFFFFFFFF;
 
@@ -2650,7 +2653,7 @@ namespace sdo {
 
 		
 		if (asStringBuffer != 0) delete asStringBuffer;
-		if (asXPathBuffer != 0) delete asXPathBuffer;
+//		if (asXPathBuffer != 0) delete asXPathBuffer;
 
 		if (value != 0) 
 		{
@@ -2780,8 +2783,43 @@ namespace sdo {
 		refs.clear();
 	}
 
-	char* DataObjectImpl::objectToXPath()
+	const char* DataObjectImpl::objectToXPath()
 	{
+		//string asXPathBuffer;
+		asXPathBuffer = "";
+
+		DataObjectImpl* dob = getContainerImpl();
+		DataObject*thisob = this;
+		while (dob != 0){
+			const Property& p = thisob->getContainmentProperty();
+			if (asXPathBuffer != "")
+			{
+				asXPathBuffer = "/" + asXPathBuffer;
+			}
+
+			if (p.isMany()) {
+				DataObjectList& dol = dob->getList(p);
+				for (int i=0;i<dol.size();i++)
+				{
+					if (dol[i] == thisob)
+					{
+						char index[64];
+						asXPathBuffer = itoa(i, index,10) + asXPathBuffer;
+						asXPathBuffer = "." + asXPathBuffer;
+						break;
+					}
+				}
+			}
+			asXPathBuffer = p.getName() + asXPathBuffer;
+
+			thisob = dob;
+			dob = dob->getContainerImpl();
+		}
+
+		asXPathBuffer = "#/" + asXPathBuffer;
+
+		return asXPathBuffer.c_str();
+/*
 		char* temp1;
 		char* temp2;
 
@@ -2828,7 +2866,7 @@ namespace sdo {
 			thisob = dob;
 			dob = dob->getContainerImpl();
 		}
-		return asXPathBuffer;
+		return asXPathBuffer; */
 	}
 
 	// user data support...

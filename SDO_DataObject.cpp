@@ -167,7 +167,7 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 				return_value = dop->getBoolean(xpath);
 				break;
 			case Type::DateType:
-				return_value = (dop->getDate(xpath) != 0);
+				return_value = (dop->getDate(xpath).getTime() != 0);
 				break;
 			case Type::DoubleType:
 			case Type::FloatType:
@@ -274,7 +274,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 			RETVAL_STRINGL(&char_value, 1, 1);
 			break;
 		case Type::DateType:
-			RETVAL_LONG(dop->getDate(xpath));
+			RETVAL_LONG(dop->getDate(xpath).getTime());
 			break;
 		case Type::DoubleType:
 			RETVAL_DOUBLE(dop->getDouble(xpath));
@@ -546,7 +546,7 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 				break;
 			case Type::DateType:
 				convert_to_long(&temp_zval);
-				dop->setDate(xpath, (time_t)Z_LVAL(temp_zval));
+				dop->setDate(xpath, (SDODate)Z_LVAL(temp_zval));
 				break;
 			case Type::DoubleType:
 				convert_to_double(&temp_zval);

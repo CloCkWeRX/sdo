@@ -27,7 +27,7 @@
 
 #include "Type.h"
 #include "DataObject.h"
-
+#include "SDODate.h"
 
 namespace commonj{
 namespace sdo {
@@ -84,7 +84,7 @@ namespace sdo {
 		SDO_API int64_t getLongValue() const;
 		SDO_API float getFloatValue() const;
 		SDO_API long double getDoubleValue() const;
-		SDO_API time_t getDateValue() const;
+		SDO_API const SDODate getDateValue() const;
 		SDO_API const char* getCStringValue() ;
 		SDO_API DataObjectPtr getDataObjectValue() const;
 

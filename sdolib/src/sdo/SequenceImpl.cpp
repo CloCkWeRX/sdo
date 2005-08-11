@@ -295,7 +295,7 @@ getter(long, Integer, 0L);
 getter(int64_t, Long, 0);
 getter(float, Float, (float)0);
 getter(long double, Double, 0);
-getter(time_t, Date, 0);
+getter(const SDODate, Date, 0);
 
 ObjectGetter(RefCountingPointer<DataObject> , DataObject, 0);
 
@@ -414,7 +414,7 @@ ObjectGetter(RefCountingPointer<DataObject> , DataObject, 0);
 		the_do->setDouble(*((*i).getProp()),d);
 	}
 
-	void SequenceImpl::setDateValue(unsigned int index, time_t t )
+	void SequenceImpl::setDateValue(unsigned int index, const SDODate t )
 	{
 		SEQUENCE_ITEM_LIST::iterator i;
 		CHECK_RANGE;
@@ -478,7 +478,7 @@ adder(Integer, long);
 adder(Long, int64_t);
 adder(Float, float);
 adder(Double, long double);
-adder(Date, time_t);
+adder(Date, const SDODate);
 adder(DataObject, RefCountingPointer<DataObject>);
 
 
@@ -577,7 +577,7 @@ inserter(Integer, long);
 inserter(Long, int64_t);
 inserter(Float, float);
 inserter(Double, long double);
-inserter(Date, time_t);
+inserter(Date, const SDODate);
 inserter(DataObject, RefCountingPointer<DataObject>);
 
 
