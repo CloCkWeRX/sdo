@@ -17,9 +17,8 @@
 +----------------------------------------------------------------------+ 
 | Author: Pete Robbins                                                 | 
 +----------------------------------------------------------------------+ 
-
+$Id$
 */
-/* $Id$ */
 
 #ifndef _SAX2PARSER_H_
 #define _SAX2PARSER_H_
@@ -72,6 +71,8 @@ namespace commonj
 				friend std::istream& operator>>(std::istream& input, SAX2Parser& parser);
 				
 				bool parserError;
+
+				char messageBuffer[1024];
 
 			};
 		} // End - namespace xmldas

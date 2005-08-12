@@ -17,9 +17,8 @@
 +----------------------------------------------------------------------+ 
 | Author: Pete Robbins                                                 | 
 +----------------------------------------------------------------------+ 
-
+$Id$
 */
-/* $Id$ */
 
 #include "SAX2Parser.h"
 #include "libxml/SAX2.h"
@@ -291,6 +290,10 @@ namespace commonj
 				parserError = false;
 				xmlSAXHandlerPtr handler = &SDOSAX2HandlerStruct;
 				xmlSAXUserParseFile(handler, this, filename);
+				if (parserError)
+				{
+			       SDO_THROW_EXCEPTION("parse", SDOXMLParserException,messageBuffer);
+				}
 				return 0;
 			}
 
@@ -325,20 +328,20 @@ namespace commonj
 			
 			void SAX2Parser::fatalError(const char* msg, va_list args)
 			{
-				char buff[1024];
-				vsprintf(buff, msg, args);
+				if (!parserError)
+				{
+					vsprintf(messageBuffer, msg, args);
+				}
 				parserError = true;
-				SDO_THROW_EXCEPTION("fatalError", SDOXMLParserException,buff);
-
 			}
 			
 			void SAX2Parser::error(const char* msg, va_list args)
 			{
+				if (!parserError)
+				{
+					vsprintf(messageBuffer, msg, args);
+				}
 				parserError = true;
-				char buff[1024];
-				vsprintf(buff, msg, args);
-				parserError = true;
-				SDO_THROW_EXCEPTION("error", SDOXMLParserException,buff);
 			}
 
 			void SAX2Parser::stream(std::istream& input)
@@ -360,6 +363,11 @@ namespace commonj
 				
 				xmlParseChunk(ctxt, buffer, input.gcount(), 1);
 				xmlFreeParserCtxt(ctxt);
+
+				if (parserError)
+				{
+			       SDO_THROW_EXCEPTION("stream", SDOXMLParserException,messageBuffer);
+				}
 				
 			}
 
