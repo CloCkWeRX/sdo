@@ -20,7 +20,8 @@
 
 */
 
-/* $Id$ */
+static char rcs_id[] = "$Id$";
+
 #ifdef PHP_WIN32
 #include <iostream>
 #include <math.h>
