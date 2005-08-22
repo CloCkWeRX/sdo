@@ -19,7 +19,8 @@
 +----------------------------------------------------------------------+
 
 */
-/* $Id$ */
+static char rcs_id[] = "$Id$";
+
 #ifdef PHP_WIN32
 /* disable warning about identifier lengths in browser information */
 #pragma warning(disable: 4786)

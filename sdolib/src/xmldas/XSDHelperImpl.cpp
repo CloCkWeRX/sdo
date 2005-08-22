@@ -19,7 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
-/* $Id$ */
+static char rcs_id[] = "$Id$";
 
 // XSDHelperImpl.cpp: implementation of the XSDHelperImpl class.
 //

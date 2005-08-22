@@ -19,7 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
-/* $Id$ */
+static char rcs_id[] = "$Id$";
 
 #include "SDOXSDBufferWriter.h"
 #include "SDORuntimeException.h"

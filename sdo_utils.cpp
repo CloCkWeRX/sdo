@@ -20,7 +20,8 @@
 
 */
 
-/* $Id$ */
+static char rcs_id[] = "$Id$";
+
 /*
  * Utility functions for internal use by the SDO extension
  */

@@ -19,7 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
-/* $Id$ */
+static char rcs_id[] = "$Id$";
 
 // XMLDAS.cpp: implementation of the XMLDAS class.
 //

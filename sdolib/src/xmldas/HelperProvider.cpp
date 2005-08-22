@@ -19,7 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
-/* $Id$ */
+static char rcs_id[] = "$Id$";
 
 #pragma warning(disable: 4786)
 #include "HelperProvider.h"

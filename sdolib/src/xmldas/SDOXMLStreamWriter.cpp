@@ -19,7 +19,7 @@
 +----------------------------------------------------------------------+ 
 
 */
-/* $Id$ */
+static char rcs_id[] = "$Id$";
 
 #include "SDOXMLStreamWriter.h"
 #include <sstream>

@@ -19,6 +19,8 @@
 +----------------------------------------------------------------------+ 
 
 */
+static char rcs_id[] = "$Id$";
+
 #include "XMLDocument.h"
 namespace commonj
 {
