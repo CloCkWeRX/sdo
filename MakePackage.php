@@ -21,7 +21,7 @@
        		      'Added some tests for the XML DAS.',
        'simpleoutput' => true,
        'version' => '0.5.1',
-       'baseinstalldir' => 'sdo',
+       'baseinstalldir' => 'SDO',
        'state' => 'beta',
        'license' => 'Apache 2.0',
        'packagedirectory' => 'C:/eclipse-3.0/workspace/sdo/',
