@@ -240,11 +240,20 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
             try {
                 $xmldas = SDO_DAS_XML::create("company.xsd");
                 $xdoc = $xmldas->loadFromFile("company.xml");
-                $xdoc->setEncoding("UTF16");
+                $xdoc->setEncoding("UTF-16");
+                $this->assertEquals("UTF-16", $xdoc->getEncoding(), 'testsetEncoding - failed;');
+                 
+                $xdoc->setEncoding("ISO-8859-1");
                 $str = $xmldas->saveDocumentToString($xdoc);
                 $xdoc1 = $xmldas->loadFromString($str);
-// FAILED                
-//              $this->assertEquals("UTF16", $xdoc1->getEncoding(), 'testsetEncoding - failed');
+                $this->assertEquals("ISO-8859-1", $xdoc1->getEncoding(), 'testsetEncoding - failed after write to string;');    
+                
+                $xdoc->setEncoding("UTF-16");
+                $temp_file = tempnam($_ENV['TMP'], 'SDO');
+                $xmldas->saveDocumentToFile($xdoc, $temp_file);
+                $xdoc2 = $xmldas->loadFromFile($temp_file);
+                unlink($temp_file);              
+                $this->assertEquals("UTF-16", $xdoc2->getEncoding(), 'testsetEncoding - failed after write to file;');
             } catch (SDO_Exception $e) {
                 $this->assertTrue(false, "testsetEncoding - Exception  Caught" . $e->getMessage());
             }

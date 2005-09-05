@@ -545,7 +545,7 @@ PHP_METHOD(SDO_DAS_XML_Document, setEncoding) {
     }
 
     try {
-        obj->xdoch->setNoNamespaceSchemaLocation(encoding);
+        obj->xdoch->setEncoding(encoding);
     } catch (SDORuntimeException e) {
         sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
     }
