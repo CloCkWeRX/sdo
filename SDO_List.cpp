@@ -498,7 +498,7 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 				} else if (write_type == TYPE_INSERT) {
 					dol.insert(index, value_object->dop);
 				} else {
-					dol[index] = value_object->dop;
+					dol.setDataObject(index, value_object->dop);
 				}
 			}
 			break;

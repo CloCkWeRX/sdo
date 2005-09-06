@@ -777,7 +777,8 @@ void DataObjectListImpl::setDataObject(unsigned int index, DataObjectPtr dob)
 	{
 		container->logChange(pindex);
 	}
-	(*this)[index] = dob;
+	remove(index);
+    insert(index, dob);
 }
 
 unsigned int DataObjectListImpl::getLength(unsigned int index) 

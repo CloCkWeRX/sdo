@@ -446,6 +446,12 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, 'Incorrect Exception thrown in insert test:'.$e->getMessage());
 		}
 
+        // Test overwriting an element
+        $employee = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
+        $employee->name = 'Old Deuteronomy';
+        $departments[0]->employees[0] = $employee;
+        $this->assertEquals($employee->name, $departments[0]->employees[0]->name, 'SDOList DataObject overwrite assignment test failed.');
+
 		// Test iteration over an SDO_List
 		$iters = 0;
 		try {
@@ -711,7 +717,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$newDept = $this->dmsDf->create(COMPANY_NS, DEPARTMENT_TYPE);
 		$newDept->name = 'Advanced Technologies';
 		$this->company['departments.1'] = $newDept;
-		$this->assertEquals($this->company->departments[1], $dept, "Dotted XPath set (e.g. departments.1) failed.");
+		$this->assertEquals($this->company->departments[1], $newDept, "Dotted XPath set (e.g. departments.1) failed.");
 
 		// Test simple square brackets form by setting the third department
 		$dept = $this->company->createDataObject('departments');
@@ -719,7 +725,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$newDept = $this->dmsDf->create(COMPANY_NS, DEPARTMENT_TYPE);
 		$newDept->name = 'Human Resources';
 		$this->company['departments[3]'] = $newDept;
-		$this->assertEquals($this->company->departments[2], $dept, "Dotted XPath set (e.g. departments.1) failed.");
+		$this->assertEquals($this->company->departments[2], $newDept, "Square brackets XPath set (e.g. departments[1]) failed.");
 
 		// Test navigation down containment references
 		$this->assertEquals($this->company->departments[0]->employees[0]->name, $this->company['departments.0/employees.0/name'], "XPath containment tree navigation failed.");
@@ -750,7 +756,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, "Failed to throw exception in XPath square brackets form out of bounds test.");
 		} catch (SDO_IndexOutOfBoundsException $e) {
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "Incorrect exception thrown in XPath dotted form out of bounds test: ".$e->getMessage());
+			$this->assertTrue(false, "Incorrect exception thrown in XPath square brackets form out of bounds test: ".$e->getMessage());
 		}
 
 		// Test bogus compound XPath navigation
