@@ -497,10 +497,25 @@ namespace commonj
 									seq->addCString(currentPropertySetting.name, currentPropertySetting.value);
 								}
 								// Always set the property as a String. SDO will do the conversion
-								currentPropertySetting.dataObject->
-									setCString((const char*)currentPropertySetting.name, currentPropertySetting.value );
+//CEM start patch for 45748
+							// It might be a single setting for a many-valued property.
+							// may throw SDOPropertyNotFoundException
+							const Property& p = currentPropertySetting.dataObject->getType().getProperty(
+								currentPropertySetting.name);
+							if (p.isMany())
+							{
+								DataObjectList& dl = currentPropertySetting.dataObject->
+								getList((const char*)currentPropertySetting.name);
+								dl.append(currentPropertySetting.value);
 							}
-						} 
+							else
+							{
+								currentPropertySetting.dataObject->
+								setCString((const char*)currentPropertySetting.name, currentPropertySetting.value );
+							}
+// CEM end patch for 45748
+						}
+					}
 						catch (const SDOPropertyNotFoundException&)
 						{
 							//cout << "error processing attribute (ignored): " << currentPropertySetting.name << endl;		
