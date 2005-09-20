@@ -506,7 +506,7 @@ namespace commonj
 							{
 								DataObjectList& dl = currentPropertySetting.dataObject->
 								getList((const char*)currentPropertySetting.name);
-								dl.append(currentPropertySetting.value);
+								dl.append((const char *)currentPropertySetting.value);
 							}
 							else
 							{
