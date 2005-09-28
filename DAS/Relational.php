@@ -162,10 +162,15 @@ class SDO_DAS_Relational {
 	}
 	
 	public function normaliseResultSet($pdo_stmt, $column_specifier) {
-		if ($column_specifier == null) {
-			$all_rows = $pdo_stmt->fetchAll(PDO_FETCH_ASSOC);
+		if (gettype(PDO_FETCH_ASSOC) == 'string') {
+			include "SDO/DAS/Relational/PDOConstants.colon.inc.php";
 		} else {
-			$all_rows = $pdo_stmt->fetchAll(PDO_FETCH_NUM);
+			include "SDO/DAS/Relational/PDOConstants.underscore.inc.php";			
+		}
+		if ($column_specifier == null) {
+			$all_rows = $pdo_stmt->fetchAll(SDO_DAS_Relational_PDO_FETCH_ASSOC);
+		} else {
+			$all_rows = $pdo_stmt->fetchAll(SDO_DAS_Relational_PDO_FETCH_NUM);
 		}
 		$root		 			= self::createRoot($this->data_factory);
 		$table_names = $this->database_model->getAllTableNames();	//TODO make sure they come back in graph order
