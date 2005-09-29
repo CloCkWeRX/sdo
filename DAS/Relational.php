@@ -163,9 +163,9 @@ class SDO_DAS_Relational {
 	
 	public function normaliseResultSet($pdo_stmt, $column_specifier) {
 		if (gettype(PDO_FETCH_ASSOC) == 'string') {
-			include "SDO/DAS/Relational/PDOConstants.colon.inc.php";
+			include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
 		} else {
-			include "SDO/DAS/Relational/PDOConstants.underscore.inc.php";			
+			include_once "SDO/DAS/Relational/PDOConstants.underscore.inc.php";			
 		}
 		if ($column_specifier == null) {
 			$all_rows = $pdo_stmt->fetchAll(SDO_DAS_Relational_PDO_FETCH_ASSOC);

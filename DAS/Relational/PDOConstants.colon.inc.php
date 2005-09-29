@@ -23,8 +23,8 @@ $Id$
 
 // A quick bodge to handle how PDO constants are defined
 // This file gets included if they are are new-style PDO::xxx
-define(SDO_DAS_Relational_PDO_FETCH_ASSOC, PDO::FETCH_ASSOC);
-define(SDO_DAS_Relational_PDO_FETCH_NUM, PDO::FETCH_NUM);
-define(SDO_DAS_Relational_PDO_ATTR_CLIENT_VERSION, PDO::ATTR_CLIENT_VERSION);
+define('SDO_DAS_Relational_PDO_FETCH_ASSOC', PDO::FETCH_ASSOC);
+define('SDO_DAS_Relational_PDO_FETCH_NUM', PDO::FETCH_NUM);
+define('SDO_DAS_Relational_PDO_ATTR_CLIENT_VERSION', PDO::ATTR_CLIENT_VERSION);
 ?>
   
