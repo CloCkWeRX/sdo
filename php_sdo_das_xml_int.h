@@ -26,7 +26,7 @@
 
 #include "php_sdo_int.h"
 #include "SDO.h"
-#include "DASDataFactory.h"
+#include "DataFactory.h"
 #include "XMLDASExport.h"
 #include "XMLDAS.h"
 #include "XMLDocument.h"
@@ -36,7 +36,7 @@ using namespace commonj;
 using namespace sdo;
 using namespace xmldas;
 
-#define SDO_DAS_XML_VERSION "20050714"
+#define SDO_DAS_XML_VERSION "0.5.2"
 
 /*
  * Internal structure for an SDO_DAS_XML
@@ -59,6 +59,7 @@ typedef struct {
 
 extern zend_class_entry* sdo_das_xml_doc_cls_entry;
 extern zend_class_entry* sdo_xmlparserexcep_ce;
+extern zend_class_entry* sdo_xmlfileexcep_ce;
 extern zend_class_entry* sdo_das_xml_class_entry;
 
 void initialize_sdo_das_xml_class(TSRMLS_D);
@@ -67,6 +68,7 @@ void initialize_sdo_das_xml_document_class(TSRMLS_D);
 void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC);
 
 extern void sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
+extern void sdo_das_xml_throw_fileexception(char* filename TSRMLS_DC);
 
 static void
 sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *extra TSRMLS_DC);

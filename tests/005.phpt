@@ -8,55 +8,50 @@ SDO_DAS_XML load test
     $xmldas = SDO_DAS_XML::create("${dirname}/company.xsd");
     $xdoc = $xmldas->loadFromFile("${dirname}/company.xml");
     $do = $xdoc->getRootDataObject();
-    var_dump($do);
+    print_r($do);
 ?>
 --EXPECT--
-object(SDO_DataObjectImpl)#4 (3) {
-  ["departments"]=>
-  object(SDO_DataObjectList)#10 (1) {
-    [0]=>
-    object(SDO_DataObjectImpl)#5 (4) {
-      ["employees"]=>
-      object(SDO_DataObjectList)#11 (3) {
-        [0]=>
-        object(SDO_DataObjectImpl)#6 (2) {
-          ["name"]=>
-          string(10) "John Jones"
-          ["SN"]=>
-          string(5) "E0001"
-        }
-        [1]=>
-        object(SDO_DataObjectImpl)#9 (2) {
-          ["name"]=>
-          string(8) "Jane Doe"
-          ["SN"]=>
-          string(5) "E0003"
-        }
-        [2]=>
-        object(SDO_DataObjectImpl)#8 (3) {
-          ["name"]=>
-          string(8) "Al Smith"
-          ["SN"]=>
-          string(5) "E0004"
-          ["manager"]=>
-          bool(true)
-        }
-      }
-      ["name"]=>
-      string(21) "Advanced Technologies"
-      ["location"]=>
-      string(2) "NY"
-      ["number"]=>
-      int(123)
-    }
-  }
-  ["name"]=>
-  string(8) "MegaCorp"
-  ["employeeOfTheMonth"]=>
-  object(SDO_DataObjectImpl)#9 (2) {
-    ["name"]=>
-    string(8) "Jane Doe"
-    ["SN"]=>
-    string(5) "E0003"
-  }
-}
+SDO_DataObjectImpl Object
+(
+    [departments] => SDO_DataObjectList Object
+        (
+            [0] => SDO_DataObjectImpl Object
+                (
+                    [employees] => SDO_DataObjectList Object
+                        (
+                            [0] => SDO_DataObjectImpl Object
+                                (
+                                    [name] => John Jones
+                                    [SN] => E0001
+                                )
+
+                            [1] => SDO_DataObjectImpl Object
+                                (
+                                    [name] => Jane Doe
+                                    [SN] => E0003
+                                )
+
+                            [2] => SDO_DataObjectImpl Object
+                                (
+                                    [name] => Al Smith
+                                    [SN] => E0004
+                                    [manager] => 1
+                                )
+
+                        )
+
+                    [name] => Advanced Technologies
+                    [location] => NY
+                    [number] => 123
+                )
+
+        )
+
+    [name] => MegaCorp
+    [employeeOfTheMonth] => SDO_DataObjectImpl Object
+        (
+            [name] => Jane Doe
+            [SN] => E0003
+        )
+
+)

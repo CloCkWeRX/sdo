@@ -294,10 +294,10 @@ class SDO_DAS_Relational {
 		$plan 					= new SDO_DAS_Relational_Plan();
 		foreach ($changed_data_objects as $do) {
 			switch ($change_summary->getChangeType($do)) {
-				case SDO_DAS_CHANGE_SUMMARY_ADDITION:
+				case SDO_DAS_ChangeSummary::ADDITION:
 				$plan->addAction(new SDO_DAS_Relational_InsertAction($this->object_model, $do));
 				break;
-				case SDO_DAS_CHANGE_SUMMARY_MODIFICATION:
+				case SDO_DAS_ChangeSummary::MODIFICATION:
 				if (self::isRoot($do)) {
 					continue;
 					// currently not interested in modifications on the root - they appear as creates/deletes in their own right
@@ -306,7 +306,7 @@ class SDO_DAS_Relational {
 				$old_values = $change_summary->getOldValues($do);
 				$plan->addAction(new SDO_DAS_Relational_UpdateAction($this->object_model, $do,$old_values));
 				break;
-				case SDO_DAS_CHANGE_SUMMARY_DELETION:
+				case SDO_DAS_ChangeSummary::DELETION:
 				$old_values = $change_summary->getOldValues($do);
 				$plan->addAction(new SDO_DAS_Relational_DeleteAction($this->object_model, $do, $old_values));
 				break;
@@ -331,7 +331,12 @@ class SDO_DAS_Relational {
 			echo "      the property " . $setting->getPropertyName();
 			if ($setting->isSet()) {
 				$original_value = $setting->getValue();
-				echo ", which had original value $original_value\n";
+				echo ", which had original value ";
+	  			ob_start();
+	  			var_dump($original_value);
+  				$content = ob_get_contents();
+  				ob_end_clean();
+  				echo "$content\n";
 			} else {
 				echo ", which was originally not set\n";
 			}
@@ -346,14 +351,14 @@ class SDO_DAS_Relational {
 			echo '  Object of type ' . SDO_DAS_Relational_DataObjectHelper::getApplicationType($cdo) . "\n";
 			$change_type = $cs->getChangeType($cdo);
 			switch ($change_type) {
-				case SDO_DAS_CHANGE_SUMMARY_ADDITION:
+				case SDO_DAS_ChangeSummary::ADDITION:
 				echo "    change type = addition\n";
 				break;
-				case SDO_DAS_CHANGE_SUMMARY_MODIFICATION:
+				case SDO_DAS_ChangeSummary::MODIFICATION:
 				echo "    the type of the change was Update\n";
 				self::displaySettingsList($cs,$cdo);
 				break;
-				case SDO_DAS_CHANGE_SUMMARY_DELETION:
+				case SDO_DAS_ChangeSummary::DELETION:
 				echo "    change type = delete\n";
 				self::displaySettingsList($cs,$cdo);
 				break;

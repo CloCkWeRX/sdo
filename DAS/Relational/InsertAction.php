@@ -120,7 +120,9 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 			include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
 		} else {
 			include_once "SDO/DAS/Relational/PDOConstants.underscore.inc.php";			
-		}		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
+		}
+
+		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
 		$pk_property_name = $this->object_model->getPropertyRepresentingPrimaryKeyFromType($type);
 		if (!isset($this->do[$pk_property_name]) /* && not null */) {
 			$pdo_client_version = $dbh->getAttribute(SDO_DAS_Relational_PDO_ATTR_CLIENT_VERSION);

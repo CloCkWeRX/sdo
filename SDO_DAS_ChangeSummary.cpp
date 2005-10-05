@@ -111,12 +111,10 @@ void sdo_das_changesummary_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	tmp_ce->create_object = sdo_das_changesummary_object_create;
 	sdo_das_changesummary_class_entry = zend_register_internal_class(tmp_ce TSRMLS_CC);
 	
-	/* TODO eliminated until we have resolved a memory problem
- 	 *	sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "NONE", CS_NONE);	
-	 *	sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "MODIFICATION", CS_MODIFICATION);
-	 *	sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "ADDITION", CS_ADDITION);
-	 *	sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "DELETION", CS_DELETION);
-	 */
+	 sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "NONE", CS_NONE);	
+	 sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "MODIFICATION", CS_MODIFICATION);
+	 sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "ADDITION", CS_ADDITION);
+	 sdo_make_long_class_constant(sdo_das_changesummary_class_entry, "DELETION", CS_DELETION);
 }
 /* }}} */
 
@@ -358,21 +356,21 @@ PHP_METHOD(SDO_DAS_ChangeSummary, getOldContainer)
 	
 	try {
 		container_dop = change_summary->getOldContainer(dop);
+		
+		if (!container_dop) {
+			RETVAL_NULL();
+		} else {
+			container_zval = (zval *)container_dop->getUserData();
+			if (container_zval == (zval *)SDO_USER_DATA_EMPTY) {
+				php_error(E_ERROR, "%s:%i: container is not in object store", CLASS_NAME, __LINE__);
+				RETVAL_NULL();
+			} else {
+				RETVAL_ZVAL(container_zval, 1, 0);
+			}
+		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		return;
-	}
-	
-	if (!container_dop) {
-		RETVAL_NULL();
-	} else {
-		container_zval = (zval *)container_dop->getUserData();
-		if (container_zval == (zval *)SDO_USER_DATA_EMPTY) {
-			php_error(E_ERROR, "%s:%i: container is not in object store", CLASS_NAME, __LINE__);
-			RETVAL_NULL();
-		} else {
-			RETVAL_ZVAL(container_zval, 1, 0);
-		}
 	}
 	
 	return;

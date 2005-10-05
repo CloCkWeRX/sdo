@@ -39,7 +39,7 @@ static char rcs_id[] = "$Id$";
  */
 typedef struct {
 	zend_object			 zo;
-	DASDataFactoryPtr	 dfp;
+	DataFactoryPtr		dfp;
 } sdo_das_df_object;
 /* }}} */
 
@@ -92,7 +92,7 @@ static zend_object_value sdo_das_df_object_create(zend_class_entry *ce TSRMLS_DC
 
 /* {{{ sdo_das_df_new
  */
-void sdo_das_df_new(zval *me, DASDataFactoryPtr dfp TSRMLS_DC)
+void sdo_das_df_new(zval *me, DataFactoryPtr dfp TSRMLS_DC)
 {	
 	sdo_das_df_object *my_object;
 
@@ -124,14 +124,14 @@ void sdo_das_df_minit(zend_class_entry *tmp_ce TSRMLS_DC)
  */
 PHP_METHOD(SDO_DAS_DataFactory, getDataFactory)
 {
-	DASDataFactoryPtr dfp;
+	DataFactoryPtr dfp;
 	
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	try {
-		dfp = DASDataFactory::getDataFactory();
+		dfp = DataFactory::getDataFactory();
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		return;
@@ -174,7 +174,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, create)
 /* }}} */
 
 /* {{{ SDO_DAS_DataFactoryImpl::addType
- * This is s static factory method
+ * This is a static factory method
  */
 PHP_METHOD(SDO_DAS_DataFactoryImpl, addType) 
 {
@@ -209,8 +209,25 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 }
 /* }}} */
 
+
+static zend_bool sdo_get_boolean_value (zval *z_value) {
+	
+	zend_bool bool_value;
+
+	if (Z_TYPE_P(z_value) == IS_BOOL) {
+		bool_value = Z_BVAL_P(z_value);
+	} else {
+		zval temp_zval = *z_value;
+		zval_copy_ctor(&temp_zval);
+		convert_to_boolean(&temp_zval);
+		bool_value = Z_BVAL(temp_zval);
+		zval_dtor(&temp_zval);
+	}
+	return bool_value;
+}
+
 /* {{{ SDO_DAS_DataFactoryImpl::addPropertyToType
- * This is s static factory method
+ * This is a static factory method
  */
 PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType) 
 {
@@ -227,24 +244,174 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 	char      *typeName;
 	int        typeName_len;
 
+	/* optional array of optional argumants */
+	zval	  *args = NULL;
+	HashTable *args_hash;
+	HashPosition args_pointer;
+	zval	 **value;
+	char	  *key_string;
+	uint	   key_string_len;
+	ulong	   key_index;
+
 	/* optional parameters with default values */
 	zend_bool  many = false;
 	zend_bool  readOnly = false;
 	zend_bool  containment = true;
 
+	zval	  *default_value = NULL;
+
 	sdo_das_df_object *my_object;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssss|bbb", 
+	if (ZEND_NUM_ARGS() < 5)
+		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sssssb|bb",
 		&parent_namespaceURI, &parent_namespaceURI_len, &parent_typeName, &parent_typeName_len,
 		&propertyName, &propertyName_len, 
 		&namespaceURI, &namespaceURI_len, &typeName, &typeName_len,
-		&many, &readOnly, &containment) == FAILURE) 
-		return;
+		&many, &readOnly, &containment) == SUCCESS) {
+		/* the old (deprecated) signature */
+		php_error(E_NOTICE, "use of deprecated signature for %s", get_active_function_name(TSRMLS_C));
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssss|a",
+			&parent_namespaceURI, &parent_namespaceURI_len, &parent_typeName, &parent_typeName_len,
+			&propertyName, &propertyName_len, 
+			&namespaceURI, &namespaceURI_len, &typeName, &typeName_len,
+			&args) == FAILURE) {
+			return;		
+		} else if (args != NULL) {
+			args_hash = Z_ARRVAL_P(args);
+			
+			for (zend_hash_internal_pointer_reset_ex(args_hash, &args_pointer);
+			    zend_hash_get_current_data_ex(args_hash, (void **)&value, &args_pointer) == SUCCESS;
+			    zend_hash_move_forward_ex(args_hash, &args_pointer)) {
+				if (zend_hash_get_current_key_ex(
+					args_hash, &key_string, &key_string_len, &key_index, 0, &args_pointer) == HASH_KEY_IS_STRING) {
+					if (strcmp(key_string, "many") == SUCCESS) {
+						many = sdo_get_boolean_value (*value);
+					} else 
+						if (strcmp(key_string, "readonly") == SUCCESS) {
+							readOnly = sdo_get_boolean_value (*value);
+					} else 
+						if (strcmp(key_string, "containment") == SUCCESS) {
+							containment = sdo_get_boolean_value (*value);
+					} else 
+						if (strcmp(key_string, "opposite") == SUCCESS) {
+							php_error(E_WARNING, "option %s not yet implemented for %s", 
+								key_string, get_active_function_name(TSRMLS_C));	
+					} else 
+						if (strcmp(key_string, "default") == SUCCESS) {
+							default_value = *value;				
+					} else {	
+						php_error(E_WARNING, "unrecognized option %s in parameter array for %s", 
+							key_string, get_active_function_name(TSRMLS_C));						
+					}
+				} else {
+					php_error(E_WARNING, "%i : option name must be a string in parameter array for %s", 
+						key_index, get_active_function_name(TSRMLS_C));
+				}
+			} 
+		} 
+	}
 		
 	my_object = sdo_das_df_get_instance(getThis() TSRMLS_CC);
 	try {
 		my_object->dfp->addPropertyToType(parent_namespaceURI, parent_typeName, propertyName, namespaceURI, typeName,
-		ZEND_TRUTH(many), ZEND_TRUTH(readOnly), ZEND_TRUTH(containment));
+			ZEND_TRUTH(many), ZEND_TRUTH(readOnly), ZEND_TRUTH(containment));
+		
+		if (default_value) {			 
+			if (many) {
+				zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC, 
+					"%s:%i: multivalued property %s cannot have a default value", CLASS_NAME, __LINE__, propertyName);
+			} else if (Z_TYPE_P(default_value) == IS_NULL) {
+				zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC, 
+					"%s:%i: property %s cannot have a NULL default value", CLASS_NAME, __LINE__, propertyName); 				
+			} else {				
+				/* copy the value so that the original is not modified */
+				zval temp_zval = *default_value;			
+				zval_copy_ctor(&temp_zval);
+				
+				const Type& type = my_object->dfp->getType(namespaceURI, typeName);
+				const Type& parentType = my_object->dfp->getType(parent_namespaceURI, parent_typeName);
+				switch (type.getTypeEnum()) {
+				case Type::OtherTypes:
+					php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+					break;
+				case Type::BigDecimalType:
+				case Type::BigIntegerType:
+					convert_to_string(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, Z_STRVAL(temp_zval));
+					break;
+				case Type::BooleanType:
+					convert_to_boolean(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, (bool)ZEND_TRUTH(Z_BVAL(temp_zval)));
+					break;
+				case Type::ByteType:
+					convert_to_long(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, (char)Z_LVAL(temp_zval));
+					break;
+				case Type::BytesType:
+					convert_to_string(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, Z_STRVAL(temp_zval), Z_STRLEN(temp_zval));
+					break;
+				case Type::CharacterType: 
+					convert_to_string(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, (char)(Z_STRVAL(temp_zval)[0]));
+					break;
+				case Type::DateType:
+					convert_to_long(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, (SDODate)Z_LVAL(temp_zval));
+					break;
+				case Type::DoubleType:
+					convert_to_double(&temp_zval);
+					/*TODO this may need more work. On Windows, simply omitting the cast, or casting to double, 
+					* leads to an ambiguous overloaded function message. But some platforms may baulk at long double. 
+					*/
+					my_object->dfp->setDefault(parentType, propertyName,  (long double)Z_DVAL(temp_zval));
+					break;
+				case Type::FloatType:
+					convert_to_double(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, (float)Z_DVAL(temp_zval));
+					break;
+				case Type::IntegerType:
+					convert_to_long(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, (long)Z_LVAL(temp_zval));
+					break;
+				case Type::LongType:
+					if (Z_TYPE(temp_zval) == IS_LONG) {
+						my_object->dfp->setDefault(parentType, propertyName, (int64_t)Z_LVAL(temp_zval));
+					} else {					
+						convert_to_string(&temp_zval);
+						my_object->dfp->setDefault(parentType, propertyName, Z_STRVAL(temp_zval));
+					}
+					break;
+				case Type::ShortType:
+					convert_to_long(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, (short)Z_LVAL(temp_zval));
+					break;
+				case Type::StringType:
+				case Type::UriType:
+				case Type::TextType:
+					convert_to_string(&temp_zval);
+					my_object->dfp->setDefault(parentType, propertyName, Z_STRVAL(temp_zval), 1 + Z_STRLEN(temp_zval));
+					break;
+				case Type::DataObjectType:
+					zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC, 
+						"%s:%i: DataObject property %s cannot have a default value", CLASS_NAME, __LINE__, propertyName); 
+					break;
+				case Type::ChangeSummaryType:
+					zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC, 
+						"%s:%i: ChangeSummary property %s cannot have a default value", CLASS_NAME, __LINE__, propertyName); 
+					break;
+				default:
+					php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
+						type.getName(), propertyName);
+				}
+				
+				zval_dtor(&temp_zval);
+			}
+		}
+		
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}

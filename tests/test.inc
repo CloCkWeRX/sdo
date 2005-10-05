@@ -16,24 +16,24 @@ $dmsDf->addType(COMPANY_NS, DEPARTMENT_TYPE);
 $dmsDf->addType(COMPANY_NS, EMPLOYEE_TYPE);
 
 // add properties to the root type
-$dmsDf->addPropertyToType(ROOT_NS, ROOT_TYPE, 'company', COMPANY_NS, COMPANY_TYPE, false, false, true);
+$dmsDf->addPropertyToType(ROOT_NS, ROOT_TYPE, 'company', COMPANY_NS, COMPANY_TYPE);
 
 // add properties to the company type
-$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'departments', COMPANY_NS, DEPARTMENT_TYPE, true, false, true);
-$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'employeeOfTheMonth', COMPANY_NS, EMPLOYEE_TYPE, false, false, false);
-$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'CEO', COMPANY_NS, EMPLOYEE_TYPE, false, false, true);
+$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'departments', COMPANY_NS, DEPARTMENT_TYPE, array('many'=>true));
+$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'employeeOfTheMonth', COMPANY_NS, EMPLOYEE_TYPE, array('containment'=>false));
+$dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'CEO', COMPANY_NS, EMPLOYEE_TYPE);
 
 // add properties to the department type
-$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'location', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'number', SDO_TYPE_NAMESPACE_URI, 'Integer', false, false, false);
-$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'employees', COMPANY_NS, EMPLOYEE_TYPE, true, false, true);
+$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'location', SDO_TYPE_NAMESPACE_URI, 'String');
+$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'number', SDO_TYPE_NAMESPACE_URI, 'Integer');
+$dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'employees', COMPANY_NS, EMPLOYEE_TYPE, array('many'=>true));
 
 // add properties to employee type
-$dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-$dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'SN', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-$dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'manager', SDO_TYPE_NAMESPACE_URI, 'Boolean', false, false, false);
+$dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+$dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'SN', SDO_TYPE_NAMESPACE_URI, 'String');
+$dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'manager', SDO_TYPE_NAMESPACE_URI, 'Boolean');
 
 // Test creation of a data object
 $company = $dmsDf->create(COMPANY_NS, COMPANY_TYPE);

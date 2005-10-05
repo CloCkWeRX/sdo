@@ -214,7 +214,8 @@ class SDO_DAS_Relational_ObjectModel {
 		SDO_DAS_Relational::DAS_NAMESPACE , SDO_DAS_Relational::DAS_ROOT_TYPE,
 		$app_root_type,
 		SDO_DAS_Relational::APP_NAMESPACE , $app_root_type,
-		true, false, true); // multivalued, not readonly, containment
+		array('many' => true, 'containment' => true));
+//		true, false, true); // multivalued, not readonly, containment
 	}
 	
 	private function addAllTheColumnsAsPropertiesToSDO($data_factory) 
@@ -291,7 +292,7 @@ class SDO_DAS_Relational_ObjectModel {
 		SDO_DAS_Relational::APP_NAMESPACE , $from_type,
 		$ref_name,
 		SDO_DAS_Relational::APP_NAMESPACE, $to_type,
-		true, false, true); // multivalued, not readonly, containment
+		array('many' => true, 'containment' => true));
 	}
 	
 	private function addNonContainmentRef($data_factory, $from_type,$ref_name,$to_type) 
@@ -303,7 +304,7 @@ class SDO_DAS_Relational_ObjectModel {
 		SDO_DAS_Relational::APP_NAMESPACE , $from_type,
 		$ref_name,
 		SDO_DAS_Relational::APP_NAMESPACE, $to_type,
-		false, false, false); // singlevalued, not readonly, non-containment
+		array('many' => false, 'containment' => false));
 	}
 	
 	private function addPrimitive($data_factory, $type,$prim_name) 
@@ -315,7 +316,7 @@ class SDO_DAS_Relational_ObjectModel {
 		SDO_DAS_Relational::APP_NAMESPACE , $type,
 		$prim_name,
 		SDO_TYPE_NAMESPACE_URI, 'String',
-		false, false, false); // singlevalued, not readonly, non-containment
+		array('many' => false, 'containment' => false));
 	}
 }
 

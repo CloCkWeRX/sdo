@@ -58,6 +58,7 @@ END_EXTERN_C()
 #endif
 
 zend_class_entry *sdo_xmlparserexcep_ce = NULL;
+zend_class_entry *sdo_xmlfileexcep_ce = NULL;
 
 /* {{{ PHP_MINIT_FUNCTION
  *
@@ -76,6 +77,12 @@ PHP_MINIT_FUNCTION(sdo_das_xml)
     /* SDO_XMLParserException extends SDO_Exception */
     INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_ParserException", sdo_get_exception_methods());
     sdo_xmlparserexcep_ce = zend_register_internal_class_ex(
+                            &ce, NULL,
+                            "sdo_exception" TSRMLS_CC);
+
+    /* SDO_XMLFileException extends SDO_Exception */
+    INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_FileException", sdo_get_exception_methods());
+    sdo_xmlfileexcep_ce = zend_register_internal_class_ex(
                             &ce, NULL,
                             "sdo_exception" TSRMLS_CC);
     return SUCCESS;

@@ -237,10 +237,11 @@ PHP_METHOD(SDO_DAS_XML, create) {
               zend_object_store_get_object(return_value TSRMLS_CC);
         try {
             obj->xdh = XMLDAS::create(file_name);
-            /* TODO: Throw appropriate exception */
-            if(!obj->xdh) {
-                php_error(E_ERROR,
-                          "SDO_DAS_XML::create - Unable to load the XSD File");
+           if(!obj->xdh) {
+                /* At present the underlying XML DAS throws an exception rather than */
+                /* a bad return code so we are unlikely to get to here.              */
+                /* get to here. Nevertheless the code is here for when it happens.   */                        
+                sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
                 RETURN_NULL();
             }
         } catch (SDORuntimeException e) {
@@ -271,21 +272,16 @@ PHP_METHOD(SDO_DAS_XML, create) {
             return;
     }
 
-    if (retval) {
-        das_obj = (sdo_das_df_object *)
-                  zend_object_store_get_object(retval TSRMLS_CC);
-        try {
-            das_obj->dfp = obj->xdh->getDataFactory();
-        } catch (SDORuntimeException e) {
-            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
-        }
-        obj->php_das_df = retval;
-        zend_objects_store_add_ref(obj->php_das_df TSRMLS_CC);
-    } else {
-        php_error(E_ERROR,
-                  "SDO_DAS_XML::create - Unable to create SDO_DAS_DataFactoryImpl");
-        RETURN_NULL();
+    das_obj = (sdo_das_df_object *)
+              zend_object_store_get_object(retval TSRMLS_CC);
+    try {
+        das_obj->dfp = obj->xdh->getDataFactory();
+    } catch (SDORuntimeException e) {
+        sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
     }
+    obj->php_das_df = retval;
+    zend_objects_store_add_ref(obj->php_das_df TSRMLS_CC);
+ 
 }
 /* }}} end SDO_DAS_XML::create */
 
@@ -342,13 +338,14 @@ PHP_METHOD(SDO_DAS_XML, loadFromFile) {
         }
         try {
             doc_obj->xdoch = xmldas_obj->xdh->loadFile(file_name);
-            /*TODO : Throw appropriate exception*/
             if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject()) {
                 create_dataobject_tree(doc_obj->xdoch->getRootDataObject()
                                        TSRMLS_CC);
             } else {
-                php_error(E_ERROR,
-                          "SDO_DAS_XML::loadFromFile - Unable to load the XML document");
+                /* At present the underlying XML DAS throws an exception rather than */
+                /* a bad return code so we are unlikely to get to here.              */
+                /* get to here. Nevertheless the code is here for when it happens.   */                        
+                sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
                 RETURN_NULL();
             }
         } catch(SDORuntimeException e) {
@@ -416,8 +413,10 @@ PHP_METHOD(SDO_DAS_XML, loadFromString) {
                 create_dataobject_tree(xmldoc_obj->xdoch->getRootDataObject()
                                        TSRMLS_CC);
             } else {
+                /* Actually we are not sure that we can ever get to here - all errors seem to */
+                /* come out as exceptions, not bad return codes                               */
                 php_error(E_ERROR,
-                          "SDO_DAS_XML::loadFromFile - Unable to load the XML document");
+                          "SDO_DAS_XML::loadFromString - Unable to load the XML document");
                 RETURN_NULL();
             }
         } catch (SDORuntimeException e) {
@@ -440,6 +439,15 @@ create_dataobject_tree(DataObjectPtr data_object TSRMLS_DC) {
     zend_object *php_das_obj = NULL;
     MAKE_STD_ZVAL(z_obj);
     if (!data_object) {
+        return;
+    }
+    if (data_object->getUserData() != (void*) 0xFFFFFFFF) {
+        // if the user data is set then we have encountered this object before
+        // and already created a PHP object corresponding to it. For example,
+        // this will happen for the employee who is e.o.t.m when we follow the 
+        // non-containment reference: it was already visited following the 
+        // department.
+        // Since we already have a corresponding object, return without creating another.
         return;
     }
     sdo_do_new(z_obj, data_object TSRMLS_CC);
@@ -538,7 +546,7 @@ PHP_METHOD(SDO_DAS_XML, saveDocumentToString) {
                 zend_object_store_get_object(xml_doc_obj TSRMLS_CC);
     if (!xml_doc_ptr) {
         php_error(E_ERROR,
-                  "SDO_DAS_XML::save - Unable to get SDO_DAS_XML_Document object from object sotre");
+                  "SDO_DAS_XML::save - Unable to get SDO_DAS_XML_Document object from object store");
     }
     try {
         retval = das_obj->xdh->save(xml_doc_ptr->xdoch);

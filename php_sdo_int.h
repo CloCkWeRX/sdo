@@ -33,7 +33,7 @@
 
 using namespace commonj::sdo;
 
-#define SDO_VERSION "20050714"
+#define SDO_VERSION "0.5.2"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
@@ -84,7 +84,7 @@ extern PHP_SDO_API zend_class_entry *sdo_indexoutofboundsexception_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_unsupportedoperationexception_class_entry;
 
 extern PHP_SDO_API void sdo_das_df_minit(zend_class_entry *tmp TSRMLS_DC);
-extern PHP_SDO_API void sdo_das_df_new(zval *me, DASDataFactoryPtr dfp TSRMLS_DC);
+extern PHP_SDO_API void sdo_das_df_new(zval *me, DataFactoryPtr dfp TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_do_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC);

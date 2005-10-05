@@ -98,7 +98,7 @@ static zend_object_value sdo_do_object_create(zend_class_entry *ce TSRMLS_DC)
 /* }}} */
 
 /* {{{ sdo_do_has_dimension
- */
+*/
 static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
 {
 	const char		 *xpath = NULL;
@@ -107,7 +107,7 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 	sdo_do_object	 *my_object = (sdo_do_object *)NULL;
 	DataObjectPtr	  dop;
 	int				  return_value = 0; 
-
+	
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:	
 		xpath = Z_STRVAL_P(offset);
@@ -131,14 +131,14 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
 		return 0;
 	}
-
+	
 	dop = my_object->dop;
 	
 	try {
 		/* first, does the property exist ? */
 		const Property& property = (xpath) ?
 			dop->getType().getProperty(xpath) :
-			dop->getType().getProperty(propertyIndex);
+		dop->getType().getProperty(propertyIndex);
 		
 		if (!xpath) {
 			xpath = (char *)property.getName();
@@ -149,60 +149,64 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 		
 		if (return_value && check_empty) {
 			/* check_empty says we should additionally test if the value is equivalent to 0 */
-			switch (property.getTypeEnum()) {		
-			case Type::OtherTypes:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+			if (dop->isNull(xpath)) {
 				return_value = 0;
-				break;
-			case Type::BigDecimalType:
-			case Type::BigIntegerType:
-			case Type::BooleanType:
-			case Type::ByteType:
-				return_value = dop->getBoolean(xpath);
-				break;
-			case Type::BytesType:
-				/* magic usage returns the actual length */
-				return_value = (dop->getBytes(xpath, 0, 0) != 0);
-				break;
-			case Type::CharacterType:
-				return_value = dop->getBoolean(xpath);
-				break;
-			case Type::DateType:
-				return_value = (dop->getDate(xpath).getTime() != 0);
-				break;
-			case Type::DoubleType:
-			case Type::FloatType:
-			case Type::IntegerType:
-			case Type::LongType:
-			case Type::ShortType:
-				return_value = dop->getBoolean(xpath);
-				break;
-			case Type::StringType:
-			case Type::UriType:
-				/* TODO is this the buffer length or the string length ??? */
-				return_value = (dop->getLength(xpath) > 0);
-				break;		
-			case Type::DataObjectType:
-				/* since the property is set, the data object cannot be 'empty' */
-				break;
-			case Type::ChangeSummaryType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
-				return_value = 0;
-				break;
-			case Type::TextType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
-				return_value = 0;
-				break;
-			default:
-				php_error(E_ERROR, "%s:%i: unexpected type %s for property %s", CLASS_NAME, __LINE__, 
-					property.getType().getName(), xpath);
-				return_value = 0;
+			} else {
+				switch (property.getTypeEnum()) {		
+				case Type::OtherTypes:
+					php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+					return_value = 0;
+					break;
+				case Type::BigDecimalType:
+				case Type::BigIntegerType:
+				case Type::BooleanType:
+				case Type::ByteType:
+					return_value = dop->getBoolean(xpath);
+					break;
+				case Type::BytesType:
+					/* magic usage returns the actual length */
+					return_value = (dop->getBytes(xpath, 0, 0) != 0);
+					break;
+				case Type::CharacterType:
+					return_value = dop->getBoolean(xpath);
+					break;
+				case Type::DateType:
+					return_value = (dop->getDate(xpath).getTime() != 0);
+					break;
+				case Type::DoubleType:
+				case Type::FloatType:
+				case Type::IntegerType:
+				case Type::LongType:
+				case Type::ShortType:
+					return_value = dop->getBoolean(xpath);
+					break;
+				case Type::StringType:
+				case Type::UriType:
+					/* TODO is this the buffer length or the string length ??? */
+					return_value = (dop->getLength(xpath) > 0);
+					break;		
+				case Type::DataObjectType:
+					/* since the property is set, the data object cannot be 'empty' */
+					break;
+				case Type::ChangeSummaryType:
+					php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+					return_value = 0;
+					break;
+				case Type::TextType:
+					php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+					return_value = 0;
+					break;
+				default:
+					php_error(E_ERROR, "%s:%i: unexpected type %s for property %s", CLASS_NAME, __LINE__, 
+						property.getType().getName(), xpath);
+					return_value = 0;
+				}
 			}
 		}
 	} catch(SDORuntimeException e) {
 		return_value = 0;
 	}
-
+	
 	return return_value;
 }
 /* }}} */
@@ -244,88 +248,92 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 	zval			*return_value;
 	
 	MAKE_STD_ZVAL(return_value);
-	try {
-		switch(property.getTypeEnum()) {
-		case Type::OtherTypes:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
-			break;
-		case Type::BigDecimalType:
-		case Type::BigIntegerType:
-			RETVAL_STRING((char *)(dop->getCString(xpath)), 1);
-			break;
-		case Type::BooleanType:
-			RETVAL_BOOL(dop->getBoolean(xpath));
-			break;
-		case Type::ByteType:
-			RETVAL_LONG(dop->getByte(xpath));
-			break;
-		case Type::BytesType:
-			/* magic usage returns the actual length */
-			bytes_len = dop->getBytes(xpath, 0, 0);
-			bytes_value = (char *)emalloc(bytes_len);
-			bytes_len = dop->getBytes(xpath, bytes_value, bytes_len);
-			RETVAL_STRINGL(bytes_value, bytes_len, 0);
-			break;
-		case Type::CharacterType:
-			wchar_value = dop->getCharacter(xpath);
-			if (wchar_value > INT_MAX) {
-			    php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
-			}
-			char_value = dop->getByte(xpath);
-			RETVAL_STRINGL(&char_value, 1, 1);
-			break;
-		case Type::DateType:
-			RETVAL_LONG(dop->getDate(xpath).getTime());
-			break;
-		case Type::DoubleType:
-			RETVAL_DOUBLE(dop->getDouble(xpath));
-			break;
-		case Type::FloatType:
-			RETVAL_DOUBLE(dop->getFloat(xpath));
-			break;
-		case Type::IntegerType:
-			RETVAL_LONG(dop->getInteger(xpath));
-			break;
-		case Type::LongType:
-			/* An SDO long (64 bits) may overflow a PHP int, so we return it as a string */
-			RETVAL_STRING((char *)dop->getCString(xpath), 1);
-			break;
-		case Type::ShortType:
-			RETVAL_LONG(dop->getShort(xpath));
-			break;
-		case Type::StringType:
-		case Type::UriType:
-			RETVAL_STRING((char *)dop->getCString(xpath), 1);
-			break;		
-		case Type::DataObjectType:
-			doh_value = dop->getDataObject(xpath);
-			if (!doh_value) {
-				php_error(E_WARNING, "%s:%i: read a NULL DataObject for property '%s'", CLASS_NAME, __LINE__, 
-					property.getName());
-				RETVAL_NULL();
-			} else {
-				doh_value_zval = (zval *)doh_value->getUserData();
-				if (doh_value_zval == (zval *)SDO_USER_DATA_EMPTY) {
-					php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-					RETVAL_NULL();
-				}
-				RETVAL_ZVAL(doh_value_zval, 1, 0);
-			}
-			break;
-		case Type::ChangeSummaryType:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
-			break;
-		case Type::TextType:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
-			break;
-		default:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
-				property.getType().getName(), xpath);
-		}
-		return return_value;
-	} catch (SDORuntimeException e) {
-		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	if (dop->isNull(xpath)) {
 		RETVAL_NULL();
+	} else {
+		try {
+			switch(property.getTypeEnum()) {
+			case Type::OtherTypes:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				break;
+			case Type::BigDecimalType:
+			case Type::BigIntegerType:
+				RETVAL_STRING((char *)(dop->getCString(xpath)), 1);
+				break;
+			case Type::BooleanType:
+				RETVAL_BOOL(dop->getBoolean(xpath));
+				break;
+			case Type::ByteType:
+				RETVAL_LONG(dop->getByte(xpath));
+				break;
+			case Type::BytesType:
+				/* magic usage returns the actual length */
+				bytes_len = dop->getBytes(xpath, 0, 0);
+				bytes_value = (char *)emalloc(bytes_len);
+				bytes_len = dop->getBytes(xpath, bytes_value, bytes_len);
+				RETVAL_STRINGL(bytes_value, bytes_len, 0);
+				break;
+			case Type::CharacterType:
+				wchar_value = dop->getCharacter(xpath);
+				if (wchar_value > INT_MAX) {
+					php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
+				}
+				char_value = dop->getByte(xpath);
+				RETVAL_STRINGL(&char_value, 1, 1);
+				break;
+			case Type::DateType:
+				RETVAL_LONG(dop->getDate(xpath).getTime());
+				break;
+			case Type::DoubleType:
+				RETVAL_DOUBLE(dop->getDouble(xpath));
+				break;
+			case Type::FloatType:
+				RETVAL_DOUBLE(dop->getFloat(xpath));
+				break;
+			case Type::IntegerType:
+				RETVAL_LONG(dop->getInteger(xpath));
+				break;
+			case Type::LongType:
+				/* An SDO long (64 bits) may overflow a PHP int, so we return it as a string */
+				RETVAL_STRING((char *)dop->getCString(xpath), 1);
+				break;
+			case Type::ShortType:
+				RETVAL_LONG(dop->getShort(xpath));
+				break;
+			case Type::StringType:
+			case Type::UriType:
+				RETVAL_STRING((char *)dop->getCString(xpath), 1);
+				break;		
+			case Type::DataObjectType:
+				doh_value = dop->getDataObject(xpath);
+				if (!doh_value) {
+					php_error(E_WARNING, "%s:%i: read a NULL DataObject for property '%s'", CLASS_NAME, __LINE__, 
+						property.getName());
+					RETVAL_NULL();
+				} else {
+					doh_value_zval = (zval *)doh_value->getUserData();
+					if (doh_value_zval == (zval *)SDO_USER_DATA_EMPTY) {
+						php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+						RETVAL_NULL();
+					}
+					RETVAL_ZVAL(doh_value_zval, 1, 0);
+				}
+				break;
+			case Type::ChangeSummaryType:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				break;
+			case Type::TextType:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				break;
+			default:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
+					property.getType().getName(), xpath);
+			}
+			return return_value;
+		} catch (SDORuntimeException e) {
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+			RETVAL_NULL();
+		}
 	}
 	return return_value;
 }
@@ -507,9 +515,7 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
  */
 
 		if (Z_TYPE_P(z_propertyValue) == IS_NULL) {
-			/* TODO: fix this when the C++ lib supports a NULL property  */
-			zend_throw_exception_ex(sdo_invalidconversionexception_class_entry, 0 TSRMLS_CC, 
-				"can't assign NULL to %s", xpath);
+			dop->setNull(xpath);
 		} else {
 			/*
 			 * Since we may have to coerce the type, we make a local copy of the zval, so that the
@@ -756,6 +762,8 @@ static int sdo_do_count_elements(zval *object, long *count TSRMLS_DC)
 }
 /* }}} */
 
+static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC);
+
 /* {{{ sdo_do_get_iterator
  */
 zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) {
@@ -765,8 +773,8 @@ zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSR
 	object->refcount++;
 	iterator->zoi.data = (void *)object;
 	iterator->zoi.funcs = &sdo_do_iterator_funcs;
-	iterator->index = 0;
-	iterator->valid = true;
+	sdo_do_iterator_rewind((zend_object_iterator *)iterator TSRMLS_CC);
+
 	/* TODO
 	 * I'd like to store a reference to the C++ PropertyList in the iterator object at this point.
 	 * But I'm seeing nasty memory corruption problems, so instead I'm reading out the list
@@ -792,16 +800,8 @@ static void sdo_do_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 static int sdo_do_iterator_valid (zend_object_iterator *iter TSRMLS_DC)
 {	
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
-	zval *z_do_object = (zval *)iterator->zoi.data;
-	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
 	
-	try {
-		return ((iterator->valid && iterator->index >= 0 && 
-			iterator->index < my_object->dop->getInstanceProperties().size()) ? SUCCESS : FAILURE);
-	} catch (SDORuntimeException e) {
-		iterator->valid = false;
-		return FAILURE;
-	}
+	return (iterator->valid) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -865,7 +865,23 @@ static void sdo_do_iterator_current_data (zend_object_iterator *iter, zval ***da
 static void sdo_do_iterator_move_forward (zend_object_iterator *iter TSRMLS_DC)
 {
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
-	iterator->index++;
+	
+	if (iterator->valid) {
+		zval *z_do_object = (zval *)iterator->zoi.data;
+		sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
+		
+		try {
+			PropertyList pl = my_object->dop->getInstanceProperties();
+			for (iterator->index++; 
+			iterator->index < pl.size() && ! my_object->dop->isSet(iterator->index);
+			iterator->index++);
+			if (iterator->index >= pl.size()) 
+				iterator->valid = false;
+		} catch (SDORuntimeException e) {
+			iterator->valid = false;
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+		}
+	}
 }
 /* }}} */
 
@@ -874,7 +890,19 @@ static void sdo_do_iterator_move_forward (zend_object_iterator *iter TSRMLS_DC)
 static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
 {
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
-	iterator->index = 0;
+	zval *z_do_object = (zval *)iterator->zoi.data;
+	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
+
+	try {
+		PropertyList pl = my_object->dop->getInstanceProperties();
+		for (iterator->index = 0; 
+		    iterator->index < pl.size() && ! my_object->dop->isSet(iterator->index);
+		    iterator->index++);
+		iterator->valid = (iterator->index < pl.size());
+	} catch (SDORuntimeException e) {
+		iterator->valid = false;
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	}
 }
 /* }}} */
 
@@ -932,21 +960,28 @@ static zval *sdo_do_populate_graph (DataObjectPtr dop TSRMLS_DC)
 {
 	zval *z_new_do;
 	
-	MAKE_STD_ZVAL(z_new_do);
-	sdo_do_new(z_new_do, dop TSRMLS_CC);
-	
-    PropertyList pl = dop->getInstanceProperties();
-    for (int i = 0; i < pl.size(); i++) {
-        if (dop->isSet(pl[i])) {
-            if (pl[i].isMany()) {
-                DataObjectList& dol = dop->getList(pl[i]);
-                for (int j = 0; j < dol.size(); j++) {
-					sdo_do_populate_graph(dol[j] TSRMLS_CC);
-                }
-            } else if (pl[i].getType().isDataObjectType() && ! pl[i].isContainment()) {
-				sdo_do_populate_graph(dop->getDataObject(pl[i]) TSRMLS_CC);
-            }
-        }
+   /* We may have previously encountered this DataObject, perhaps as a non-containment reference.
+	* If so, don't create a duplicate PHP object.
+	*/
+	z_new_do = (zval *)dop->getUserData();
+	if (z_new_do == (zval *)SDO_USER_DATA_EMPTY) {
+		
+		MAKE_STD_ZVAL(z_new_do);
+		sdo_do_new(z_new_do, dop TSRMLS_CC);
+		
+		PropertyList pl = dop->getInstanceProperties();
+		for (int i = 0; i < pl.size(); i++) {
+			if (dop->isSet(pl[i])) {
+				if (pl[i].isMany()) {
+					DataObjectList& dol = dop->getList(pl[i]);
+					for (int j = 0; j < dol.size(); j++) {
+						sdo_do_populate_graph(dol[j] TSRMLS_CC);
+					}
+				} else if (pl[i].getType().isDataObjectType()) {
+					sdo_do_populate_graph(dop->getDataObject(pl[i]) TSRMLS_CC);
+				}
+			}
+		}
 	}
 	return z_new_do;
 }
@@ -976,7 +1011,7 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 		xmldasp->loadSchema(serialized_model);
 		/* Create the PHP representation of the factory */
 		MAKE_STD_ZVAL(factory_zval);
-		sdo_das_df_new(factory_zval, (DASDataFactory *)(DataFactory *)xmldasp->getDataFactory() TSRMLS_CC);
+		sdo_das_df_new(factory_zval, xmldasp->getDataFactory() TSRMLS_CC);
 
 		/* Load the graph */
 		DataObjectPtr root_dop = xmldasp->load(serialized_graph)->getRootDataObject();
@@ -1001,17 +1036,21 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC)
 {	
 	sdo_do_object *my_object;
-
+	
 	Z_TYPE_P(me) = IS_OBJECT;	
 	if (object_init_ex(me, sdo_dataobjectimpl_class_entry) == FAILURE) {
 		php_error(E_ERROR, "%s:%i: object_init failed", CLASS_NAME, __LINE__);
 		return;
 	}
-
+	
 	my_object = (sdo_do_object *)zend_object_store_get_object(me TSRMLS_CC);
 	my_object->dop = dop;
 	/* add a back pointer to the C++ object */
-	dop->setUserData ((void *)me);
+	try {
+		dop->setUserData ((void *)me);
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);	
+	}
 }
 /* }}} */
 
@@ -1201,6 +1240,7 @@ PHP_METHOD(SDO_DataObjectImpl, createDataObject)
 			new_dop = dop->createDataObject(propertyIndex);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
+		RETURN_NULL();
 	}
 	
 	/* We have a good data object, so set up its PHP incarnation */

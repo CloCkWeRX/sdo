@@ -57,10 +57,20 @@ abstract class SDO_DAS_Relational_Action {
 			echo "executing the following SQL statement:\n" . $stmt . "\n";
 			echo "using the following list of values:\n";
 			foreach ($value_list as $value) {
-				echo "   $value\n";
+	  			ob_start();
+	  			var_dump($value);
+  				$content = ob_get_contents();
+  				ob_end_clean();
+				echo "   $content";
 			}
 		}
 		$pdo_stmt = $dbh->prepare($stmt);
+		// TODO - FIXME
+		// The following line of code really should be:
+		//$pdo_stmt->execute($value_list);
+		//$rows_affected = $pdo_stmt->rowCount();
+		// but this is not working at 20050916 - see http://pecl.php.net/bugs/bug.php?id=5433
+		// the following line works but only because boolean true gets interpreted at integer 1 !!!		
 		$rows_affected = $pdo_stmt->execute($value_list);
 		if ($rows_affected != 1) {
 			$pdo_error_info = $pdo_stmt->errorInfo();

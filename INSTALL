@@ -41,8 +41,8 @@ Windows installation steps
 The latest Windows binaries for the sdo and sdo_das_xml extensions can
 be downloaded to your extension directory from:
 
-http://snaps.php.net/win32/PECL_UNSTABLE/php_sdo.dll
-http://snaps.php.net/win32/PECL_UNSTABLE/php_sdo_das_xml.dll
+http://pecl4win.php.net/ext.php/php_sdo.dll
+http://pecl4win.php.net/ext.php/php_sdo_das_xml.dll
 
 Make sure that these modules are loaded by PHP, by adding:  
 

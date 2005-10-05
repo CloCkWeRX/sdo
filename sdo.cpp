@@ -317,7 +317,8 @@ PHP_MINIT_FUNCTION(sdo)
 	REGISTER_STRING_CONSTANT("SDO_VERSION", SDO_VERSION, CONST_CS | CONST_PERSISTENT);
 
 	/*
-	 * TODO The following should be class constants, but have been defined as module constants to work around a problem.
+	 * TODO The following should be class constants, but were defined as module constants to work around a problem.
+	 * These are now deprecated and will be removed in a future release.
 	 */
 	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_NONE", CS_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_MODIFICATION", CS_MODIFICATION, CONST_CS | CONST_PERSISTENT);
@@ -380,7 +381,13 @@ PHP_MINIT_FUNCTION(sdo)
 	/* class SDO_Exception extends Exception */
     INIT_CLASS_ENTRY(ce, "SDO_Exception", sdo_exception_methods);
     sdo_exception_class_entry = zend_register_internal_class_ex(
-        &ce, zend_exception_get_default(), NULL TSRMLS_CC);
+        &ce, 
+#if (PHP_MAJOR_VERSION < 6) 
+		zend_exception_get_default(), 
+#else  
+		zend_exception_get_default(TSRMLS_C),
+#endif
+		NULL TSRMLS_CC);
 
 	/* class SDO_PropertyNotFoundException extends SDO_Exception */
     INIT_CLASS_ENTRY(ce, "SDO_PropertyNotFoundException", sdo_exception_methods);

@@ -120,14 +120,14 @@ void sdo_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC)
 
 /* {{{ sdo_make_long_class_constant
  * creates a class constant
- * not used at present because of memory corruption problems on shutdown
  */
 void sdo_make_long_class_constant(zend_class_entry *ce, char *name, long value)
 {
-	zval *z_constant;
-	MAKE_STD_ZVAL(z_constant);
+	/* Cannot emalloc the storage for this constant, it must endure beyond the current request */
+	zval *z_constant = (zval *)malloc(sizeof(zval));
+	INIT_PZVAL(z_constant);
 	ZVAL_LONG(z_constant, value);
-	zend_hash_add(&ce->constants_table, name, 1 + strlen(name), &z_constant, sizeof(zval *), NULL);
+	zend_hash_update(&ce->constants_table, name, 1 + strlen(name), &z_constant, sizeof(zval *), NULL);
 }
 /* }}} */
 

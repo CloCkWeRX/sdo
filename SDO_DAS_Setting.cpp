@@ -189,78 +189,82 @@ PHP_METHOD(SDO_DAS_Setting, getValue)
 	setting = my_object->setting;
 
 	try {
-		const Property& property = setting->getProperty();
-		switch(property.getTypeEnum()) {
-		case Type::OtherTypes:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
-			break;
-		case Type::BigDecimalType:
-		case Type::BigIntegerType:
-			RETVAL_STRING((char *)setting->getCStringValue(), 1);
-			break;
-		case Type::BooleanType:
-			RETVAL_BOOL(setting->getBooleanValue());
-			break;
-		case Type::ByteType:
-			RETVAL_LONG(setting->getByteValue());
-			break;
-		case Type::BytesType:
-			/* magic usage returns the actual length */
-			bytes_len = setting->getBytesValue(0, 0);
-			bytes_value = (char *)emalloc(bytes_len);
-			bytes_len = setting->getBytesValue(bytes_value, bytes_len);
-			RETVAL_STRINGL(bytes_value, bytes_len, 0);
-			break;
-		case Type::CharacterType:
-			wchar_value = setting->getCharacterValue();
-			if (wchar_value > INT_MAX) {
-			    php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
+		if (setting->isNull()) {
+			RETVAL_NULL();
+		} else {
+			const Property& property = setting->getProperty();
+			switch(property.getTypeEnum()) {
+			case Type::OtherTypes:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				break;
+			case Type::BigDecimalType:
+			case Type::BigIntegerType:
+				RETVAL_STRING((char *)setting->getCStringValue(), 1);
+				break;
+			case Type::BooleanType:
+				RETVAL_BOOL(setting->getBooleanValue());
+				break;
+			case Type::ByteType:
+				RETVAL_LONG(setting->getByteValue());
+				break;
+			case Type::BytesType:
+				/* magic usage returns the actual length */
+				bytes_len = setting->getBytesValue(0, 0);
+				bytes_value = (char *)emalloc(bytes_len);
+				bytes_len = setting->getBytesValue(bytes_value, bytes_len);
+				RETVAL_STRINGL(bytes_value, bytes_len, 0);
+				break;
+			case Type::CharacterType:
+				wchar_value = setting->getCharacterValue();
+				if (wchar_value > INT_MAX) {
+					php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
+				}
+				char_value = setting->getByteValue();
+				RETVAL_STRINGL(&char_value, 1, 1);
+				break;
+			case Type::DateType:
+				RETVAL_LONG(setting->getDateValue().getTime());
+				break;
+			case Type::DoubleType:
+				RETVAL_DOUBLE(setting->getDoubleValue());
+				break;
+			case Type::FloatType:
+				RETVAL_DOUBLE(setting->getFloatValue());
+				break;
+			case Type::IntegerType:
+				RETVAL_LONG(setting->getIntegerValue());
+				break;
+			case Type::LongType:
+				/* An SDO long (64 bits) may overflow a PHP int, so we return it as a string */
+				RETVAL_STRING((char *)setting->getCStringValue(), 1);
+				break;
+			case Type::ShortType:
+				RETVAL_LONG(setting->getShortValue());
+				break;
+			case Type::StringType:
+			case Type::UriType:
+				RETVAL_STRING((char *)setting->getCStringValue(), 1);
+				break;		
+			case Type::DataObjectType:
+				doh_value = setting->getDataObjectValue();
+				if (!doh_value) {
+					/* An old value may legitimately be null */
+					RETVAL_NULL();
+				} else {
+					doh_value_zval = (zval *)doh_value->getUserData();
+					RETVAL_ZVAL(doh_value_zval, 1, 0);
+				}
+				break;
+			case Type::ChangeSummaryType:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				break;
+			case Type::TextType:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				break;
+			default:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
+					property.getType().getName(), property.getName());
 			}
-			char_value = setting->getByteValue();
-			RETVAL_STRINGL(&char_value, 1, 1);
-			break;
-		case Type::DateType:
-			RETVAL_LONG(setting->getDateValue().getTime());
-			break;
-		case Type::DoubleType:
-			RETVAL_DOUBLE(setting->getDoubleValue());
-			break;
-		case Type::FloatType:
-			RETVAL_DOUBLE(setting->getFloatValue());
-			break;
-		case Type::IntegerType:
-			RETVAL_LONG(setting->getIntegerValue());
-			break;
-		case Type::LongType:
-			/* An SDO long (64 bits) may overflow a PHP int, so we return it as a string */
-			RETVAL_STRING((char *)setting->getCStringValue(), 1);
-			break;
-		case Type::ShortType:
-			RETVAL_LONG(setting->getShortValue());
-			break;
-		case Type::StringType:
-		case Type::UriType:
-			RETVAL_STRING((char *)setting->getCStringValue(), 1);
-			break;		
-		case Type::DataObjectType:
-			doh_value = setting->getDataObjectValue();
-			if (!doh_value) {
-				/* An old value may legitimately be null */
-				RETVAL_NULL();
-			} else {
-				doh_value_zval = (zval *)doh_value->getUserData();
-				RETVAL_ZVAL(doh_value_zval, 1, 0);
-			}
-			break;
-		case Type::ChangeSummaryType:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
-			break;
-		case Type::TextType:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
-			break;
-		default:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
-				property.getType().getName(), property.getName());
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);

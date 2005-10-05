@@ -243,16 +243,22 @@ The namespaceURI for the type of the property
 
 The typeName for the type of the property
 
-A flag to say whether the property is many-valued.
-A value of 'true' adds the property as a many-valued property (default is 'false')
+Optional associative array of optional arguments for the new property.
+Valid keys are:
 
-A flag to say whether the property is read-only.
-A value of 'true' means the property value cannot be modified through the SDO application APIs (default is 'false')
+"many" for a many-valued property (default false)
 
-A flag to say whether the property is contained by the parent.
-A value of 'true' means the property is contained by the parent.
-A value of 'false' results in a non-containment reference (default is 'true').
-This flag is only interpreted when adding properties which are data object types.
+"readonly" for a read-only property(default false)
+
+"containment" to say if the property is contained by the parent (default is true. 
+This value only relates to properties which are data object types)
+
+"default" to specifiy a default value for the property. "Default" is a mixed type argument, and omitting a default means the 
+property does not have one.
+
+"opposite" to specify the property at the other end of a bi-directional relationship. Opposite  is an array of three values 
+required to identify the opposite property. The first two are namespaceURI and type name and identify the type which contains
+the opposite property, the thirs value is the property name of the opposite property.
 
 Example: to add a 'name' property to a Person type:
 $df->addPropertyToType('PersonNS', 'PersonType',

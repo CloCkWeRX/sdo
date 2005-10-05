@@ -46,7 +46,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// are we using the matched extension version?
 		$version = phpversion('sdo');
-		$this->assertTrue(($version >= '20050713'), 'Incompatible version of php_sdo extension.');
+		$this->assertTrue(($version >= '0.5.2'), 'Incompatible version of php_sdo extension.');
 
 		// We don''t want to force direct type comparison (e.g. we want (int)100 to be the same as "100")
 		$this->setLooselyTyped(true);
@@ -68,56 +68,56 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->dmsDf->addType(COMPANY_NS, EMPLOYEE_TYPE);
 
 		// add properties to the root type
-		$this->dmsDf->addPropertyToType(ROOT_NS, ROOT_TYPE, 'company', COMPANY_NS, COMPANY_TYPE, false, false, true);
+		$this->dmsDf->addPropertyToType(ROOT_NS, ROOT_TYPE, 'company', COMPANY_NS, COMPANY_TYPE);
 
 		// add properties to the company type
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'departments', COMPANY_NS, DEPARTMENT_TYPE, true, false, true);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'employeeOfTheMonth', COMPANY_NS, EMPLOYEE_TYPE, false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'CEO', COMPANY_NS, EMPLOYEE_TYPE, false, false, true);
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'departments', COMPANY_NS, DEPARTMENT_TYPE, array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'employeeOfTheMonth', COMPANY_NS, EMPLOYEE_TYPE, array('containment'=>false));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'CEO', COMPANY_NS, EMPLOYEE_TYPE);
 		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'cs', SDO_TYPE_NAMESPACE_URI, 'ChangeSummary');
 
 		// add properties to the department type
-		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'location', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'number', SDO_TYPE_NAMESPACE_URI, 'Integer', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'employees', COMPANY_NS, EMPLOYEE_TYPE, true, false, true);
+		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'location', SDO_TYPE_NAMESPACE_URI, 'String');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'number', SDO_TYPE_NAMESPACE_URI, 'Integer');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, DEPARTMENT_TYPE, 'employees', COMPANY_NS, EMPLOYEE_TYPE, array('many'=>true));
 
 		// add properties to employee type
-		$this->dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'SN', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'manager', SDO_TYPE_NAMESPACE_URI, 'Boolean', false, false, false);
+		$this->dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'SN', SDO_TYPE_NAMESPACE_URI, 'String');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, EMPLOYEE_TYPE, 'manager', SDO_TYPE_NAMESPACE_URI, 'Boolean');
 
 		// add some more properties to the company type for all the different base types
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'string', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bool', SDO_TYPE_NAMESPACE_URI, 'Boolean', false, false, false);
-		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bigD', SDO_TYPE_NAMESPACE_URI, 'BigDecimal', false, false, false);
-		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bigI', SDO_TYPE_NAMESPACE_URI, 'BigInteger', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'byte', SDO_TYPE_NAMESPACE_URI, 'Byte', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bytes', SDO_TYPE_NAMESPACE_URI, 'Bytes', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'char', SDO_TYPE_NAMESPACE_URI, 'Character', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'date', SDO_TYPE_NAMESPACE_URI, 'Date', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'double', SDO_TYPE_NAMESPACE_URI, 'Double', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'float', SDO_TYPE_NAMESPACE_URI, 'Float', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'int', SDO_TYPE_NAMESPACE_URI, 'Integer', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'long', SDO_TYPE_NAMESPACE_URI, 'Long', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'short', SDO_TYPE_NAMESPACE_URI, 'Short', false, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'uri', SDO_TYPE_NAMESPACE_URI, 'URI', false, false, false);
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'string', SDO_TYPE_NAMESPACE_URI, 'String');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bool', SDO_TYPE_NAMESPACE_URI, 'Boolean');
+		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bigD', SDO_TYPE_NAMESPACE_URI, 'BigDecimal');
+		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bigI', SDO_TYPE_NAMESPACE_URI, 'BigInteger');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'byte', SDO_TYPE_NAMESPACE_URI, 'Byte');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'bytes', SDO_TYPE_NAMESPACE_URI, 'Bytes');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'char', SDO_TYPE_NAMESPACE_URI, 'Character');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'date', SDO_TYPE_NAMESPACE_URI, 'Date');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'double', SDO_TYPE_NAMESPACE_URI, 'Double');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'float', SDO_TYPE_NAMESPACE_URI, 'Float');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'int', SDO_TYPE_NAMESPACE_URI, 'Integer');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'long', SDO_TYPE_NAMESPACE_URI, 'Long');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'short', SDO_TYPE_NAMESPACE_URI, 'Short');
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'uri', SDO_TYPE_NAMESPACE_URI, 'URI');
 
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mstring', SDO_TYPE_NAMESPACE_URI, 'String', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mbool', SDO_TYPE_NAMESPACE_URI, 'Boolean', true, false, false);
-		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'MbigD', SDO_TYPE_NAMESPACE_URI, 'BigDecimal', true, false, false);
-		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'MbigI', SDO_TYPE_NAMESPACE_URI, 'BigInteger', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mbyte', SDO_TYPE_NAMESPACE_URI, 'Byte', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mbytes', SDO_TYPE_NAMESPACE_URI, 'Bytes', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mchar', SDO_TYPE_NAMESPACE_URI, 'Character', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mdate', SDO_TYPE_NAMESPACE_URI, 'Date', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mdouble', SDO_TYPE_NAMESPACE_URI, 'Double', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mfloat', SDO_TYPE_NAMESPACE_URI, 'Float', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mint', SDO_TYPE_NAMESPACE_URI, 'Integer', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mlong', SDO_TYPE_NAMESPACE_URI, 'Long', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mshort', SDO_TYPE_NAMESPACE_URI, 'Short', true, false, false);
-		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Muri', SDO_TYPE_NAMESPACE_URI, 'URI', true, false, false);
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mstring', SDO_TYPE_NAMESPACE_URI, 'String', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mbool', SDO_TYPE_NAMESPACE_URI, 'Boolean', array('many'=>true));
+		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'MbigD', SDO_TYPE_NAMESPACE_URI, 'BigDecimal', array('many'=>true));
+		//$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'MbigI', SDO_TYPE_NAMESPACE_URI, 'BigInteger', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mbyte', SDO_TYPE_NAMESPACE_URI, 'Byte', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mbytes', SDO_TYPE_NAMESPACE_URI, 'Bytes', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mchar', SDO_TYPE_NAMESPACE_URI, 'Character', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mdate', SDO_TYPE_NAMESPACE_URI, 'Date', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mdouble', SDO_TYPE_NAMESPACE_URI, 'Double', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mfloat', SDO_TYPE_NAMESPACE_URI, 'Float', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mint', SDO_TYPE_NAMESPACE_URI, 'Integer', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mlong', SDO_TYPE_NAMESPACE_URI, 'Long', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mshort', SDO_TYPE_NAMESPACE_URI, 'Short', array('many'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Muri', SDO_TYPE_NAMESPACE_URI, 'URI', array('many'=>true));
 
 	}
 
@@ -183,23 +183,39 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->assertEquals($this->company->employeeOfTheMonth, $this->company->departments[0]->employees[0], 'Non-containment reference test failed.');
 
 		// Test use of non-containment reference
+		try {
+		    $eotm = $this->company->createDataObject('employeeOfTheMonth');
+			$this->assertTrue(false, "Failed to throw exception in create non-contained DataObject test.");
+		} catch (SDO_UnsupportedOperationException $e) {
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown in create non-contained DataObject test: ".$e->getMessage());
+		}		
 		$ceo = $this->company->createDataObject('CEO');
 		$ceo->name = "Fred Smith";
 		$this->company->employeeOfTheMonth = $ceo;
 		$this->assertTrue(isset ($this->company->CEO), 'Single-valued SDODataObject test failed - CEO not set.');
 
 		// Test iteration over an SDO_DataObject
+		// Note that the for loop returns all properties, regardless of whether they are set, 
+		// whereas foreach iterates over set properties only.
+		$set_props = array();
+		for ($i = 0; $i < count($this->company); $i++) {
+		    if (isset($this->company[$i])) {
+		        $set_props[] = $i;
+		    }
+		}
+		
 		$iters = 0;
 		try {
 			foreach ($this->company as $name => $value) {
-				$this->assertEquals($this->company[$iters], $value, "SDO_DataObject iteration failed - values do not match.");
+				$this->assertEquals($this->company[$set_props[$iters]], $value, "SDO_DataObject iteration failed - values do not match.");
 				$iters ++;
 			}
 		} catch (Exception $e) {
 			$this->assertTrue(false, "SDO_DataObject iteration test failed - Exception thrown: ".$e->getMessage());
 		}
-		$this->assertEquals(count($this->company), $iters, "SDO_DataObject iteration test failed - incorrect number of interations.");
-		$this->assertTrue(($iters > 0), "SDO_DataObject iteration test failed - zero iteration performed.");
+		$this->assertEquals(count($set_props), $iters, "SDO_DataObject iteration test failed - incorrect number of interations.");
+		$this->assertTrue(($iters > 0), "SDO_DataObject iteration test failed - zero iterations performed.");
 	}
 
 	public function testBoolean() {
@@ -655,8 +671,8 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(GENE_NAMESPACE, 'person');
-		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, true);
-		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'child', GENE_NAMESPACE, 'person', false, false, true);
+		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'child', GENE_NAMESPACE, 'person');
 
 		$root = $data_factory->create(GENE_NAMESPACE, 'person');
 		$root['name'] = 'Eve';
@@ -674,9 +690,9 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(GENE_NAMESPACE, 'person');
-		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, true);
-		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'address_line', SDO_TYPE_NAMESPACE_URI, 'String', true, false, true);
-		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'children', GENE_NAMESPACE, 'person', true, false, true);
+		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'address_line', SDO_TYPE_NAMESPACE_URI, 'String', array('many'=>true));
+		$data_factory->addPropertyToType(GENE_NAMESPACE, 'person', 'children', GENE_NAMESPACE, 'person', array('many'=>true, 'containment'=>true));
 
 		$root = $data_factory->create(GENE_NAMESPACE, 'person');
 		$root['name'] = 'Eve';
@@ -788,10 +804,10 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
 
 		$data_factory->addType(APP_NAMESPACE, 'company');
-		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', true, false, true); // multivalued, not readonly, containment
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); // multivalued, not readonly, containment
 
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false); // singlevalued, not readonly, non-containment
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'id', SDO_TYPE_NAMESPACE_URI, 'Integer', false, false, false); // singlevalued, not readonly, non-containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); // singlevalued, not readonly, non-containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'id', SDO_TYPE_NAMESPACE_URI, 'Integer'); // singlevalued, not readonly, non-containment
 
 		$root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
 		$acme = $root->createDataObject('company');
@@ -817,7 +833,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
 
 		$data_factory->addType(APP_NAMESPACE, 'company');
-		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', true, false, true); // multivalued, not readonly, containment
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); // multivalued, not readonly, containment
 
 		$root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
 		$acme = $root->createDataObject('company');
@@ -826,7 +842,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
 
 		$data_factory->addType(APP_NAMESPACE, 'company');
-		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', true, false, true); // multivalued, not readonly, containment
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); // multivalued, not readonly, containment
 
 		$root2 = $acme->getContainer();
 	}
@@ -842,9 +858,9 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		$data_factory->addType(APP_NAMESPACE, 'company');
 
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false); //singlevalued, not readonly, non-containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); //singlevalued, not readonly, non-containment
 
-		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', true, false, true); //multivalued, not readonly, containment
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); //multivalued, not readonly, containment
 
 		$root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
 
@@ -874,13 +890,13 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$data_factory->addType(APP_NAMESPACE, 'department');
 		$data_factory->addType(APP_NAMESPACE, 'employee');
 
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false); //singlevalued, not readonly, non-containment
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false); //singlevalued, not readonly, non-containment
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'employee', 'name', SDO_TYPE_NAMESPACE_URI, 'String', false, false, false); // singlevalued, not readonly, non-containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); //singlevalued, not readonly, non-containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); //singlevalued, not readonly, non-containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'employee', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); // singlevalued, not readonly, non-containment
 
-		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', true, false, true); // multivalued, not readonly, containment
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'department', APP_NAMESPACE, 'department', true, false, true); // multivalued, not readonly, containment
-		$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'employee', APP_NAMESPACE, 'employee', true, false, true); // multivalued, not readonly, containment
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); // multivalued, not readonly, containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'department', APP_NAMESPACE, 'department', array('many'=>true)); // multivalued, not readonly, containment
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'employee', APP_NAMESPACE, 'employee', array('many'=>true)); // multivalued, not readonly, containment
 
 		$root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
 
@@ -930,6 +946,120 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// try some invalid data
 		//$company3 = SDO_DataObjectImpl::unserialize('splu<rge');
+	}
+	
+	public function testSetUnset() {
+	    $this->testDataObject();
+	    
+	    // multi-valued DataObject property
+	    $departments = $this->company->departments;
+	    $dept_count = count($departments);
+	    $this->assertTrue(isset($departments[0]), 'first department is not set.');
+	    $this->assertFalse(isset($departments[$dept_count]), 'invalid department is set (1).');
+	    
+	    // add a new department
+	    $new_dept = $this->company->createDataObject('departments');
+	    $new_dept->name = 'Gubbins';
+	    $this->assertTrue(isset($departments[$dept_count]), 'new department is set.');
+	    $this->assertFalse(isset($departments[1 + $dept_count]), 'invalid department is set (2).');
+	    
+	    // unset the first one 
+	    unset($this->company->departments[0]);
+	    $this->assertEquals($dept_count, $departments->count(), 'wrong department count (local ref).');
+	    $this->assertEquals($dept_count, $this->company->departments->count(), 'wrong department count (full ref).');
+	    $this->assertEquals($new_dept, $departments[0], 'list order wrong after element unset (local ref).');
+	    $this->assertEquals($new_dept, $this->company->departments[0], 'list order wrong after element unset (full ref).');
+	    
+	    // single valued Integer property
+	    $this->assertFalse(isset($this->company->int), 'uninitialized Integer property satisfies isset().');
+	    $this->company->int = 4;
+	    $this->assertTrue(isset($this->company->int), 'set Integer property fails isset().');
+	    $this->assertFalse(empty($this->company->int), 'non-zero Integer property satisfies empty().');
+	    $this->company->int = 0;
+	    $this->assertTrue(isset($this->company->int), 'set Integer property fails isset().');
+	    $this->assertTrue(empty($this->company->int), 'zero-valued Integer property fails empty().');
+	    unset($this->company->int);
+	    $this->assertFalse(isset($this->company->int), 'unset Integer property satisfies isset().');
+	    
+	    // multi-valued Integer property
+	    $this->assertFalse(isset($this->company->Mint[0]), 'uninitialized Integer list property satisfies isset().');
+	    $this->assertEquals(0, $this->company->Mint->count(), 'uninitialized Integer list has non-zero count.');
+	    $this->company->Mint->insert(4);
+	    $this->assertEquals(1, $this->company->Mint->count(), 'Integer list has wrong count.');
+	    $this->assertTrue(isset($this->company->Mint[0]), 'set Integer list property fails isset().');
+	    $this->assertFalse(empty($this->company->Mint[0]), 'non-zero Integer list property satisfies empty().');
+	    $this->company->Mint[0] = 0;
+	    $this->assertTrue(isset($this->company->Mint[0]), 'set Integer list property fails isset().');
+	    $this->assertTrue(empty($this->company->Mint[0]), 'zero-valued Integer list property fails empty().');
+	    unset($this->company->Mint[0]);
+	    $this->assertFalse(isset($this->company->Mint[0]), 'unset Integer list property satisfies isset().');
+	    $this->assertEquals(0, count($this->company->Mint), 'unset Integer list has non-zero count.');
+	}
+	
+	public function testNull() {
+	    $this->testDataFactory();
+	    $this->company->name = 'ACME Corp';
+	    $this->assertNotNull ($this->company->name, 'company name property is null.');
+	    $this->company->name = NULL;
+	    $this->assertNull ($this->company->name, 'nulled company name property is not null.');
+	    $this->company->name = ''; /* an empty string is not null */
+	    $this->assertNotNull ($this->company->name, 'empty company name property is null.');
+	    
+	    $this->assertNull($this->company->int, 'unset int property is not null.');
+	    $this->company->int = NULL;
+	    $this->assertNull($this->company->int, 'nulled int property is not null.');
+	    $this->company->int = 4;
+	    $this->assertNotNull($this->company->int, 'initialized int property is null.');
+	   
+	}
+	
+	public function testAddPropertyToType() {
+	    define('DAS_NAMESPACE', "das_namespace");
+		define('APP_NAMESPACE', "app_namespace");
+		define('DAS_ROOT_TYPE', "TheRootType");
+		define('DAS_OBJECT_TYPE', 'TheObjectType');
+	
+		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
+		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
+		$data_factory->addType(DAS_NAMESPACE, DAS_OBJECT_TYPE);
+	
+		/* We shall use SDO_Model_Property to test these settings. For now, just see what errors occur */
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p1', SDO_TYPE_NAMESPACE_URI, 'String', true, false, true); // multivalued, not readonly, containment
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p2', SDO_TYPE_NAMESPACE_URI, 'String', true);	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p3', SDO_TYPE_NAMESPACE_URI, 'String', array("many", "readonly"=>true));	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p4', SDO_TYPE_NAMESPACE_URI, 'String', array("blob"));	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p5', SDO_TYPE_NAMESPACE_URI, 'String', array("blob"=>"blob"));	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p6', SDO_TYPE_NAMESPACE_URI, 'String', 42);	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p7', SDO_TYPE_NAMESPACE_URI, 'String', array(42=>0));	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p8', SDO_TYPE_NAMESPACE_URI, 'String', array("many"=>42));	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p9', SDO_TYPE_NAMESPACE_URI, 'String', array("many"=>0));	
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p10', SDO_TYPE_NAMESPACE_URI, 'String', array("many"=>NULL));	
+	    
+	    /* try some default values */
+	    try {
+       	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'defmi', SDO_TYPE_NAMESPACE_URI, 'Integer', array('many'=>true,'default'=>5));
+			$this->assertTrue(false, "Failed to throw exception in multivalued setDefault test.");
+		} catch (SDO_UnsupportedOperationException $e) {
+		} catch (SDO_Exception $e) {
+					$this->assertTrue(false, 'Incorrect exception thrown in multivalued setDefault test:'.$e->getMessage());
+		}
+		
+		try {
+	        $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'defsdo', DAS_NAMESPACE, DAS_OBJECT_TYPE, array('default'=>5));
+			$this->assertTrue(false, "Failed to throw exception in DataObject setDefault test.");
+		} catch (SDO_UnsupportedOperationException $e) {
+		} catch (SDO_Exception $e) {
+					$this->assertTrue(false, 'Incorrect exception thrown in DataObject setDefault test:'.$e->getMessage());
+		}
+
+	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'defsi', SDO_TYPE_NAMESPACE_URI, 'Integer', array('default'=>5));
+	    
+	    $root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
+		$this->assertEquals($root->defsi, 5, 'Default value not set for uninitialized property');
+		$root->defsi = 10;
+		$this->assertEquals($root->defsi, 10, 'Assignment to property with default value failed');
+		unset($root->defsi);
+		$this->assertEquals($root->defsi, 5, 'Default value not set for property which has been unset');
 	}
 }
 

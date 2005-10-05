@@ -68,3 +68,14 @@ sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC)
         }
 }
 /* }}} */
+
+/* {{{ sdo_das_xml_throw_fileexception
+ */
+void sdo_das_xml_throw_fileexception(char *filename TSRMLS_DC)
+{
+        zend_class_entry *ce = sdo_xmlfileexcep_ce;
+
+		zend_throw_exception_ex(ce, 0 TSRMLS_CC, "SDO_DAS_XML_FileException thrown; file %s could not be found.\n",
+		filename);
+}
+/* }}} */
