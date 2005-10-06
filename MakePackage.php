@@ -17,10 +17,18 @@
 //            ' It has been tested on both 5.1.0b2 and 5.1.0b3.' .
 //            ' The core SDO extension and XML DAS work with 5.1.0b2.' .
 //            ' The Relational DAS requires PHP 5.1.0b3.',
-       'notes' => 'Now includes support for DB2 on both Windows and Linux as well as MySQL.' . "\n" .
-       		      'Added some tests for the XML DAS.',
+//       'notes' => 'Now includes support for DB2 on both Windows and Linux as well as MySQL.' . "\n" .
+//       		      'Added some tests for the XML DAS.',
+       'notes' => "This release fixes a number of bugs:\n"
+               . "- The XML DAS now throws a more meaningful exception when the xsd or xml file is not found\n"
+               . "- The interface to SDO_DAS_DataFactory::addPropertyToType has changed and the previous interface is deprecated\n"
+               . "- The interface to SDO_DAS_DataFactory::addProperty now supports the setting of default values\n"
+               . "- The unit tests for the XML DAS have been added to\n"
+               . "- The Relational DAS adapts to whether PDO constants are using old-style PDO_* or new-style PDO::*\n"
+               . "- The Relational DAS contains a workaround for a problem with PDO_Statement::RowCount and ODBC driver\n"
+               . "- Some SDO_DAS_ChangeSummary* constants, which were probably only used by the Relational DAS, have been changed",
        'simpleoutput' => true,
-       'version' => '0.5.1',
+       'version' => '0.5.2',
        'baseinstalldir' => 'SDO',
        'state' => 'beta',
        'license' => 'Apache 2.0',
@@ -52,7 +60,6 @@
      //                      'PHPLICENSE.txt' => 'doc'))); // same for the license
 	$packagexml->addMaintainer('gcc',0,'Graham Charters','charters@uk.ibm.com');
 	$packagexml->addMaintainer('cem',0,'Caroline Maynard','caroline.maynard@uk.ibm.com');
-	$packagexml->addMaintainer('ansriniv',0,'Anantoju Veera Srinivas','srinivas.anantoju@in.ibm.com');
 	$packagexml->addMaintainer('mfp',0,'Matthew Peters','matthew_peters@uk.ibm.com');
 //	$packagexml->addRole('php','php');
 //	$packagexml->addRole('c','src');

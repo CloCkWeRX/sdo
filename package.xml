@@ -18,12 +18,6 @@
       <role>0</role>
     </maintainer>
     <maintainer>
-      <user>ansriniv</user>
-      <name>Anantoju Veera Srinivas</name>
-      <email>srinivas.anantoju@in.ibm.com</email>
-      <role>0</role>
-    </maintainer>
-    <maintainer>
       <user>mfp</user>
       <name>Matthew Peters</name>
       <email>matthew_peters@uk.ibm.com</email>
@@ -31,14 +25,169 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.5.1</version>
-    <date>2005-08-22</date>
+    <version>0.5.2</version>
+    <date>2005-10-06</date>
     <license>Apache 2.0</license>
     <state>beta</state>
-    <notes>Now includes support for DB2 on both Windows and Linux as well as MySQL.
-Added some tests for the XML DAS.</notes>
+    <notes>This release fixes a number of bugs:
+- The XML DAS now throws a more meaningful exception when the xsd or xml file is not found
+- The interface to SDO_DAS_DataFactory::addPropertyToType has changed and the previous interface is deprecated
+- The interface to SDO_DAS_DataFactory::addProperty now supports the setting of default values
+- The unit tests for the XML DAS have been added to
+- The Relational DAS adapts to whether PDO constants are using old-style PDO_* or new-style PDO::*
+- The Relational DAS contains a workaround for a problem with PDO_Statement::RowCount and ODBC driver
+- Some SDO_DAS_ChangeSummary* constants, which were probably only used by the Relational DAS, have been changed</notes>
     <filelist>
-      <dir baseinstalldir="sdo" name="/">
+      <dir baseinstalldir="SDO" name="/">
+       <dir name="cpp">
+        <dir name="sdo">
+         <file role="src" name="ChangedDataObjectList.h"/>
+         <file role="src" name="ChangedDataObjectListImpl.cpp"/>
+         <file role="src" name="ChangedDataObjectListImpl.h"/>
+         <file role="src" name="ChangeSummary.cpp"/>
+         <file role="src" name="ChangeSummary.h"/>
+         <file role="src" name="ChangeSummaryImpl.cpp"/>
+         <file role="src" name="ChangeSummaryImpl.h"/>
+         <file role="src" name="CopyHelper.cpp"/>
+         <file role="src" name="CopyHelper.h"/>
+         <file role="src" name="DASDataObject.cpp"/>
+         <file role="src" name="DASDataObject.h"/>
+         <file role="src" name="DASProperty.cpp"/>
+         <file role="src" name="DASProperty.h"/>
+         <file role="src" name="DASType.cpp"/>
+         <file role="src" name="DASType.h"/>
+         <file role="src" name="DASValue.cpp"/>
+         <file role="src" name="DASValue.h"/>
+         <file role="src" name="DASValues.cpp"/>
+         <file role="src" name="DASValues.h"/>
+         <file role="src" name="DataFactory.cpp"/>
+         <file role="src" name="DataFactory.h"/>
+         <file role="src" name="DataFactoryImpl.cpp"/>
+         <file role="src" name="DataFactoryImpl.h"/>
+         <file role="src" name="DataGraph.cpp"/>
+         <file role="src" name="DataGraph.h"/>
+         <file role="src" name="DataGraphImpl.cpp"/>
+         <file role="src" name="DataGraphImpl.h"/>
+         <file role="src" name="DataObject.cpp"/>
+         <file role="src" name="DataObject.h"/>
+         <file role="src" name="DataObjectImpl.cpp"/>
+         <file role="src" name="DataObjectImpl.h"/>
+         <file role="src" name="DataObjectList.cpp"/>
+         <file role="src" name="DataObjectList.h"/>
+         <file role="src" name="DataObjectListImpl.cpp"/>
+         <file role="src" name="DataObjectListImpl.h"/>
+         <file role="src" name="EqualityHelper.cpp"/>
+         <file role="src" name="EqualityHelper.h"/>
+         <file role="src" name="export.h"/>
+         <file role="src" name="HelperProvider.cpp"/>
+         <file role="src" name="HelperProvider.h"/>
+         <file role="src" name="Logger.cpp"/>
+         <file role="src" name="Logger.h"/>
+         <file role="src" name="Property.cpp"/>
+         <file role="src" name="Property.h"/>
+         <file role="src" name="PropertyDefinition.cpp"/>
+         <file role="src" name="PropertyDefinition.h"/>
+         <file role="src" name="PropertyImpl.cpp"/>
+         <file role="src" name="PropertyImpl.h"/>
+         <file role="src" name="PropertyList.cpp"/>
+         <file role="src" name="PropertyList.h"/>
+         <file role="src" name="PropertySetting.cpp"/>
+         <file role="src" name="PropertySetting.h"/>
+         <file role="src" name="RefCountingObject.cpp"/>
+         <file role="src" name="RefCountingObject.h"/>
+         <file role="src" name="RefCountingPointer.cpp"/>
+         <file role="src" name="RefCountingPointer.h"/>
+         <file role="src" name="SAX2Attribute.cpp"/>
+         <file role="src" name="SAX2Attribute.h"/>
+         <file role="src" name="SAX2Attributes.cpp"/>
+         <file role="src" name="SAX2Attributes.h"/>
+         <file role="src" name="SAX2Namespaces.cpp"/>
+         <file role="src" name="SAX2Namespaces.h"/>
+         <file role="src" name="SAX2Parser.cpp"/>
+         <file role="src" name="SAX2Parser.h"/>
+         <file role="src" name="SchemaInfo.cpp"/>
+         <file role="src" name="SchemaInfo.h"/>
+         <file role="src" name="SDO.h"/>
+         <file role="src" name="SdoCheck.cpp"/>
+         <file role="src" name="SdoCheck.h"/>
+         <file role="src" name="SDODate.cpp"/>
+         <file role="src" name="SDODate.h"/>
+         <file role="src" name="SdoRuntime.cpp"/>
+         <file role="src" name="SdoRuntime.h"/>
+         <file role="src" name="SDORuntimeException.cpp"/>
+         <file role="src" name="SDORuntimeException.h"/>
+         <file role="src" name="SDOSAX2Parser.cpp"/>
+         <file role="src" name="SDOSAX2Parser.h"/>
+         <file role="src" name="SDOSchemaSAX2Parser.cpp"/>
+         <file role="src" name="SDOSchemaSAX2Parser.h"/>
+         <file role="src" name="SDOSPI.h"/>
+         <file role="src" name="SDOXMLBufferWriter.cpp"/>
+         <file role="src" name="SDOXMLBufferWriter.h"/>
+         <file role="src" name="SDOXMLFileWriter.cpp"/>
+         <file role="src" name="SDOXMLFileWriter.h"/>
+         <file role="src" name="SDOXMLStreamWriter.cpp"/>
+         <file role="src" name="SDOXMLStreamWriter.h"/>
+         <file role="src" name="SDOXMLString.cpp"/>
+         <file role="src" name="SDOXMLString.h"/>
+         <file role="src" name="SDOXMLWriter.cpp"/>
+         <file role="src" name="SDOXMLWriter.h"/>
+         <file role="src" name="SDOXSDBufferWriter.cpp"/>
+         <file role="src" name="SDOXSDBufferWriter.h"/>
+         <file role="src" name="SDOXSDFileWriter.cpp"/>
+         <file role="src" name="SDOXSDFileWriter.h"/>
+         <file role="src" name="SDOXSDStreamWriter.cpp"/>
+         <file role="src" name="SDOXSDStreamWriter.h"/>
+         <file role="src" name="SDOXSDWriter.cpp"/>
+         <file role="src" name="SDOXSDWriter.h"/>
+         <file role="src" name="Sequence.cpp"/>
+         <file role="src" name="Sequence.h"/>
+         <file role="src" name="SequenceImpl.cpp"/>
+         <file role="src" name="SequenceImpl.h"/>
+         <file role="src" name="Setting.cpp"/>
+         <file role="src" name="Setting.h"/>
+         <file role="src" name="SettingList.cpp"/>
+         <file role="src" name="SettingList.h"/>
+         <file role="src" name="Type.cpp"/>
+         <file role="src" name="Type.h"/>
+         <file role="src" name="TypeDefinition.cpp"/>
+         <file role="src" name="TypeDefinition.h"/>
+         <file role="src" name="TypeDefinitions.cpp"/>
+         <file role="src" name="TypeDefinitions.h"/>
+         <file role="src" name="TypeImpl.cpp"/>
+         <file role="src" name="TypeImpl.h"/>
+         <file role="src" name="TypeList.cpp"/>
+         <file role="src" name="TypeList.h"/>
+         <file role="src" name="XMLDocument.cpp"/>
+         <file role="src" name="XMLDocument.h"/>
+         <file role="src" name="XMLDocumentImpl.cpp"/>
+         <file role="src" name="XMLDocumentImpl.h"/>
+         <file role="src" name="XMLHelper.cpp"/>
+         <file role="src" name="XMLHelper.h"/>
+         <file role="src" name="XMLHelperImpl.cpp"/>
+         <file role="src" name="XMLHelperImpl.h"/>
+         <file role="src" name="XMLQName.cpp"/>
+         <file role="src" name="XMLQName.h"/>
+         <file role="src" name="XpathHelper.cpp"/>
+         <file role="src" name="XpathHelper.h"/>
+         <file role="src" name="XSDHelper.cpp"/>
+         <file role="src" name="XSDHelper.h"/>
+         <file role="src" name="XSDHelperImpl.cpp"/>
+         <file role="src" name="XSDHelperImpl.h"/>
+         <file role="src" name="XSDPropertyInfo.cpp"/>
+         <file role="src" name="XSDPropertyInfo.h"/>
+         <file role="src" name="XSDTypeInfo.cpp"/>
+         <file role="src" name="XSDTypeInfo.h"/>
+        </dir> <!-- cpp/sdo -->
+        <dir name="xmldas">
+         <file role="src" name="XMLDAS.cpp"/>
+         <file role="src" name="XMLDAS.h"/>
+         <file role="src" name="XMLDASCheck.cpp"/>
+         <file role="src" name="XMLDASCheck.h"/>
+         <file role="src" name="XMLDASExport.h"/>
+         <file role="src" name="XMLDASImpl.cpp"/>
+         <file role="src" name="XMLDASImpl.h"/>
+        </dir> <!-- cpp/xmldas -->
+       </dir> <!-- cpp -->
        <dir name="DAS">
         <file role="php" name="Relational.php"/>
         <dir name="Relational">
@@ -54,6 +203,8 @@ Added some tests for the XML DAS.</notes>
          <file role="php" name="KeyObjectMap.php"/>
          <file role="php" name="NonContainmentReference.php"/>
          <file role="php" name="ObjectModel.php"/>
+         <file role="php" name="PDOConstants.colon.inc.php"/>
+         <file role="php" name="PDOConstants.underscore.inc.php"/>
          <file role="php" name="Plan.php"/>
          <file role="php" name="PrimaryKey.php"/>
          <file role="php" name="ReferencesModel.php"/>
@@ -74,6 +225,7 @@ Added some tests for the XML DAS.</notes>
           <file role="php" name="1c-RUunsetPrimitive.php"/>
           <file role="php" name="1cd-C.php"/>
           <file role="php" name="1cd-CRUD.php"/>
+          <file role="php" name="1cd-CRUDnull.php"/>
           <file role="php" name="1cd-RA.php"/>
           <file role="php" name="1cde-C.php"/>
           <file role="php" name="1cde-CRU.php"/>
@@ -105,158 +257,6 @@ Added some tests for the XML DAS.</notes>
          </dir> <!-- DAS/Relational/Tests -->
         </dir> <!-- DAS/Relational -->
        </dir> <!-- DAS -->
-       <dir name="sdolib">
-        <dir name="src">
-         <dir name="sdo">
-          <file role="src" name="ChangedDataObjectList.cpp"/>
-          <file role="src" name="ChangedDataObjectList.h"/>
-          <file role="src" name="ChangedDataObjectListImpl.cpp"/>
-          <file role="src" name="ChangedDataObjectListImpl.h"/>
-          <file role="src" name="ChangeSummary.cpp"/>
-          <file role="src" name="ChangeSummary.h"/>
-          <file role="src" name="ChangeSummaryImpl.cpp"/>
-          <file role="src" name="ChangeSummaryImpl.h"/>
-          <file role="src" name="CopyHelper.cpp"/>
-          <file role="src" name="CopyHelper.h"/>
-          <file role="src" name="DASDataFactory.cpp"/>
-          <file role="src" name="DASDataFactory.h"/>
-          <file role="src" name="DASDataFactoryImpl.cpp"/>
-          <file role="src" name="DASDataFactoryImpl.h"/>
-          <file role="src" name="DASDataObject.cpp"/>
-          <file role="src" name="DASDataObject.h"/>
-          <file role="src" name="DASProperty.cpp"/>
-          <file role="src" name="DASProperty.h"/>
-          <file role="src" name="DASType.cpp"/>
-          <file role="src" name="DASType.h"/>
-          <file role="src" name="DASValue.cpp"/>
-          <file role="src" name="DASValue.h"/>
-          <file role="src" name="DASValues.cpp"/>
-          <file role="src" name="DASValues.h"/>
-          <file role="src" name="DataFactory.cpp"/>
-          <file role="src" name="DataFactory.h"/>
-          <file role="src" name="DataObject.cpp"/>
-          <file role="src" name="DataObject.h"/>
-          <file role="src" name="DataObjectImpl.cpp"/>
-          <file role="src" name="DataObjectImpl.h"/>
-          <file role="src" name="DataObjectList.cpp"/>
-          <file role="src" name="DataObjectList.h"/>
-          <file role="src" name="DataObjectListImpl.cpp"/>
-          <file role="src" name="DataObjectListImpl.h"/>
-          <file role="src" name="EqualityHelper.cpp"/>
-          <file role="src" name="EqualityHelper.h"/>
-          <file role="src" name="export.h"/>
-          <file role="src" name="Logger.cpp"/>
-          <file role="src" name="Logger.h"/>
-          <file role="src" name="Property.cpp"/>
-          <file role="src" name="Property.h"/>
-          <file role="src" name="PropertyImpl.cpp"/>
-          <file role="src" name="PropertyImpl.h"/>
-          <file role="src" name="PropertyList.cpp"/>
-          <file role="src" name="PropertyList.h"/>
-          <file role="src" name="RefCountingObject.cpp"/>
-          <file role="src" name="RefCountingObject.h"/>
-          <file role="src" name="RefCountingPointer.cpp"/>
-          <file role="src" name="RefCountingPointer.h"/>
-          <file role="src" name="SDO.h"/>
-          <file role="src" name="SdoCheck.cpp"/>
-          <file role="src" name="SdoCheck.h"/>
-          <file role="src" name="SDODate.cpp"/>
-          <file role="src" name="SDODate.h"/>
-          <file role="src" name="SdoRuntime.cpp"/>
-          <file role="src" name="SdoRuntime.h"/>
-          <file role="src" name="SDORuntimeException.cpp"/>
-          <file role="src" name="SDORuntimeException.h"/>
-          <file role="src" name="SDOSPI.h"/>
-          <file role="src" name="Sequence.cpp"/>
-          <file role="src" name="Sequence.h"/>
-          <file role="src" name="SequenceImpl.cpp"/>
-          <file role="src" name="SequenceImpl.h"/>
-          <file role="src" name="Setting.cpp"/>
-          <file role="src" name="Setting.h"/>
-          <file role="src" name="SettingList.cpp"/>
-          <file role="src" name="SettingList.h"/>
-          <file role="src" name="Type.cpp"/>
-          <file role="src" name="Type.h"/>
-          <file role="src" name="TypeHelper.cpp"/>
-          <file role="src" name="TypeHelper.h"/>
-          <file role="src" name="TypeImpl.cpp"/>
-          <file role="src" name="TypeImpl.h"/>
-          <file role="src" name="TypeList.cpp"/>
-          <file role="src" name="TypeList.h"/>
-          <file role="src" name="XMLDocument.cpp"/>
-          <file role="src" name="XMLDocument.h"/>
-          <file role="src" name="XMLHelper.cpp"/>
-          <file role="src" name="XMLHelper.h"/>
-          <file role="src" name="XpathHelper.cpp"/>
-          <file role="src" name="XpathHelper.h"/>
-          <file role="src" name="XSDHelper.cpp"/>
-          <file role="src" name="XSDHelper.h"/>
-         </dir> <!-- sdolib/src/sdo -->
-         <dir name="xmldas">
-          <file role="src" name="HelperProvider.cpp"/>
-          <file role="src" name="HelperProvider.h"/>
-          <file role="src" name="PropertyDefinition.cpp"/>
-          <file role="src" name="PropertyDefinition.h"/>
-          <file role="src" name="PropertySetting.cpp"/>
-          <file role="src" name="PropertySetting.h"/>
-          <file role="src" name="SAX2Attribute.cpp"/>
-          <file role="src" name="SAX2Attribute.h"/>
-          <file role="src" name="SAX2Attributes.cpp"/>
-          <file role="src" name="SAX2Attributes.h"/>
-          <file role="src" name="SAX2Namespaces.cpp"/>
-          <file role="src" name="SAX2Namespaces.h"/>
-          <file role="src" name="SAX2Parser.cpp"/>
-          <file role="src" name="SAX2Parser.h"/>
-          <file role="src" name="SchemaInfo.cpp"/>
-          <file role="src" name="SchemaInfo.h"/>
-          <file role="src" name="SDOSAX2Parser.cpp"/>
-          <file role="src" name="SDOSAX2Parser.h"/>
-          <file role="src" name="SDOSchemaSAX2Parser.cpp"/>
-          <file role="src" name="SDOSchemaSAX2Parser.h"/>
-          <file role="src" name="SDOXMLBufferWriter.cpp"/>
-          <file role="src" name="SDOXMLBufferWriter.h"/>
-          <file role="src" name="SDOXMLFileWriter.cpp"/>
-          <file role="src" name="SDOXMLFileWriter.h"/>
-          <file role="src" name="SDOXMLStreamWriter.cpp"/>
-          <file role="src" name="SDOXMLStreamWriter.h"/>
-          <file role="src" name="SDOXMLString.cpp"/>
-          <file role="src" name="SDOXMLString.h"/>
-          <file role="src" name="SDOXMLWriter.cpp"/>
-          <file role="src" name="SDOXMLWriter.h"/>
-          <file role="src" name="SDOXSDBufferWriter.cpp"/>
-          <file role="src" name="SDOXSDBufferWriter.h"/>
-          <file role="src" name="SDOXSDFileWriter.cpp"/>
-          <file role="src" name="SDOXSDFileWriter.h"/>
-          <file role="src" name="SDOXSDStreamWriter.cpp"/>
-          <file role="src" name="SDOXSDStreamWriter.h"/>
-          <file role="src" name="SDOXSDWriter.cpp"/>
-          <file role="src" name="SDOXSDWriter.h"/>
-          <file role="src" name="TypeDefinition.cpp"/>
-          <file role="src" name="TypeDefinition.h"/>
-          <file role="src" name="TypeDefinitions.cpp"/>
-          <file role="src" name="TypeDefinitions.h"/>
-          <file role="src" name="XMLDAS.cpp"/>
-          <file role="src" name="XMLDAS.h"/>
-          <file role="src" name="XMLDASCheck.cpp"/>
-          <file role="src" name="XMLDASCheck.h"/>
-          <file role="src" name="XMLDASExport.h"/>
-          <file role="src" name="XMLDASImpl.cpp"/>
-          <file role="src" name="XMLDASImpl.h"/>
-          <file role="src" name="XMLDocumentImpl.cpp"/>
-          <file role="src" name="XMLDocumentImpl.h"/>
-          <file role="src" name="XMLHelperImpl.cpp"/>
-          <file role="src" name="XMLHelperImpl.h"/>
-          <file role="src" name="XMLQName.cpp"/>
-          <file role="src" name="XMLQName.h"/>
-          <file role="src" name="XSDHelperImpl.cpp"/>
-          <file role="src" name="XSDHelperImpl.h"/>
-          <file role="src" name="XSDPropertyInfo.cpp"/>
-          <file role="src" name="XSDPropertyInfo.h"/>
-          <file role="src" name="XSDTypeInfo.cpp"/>
-          <file role="src" name="XSDTypeInfo.h"/>
-         </dir> <!-- sdolib/src/xmldas -->
-        </dir> <!-- sdolib/src -->
-       </dir> <!-- sdolib -->
        <dir name="tests">
         <file role="test" name="001.phpt"/>
         <file role="test" name="002.phpt"/>
@@ -266,6 +266,7 @@ Added some tests for the XML DAS.</notes>
         <file role="test" name="company.xml"/>
         <file role="test" name="company.xsd"/>
         <file role="test" name="company1.xsd"/>
+        <file role="test" name="company_noxmldecl.xml"/>
         <file role="test" name="SDOAPITest.php"/>
         <file role="test" name="test.inc"/>
         <file role="test" name="XMLDASTest.php"/>
@@ -310,6 +311,20 @@ Added some tests for the XML DAS.</notes>
       <state>beta</state>
       <notes>Now includes support for DB2 on both Windows and Linux as well as MySQL.
 Added some tests for the XML DAS.</notes>
+    </release>
+    <release>
+      <version>0.5.2</version>
+      <date>2005-10-06</date>
+      <license>Apache 2.0</license>
+      <state>beta</state>
+      <notes>This release fixes a number of bugs:
+- The XML DAS now throws a more meaningful exception when the xsd or xml file is not found
+- The interface to SDO_DAS_DataFactory::addPropertyToType has changed and the previous interface is deprecated
+- The interface to SDO_DAS_DataFactory::addProperty now supports the setting of default values
+- The unit tests for the XML DAS have been added to
+- The Relational DAS adapts to whether PDO constants are using old-style PDO_* or new-style PDO::*
+- The Relational DAS contains a workaround for a problem with PDO_Statement::RowCount and ODBC driver
+- Some SDO_DAS_ChangeSummary* constants, which were probably only used by the Relational DAS, have been changed</notes>
     </release>
   </changelog>
 </package>
