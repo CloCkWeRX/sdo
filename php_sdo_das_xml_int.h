@@ -25,11 +25,11 @@
 #define _PHP_SDO_DEFS_H
 
 #include "php_sdo_int.h"
-#include "SDO.h"
-#include "DataFactory.h"
-#include "XMLDASExport.h"
-#include "XMLDAS.h"
-#include "XMLDocument.h"
+#include "commonj/sdo/SDO.h"
+#include "commonj/sdo/DataFactory.h"
+#include "commonj/sdo/xmldas/XMLDASExport.h"
+#include "commonj/sdo/xmldas/XMLDAS.h"
+#include "commonj/sdo/XMLDocument.h"
 
 
 using namespace commonj;
