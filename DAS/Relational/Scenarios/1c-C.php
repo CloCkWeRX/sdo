@@ -63,6 +63,7 @@ $root = $das  -> createRootDataObject();
 $acme = $root -> createDataObject('company');
 
 $acme->name = "Acme";
+$acme->employee_of_the_month = null;
 
 /**************************************************************
  * Get a PDO database connection

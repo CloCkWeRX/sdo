@@ -27,6 +27,8 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
+#include <sstream>
+
 #include "php.h"
 #include "zend_exceptions.h"
 
@@ -88,8 +90,7 @@ static int sdo_sequence_valid(sdo_seq_object *my_object, long sequenceIndex, int
 				return_value = seq.getBooleanValue(sequenceIndex);
 				break;
 			case Type::BytesType:
-				/* magic usage returns the actual length */
-				return_value = (seq.getBytesValue(sequenceIndex, 0, 0) != 0);
+				return_value = (seq.getLength(sequenceIndex) != 0);
 				break;
 			case Type::CharacterType:
 				return_value = seq.getBooleanValue(sequenceIndex);
@@ -161,10 +162,10 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequenceInd
 			RETVAL_LONG(seq.getByteValue(sequenceIndex));
 			break;
 		case Type::BytesType:
-			/* magic usage returns the actual length */
-			bytes_len = seq.getBytesValue(sequenceIndex, 0, 0);
-			bytes_value = (char *)emalloc(bytes_len);
+			bytes_len = seq.getLength(sequenceIndex);
+			bytes_value = (char *)emalloc(1 + bytes_len);
 			bytes_len = seq.getBytesValue(sequenceIndex, bytes_value, bytes_len);
+			bytes_value[bytes_len] = '\0';
 			RETVAL_STRINGL(bytes_value, bytes_len, 0);
 			break;
 		case Type::CharacterType:
@@ -586,6 +587,83 @@ static HashTable *sdo_sequence_get_properties(zval *object TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sdo_sequence_cast_object
+*/ 
+static int sdo_sequence_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+{
+	sdo_seq_object	*my_object;
+	ostringstream	 print_buf;
+	zval			 free_obj;
+	int				 rc = SUCCESS;
+	int				 entries;
+	
+	if (should_free) {
+		free_obj = *writeobj;
+	}
+	
+	my_object = sdo_sequence_get_instance(readobj TSRMLS_CC);
+	if (my_object == (sdo_seq_object *)NULL) {
+		ZVAL_NULL(writeobj);
+		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+		rc = FAILURE;
+	} else {		
+		Sequence& seq = *my_object->seqp;
+		try {			
+			print_buf << "object(" << CLASS_NAME << ")#" <<
+				readobj->value.obj.handle << " (" << seq.size() << ") {";
+			
+			for (unsigned int i = 0; i < seq.size(); i++) {
+				if (i > 0) print_buf << "; ";
+				if (seq.isText(i)) {
+					print_buf << '\"' << seq.getCStringValue(i) << '\"';
+				} else {
+					const Property& property = seq.getProperty(i);
+					print_buf << property.getName();
+					if (property.isMany()) {
+						print_buf << '[' << seq.getListIndex(i) << ']';
+					}
+					if (property.getType().isDataType()) {
+						print_buf << "=>\"" << seq.getCStringValue(i) << '\"';
+					} 
+				}
+			}
+			
+			print_buf << '}';
+			
+			string print_string = print_buf.str().substr(0, SDO_TOSTRING_MAX);
+			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+			
+		} catch (SDORuntimeException e) {
+			ZVAL_NULL(writeobj);
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+			rc = FAILURE;
+		}
+	}	
+	
+	switch(type) {
+	case IS_STRING:
+		convert_to_string(writeobj);
+		break;
+	case IS_BOOL:
+		convert_to_boolean(writeobj);
+		break;
+	case IS_LONG:
+		convert_to_long(writeobj);
+		break;
+	case IS_DOUBLE:
+		convert_to_double(writeobj);
+		break;
+	default:
+		rc = FAILURE;
+	}
+	
+	if (should_free) {
+		zval_dtor(&free_obj);
+	}
+	return rc;
+}
+/* }}} */
+
 /* {{{ sdo_sequence_get_iterator
  */
 zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) {
@@ -768,6 +846,7 @@ void sdo_sequence_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_sequence_object_handlers.has_dimension = sdo_sequence_has_dimension;
 	sdo_sequence_object_handlers.unset_dimension = sdo_sequence_unset_dimension;
 	sdo_sequence_object_handlers.get_properties = sdo_sequence_get_properties;
+	sdo_sequence_object_handlers.cast_object = sdo_sequence_cast_object;
 	sdo_sequence_object_handlers.count_elements = sdo_sequence_count_elements;
 
 	sdo_sequence_iterator_funcs.dtor = sdo_sequence_iterator_dtor;

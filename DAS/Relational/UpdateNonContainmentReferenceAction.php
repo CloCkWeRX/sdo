@@ -22,19 +22,17 @@ $Id$
 */
 
 require_once 'SDO/DAS/Relational/DataObjectHelper.php';
+require_once 'SDO/DAS/Relational/DatabaseHelper.php';
 
 class SDO_DAS_Relational_UpdateNonContainmentReferenceAction extends SDO_DAS_Relational_Action {
 	
-	/**
-	* execute self
-	*/
+	private $object_model;
 	private $from_who;       // the object containing the n-c-ref 
 	private $property_name;  // the name of the property which is the n-c-ref
 	private $who_to;         // the object it points to
 	
 	public function __construct($object_model, $from_who, $property_name, $who_to) 
 	{
-		// TODO this looks a bit odd - yet can;t call parent constructor as no $do		
 		$this->object_model = $object_model;
 		$this->from_who = $from_who;
 		$this->property_name = $property_name;
@@ -47,9 +45,9 @@ class SDO_DAS_Relational_UpdateNonContainmentReferenceAction extends SDO_DAS_Rel
 		$pk_to 		= SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model,$this->who_to);
 		$type_name 	= SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->from_who);
 		$name_of_the_pk_column = $this->object_model->getPropertyRepresentingPrimaryKeyFromType($type_name);
-		$stmt 	=  "UPDATE $type_name set $this->property_name = ? where $name_of_the_pk_column = ?" ;
+		$stmt 	=  "UPDATE $type_name SET $this->property_name = ? WHERE $name_of_the_pk_column = ?" ;
 		$value_list = array($pk_to, $pk_from);
-		$this->executeStatement($dbh,$stmt,$value_list);
+		SDO_DAS_Relational_DatabaseHelper::executeStatement($dbh,$stmt,$value_list);
 	}
 	
 	public function toString() 

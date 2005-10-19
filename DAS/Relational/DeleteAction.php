@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -28,83 +28,87 @@ $Id$
 require_once 'SDO/DAS/Relational/Action.php';
 require_once 'SDO/DAS/Relational/ObjectModel.php';
 require_once 'SDO/DAS/Relational/DataObjectHelper.php';
+require_once 'SDO/DAS/Relational/DatabaseHelper.php';
+
 
 class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
 
-	private $old_values;
+	private $object_model;
+	private $do;
+	private $settings_for_where_clause = array(); // computed in constructor, settings to be tested in WHERE clause
+	private $spawned_actions = array();
+	private $stmt = '';
+	private $value_list = array();
+
 
 	public function __construct($object_model,$do, $old_values)
 	{
-		parent::__construct($object_model,$do);
-		$this->old_values = $old_values;
+		$this->object_model = $object_model;
+		$this->do = $do;
+
 		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($do);
+
+		$old_values_of_any_changed_properties = SDO_DAS_Relational_SettingListHelper::getSettingsAsArray($old_values);
+		foreach($this->do as $prop => $value) {
+			if ($this->object_model->isContainmentReferenceProperty($type, $prop)) {
+				// We ignore containment references - any changes to them appear elsewhere in the C/S
+				continue;
+			}
+			if (array_key_exists($prop, $old_values_of_any_changed_properties)) {
+				$this->settings_for_where_clause[$prop] = $old_values_of_any_changed_properties[$prop];
+			} else {
+				$this->settings_for_where_clause[$prop] = $value;
+			}
+		}
+		if (count($this->settings_for_where_clause) > 0) {
+			$this->convertNonContainmentReferencesFromObjectToPK();
+			$this->stmt = $this->toSQL($this->settings_for_where_clause);
+			$this->value_list = $this->buildValueList();
+		}
+
 		if (SDO_DAS_Relational::DEBUG_BUILD_PLAN ) {
 			echo "adding update to plan for type $type\n";
 		}
 	}
 
-	private function getOriginalSettingsOfChangedProperties($old_values)
-	{
-		foreach($old_values as $setting) {
-			$property_name 	= $setting->getPropertyName();
-			$old_value 		= $setting->getValue();
-			if ($old_value === null) {
-				// ignore
-			} else {
-				$original_settings_of_changed_properties[$property_name] = $old_value;
-			}
-		}
-		return $original_settings_of_changed_properties;
-	}
-
-	public function getAllOriginalSettings()
-	{
-		$current_settings = SDO_DAS_Relational_DataObjectHelper::getCurrentPrimitiveSettings($this->do, $this->object_model);
-		$original_settings_of_changed_properties = $this->getOriginalSettingsOfChangedProperties($this->old_values);
-		foreach($current_settings as $name => $value) {
-			if (array_key_exists($name, $original_settings_of_changed_properties)) {
-				$original_settings_of_all_properties[$name] = $original_settings_of_changed_properties[$name];
-			} else {
-				$original_settings_of_all_properties[$name] = $this->do[$name];
-			}
-		}
-		return $original_settings_of_all_properties;
-	}
-
 	public function execute($dbh)
 	{
-		$test = $this->getOriginalSettingsOfChangedProperties($this->old_values);
-		$all_original_settings 			= $this->getAllOriginalSettings();
-		// can end up with empty $updated settings if the only setting changed was a containment ref that does not
-		// correspond to a column
-		if (count($all_original_settings) > 0) {
-			$stmt = $this->toSQL($all_original_settings);
-			foreach($all_original_settings as $name => $value) {
-				$value_list[] = $value;
-			}
-			$this->executeStatement($dbh,$stmt,$value_list);
+		if ($this ->stmt != '') {
+			SDO_DAS_Relational_DatabaseHelper::executeStatement($dbh,$this->stmt,$this->value_list);
 		}
-		$spawned_actions = array();
-		return $spawned_actions;
+		return $this->spawned_actions;
 	}
 
-	private function toSQL($original_values_as_nv_pairs)
+	public function convertNonContainmentReferencesFromObjectToPK() {
+		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
+		foreach($this->settings_for_where_clause as $prop => $value) {
+			if ($value === null) continue;
+			if ($this->object_model->isNonContainmentReferenceProperty($type, $prop)) {
+				$pk = SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model, $value);
+				$this->settings_for_where_clause[$prop] = $pk;
+			}
+		}
+	}
+
+	public function buildValueList() {
+		$value_list = array();
+		foreach($this->settings_for_where_clause as $name => $value) {
+			if ($value === null) {
+				// no-op - don't add to value list as we will have put IS NULL in the UPDATE statement
+			} else {
+				$value_list[] = $value;
+			}
+		}
+		return $value_list;
+	}
+
+	public function toSQL()
 	{
 		$table_name = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
 		$stmt   = 'DELETE FROM ' . $table_name . ' ';
-		$stmt .= $this->constructWhereClauseFromOriginalValues($original_values_as_nv_pairs);
+		$stmt .= $this->constructWhereClauseFromOriginalValues($this->settings_for_where_clause);
 		$stmt .= ';'  ;
 		return $stmt;
-	}
-
-	private function constructSetClauseFromChangedValues($changed_properties_as_nv_pairs)
-	{
-		foreach($changed_properties_as_nv_pairs as $name => $value) {
-			$sql_settings[] = $this->makeAnSQLSetting($name, $value);
-		}
-		$set_clause = 'SET ';
-		$set_clause .= implode( ',' , $sql_settings );
-		return $set_clause;
 	}
 
 	private function constructWhereClauseFromOriginalValues($original_values_as_nv_pairs)
@@ -117,46 +121,12 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
 		return $where_clause;
 	}
 
-	private function makeAnSQLSetting($name, $value)
-	{
-		// 		TODO NULLS support needed before turning on this code hence asssert
-		//		assert(false,"NULLS support needed before you can turn on this code");
-		//		if (/* the value is NULL */) {
-		//			$sql_setting = $name . '=NULL';
-		//			return $sql_setting;
-		//		}
-
-		//      TODO convert booleans to 1 or 0. Not needed at the moment because all types in the DO are String
-		//		if (gettype($value) == 'boolean') {
-		//			if ($value) {
-		//				$sql_setting = $name . '="1"';
-		//			} else {
-		//				$sql_setting = $name . '="0"';
-		//			}
-		//			return $sql_setting;
-		//		}
-		$sql_setting = $name . '="' . $value . '"';
-		return $sql_setting;
-	}
-
 	private function makeAnSQLCompare($name, $value)
 	{
-		//		TODO NULLS support needed before turning on this code hence asssert
-		//		assert(false,"NULLS support needed before you can turn on this code");
-		//		if ($value === null) {
-		//			$sql_setting = $name . ' IS NULL';
-		//			return $sql_setting;
-		//		}
-		//
-		//		TODO convert booleans to 1 or 0. Not needed at the moment because all types in the DO are String
-		//		if (gettype($value) == 'boolean') {
-		//			if ($value) {
-		//				$sql_setting = $name . '="1"';
-		//			} else {
-		//				$sql_setting = $name . '="0"';
-		//			}
-		//			return $sql_setting;
-		//		}
+		if ($value === null) {
+			$sql_setting = $name . ' IS NULL';
+			return $sql_setting;
+		}
 		$sql_setting = "$name = ?";
 		return $sql_setting;
 	}
@@ -169,6 +139,16 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
 		$str .= ']';
 		return $str;
 	}
+
+	public function getSQL() { // supplied for unit test
+		return $this->stmt;
+	}
+
+	public function getValueList() { // supplied for unit test
+		return $this->value_list;
+	}
+
+
 
 }
 

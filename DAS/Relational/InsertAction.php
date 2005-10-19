@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -36,49 +36,92 @@ require_once 'SDO/DAS/Relational/Action.php';
 require_once 'SDO/DAS/Relational/ObjectModel.php';
 require_once 'SDO/DAS/Relational/UpdateNonContainmentReferenceAction.php';
 require_once 'SDO/DAS/Relational/DataObjectHelper.php';
+require_once 'SDO/DAS/Relational/DatabaseHelper.php';
 
 class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 
+	private $object_model;
+	private $do;
+	private $spawned_actions = array();
+	private $settings_for_insert = array();
+	private $stmt = '';
+	private $value_list = array();
+
 	public function __construct($object_model,$do)
 	{
-		parent::__construct($object_model,$do);
-		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($do);
+		$this->object_model = $object_model;
+		$this->do = $do;
+		$this->computeSettingsForInsert();
+		$this->convertNonContainmentReferencesFromObjectToPK();
+
+		// the settings are not yet complete but we can do no more for the moment.
+		// the settings get completed when the previous insert has executed and we can get hold of the PK for the
+		// parent.
+
 		if (SDO_DAS_Relational::DEBUG_BUILD_PLAN ) {
+			$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($do);
 			echo "adding insert to plan for type $type\n";
 		}
 	}
 
-	/**
-	* Break object into name-value pairs, add a parent PK if necessary, insert, and retrieve and store own PK
-	*/
-	public function execute($dbh)
-	{
-		$name_value_pairs 	= SDO_DAS_Relational_DataObjectHelper::getCurrentPrimitiveSettings($this->do, $this->object_model);
-		$name_value_pairs   = $this->addFKToParentToNameValuePairs($this->do,$name_value_pairs);
-		$spawned_actions 	= $this->spawnLaterUpdatesForNonContainmentReferences($this->do);
-
-		$stmt = $this->toSQL($name_value_pairs);
-		foreach($name_value_pairs as $name => $value) {
-			$value_list[] = $value;
+	public function computeSettingsForInsert() {
+		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
+		foreach($this->do as $prop => $value) {
+			if ($this->object_model->isContainmentReferenceProperty($type, $prop)) {
+				// We ignore containment references - updates to them will appear as creates or deletes elsewhere in the C/S
+				continue;
+			}
+			$this->settings_for_insert[$prop] = $this->do[$prop];
 		}
-		$this->executeStatement($dbh,$stmt,$value_list);
-		$this->storeThisObjectsPrimaryKey($dbh);
-
-		return $spawned_actions;
 	}
 
-	private function addFKToParentToNameValuePairs($do,$name_value_pairs)
+	//TODO have three copies of this method in each of I/U/D. Not happy
+	public function convertNonContainmentReferencesFromObjectToPK() {
+		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
+		foreach($this->settings_for_insert as $prop => $value) {
+			if ($value === null) continue;
+			if ($this->object_model->isNonContainmentReferenceProperty($type, $prop)) {
+				$pk = SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model, $value);
+				if ($pk === null) { // this must point to an object just created with no PK set yet, so spawn a later update
+					$who_to = $this->settings_for_insert[$prop];
+					$this->spawned_actions[] = new SDO_DAS_Relational_UpdateNonContainmentReferenceAction($this->object_model,$this->do, $prop, $who_to);
+					unset($this->settings_for_insert[$prop]);
+				} else {
+					$this->settings_for_insert[$prop] = $pk;
+				}
+			}
+		}
+	}
+
+	public function execute($dbh)
 	{
-		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($do);
+		$this->addFKToParentToSettings();
+		$this->stmt = $this->toSQL();
+		$this->buildValueList();
+
+		SDO_DAS_Relational_DatabaseHelper::executeStatement($dbh,$this->stmt,$this->value_list);
+		$this->storeThisObjectsPrimaryKey($dbh);
+
+		return $this->spawned_actions;
+	}
+
+	public function buildValueList() {
+		foreach($this->settings_for_insert as $name => $value) {
+			$this->value_list[] = $value;
+		}
+	}
+
+	public function addFKToParentToSettings()
+	{
+		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
 		$containing_reference = $this->object_model->getContainingReferenceFromChildType($type);
 		if ($containing_reference != null) {
 			$fk 				= $this->object_model->getTheFKSupportingAContainmentReference($containing_reference);
 			$from_column_name 	= $fk->getFromColumnName();
-			$parent_do 			= $do->getContainer();
+			$parent_do 			= $this->do->getContainer();
 			$parentPK 			= SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model,$parent_do);
-			$name_value_pairs[$from_column_name] = $parentPK;
+			$this->settings_for_insert[$from_column_name] = $parentPK;
 		}
-		return $name_value_pairs;
 	}
 
 	private function spawnLaterUpdatesForNonContainmentReferences($do)
@@ -90,7 +133,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 				if (isset($do[$prop])) {
 					// TODO handle null
 					$who_to = $do[$prop];
-					// TODO we could check to see if the pk is already set and if so pick it up here and now 
+					// TODO we could check to see if the pk is already set and if so pick it up here and now
 					$spawned_actions[] = new SDO_DAS_Relational_UpdateNonContainmentReferenceAction($this->object_model,$do, $prop, $who_to);
 				}
 
@@ -99,9 +142,9 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 		return $spawned_actions;
 	}
 
-	public function toSQL($name_value_pairs)
+	public function toSQL()
 	{
-		foreach($name_value_pairs as $name => $value) {
+		foreach($this->settings_for_insert as $name => $value) {
 			$name_list[] = $name;
 			$placeholder_list[] = "?";
 		}
@@ -119,7 +162,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 		if (gettype(PDO_FETCH_ASSOC) == 'string') {
 			include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
 		} else {
-			include_once "SDO/DAS/Relational/PDOConstants.underscore.inc.php";			
+			include_once "SDO/DAS/Relational/PDOConstants.underscore.inc.php";
 		}
 
 		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
@@ -129,8 +172,8 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 			if (substr($pdo_client_version,0,4) == 'ODBC') {
 				// looks like DB2
 				foreach($dbh->query('values identity_val_local()') as $row) {
-  					$last_insert_id = $row[1]; 
-				}				
+					$last_insert_id = $row[1];
+				}
 			} else {
 				// assume MySQL
 				$last_insert_id = $dbh->lastInsertId();
@@ -143,7 +186,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 					throw new SDO_DAS_Relational_Exception($bug_msg);
 				}
 			}
-			
+
 			if (SDO_DAS_Relational::DEBUG_EXECUTE_PLAN) {
 				echo "executed obtainLastInsertId() and obtained $last_insert_id\n";
 			}
@@ -159,6 +202,18 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 		$str .= ']';
 		return $str;
 	}
+
+	// Following functions supplied so unit test can inspect the update
+	// Ideally they would not be public but no choice
+	public function getValueList() { // supplied for unit test
+		return $this->value_list;
+	}
+
+	public function getSQL() { // supplied for unit test
+		return $this->stmt;
+	}
+
+
 
 }
 

@@ -1,5 +1,5 @@
 <?php 
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -87,111 +87,87 @@ class TestInsertAction extends PHPUnit2_Framework_TestCase
 		$this->das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metadata);
 	}
 
-	public function testConstruct() {
+	public function testConstructor_TakesObjectModelAndDataObject() {
 		$root = $this->das->createRootDataObject();
 		$company = $root->createDataObject('company');
 		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
 		$this->assertTrue(get_class($insert_action) == 'SDO_DAS_Relational_InsertAction','Construction of InsertAction failed');
 	}
 
-	public function testBasicConvertToString() {
+	public function testToSQL_ContainsPropertyNameAndPlaceholder() {
 		$root = $this->das->createRootDataObject();
-		$company = $root->createDataObject('company');
-		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
-		$str = $insert_action->toString();
-		$this->assertTrue(strpos($str,'company') >0);
-	}
-
-	public function testSimpleConvertToSQL() {
-		$root = $this->das->createRootDataObject();
+		$root->getChangeSummary()->beginLogging();
 		$company = $root->createDataObject('company');
 		$company->name = 'acme';
 		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
-		$name_value_pairs = SDO_DAS_Relational_DataObjectHelper::getCurrentPrimitiveSettings($company,$this->object_model);
-		$sql = $insert_action->toSQL($name_value_pairs);
-		$this->assertTrue(strpos($sql,'name')>0);
-		$this->assertTrue(strpos($sql,'acme')>0);
+//		$insert_action->addFKToParentToSettings();
+		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$insert_action->buildValueList();
+		$value_list = $insert_action->getValueList();
+		$this->assertTrue($sql == 'INSERT INTO company (name) VALUES (?);', "Generated SQL was incorrect: $sql");
+		$this->assertTrue($value_list[0] == 'acme', 'First entry in value list should be "acme" but was ' . $value_list[0]);
 	}
 
-	///////////////////////////////////////////////////////////
-	// tests relating to nulls removed - not supported
-	///////////////////////////////////////////////////////////
-	
-//	public function testNullDetectedAndConverted() {
-//		$company = $this->das->create();
-//		$company->name = 'acme';
-//		throw new PHPUnit2_Framework_IncompleteTestError(); // awaiting null support
-//		$company->id = null;
-//		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
-//		$name_value_pairs = $insert_action->getNameValuePairsFromObject();
-//		$sql = $insert_action->toSQL($name_value_pairs);
-//		$this->assertTrue(strpos($sql,'name')>0);
-//		$this->assertTrue(strpos($sql,'acme')>0);
-//		$this->assertTrue(strpos($sql,'id')>0);
-//		$this->assertTrue(strpos($sql,'NULL')>0); // make sure the SQL contains NULL
-//	}
-//
-//	public function testBlankNotConvertedToNull() {
-//		$company = $this->das->create();
-//		$company->name = '';
-//		throw new PHPUnit2_Framework_IncompleteTestError(); // awaiting null support
-//		// failing due to Bug 425 and use of == to compare to null
-//		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
-//		$sql = $insert_action->toSQL();
-//		$this->assertTrue(strpos($sql,'name')>0);
-//		$this->assertTrue(!strpos($sql,'NULL')); // check NULL not found
-//	}
-//
-//	public function testZeroNotConvertedToNull() {
-//		$company = $this->das->create();
-//		$company->name = 'acme';
-//		$company->id = 0;
-//		throw new PHPUnit2_Framework_IncompleteTestError(); // awaiting null support
-//		// failing due to Bug 425 and use of == to compare to null
-//		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
-//		$sql = $insert_action->toSQL();
-//		$this->assertTrue(strpos($sql,'id')>0);
-//		$this->assertTrue(!strpos($sql,'NULL')); // check NULL not found
-//	}
+	public function testToSQL_ContainsPropertyNameAndPlaceholderWhenValueIsNull() {
+		$root = $this->das->createRootDataObject();
+		$root->getChangeSummary()->beginLogging();
+		$company = $root->createDataObject('company');
+		$company->name = 'acme';
+		$company->employee_of_the_month = null;
+		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
+//		$insert_action->addFKToParentToSettings();
+		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$insert_action->buildValueList();
+		$value_list = $insert_action->getValueList();
+		$this->assertTrue($sql == 'INSERT INTO company (name,employee_of_the_month) VALUES (?,?);', "Generated SQL was incorrect: $sql");
+		$this->assertTrue($value_list[0] == 'acme', 'First entry in value list should be "acme" but was ' . $value_list[0]);
+		$this->assertTrue($value_list[1] === null, 'Second entry in value list should be null but was ' . $value_list[1]);
+	}
 
+	public function testToSQL_ContainsPropertyNameAndPlaceholderWhenValueIsBlank() {
+		$root = $this->das->createRootDataObject();
+		$root->getChangeSummary()->beginLogging();
+		$company = $root->createDataObject('company');
+		$company->name = '';
+		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
+//		$insert_action->addFKToParentToSettings();
+		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$insert_action->buildValueList();
+		$value_list = $insert_action->getValueList();
+		$this->assertTrue($sql == 'INSERT INTO company (name) VALUES (?);', "Generated SQL was incorrect: $sql");
+		$this->assertTrue($value_list[0] === '', 'First entry in value list should be blank but was ' . $value_list[0]);
+	}
 
-///////////////////////////////////////////////////////////////
-// there is currently no way a boolean could be assigned to a property so remove these two tests
-///////////////////////////////////////////////////////////////
+	public function testToSQL_ContainsPropertyNameAndPlaceholderWhenValueIsZero() {
+		$root = $this->das->createRootDataObject();
+		$root->getChangeSummary()->beginLogging();
+		$company = $root->createDataObject('company');
+		$company->name = 0;
+		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
+//		$insert_action->addFKToParentToSettings();
+		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$insert_action->buildValueList();
+		$value_list = $insert_action->getValueList();
+		$this->assertTrue($sql == 'INSERT INTO company (name) VALUES (?);', "Generated SQL was incorrect: $sql");
+		$this->assertTrue($value_list[0] ==='0', 'First entry in value list should be string zero (0) but was ' . $value_list[0]);
+	}
 
-//
-//	public function testBooleanTrueDetectedAndConvertedToOne() {
-//		$company = $this->das->create();
-//		$company->name = 'acme';
-//		$company->id = true;
-//		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
-//		$sql = $insert_action->toSQL();
-//		$this->assertTrue(strpos($sql,'name')>0);
-//		$this->assertTrue(strpos($sql,'acme')>0);
-//		$this->assertTrue(strpos($sql,'feeling_good')>0);
-//		$this->assertTrue(strpos($sql,'"1"')>0); // make sure the SQL contains a "1"
-//	}
-//
-//	public function testBooleanFalseDetectedAndConvertedToZero() {
-//		// This test will fail until Bug 425 is resolved
-//		// The issue is that we are currently using == to compare for NULL (would prefer to use ===)
-//		// and (false == null) in PHP world
-//
-//		$company = $this->das->create();
-//		$company->name = 'acme';
-//		$company->id = false;
-//		throw new PHPUnit2_Framework_IncompleteTestError(); // awaiting null support
-//		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
-//		$sql = $insert_action->toSQL();
-//		$this->assertTrue(strpos($sql,'name')>0);
-//		$this->assertTrue(strpos($sql,'acme')>0);
-//		$this->assertTrue(strpos($sql,'feeling_good')>0);
-//		$this->assertTrue(strpos($sql,'"0"')>0); // make sure the SQL contains a "0"
-//	}
-
-	//		throw new PHPUnit2_Framework_IncompleteTestError();
-
-
+	public function testToSQL_FK_created() {
+		$root = $this->das->createRootDataObject();
+		$root->getChangeSummary()->beginLogging();
+		$company = $root->createDataObject('company');
+		$department = $company->createDataObject('department');
+		$department->name = 'shoe';
+		$company->id = 1001;
+		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$department);
+		$insert_action->addFKToParentToSettings();
+		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$insert_action->buildValueList();
+		$value_list = $insert_action->getValueList();
+		$this->assertTrue($sql == 'INSERT INTO department (name,co_id) VALUES (?,?);', "Generated SQL was incorrect: $sql");
+		$this->assertTrue($value_list[0] ==='shoe', 'First entry in value list should be "shoe" ' . $value_list[0]);
+		$this->assertTrue($value_list[1] ==='1001', 'Second entry in value list should be 1001 but was ' . $value_list[1]);
+	}
 }
 
 ?>

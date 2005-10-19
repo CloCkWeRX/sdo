@@ -33,12 +33,13 @@
 
 using namespace commonj::sdo;
 
-#define SDO_VERSION "0.5.2"
+#define SDO_VERSION "0.6.0"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
 
 #define SDO_USER_DATA_EMPTY 0xffffffff
+#define SDO_TOSTRING_MAX 1024
 
 /**
  * The internal structure for an SDO_DataObjectImpl

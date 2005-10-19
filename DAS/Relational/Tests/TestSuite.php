@@ -41,7 +41,10 @@ require_once "TestDatabaseModel.php";
 require_once "TestContainmentReference.php";
 require_once "TestReferencesModel.php";
 require_once "TestObjectModel.php";
+require_once 'TestDataObjectHelper.php';
 require_once 'TestInsertAction.php';
+require_once 'TestUpdateAction.php';
+require_once 'TestDeleteAction.php';
 require_once 'TestPlan.php';
 
 
@@ -55,7 +58,10 @@ class SDO_DAS_Relational_TestSuite {
 		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestContainmentReference"));
 		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestReferencesModel"));
 		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestObjectModel"));
+		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestDataObjectHelper"));
 		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestInsertAction"));
+		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestUpdateAction"));
+		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestDeleteAction"));
 		$suite->addTest(new PHPUnit2_Framework_TestSuite("TestPlan"));
 		return $suite;
 	}

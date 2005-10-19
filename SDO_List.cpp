@@ -27,6 +27,8 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
+#include <sstream>
+
 #include "php.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
@@ -213,10 +215,10 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 				RETVAL_LONG(dol.getByte(index));
 				break;
 			case Type::BytesType:
-				/* magic usage returns the actual length */
-				bytes_len = dol.getBytes(index, 0, 0);
-				bytes_value = (char *)emalloc(bytes_len);
+				bytes_len = dol.getLength(index);
+				bytes_value = (char *)emalloc(1 + bytes_len);
 				bytes_len = dol.getBytes(index, bytes_value, bytes_len);
+				bytes_value[bytes_len] = '\0';
 				RETVAL_STRINGL(bytes_value, bytes_len, 0);
 				break;
 			case Type::CharacterType:
@@ -544,8 +546,7 @@ static int sdo_dataobjectlist_valid(sdo_list_object *my_object, long index, int 
 				return_value = dol.getBoolean(index);
 				break;
 			case Type::BytesType:
-				/* magic usage returns the actual length */
-				return_value = (dol.getBytes(index, 0, 0) != 0);
+				return_value = (dol.getLength(index) != 0);
 				break;
 			case Type::CharacterType:
 				return_value = dol.getBoolean(index);
@@ -868,6 +869,117 @@ static HashTable *sdo_list_get_properties(zval *object TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sdo_list_cast_object
+*/ 
+static int sdo_list_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+{
+	sdo_list_object	*my_object;
+	ostringstream	 print_buf;
+	zval			 free_obj;
+	int				 rc = SUCCESS;
+	int				 entries;
+	
+	if (should_free) {
+		free_obj = *writeobj;
+	}
+	
+	my_object = sdo_list_get_instance(readobj TSRMLS_CC);
+	if (my_object == (sdo_list_object *)NULL) {
+		ZVAL_NULL(writeobj);
+		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+		rc = FAILURE;
+	} else if (my_object->list_type > TYPE_SettingList) {
+		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+		ZVAL_NULL(writeobj);
+		rc = FAILURE;
+	} else {		
+		print_buf << "object(";
+		try {
+			switch (my_object->list_type) {
+			case TYPE_ChangedDataObjectList: 	
+				print_buf << "SDO_ChangedDataObjectList";
+				entries = my_object->cdolp->size();
+				break;
+			case TYPE_DataObjectList:	
+				print_buf << "SDO_DataObjectList";
+				entries = my_object->dolp->size();
+				break;
+			case TYPE_SettingList:
+				print_buf << "SDO_SettingList";
+				entries = my_object->slp->size();
+				break;
+			}
+
+			print_buf << ")#" << readobj->value.obj.handle << " (" << entries << ')';
+			
+			switch (my_object->list_type) {
+			case TYPE_ChangedDataObjectList: 
+				/* Any useful information would require navigation to the related Setting */
+				break;
+			case TYPE_DataObjectList:
+				{
+					DataObjectList& dol = *my_object->dolp;
+					if (my_object->typep->isDataType()) {
+						print_buf << " {";
+						for (int i = 0; i < entries; i++) {
+							if (i > 0) print_buf << "; ";
+							print_buf << '[' << i << "]=>\"" << dol.getCString(i) << '\"';
+						}
+						print_buf << '}';
+					}
+				}
+				break;
+			case TYPE_SettingList:
+				{
+					print_buf << '{';
+					const SettingList &sl = *my_object->slp;
+					for (int i = 0; i < entries; i++) {
+						if (i > 0) print_buf << "; ";
+						const Property& property = sl[i].getProperty();
+						print_buf << property.getName();
+						if (property.isMany()) {
+							print_buf << '[' << sl[i].getIndex() << ']';
+						}
+					}
+					print_buf << '}';
+				}
+				break;
+			}
+			
+			string print_string = print_buf.str().substr(0, SDO_TOSTRING_MAX);
+			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+			
+		} catch (SDORuntimeException e) {
+			ZVAL_NULL(writeobj);
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+			rc = FAILURE;
+		}
+	}	
+	
+	switch(type) {
+	case IS_STRING:
+		convert_to_string(writeobj);
+		break;
+	case IS_BOOL:
+		convert_to_boolean(writeobj);
+		break;
+	case IS_LONG:
+		convert_to_long(writeobj);
+		break;
+	case IS_DOUBLE:
+		convert_to_double(writeobj);
+		break;
+	default:
+		rc = FAILURE;
+	}
+	
+	if (should_free) {
+		zval_dtor(&free_obj);
+	}
+	return rc;
+}
+/* }}} */
+
 /* {{{ sdo_list_compare_objects
  * gets called as a consequence of an == comparison
  * we do a deep compare of the values of the two lists
@@ -1093,6 +1205,7 @@ void sdo_list_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_list_object_handlers.unset_dimension = sdo_list_unset_dimension;
 	sdo_list_object_handlers.get_properties = sdo_list_get_properties;
 	sdo_list_object_handlers.compare_objects = sdo_list_compare_objects;
+	sdo_list_object_handlers.cast_object = sdo_list_cast_object;
 	sdo_list_object_handlers.count_elements = sdo_list_count_elements;
 
 	sdo_list_iterator_funcs.dtor = sdo_list_iterator_dtor;

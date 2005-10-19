@@ -25,6 +25,9 @@ require_once 'company_metadata.inc.php';
 
 /**
  * Scenario - Use one company and department to test the handling of null
+ * Set the location of the shoe department to a string and write back,
+ * then to a null, write back, then back to a string, then to a null
+ * Test each time. 
  *
  */
 
@@ -73,12 +76,10 @@ echo "location is " ;
 var_dump($shoe->location);
 assert($shoe->location === null);
 
-$shoe->location = 'First floor';
+$shoe->location = 'Top floor';
 
 $das -> applyChanges($dbh, $root);
 echo "Wrote back company with changed location for shoe department\n";
-
-exit;
 
 /**************************************************************
 * Retrieve the company and check the location of the shoe department; further set it back to null again
@@ -93,7 +94,7 @@ array('company.id','company.name','department.id','department.name','department.
 
 $acme = $root['company'][0];
 $shoe = $acme['department'][0];
-assert($shoe->location == 'First Floor');
+assert($shoe->location == 'Top floor');
 $shoe->location = null;
 
 $das -> applyChanges($dbh, $root);

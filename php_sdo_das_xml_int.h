@@ -36,7 +36,7 @@ using namespace commonj;
 using namespace sdo;
 using namespace xmldas;
 
-#define SDO_DAS_XML_VERSION "0.5.2"
+#define SDO_DAS_XML_VERSION "0.6.0"
 
 /*
  * Internal structure for an SDO_DAS_XML

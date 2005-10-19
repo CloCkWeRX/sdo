@@ -109,15 +109,15 @@ class SDO_DAS_Relational {
 	public function ensureValueListIsNullOrAnArray($value_list)
 	{
 		if ($value_list != NULL && gettype($value_list) != 'array') {
-			throw new SDO_DAS_Relational_Exception('The value list (third argument) passed to executeQuery* must be null or an array');
+			throw new SDO_DAS_Relational_Exception('The value list (third argument) passed to executePreparedQuery must be null or an array');
 		}
 	}
 
-	public function ensureColumnSpecifierContainsOnlyValidTableAndColumnNames($column_specifier)
+	public function ensureColumnSpecifierIsNullOrAnArrayContainingOnlyValidTableAndColumnNames($column_specifier)
 	{
 		if ($column_specifier != null) {
 			if (gettype($column_specifier) != 'array') {
-				throw new SDO_DAS_Relational_Exception('The column specifier (fourth argument) passed to executeQuery must be an array');
+				throw new SDO_DAS_Relational_Exception('The column specifier passed to executeQuery must be an array');
 			}
 			foreach($column_specifier as $cs) {
 				if (gettype($cs) != 'string') {
@@ -132,13 +132,12 @@ class SDO_DAS_Relational {
 	}
 
 	/**
-	 * Given an SQL query in the form of a prepared stament and a value list, execute it, 
-	 * normalise the result set into a data graph and return it.
+	 * Given an SQL query as a literal string, execute it, normalise the result set into a data graph and return it.
 	 */
 	public function executeQuery($dbh, $stmt, $column_specifier = null)
 	{
 		$this->ensureStatementIsAString($stmt);
-		$this->ensureColumnSpecifierContainsOnlyValidTableAndColumnNames($column_specifier);
+		$this->ensureColumnSpecifierIsNullOrAnArrayContainingOnlyValidTableAndColumnNames($column_specifier);
 		$dbh->beginTransaction();
 		$pdo_stmt 		= $dbh->prepare($stmt);
 		$rows_affected 	= $pdo_stmt->execute();
@@ -148,12 +147,13 @@ class SDO_DAS_Relational {
 	}
 	
 	/**
-	 * Given an SQL query as a string, execute it, normalise the result set into a data graph and return it.
+	 * Given an SQL query in the form of a prepared PDO statement and a value list, execute it, 
+	 * normalise the result set into a data graph and return it.
 	 */
-	public function executePreparedQuery($dbh, PDOStatement $pdo_stmt, $value_list, $column_specifier = null)
+	public function executePreparedQuery($dbh, $pdo_stmt, $value_list, $column_specifier = null)
 	{
 		$this->ensureValueListIsNullOrAnArray($value_list);
-		$this->ensureColumnSpecifierContainsOnlyValidTableAndColumnNames($column_specifier);
+		$this->ensureColumnSpecifierIsNullOrAnArrayContainingOnlyValidTableAndColumnNames($column_specifier);
 		$dbh->beginTransaction();
 		$rows_affected 	= $pdo_stmt->execute($value_list);
 		$root = $this->normaliseResultSet($pdo_stmt, $column_specifier);
@@ -389,6 +389,10 @@ class SDO_DAS_Relational {
 	private static function createRoot($df)
 	{
 		return $df->create(SDO_DAS_Relational::DAS_NAMESPACE, SDO_DAS_Relational::DAS_ROOT_TYPE);
+	}
+	
+	public function getObjectModel() {
+		return $this->object_model;
 	}
 
 }

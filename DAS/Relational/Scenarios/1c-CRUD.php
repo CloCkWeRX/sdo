@@ -54,6 +54,8 @@ $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $root 		= $das  -> createRootDataObject();
 $company 	= $root -> createDataObject('company');
 $company -> name = "Acme";
+$company -> employee_of_the_month = null;
+
 $das -> applyChanges($dbh, $root);
 echo "Created a company with name Acme and wrote it to the database\n";
 
@@ -65,10 +67,12 @@ $das = new SDO_DAS_Relational ($database_metadata,'company',$SDO_reference_metad
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
 $name = 'Acme';
-$pdo_stmt = $dbh->prepare('select name, id from company where name=?');
-$root = $das->executePreparedQuery($dbh, $pdo_stmt ,array($name), array('company.name', 'company.id'));
+$pdo_stmt = $dbh->prepare('select name, id, employee_of_the_month from company where name=?');
+$root = $das->executePreparedQuery($dbh, $pdo_stmt ,array($name), array('company.name', 'company.id','company.employee_of_the_month'));
 $company2 = $root['company'][0];
 echo "Looked for Acme and found company with name = " . $company2->name . " and id " . $company2->id . "\n";
+assert($company2->name == 'Acme');
+assert($company2->employee_of_the_month === null);
 $company2->name = 'MegaCorp';
 $das -> applyChanges($dbh, $root);
 echo "Wrote back Acme with name changed to MegaCorp\n";
@@ -79,9 +83,10 @@ echo "Wrote back Acme with name changed to MegaCorp\n";
 *************************************************************************************/
 
 $name = 'MegaCorp';
-$root = $das->executePreparedQuery($dbh, $pdo_stmt ,array($name), array('company.name', 'company.id'));
+$root = $das->executePreparedQuery($dbh, $pdo_stmt ,array($name), array('company.name', 'company.id','company.employee_of_the_month'));
 $company3 = $root['company'][0];
 echo "Looked for MegaCorp and found company with name = " . $company3->name . " and id " . $company3->id . "\n";
+assert($company3->name == 'MegaCorp');
 unset($root['company'][0]); // do not make the mistake of doing unset($company3) - this will just destroy the $company3 variable
 $das -> applyChanges($dbh, $root);
 echo "Deleted the company and wrote the changes back to the database\n";

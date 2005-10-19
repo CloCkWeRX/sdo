@@ -33,8 +33,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	// Set by testDataFactory and used by subsequent tests
 	private $company = null;
 
-	private $serialized_form = null;
-
 	public function __construct($name) {
 		parent :: __construct($name);
 	}
@@ -929,23 +927,25 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 	public function testSerialization1() {
 		$this->testDataObject();
-		$_SESSION['my_datagraph'] = serialize($this->company);
+		session_start();
+		$_SESSION['my_datagraph'] = $this->company;
+		session_write_close();
+		unset($this->company);
 	}
 
 	public function testSerialization2() {
-		$company2 = unserialize($_SESSION['my_datagraph']);
-		$this->assertEquals('MegaCorp', $company2->name, 'unserializing failed.');
-		$this->assertEquals('Shoe', $company2->departments[0]->name, 'unserializing failed.');
-		$this->assertEquals('Fred Smith', $company2->CEO->name, 'unserializing failed.');
-		$this->assertEquals('Sarah Jones', $company2->departments[0]->employees[0]->name, 'unserializing failed.');
-		$this->assertEquals('Fred Smith', $company2->employeeOfTheMonth->name, 'unserializing failed.');
+		$this->testDataObject();
+		session_start();
+		$company2 = $_SESSION['my_datagraph'];
+		$this->assertEquals($this->company->name, $company2->name, 'unserializing failed.');
+		$this->assertEquals($this->company->departments[0]->name, $company2->departments[0]->name, 'unserializing failed.');
+		$this->assertEquals($this->company->CEO->name, $company2->CEO->name, 'unserializing failed.');
+		$this->assertEquals($this->company->departments[0]->employees[0]->name, $company2->departments[0]->employees[0]->name, 'unserializing failed.');
+		$this->assertEquals($this->company->employeeOfTheMonth->name, $company2->employeeOfTheMonth->name, 'unserializing failed.');
 
 		// FAILED because char type becomes string after round trip
 		//$this->testDataObject();
 		//$this->assertTrue($company2 == $this->company, 'values not equal after serialization round-trip');
-
-		// try some invalid data
-		//$company3 = SDO_DataObjectImpl::unserialize('splu<rge');
 	}
 	
 	public function testSetUnset() {
@@ -1060,6 +1060,20 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->assertEquals($root->defsi, 10, 'Assignment to property with default value failed');
 		unset($root->defsi);
 		$this->assertEquals($root->defsi, 5, 'Default value not set for property which has been unset');
+	}
+	
+	public function testClone() {
+	    $this->testDataObject();
+	    $employees = $this->company->departments[0]->employees;
+	    $old_employee = $employees[0];
+	    $new_employee = clone($old_employee);
+	    $this->assertEquals($new_employee, $old_employee, 'Cloned DataObject not equal to original');	 
+	    $this->assertNull($new_employee->getContainer(), 'Cloned DataObject should have no container');
+	    $emp_count = count($employees);
+	    $new_employee->name = 'Dolly the Sheep';
+	    $employees[] = $new_employee;
+	    $this->assertTrue($employees[0] != $employees[$emp_count], 'Cloned DataObject not independent of original');
+	    $this->assertEquals($employees[$emp_count], $new_employee, 'Append of cloned object failed');
 	}
 }
 

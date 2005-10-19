@@ -24,8 +24,11 @@ static char rcs_id[] = "$Id$";
 #ifdef PHP_WIN32
 #include <iostream>
 #include <math.h>
+#include <string>
 #include "zend_config.w32.h"
 #endif
+
+#include <sstream>
 
 #include "php.h"
 #include "zend_exceptions.h"
@@ -97,6 +100,30 @@ static zend_object_value sdo_do_object_create(zend_class_entry *ce TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sdo_do_clone_obj
+ */
+static zend_object_value sdo_do_clone_obj(zval *object TSRMLS_DC)
+{
+	zend_object_value retval;
+	sdo_do_object *my_old_object;
+	DataObjectPtr new_dop;
+	zval *z_new;
+
+    MAKE_STD_ZVAL(z_new);
+
+	my_old_object = sdo_do_get_instance(object TSRMLS_CC);
+	
+	try {
+		new_dop = CopyHelper::copy(my_old_object->dop);	    
+		sdo_do_new(z_new, new_dop TSRMLS_CC);
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	}
+	
+	return z_new->value.obj;
+}
+/* }}} */
+	
 /* {{{ sdo_do_has_dimension
 */
 static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
@@ -164,8 +191,7 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 					return_value = dop->getBoolean(xpath);
 					break;
 				case Type::BytesType:
-					/* magic usage returns the actual length */
-					return_value = (dop->getBytes(xpath, 0, 0) != 0);
+					return_value = (dop->getLength(xpath) != 0);
 					break;
 				case Type::CharacterType:
 					return_value = dop->getBoolean(xpath);
@@ -267,10 +293,10 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 				RETVAL_LONG(dop->getByte(xpath));
 				break;
 			case Type::BytesType:
-				/* magic usage returns the actual length */
-				bytes_len = dop->getBytes(xpath, 0, 0);
-				bytes_value = (char *)emalloc(bytes_len);
+				bytes_len = dop->getLength(xpath);
+				bytes_value = (char *)emalloc(1 + bytes_len);
 				bytes_len = dop->getBytes(xpath, bytes_value, bytes_len);
+				bytes_value[bytes_len] = '\0';
 				RETVAL_STRINGL(bytes_value, bytes_len, 0);
 				break;
 			case Type::CharacterType:
@@ -739,6 +765,94 @@ static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sdo_do_cast_object
+*/ 
+static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+{
+	sdo_do_object *my_object;
+	ostringstream print_buf;
+	zval free_obj;
+	int rc = SUCCESS;
+	
+	if (should_free) {
+		free_obj = *writeobj;
+	}
+	
+	my_object = sdo_do_get_instance(readobj TSRMLS_CC);
+	if (my_object == (sdo_do_object *)NULL) {
+		ZVAL_NULL(writeobj);
+		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+		rc = FAILURE;
+	} else {
+		
+		try {
+			const Type& type = my_object->dop->getType();
+			PropertyList pl = my_object->dop->getInstanceProperties();
+			
+			print_buf << "object(" << CLASS_NAME << ")#" <<
+				readobj->value.obj.handle << " (" << pl.size() << ") {";
+			
+			for (unsigned int i = 0; i < pl.size(); i++) {
+				const Property& prop = pl[i];
+				
+				if (i > 0) {
+					print_buf << "; ";
+				}
+				
+				print_buf << prop.getName();
+				
+				/* We'll try to print the value for single-valued primitives only.
+				* Multi-valued properties just get a dimension.
+				*/
+				if (prop.isMany()) {
+					print_buf << '[' << my_object->dop->getList(prop).size() << ']';
+					
+				} else if (my_object->dop->isSet(i) && prop.getType().isDataType()) {
+					print_buf << "=>";
+					if (my_object->dop->isNull(i)) {
+						print_buf << "NULL";
+					} else {
+						print_buf << '\"' << my_object->dop->getCString(i) << '\"';
+					}
+					
+				}
+			}
+			
+			print_buf << '}';
+			string print_string = print_buf.str().substr(0, SDO_TOSTRING_MAX);
+			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+			
+		} catch (SDORuntimeException e) {
+			ZVAL_NULL(writeobj);
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+			rc = FAILURE;
+		}
+	}	
+	
+	switch(type) {
+	case IS_STRING:
+		convert_to_string(writeobj);
+		break;
+	case IS_BOOL:
+		convert_to_boolean(writeobj);
+		break;
+	case IS_LONG:
+		convert_to_long(writeobj);
+		break;
+	case IS_DOUBLE:
+		convert_to_double(writeobj);
+		break;
+	default:
+		rc = FAILURE;
+	}
+	
+	if (should_free) {
+		zval_dtor(&free_obj);
+	}
+	return rc;
+}
+/* }}} */
+
 /* {{{ sdo_do_count_elements
  */ 
 static int sdo_do_count_elements(zval *object, long *count TSRMLS_DC) 
@@ -1066,7 +1180,7 @@ void sdo_do_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	zend_class_implements(sdo_dataobjectimpl_class_entry TSRMLS_CC, 1, sdo_das_dataobject_class_entry);
 
 	memcpy(&sdo_do_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	sdo_do_object_handlers.clone_obj = NULL;
+	sdo_do_object_handlers.clone_obj = sdo_do_clone_obj;
 	sdo_do_object_handlers.read_dimension = sdo_do_read_dimension;
 	sdo_do_object_handlers.read_property = sdo_do_read_dimension;
 	sdo_do_object_handlers.write_dimension = sdo_do_write_dimension;
@@ -1077,6 +1191,7 @@ void sdo_do_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_do_object_handlers.unset_property = sdo_do_unset_dimension;
 	sdo_do_object_handlers.get_properties = sdo_do_get_properties;
 	sdo_do_object_handlers.compare_objects = sdo_do_compare_objects;
+	sdo_do_object_handlers.cast_object = sdo_do_cast_object;
 	sdo_do_object_handlers.count_elements = sdo_do_count_elements;
 
 	sdo_do_iterator_funcs.dtor = sdo_do_iterator_dtor;

@@ -31,6 +31,7 @@ class SDO_DAS_Relational_DataObjectHelper
 
 	public static function getCurrentPrimitiveSettings($data_object,$object_model)
 	{
+		$nvpairs = array();
 		$type = self::getApplicationType($data_object);
 		foreach($data_object as $prop => $value) {
 			if ($object_model->isPrimitive($type,$prop)) {

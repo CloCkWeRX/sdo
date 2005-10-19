@@ -175,9 +175,7 @@ static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addPropertyToType, 0, 
     ZEND_ARG_INFO(0, propertyName)
     ZEND_ARG_INFO(0, namespaceURI)
     ZEND_ARG_INFO(0, typeName)
-    ZEND_ARG_INFO(0, many)
-    ZEND_ARG_INFO(0, readOnly)
-    ZEND_ARG_INFO(0, containment)
+    ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
 function_entry sdo_das_datafactory_methods[] = {

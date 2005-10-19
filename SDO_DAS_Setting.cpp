@@ -27,6 +27,8 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
+#include <sstream>
+
 #include "php.h"
 
 #include "php_sdo_int.h"
@@ -41,6 +43,8 @@ typedef struct {
 	Setting         *setting;
 } sdo_das_setting_object;
 /* }}} */
+
+static zend_object_handlers sdo_das_setting_object_handlers;
 
 /* {{{ sdo_das_setting_get_instance
  */
@@ -79,7 +83,7 @@ static zend_object_value sdo_das_setting_object_create(zend_class_entry *ce TSRM
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
 		(void *)&tmp, sizeof(zval *));
 	retval.handle = zend_objects_store_put(my_object, NULL, sdo_das_setting_object_free_storage, NULL TSRMLS_CC);
-	retval.handlers = zend_get_std_object_handlers();
+	retval.handlers = &sdo_das_setting_object_handlers;
 
 	return retval;
 }
@@ -102,12 +106,231 @@ void sdo_das_setting_new(zval *me, Setting *setting TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sdo_das_setting_read_value
+*/
+static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRMLS_DC)
+{
+	Setting		*setting = my_object->setting;
+	uint		 bytes_len;
+	char		*bytes_value;
+	char		 char_value; 
+	wchar_t		 wchar_value;
+	DataObjectPtr doh_value;
+	zval		*doh_value_zval;
+	zval		*return_value;
+	
+	MAKE_STD_ZVAL(return_value);
+	try {
+		if (setting->isNull()) {
+			RETVAL_NULL();
+		} else {
+			const Property& property = setting->getProperty();
+			switch(property.getTypeEnum()) {
+			case Type::OtherTypes:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				break;
+			case Type::BigDecimalType:
+			case Type::BigIntegerType:
+				RETVAL_STRING((char *)setting->getCStringValue(), 1);
+				break;
+			case Type::BooleanType:
+				RETVAL_BOOL(setting->getBooleanValue());
+				break;
+			case Type::ByteType:
+				RETVAL_LONG(setting->getByteValue());
+				break;
+			case Type::BytesType:
+				bytes_len = setting->getLength();
+				bytes_value = (char *)emalloc(1 + bytes_len);
+				bytes_len = setting->getBytesValue(bytes_value, bytes_len);
+				bytes_value[bytes_len] = '\0';
+				RETVAL_STRINGL(bytes_value, bytes_len, 0);
+				break;
+			case Type::CharacterType:
+				wchar_value = setting->getCharacterValue();
+				if (wchar_value > INT_MAX) {
+					php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
+				}
+				char_value = setting->getByteValue();
+				RETVAL_STRINGL(&char_value, 1, 1);
+				break;
+			case Type::DateType:
+				RETVAL_LONG(setting->getDateValue().getTime());
+				break;
+			case Type::DoubleType:
+				RETVAL_DOUBLE(setting->getDoubleValue());
+				break;
+			case Type::FloatType:
+				RETVAL_DOUBLE(setting->getFloatValue());
+				break;
+			case Type::IntegerType:
+				RETVAL_LONG(setting->getIntegerValue());
+				break;
+			case Type::LongType:
+				/* An SDO long (64 bits) may overflow a PHP int, so we return it as a string */
+				RETVAL_STRING((char *)setting->getCStringValue(), 1);
+				break;
+			case Type::ShortType:
+				RETVAL_LONG(setting->getShortValue());
+				break;
+			case Type::StringType:
+			case Type::UriType:
+				RETVAL_STRING((char *)setting->getCStringValue(), 1);
+				break;		
+			case Type::DataObjectType:
+				doh_value = setting->getDataObjectValue();
+				if (!doh_value) {
+					/* An old value may legitimately be null */
+					RETVAL_NULL();
+				} else {
+					doh_value_zval = (zval *)doh_value->getUserData();
+					RETVAL_ZVAL(doh_value_zval, 1, 0);
+				}
+				break;
+			case Type::ChangeSummaryType:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				break;
+			case Type::TextType:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				break;
+			default:
+				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
+					property.getType().getName(), property.getName());
+			}
+		}
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	}
+	return return_value;
+}
+/* }}} */
+
+/* {{{ sdo_das_setting_get_properties
+*/
+static HashTable *sdo_das_setting_get_properties(zval *object TSRMLS_DC)
+{ 
+	sdo_das_setting_object	*my_object;
+	HashTable				*properties;
+	int						 entries;
+	zval					*tmp;
+	Setting					*setting;
+	
+	ALLOC_HASHTABLE(properties);
+	
+	my_object = sdo_das_setting_get_instance(object TSRMLS_CC);
+	if (my_object == (sdo_das_setting_object *)NULL) {
+		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+	} else {		 
+		try {
+			setting = my_object->setting;			
+			const char *propertyName = setting->getProperty().getName();
+			
+			zend_hash_init(properties, 1, NULL, NULL, 0);
+			
+			/* TODO if the setting is for a list element, we should 
+			* probably include the list index as part of the key
+			*/
+			
+			tmp = sdo_das_setting_read_value(my_object TSRMLS_CC);
+			
+			zend_hash_update(properties, (char *)propertyName, 1 + strlen(propertyName),
+				&tmp, sizeof(zval *), NULL);
+		} catch (SDORuntimeException e) {
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+		}
+	}
+	return properties;
+}
+/* }}} */
+
+/* {{{ sdo_das_setting_cast_object
+*/ 
+static int sdo_das_setting_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+{
+	sdo_das_setting_object	*my_object;
+	ostringstream	 print_buf;
+	zval			 free_obj;
+	int				 rc = SUCCESS;
+	int				 entries;
+	Setting			*setting;
+	
+	if (should_free) {
+		free_obj = *writeobj;
+	}
+	
+	my_object = sdo_das_setting_get_instance(readobj TSRMLS_CC);
+	if (my_object == (sdo_das_setting_object *)NULL) {
+		ZVAL_NULL(writeobj);
+		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+		rc = FAILURE;
+	} else {		
+		setting = my_object->setting;
+		try {			
+			const Property& property = setting->getProperty();
+			
+			print_buf << "object(" << CLASS_NAME << 
+				")#" << readobj->value.obj.handle;
+						
+			if (property.isMany()) {
+				print_buf << '[' << setting->getIndex() << ']';
+			}
+			
+			if (setting->isSet() && property.getType().isDataType()) {
+				print_buf << "=>";
+				if (setting->isNull()) {
+					print_buf << "NULL";
+				} else {
+					print_buf << '\"' << setting->getCStringValue() << '\"';
+				}				
+			}
+			
+			print_buf << '}';
+			
+			string print_string = print_buf.str().substr(0, SDO_TOSTRING_MAX);
+			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+			
+		} catch (SDORuntimeException e) {
+			ZVAL_NULL(writeobj);
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+			rc = FAILURE;
+		}
+	}	
+	
+	switch(type) {
+	case IS_STRING:
+		convert_to_string(writeobj);
+		break;
+	case IS_BOOL:
+		convert_to_boolean(writeobj);
+		break;
+	case IS_LONG:
+		convert_to_long(writeobj);
+		break;
+	case IS_DOUBLE:
+		convert_to_double(writeobj);
+		break;
+	default:
+		rc = FAILURE;
+	}
+	
+	if (should_free) {
+		zval_dtor(&free_obj);
+	}
+	return rc;
+}
+/* }}} */
+
 /* {{{ sdo_das_setting_minit
  */
 void sdo_das_setting_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 {	
 	tmp_ce->create_object = sdo_das_setting_object_create;
 	sdo_das_setting_class_entry = zend_register_internal_class(tmp_ce TSRMLS_CC);
+
+	memcpy(&sdo_das_setting_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sdo_das_setting_object_handlers.clone_obj = NULL;
+	sdo_das_setting_object_handlers.get_properties = sdo_das_setting_get_properties;
+	sdo_das_setting_object_handlers.cast_object = sdo_das_setting_cast_object;
 }
 /* }}} */
 
@@ -168,14 +391,8 @@ PHP_METHOD(SDO_DAS_Setting, getPropertyName)
  */
 PHP_METHOD(SDO_DAS_Setting, getValue)
 {
+	zval *value;	
 	sdo_das_setting_object *my_object;
-	Setting		*setting;
-	uint		 bytes_len;
-	char		*bytes_value;
-	char		 char_value; 
-	wchar_t		 wchar_value;
-	DataObjectPtr doh_value;
-	zval		*doh_value_zval;
 	
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
@@ -186,89 +403,9 @@ PHP_METHOD(SDO_DAS_Setting, getValue)
 		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
 		return;
 	}
-	setting = my_object->setting;
 
-	try {
-		if (setting->isNull()) {
-			RETVAL_NULL();
-		} else {
-			const Property& property = setting->getProperty();
-			switch(property.getTypeEnum()) {
-			case Type::OtherTypes:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
-				break;
-			case Type::BigDecimalType:
-			case Type::BigIntegerType:
-				RETVAL_STRING((char *)setting->getCStringValue(), 1);
-				break;
-			case Type::BooleanType:
-				RETVAL_BOOL(setting->getBooleanValue());
-				break;
-			case Type::ByteType:
-				RETVAL_LONG(setting->getByteValue());
-				break;
-			case Type::BytesType:
-				/* magic usage returns the actual length */
-				bytes_len = setting->getBytesValue(0, 0);
-				bytes_value = (char *)emalloc(bytes_len);
-				bytes_len = setting->getBytesValue(bytes_value, bytes_len);
-				RETVAL_STRINGL(bytes_value, bytes_len, 0);
-				break;
-			case Type::CharacterType:
-				wchar_value = setting->getCharacterValue();
-				if (wchar_value > INT_MAX) {
-					php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
-				}
-				char_value = setting->getByteValue();
-				RETVAL_STRINGL(&char_value, 1, 1);
-				break;
-			case Type::DateType:
-				RETVAL_LONG(setting->getDateValue().getTime());
-				break;
-			case Type::DoubleType:
-				RETVAL_DOUBLE(setting->getDoubleValue());
-				break;
-			case Type::FloatType:
-				RETVAL_DOUBLE(setting->getFloatValue());
-				break;
-			case Type::IntegerType:
-				RETVAL_LONG(setting->getIntegerValue());
-				break;
-			case Type::LongType:
-				/* An SDO long (64 bits) may overflow a PHP int, so we return it as a string */
-				RETVAL_STRING((char *)setting->getCStringValue(), 1);
-				break;
-			case Type::ShortType:
-				RETVAL_LONG(setting->getShortValue());
-				break;
-			case Type::StringType:
-			case Type::UriType:
-				RETVAL_STRING((char *)setting->getCStringValue(), 1);
-				break;		
-			case Type::DataObjectType:
-				doh_value = setting->getDataObjectValue();
-				if (!doh_value) {
-					/* An old value may legitimately be null */
-					RETVAL_NULL();
-				} else {
-					doh_value_zval = (zval *)doh_value->getUserData();
-					RETVAL_ZVAL(doh_value_zval, 1, 0);
-				}
-				break;
-			case Type::ChangeSummaryType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
-				break;
-			case Type::TextType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
-				break;
-			default:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
-					property.getType().getName(), property.getName());
-			}
-		}
-	} catch (SDORuntimeException e) {
-		sdo_throw_runtimeexception(&e TSRMLS_CC);
-	}
+	value = sdo_das_setting_read_value(my_object TSRMLS_CC);
+	RETVAL_ZVAL(value, 1, 0);
 	
 	return;
 }

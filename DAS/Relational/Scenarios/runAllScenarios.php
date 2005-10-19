@@ -60,6 +60,10 @@ require_once '1cde-R.php';
 require_once '1cde-CRUD.php';
 //require_once '1cde-CRUDdetach.php';
 
+/* tables that check null handled correctly */
+require_once '1cd-CRUDnull.php';  // tests primitive null
+require_once '1cde-CRUDnull.php'; // tests non-containment reference employee_of_the_month can be null
+
 /* one-table, one-employee scenario */
 /* alters the metadata so put it last */
 require_once '1e-CRUD.php';

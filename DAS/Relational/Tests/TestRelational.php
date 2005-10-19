@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -35,7 +35,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		parent::__construct($name);
 	}
 
-	public function testMustHaveSomeDatabaseMetadata() {
+	public function testConstructor_ThrowsExceptionIfNoDatabaseMetadata() {
 		$database_metadata = null;
 		$exception_thrown = false;
 		try {
@@ -48,7 +48,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		$this->assertTrue(strpos($msg,'must not be null') != 0,'Wrong message issued: '.$msg);
 	}
 
-	public function testApplicationRootTypeCanBeNullIfExactlyOneTable() {
+	public function testConstructor_CanOmitApplicationRootTypeIfExactlyOneTable() {
 		$company_table_metadata = array(
 		'name' => 'company',
 		'columns'=> array('id'),
@@ -66,7 +66,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		$this->assertTrue(! $exception_thrown,'Unexpected exception was thrown:' . $msg);
 	}
 
-	public function testApplicationRootTypeCannotBeNullIfMoreThanOneTable() {
+	public function testConstructor_ThrowsExceptionIfApplicationRootTypeNullAndMoreThanOneTable() {
 		$company_table_metadata = array(
 		'name' => 'company',
 		'columns'=> array('id'),
@@ -91,7 +91,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 	}
 
 
-	public function testReferencesMetadataCanBeNull() {
+	public function  testConstructor_CanOmitReferencesMetadataIfExactlyOneTable() {
 		$company_table_metadata = array(
 		'name' => 'company',
 		'columns'=> array('id'),
@@ -115,7 +115,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 	}
 
 
-	public function testSQLStatementMustBeAString() {
+	public function testExecuteQuery_SQLStatementMustBeAString() {
 		$company_table = array (
 		'name' => 'company',
 		'columns' => array('id', 'name',  'employee_of_the_month'),
@@ -135,7 +135,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		$this->assertTrue(strpos($msg,'must be a string') != 0,'Wrong message issued: '.$msg);
 	}
 
-	public function testColumnSpeciferMustBeAnArray() {
+	public function testExecuteQuery_ColumnSpeciferMustBeAnArray() {
 		$company_table = array (
 		'name' => 'company',
 		'columns' => array('id', 'name',  'employee_of_the_month'),
@@ -151,11 +151,11 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 			$msg = $e->getMessage();
 		}
 		$this->assertTrue($exception_thrown,'Exception was never thrown');
-		$this->assertTrue(strpos($msg,'third argument') != 0,'Wrong message issued: '.$msg);
+		$this->assertTrue(strpos($msg,'column specifier') != 0,'Wrong message issued: '.$msg);
 		$this->assertTrue(strpos($msg,'must be an array') != 0,'Wrong message issued: '.$msg);
 	}
 
-	public function testColumnSpeciferMustContainStrings() {
+	public function testExecuteQuery_ColumnSpeciferMustContainStrings() {
 		$company_table = array (
 		'name' => 'company',
 		'columns' => array('id', 'name',  'employee_of_the_month'),
@@ -175,7 +175,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		$this->assertTrue(strpos($msg,'must be a string') != 0,'Wrong message issued: '.$msg);
 	}
 
-	public function testColumnSpecifersMustBeValidTableAndColumnNames() {
+	public function testExecuteQuery_ColumnSpecifersMustBeValidTableAndColumnNames() {
 		$company_table = array (
 		'name' => 'company',
 		'columns' => array('id', 'name',  'employee_of_the_month'),
@@ -192,6 +192,26 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		}
 		$this->assertTrue($exception_thrown,'Exception was never thrown');
 		$this->assertTrue(strpos($msg,'table.column') != 0,'Wrong message issued: '.$msg);
+	}
+
+	public function testPreparedExecuteQuery_ValueListMustBeNullOrAnArray() {
+		$company_table = array (
+		'name' => 'company',
+		'columns' => array('id', 'name',  'employee_of_the_month'),
+		'PK' => 'id',
+		);
+		$database_metadata = array($company_table);
+		$exception_thrown = false;
+		$das = new SDO_DAS_Relational ($database_metadata);
+		try {
+			$company = $das->executePreparedQuery('dummy PDO handle','dummy PDO statement','a string, not an array or null');
+		} catch (SDO_DAS_Relational_Exception $e) {
+			$exception_thrown = true;
+			$msg = $e->getMessage();
+		}
+		$this->assertTrue($exception_thrown,'Exception was never thrown');
+		$this->assertTrue(strpos($msg,'third argument') != 0,'Wrong message issued: '.$msg);
+		$this->assertTrue(strpos($msg,'must be null or an array') != 0,'Wrong message issued: '.$msg);
 	}
 
 
