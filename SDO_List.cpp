@@ -1205,7 +1205,10 @@ void sdo_list_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_list_object_handlers.unset_dimension = sdo_list_unset_dimension;
 	sdo_list_object_handlers.get_properties = sdo_list_get_properties;
 	sdo_list_object_handlers.compare_objects = sdo_list_compare_objects;
+	/*TODO There's a signature change for cast_object in PHP6. */
+#if (PHP_MAJOR_VERSION < 6) 
 	sdo_list_object_handlers.cast_object = sdo_list_cast_object;
+#endif
 	sdo_list_object_handlers.count_elements = sdo_list_count_elements;
 
 	sdo_list_iterator_funcs.dtor = sdo_list_iterator_dtor;

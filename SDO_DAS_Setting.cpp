@@ -330,7 +330,10 @@ void sdo_das_setting_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	memcpy(&sdo_das_setting_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	sdo_das_setting_object_handlers.clone_obj = NULL;
 	sdo_das_setting_object_handlers.get_properties = sdo_das_setting_get_properties;
+	/*TODO There's a signature change for cast_object in PHP6. */
+#if (PHP_MAJOR_VERSION < 6) 
 	sdo_das_setting_object_handlers.cast_object = sdo_das_setting_cast_object;
+#endif
 }
 /* }}} */
 
