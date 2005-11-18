@@ -117,8 +117,6 @@ sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC) {
     memset(obj, 0, sizeof(xmldocument_object));
 
     obj->z_obj.ce = ce;
-    obj->z_obj.in_get = 0;
-    obj->z_obj.in_set = 0;
     ALLOC_HASHTABLE(obj->z_obj.properties);
     zend_hash_init(obj->z_obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
     zend_hash_copy(obj->z_obj.properties, &ce->default_properties,
