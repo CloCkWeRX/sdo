@@ -25,18 +25,14 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.5.2</version>
-    <date>2005-10-06</date>
+     <version>0.6.0</version>
+    <date>2005-10-19</date>
     <license>Apache 2.0</license>
     <state>beta</state>
-    <notes>This release fixes a number of bugs:
-- The XML DAS now throws a more meaningful exception when the xsd or xml file is not found
-- The interface to SDO_DAS_DataFactory::addPropertyToType has changed and the previous interface is deprecated
-- The interface to SDO_DAS_DataFactory::addProperty now supports the setting of default values
-- The unit tests for the XML DAS have been added to
-- The Relational DAS adapts to whether PDO constants are using old-style PDO_* or new-style PDO::*
-- The Relational DAS contains a workaround for a problem with PDO_Statement::RowCount and ODBC driver
-- Some SDO_DAS_ChangeSummary* constants, which were probably only used by the Relational DAS, have been changed</notes>
+    <notes>This release adds a small number of new features:
+- The Relational DAS now supports nulls: an SQL NULL in the database is represented as a PHP null in the data object and vice versa
+- The important SDO classes all support toString()
+- The SDO_DataObject class now supports clone()</notes>
     <filelist>
       <dir baseinstalldir="SDO" name="/">
        <dir name="cpp">
@@ -325,6 +321,18 @@ Added some tests for the XML DAS.</notes>
 - The Relational DAS adapts to whether PDO constants are using old-style PDO_* or new-style PDO::*
 - The Relational DAS contains a workaround for a problem with PDO_Statement::RowCount and ODBC driver
 - Some SDO_DAS_ChangeSummary* constants, which were probably only used by the Relational DAS, have been changed</notes>
+    </release>
+        <release>
+      <version>0.6.0</version>
+      <date>2005-10-19</date>
+      <license>Apache 2.0</license>
+      <state>beta</state>
+      <notes>This release adds a small number of new features:
+- The Relational DAS now supports nulls: an SQL NULL in the database is represented as a PHP null in the data object and vice versa
+- The important SDO classes all support toString()
+- The SDO_DataObject class now supports clone()
+
+</notes>
     </release>
   </changelog>
 </package>
