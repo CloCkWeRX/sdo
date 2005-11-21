@@ -25,15 +25,18 @@
 #include "commonj/sdo/XSDPropertyInfo.h"
 #include "commonj/sdo/XSDTypeInfo.h"
 #include "commonj/sdo/SDORuntimeException.h"
+#include "commonj/sdo/Logging.h"
 
 namespace commonj
 {
 	namespace sdo
 	{
 		
-		SDOSchemaSAX2Parser::SDOSchemaSAX2Parser(SchemaInfo& schemaInf)
-			: schemaInfo(schemaInf)
+		SDOSchemaSAX2Parser::SDOSchemaSAX2Parser(SchemaInfo& schemaInf,
+			ParserErrorSetter* insetter)
+			: schemaInfo(schemaInf) ,SAX2Parser(insetter)
 		{
+			bInSchema = false;
 		}
 		
 		SDOSchemaSAX2Parser::~SDOSchemaSAX2Parser()
@@ -52,8 +55,11 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+			LOGINFO_1( INFO,"SchemaParser:startElementNs:%s",(const char*)localname);
+
 			if (URI.equalsIgnoreCase("http://www.w3.org/2001/XMLSchema"))
 			{
+
 				///////////////////////////////////////////////////////////////////////
 				// Handle schema
 				// Set the URI from the targetNamespace of the xsd:schema element
@@ -64,8 +70,9 @@ namespace commonj
 
 				if (localname.equalsIgnoreCase("schema"))
 				{
+					bInSchema = true;
 					// Handle namespace definitions
-					schemaInfo.getSchemaNamespaces() = namespaces;
+					schemaInfo.getSchemaNamespaces().merge(namespaces);
 					
 					// Handle attributes
 					for (int i=0; i < attributes.size(); i++)
@@ -78,6 +85,7 @@ namespace commonj
 					
 					currentType.uri = schemaInfo.getTargetNamespaceURI();
 					currentType.name = "RootType";
+					currentType.localname = "RootType";
 					
 				} // end schema handling
 
@@ -107,6 +115,12 @@ namespace commonj
 				else if (localname.equalsIgnoreCase("attribute"))
 				{
 					startAttribute(localname, prefix, URI, namespaces, attributes);
+				}
+				else if (localname.equalsIgnoreCase("any")
+						|| localname.equalsIgnoreCase("anyAttribute"))
+				{
+					// the type containing this is to be created as open
+					currentType.isOpen = true;
 				}
 				
 				
@@ -145,6 +159,10 @@ namespace commonj
 					startExtension(localname, prefix, URI, namespaces, attributes);
 				}
 			}
+			else // not in schema - check for any extra namespaces
+			{
+				schemaInfo.getSchemaNamespaces().merge(namespaces);
+			}
 			
 		}			
 		
@@ -157,8 +175,15 @@ namespace commonj
 			const SDOXMLString& prefix,
 			const SDOXMLString& URI)
 		{
+			LOGINFO_1( INFO,"SchemaParser:endElementNs:%s",(const char*)localname);
+
 			if (URI.equalsIgnoreCase("http://www.w3.org/2001/XMLSchema"))
 			{
+				if (localname.equalsIgnoreCase("schema"))
+				{
+					bInSchema = false;
+				}
+
 				///////////////////////////////////////////////////////////////////////
 				// Handle complexType
 				// Pop the Type off our stack
@@ -204,86 +229,109 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{		
+			LOGINFO_1( INFO,"SchemaParser:startInclude:%s",(const char*)localname);
+
+			if (!bInSchema) return;
+
 			SDOXMLString schemaLocation = attributes.getValue("schemaLocation");
 			if (!schemaLocation.isNull())
 			{
 				SchemaInfo schemaInf;
-				SDOSchemaSAX2Parser schemaParser(schemaInf);
-				try {
-					schemaParser.parse(schemaLocation);
-				}
-				catch (SDOXMLParserException e)
+				SDOSchemaSAX2Parser schemaParser(schemaInf, (ParserErrorSetter*)setter);
+
+				try 
 				{
 					SDOXMLString sl = getCurrentFile();
-					if (sl.isNull()) return;
+					FILE *f;
+					bool bprocessed = false;
 
-					int i = sl.lastIndexOf('/');
-					if (i < 0)i = sl.lastIndexOf('\\');
-					if (i < 0) return;
-
-					sl = sl.substring(0,i+1);
-
-					i = schemaLocation.lastIndexOf('/');
-					if (i < 0)i = schemaLocation.lastIndexOf('\\');
-					if (i < 0) 
+					if (!sl.isNull()) 
 					{
-						sl = sl + schemaLocation;
+					    int i = sl.lastIndexOf('/');
+						if (i < 0)i = sl.lastIndexOf('\\');
+						if (i >= 0)
+						{
+							sl = sl.substring(0,i+1) + schemaLocation;
+							// first attempt, relative path plus the location
+							f = fopen(sl,"r+");
+							if (f != NULL)
+							{
+								fclose(f);
+								schemaParser.parse(sl);
+								bprocessed = true;
+							}
+							else // didnt find the file  
+							{
+								int j = schemaLocation.lastIndexOf('/');
+								if (j < 0)j = schemaLocation.lastIndexOf('\\');
+								if (j >= 0) 
+								{
+									sl = sl.substring(0,i+1) + 
+									 schemaLocation.substring(0,j+1);
+									f = fopen(sl,"r+");
+									if (f != NULL)
+									{
+										fclose(f);
+										schemaParser.parse(sl);
+										bprocessed = true;
+									}
+								}
+							}
+						}
 					}
-					else
+					if (!bprocessed)
 					{
-						sl = sl + schemaLocation.substring(i+1);
-					}
-
-					try {
-						schemaParser.parse(sl);
-					}
-					catch (SDOXMLParserException e)
-					{
-						// finally give up - its not in the current path, or
-						// in the path specified
-						return;
+						schemaParser.parse(schemaLocation);
 					}
 				}
+
+				catch (SDOFileNotFoundException e)
+				{
+					// finally give up - its not in the current path, or
+					// in the path specified
+					return;
+				}
+
+
 				TypeDefinitions& typedefs = schemaParser.getTypeDefinitions();
 				XMLDAS_TypeDefs types = typedefs.types;
 				XMLDAS_TypeDefs::iterator iter;
 				for (iter=types.begin(); iter != types.end(); iter++)
 				{	
-					if ((*iter).second.name.equals("RootType"))
+					if ((*iter).second.name.equals("RootType")
+						&& currentType.name.equals("RootType")
+						&&  (*iter).second.uri.equals(currentType.uri))
 					{
-						if (currentType.name.equals("RootType"))
+						// This must be true for an import/include to be
+						// legally positioned
+
+						XMLDAS_TypeDefs::iterator find = typeDefinitions.types.find(
+								(*iter).first);
+
+						std::list<PropertyDefinition>::iterator propit;
+						std::list<PropertyDefinition>::iterator currpropit;
+						bool found;
+
+						for (propit = (*iter).second.properties.begin() ; 
+							 propit != (*iter).second.properties.end(); ++ propit)
 						{
-							// This must be true for an import/include to be
-							// legally positioned
-
-							XMLDAS_TypeDefs::iterator find = typeDefinitions.types.find(
-									(*iter).first);
-
-							std::list<PropertyDefinition>::iterator propit;
-							std::list<PropertyDefinition>::iterator currpropit;
-							bool found;
-
-							for (propit = (*iter).second.properties.begin() ; 
-								 propit != (*iter).second.properties.end(); ++ propit)
-							{
-                                 found = false;
-							     // do not merge properties whose names clash
-								 for ( currpropit = currentType.properties.begin();
-								       currpropit != currentType.properties.end();
-									   ++currpropit)
+                                found = false;
+						     // do not merge properties whose names clash
+							 for ( currpropit = currentType.properties.begin();
+							       currpropit != currentType.properties.end();
+								   ++currpropit)
+							 {
+							     if ((*currpropit).name.equals((*propit).name))
 								 {
-								     if ((*currpropit).name.equals((*propit).name))
-									 {
-										 found = true;
-										 break;
-									 }
+									 found = true;
+									 break;
 								 }
-								 if (!found) 
-								 {
-									currentType.properties.insert(
-										 currentType.properties.end(),*propit);
-								 }
-							}
+							 }
+							 if (!found) 
+							 {
+								currentType.properties.insert(
+									 currentType.properties.end(),*propit);
+							 }
 						}
 					}
 					else 
@@ -305,8 +353,13 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+
+			if (!bInSchema) return;
+
 			PropertyDefinition thisProperty;
-			
+
+			LOGINFO_1( INFO,"SchemaParser:startElement:%s",(const char*)localname);
+
 			thisProperty.isElement =  true;
 			
 			setName(attributes,
@@ -324,7 +377,25 @@ namespace commonj
 					thisProperty.isMany = true;
 				}
 			}
+
+			// find aliases
+            thisProperty.aliases = attributes.getValue("aliasName");
 			
+			// mark this as a substitution group.
+			// TODO - what about properties which have already been set into the tree,
+			// and might have a substitution?
+
+			SDOXMLString substituteName = attributes.getValue("substitutionGroup");
+			if (! substituteName.isNull())
+			{
+				XMLQName qname = resolveTypeName(
+				substituteName,
+				namespaces,
+				thisProperty.substituteUri,
+				thisProperty.substituteName);
+				thisProperty.isSubstitute=true;
+			}
+
 			// count the number of elements in the group
 			if (currentType.isMany)
 			{
@@ -345,6 +416,11 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+
+			LOGINFO_1( INFO,"SchemaParser:startAttribute:%s",(const char*)localname);
+
+			if (!bInSchema) return;
+
 			PropertyDefinition thisProperty;
 			
 			thisProperty.isElement =  false;
@@ -368,10 +444,17 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+			LOGINFO_1( INFO,"SchemaParser:startComplexType:%s",(const char*)localname);
+
+			if (!bInSchema) return;
+
 			TypeDefinition thisType; // set defaults
 			thisType.uri=schemaInfo.getTargetNamespaceURI();
 			
 			setTypeName(thisType, attributes);
+
+
+			
 			for (int i=0; i < attributes.size(); i++)
 			{
 				// If sdo:sequence="true" or mixed="true" it is sequenced
@@ -383,6 +466,18 @@ namespace commonj
 					{
 						thisType.isSequenced = true;
 					}
+				}
+				// If abstract="true" it is abstract
+				else if (attributes[i].getName().equalsIgnoreCase("abstract"))
+				{	
+					if (attributes[i].getValue().equals("true"))
+					{
+						thisType.isAbstract = true;
+					}
+				}
+				else if (attributes[i].getName().equalsIgnoreCase("aliasName"))
+				{
+					thisType.aliases = attributes[i].getValue();
 				}
 			}
 			
@@ -399,11 +494,33 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+			LOGINFO_1( INFO,"SchemaParser:startSimpleType:%s",(const char*)localname);
+
+			if (!bInSchema) return;
+
 			TypeDefinition thisType; // set defaults
 			thisType.uri=schemaInfo.getTargetNamespaceURI();
 			thisType.dataType = true;
 			
+			for (int i=0; i < attributes.size(); i++)
+			{
+				// If abstract="true" it is abstract
+				if (attributes[i].getName().equalsIgnoreCase("abstract"))
+				{	
+					if (attributes[i].getValue().equals("true"))
+					{
+						thisType.isAbstract = true;
+					}
+				}
+				else if (attributes[i].getName().equalsIgnoreCase("aliasName"))
+				{
+					thisType.aliases = attributes[i].getValue();
+				}
+			}
 			setTypeName(thisType, attributes);
+
+			// see if the type is going to be abstract...
+
 			
 			setCurrentType(thisType);				
 		}
@@ -418,6 +535,10 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+			LOGINFO_1( INFO,"SchemaParser:startRestriction:%s",(const char*)localname);
+
+			if (!bInSchema) return;
+
 			SDOXMLString base = attributes.getValue("base");
 			if (!base.isNull())
 			{
@@ -446,6 +567,10 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+			LOGINFO_1( INFO,"SchemaParser:startExtension:%s",(const char*)localname);
+
+			if (!bInSchema) return;
+
 			SDOXMLString base = attributes.getValue("base");
 			if (!base.isNull())
 			{
@@ -498,6 +623,10 @@ namespace commonj
 			const SAX2Namespaces& namespaces,
 			const SAX2Attributes& attributes)
 		{
+			LOGINFO_1( INFO,"SchemaParser:startGroup:%s",(const char*)localname);
+
+			if (!bInSchema) return;
+
 			SDOXMLString maxOccurs = attributes.getValue("maxOccurs");
 			if (!maxOccurs.isNull())
 			{
@@ -660,16 +789,21 @@ namespace commonj
 			{
 				XMLQName qname(property.fullLocalTypeName,schemaInfo.getSchemaNamespaces(), namespaces);
 				if (qname.getLocalName().equals("IDREF")
-					|| qname.getLocalName().equals("IDREFS")
-					|| qname.getLocalName().equals("anyURI"))
+					|| qname.getLocalName().equals("IDREFS"))
 				{
 					property.fullTypeName = attributes.getValue("commonj.sdo/xml","propertyType");
+					
 					property.isIDREF = true;
 					property.isContainment = false;
+					
 					if (qname.getLocalName().equals("IDREFS"))
 					{
 						property.isMany = true;
 					}
+				}
+				else if (qname.getLocalName().equals("anyURI"))
+				{
+					property.fullTypeName = attributes.getValue("commonj.sdo/xml","propertyType");
 				}
 				else if (qname.getLocalName().equals("ID"))
 				{
@@ -874,6 +1008,10 @@ namespace commonj
 					name = "ChangeSummary";
 				}
 				
+			}
+			else if (qname.getURI().isNull())
+			{
+				uri = schemaInfo.getTargetNamespaceURI();
 			}
 
 			return qname;

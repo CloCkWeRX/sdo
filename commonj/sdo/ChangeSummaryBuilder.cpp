@@ -1,22 +1,22 @@
-/*
+/* 
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005.                                  | 
 | All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
++----------------------------------------------------------------------+ 
+|                                                                      | 
+| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
+| may not use this file except in compliance with the License. You may | 
+| obtain a copy of the License at                                      | 
 |  http://www.apache.org/licenses/LICENSE-2.0                          |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Ed Slattery                                                 |
-+----------------------------------------------------------------------+
+|                                                                      | 
+| Unless required by applicable law or agreed to in writing, software  | 
+| distributed under the License is distributed on an "AS IS" BASIS,    | 
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
+| implied. See the License for the specific language governing         | 
+| permissions and limitations under the License.                       | 
++----------------------------------------------------------------------+ 
+| Author: Ed Slattery                                                 | 
++----------------------------------------------------------------------+ 
 
 */
 /* $Id$ */
@@ -34,7 +34,7 @@ namespace commonj
 {
 	namespace sdo
 	{
-
+		
 // ========================================================================
 // Constructor/Destructor
 // ========================================================================
@@ -42,23 +42,22 @@ namespace commonj
 		ChangeSummaryBuilder::ChangeSummaryBuilder(
 			DataFactoryPtr df,
 			DataObjectPtr& rootDO)
-
+			
 			: dataFactory(df),
 			rootDataObject(rootDO)
-
-
+			
+	
 		{
-			LOGENTRY(INFO,"CSBuilder constructor");
-
+			LOGINFO(INFO,"CSBuilder constructor");
 			currentState = baseState;
 		}
-
+		
 		ChangeSummaryBuilder::~ChangeSummaryBuilder()
 		{
-			LOGENTRY(INFO,"CSBuilder destructor");
+			LOGINFO(INFO,"CSBuilder destructor");
 		}
-
-
+		
+		
 // ========================================================================
 // Deletion handling
 // ========================================================================
@@ -68,7 +67,7 @@ namespace commonj
 		{
 			LOGENTRY(INFO,"CSBuilder populateDeletion");
 			try {
-
+                
 				std::list<deletionAttribute>::iterator  attributesiter;
 				std::list<deletionElement>::iterator    elementsiter;
 
@@ -90,7 +89,7 @@ namespace commonj
 
 				    LOGINFO_1(INFO,"CSBuilder:Populate deletion element:%s",
 					(const char*)((*elementsiter).name));
-
+					
 					SDOXMLString value = (*elementsiter).value;
 					SDOXMLString prop = (*elementsiter).name;
 
@@ -136,8 +135,8 @@ namespace commonj
 // ========================================================================
 
 		void ChangeSummaryBuilder::handleDeletion(
-							  ChangeSummaryImpl* csi,
-			                  int currentIndex,
+							  ChangeSummaryImpl* csi, 
+			                  int currentIndex, 
 							  DataObjectPtr cont,
 							  SDOXMLString path,
 							  SDOXMLString prop)
@@ -150,7 +149,7 @@ namespace commonj
 				return;
 			}
 
-			const Property& p = cont->getType().getProperty(prop);
+			const Property& p = cont->getProperty(prop);
 			DataObjectPtr dob = dataFactory->create(
 								p.getType());
 			populateDeletion(csi,dob,currentIndex);
@@ -168,8 +167,8 @@ namespace commonj
 // ========================================================================
 
 		void ChangeSummaryBuilder::handleDeletion(
-							  ChangeSummaryImpl* csi,
-			                  int currentIndex,
+							  ChangeSummaryImpl* csi, 
+			                  int currentIndex, 
 							  SDOXMLString path)
 		{
 
@@ -194,8 +193,8 @@ namespace commonj
 				LOGEXIT(INFO,"CSBuilder:handleDeletion - Exit2");
 				return;
 			}
-
-			SDOXMLString prop =
+			
+			SDOXMLString prop = 
 					path.substring(index+1);
 			SDOXMLString contpath =
 					path.substring(0,index);
@@ -214,7 +213,7 @@ namespace commonj
 
 				LOGINFO_1(INFO,"Handling deletion from root of %s",(const char*)prop);
 			}
-			else
+			else 
 			{
 				try {
 				    cont = rootDataObject->getDataObject(contpath);
@@ -240,7 +239,7 @@ namespace commonj
 				cont = csi->matchDeletedObject(contpath);
 				if (cont != 0)
 				{
-					// we found a previously deleted object for
+					// we found a previously deleted object for 
 					// the container.
 					handleDeletion(csi,currentIndex,cont,path,prop);
 					LOGEXIT(INFO,"CSBuilder:handleDeletion - Exit4");
@@ -302,7 +301,7 @@ namespace commonj
 
 			SDOXMLString refstring = createDeletes[index].value.substring(0,pos);
 			pos = atoi((const char*)(createDeletes[index].value.substring(pos+1)));
-
+				                     
 			for (int k=index+1;k<createDeletes.size();k++)
 			{
 
@@ -380,20 +379,20 @@ namespace commonj
 							dob = rootDataObject->getDataObject(thispath);
 						}
 						if (dob != 0) {
-
+							
 							LOGINFO(INFO,"CSBuilder:add create to change summary");
 
 							csi->appendToCreations(dob->getContainmentProperty(),
 											dob, dob->getContainer());
 							shiftIndices(i,-1);
 						}
-						else
+						else 
 						{
 							LOGERROR_1(WARNING,"Failed to find object at %s",
 								(const char*)createDeletes[i].value);
 						}
 					}
-					else
+					else 
 					{
 						// its a deletion - match it.
 						for (int j = 0; j < deletions.size(); j++)
@@ -405,9 +404,9 @@ namespace commonj
 								// matching deletion found
 								LOGINFO_1(INFO,"CSBuilder:matched delete:%s",
 								(const char*)deletions[j].reference);
-
+								
 								handleDeletion(csi, j,createDeletes[i].value);
-								// update the path on any higher items in the current
+								// update the path on any higher items in the current 
 								// many-valued property.
 								shiftIndices(i,1);
 
@@ -416,7 +415,7 @@ namespace commonj
 						}
 					}
 				}
-
+		
 				// add the changes
 
 				std::list<changeAttribute>::iterator a;
@@ -429,7 +428,7 @@ namespace commonj
 					{
 						dob = rootDataObject;
 					}
-					else
+					else 
 					{
 						dob = rootDataObject->getDataObject(changes[i].reference);
 					}
@@ -444,8 +443,8 @@ namespace commonj
 						for (a=changes[i].attributes.begin();
 							 a != changes[i].attributes.end();++a)
 						{
-							const Property& p = dob->getType().getProperty((const char*)((*a).name));
-							if (p.getType().isDataType())
+							const Property& p = dob->getProperty((const char*)((*a).name));
+							if (p.getType().isDataType()) 
 							{
 								csi->appendToChanges(
 									p,dob,(*a).value,0);
@@ -466,7 +465,7 @@ namespace commonj
 						for (e=changes[i].elements.begin();
 							 e != changes[i].elements.end();++e)
 						{
-							const Property& p = dob->getType().getProperty
+							const Property& p = dob->getProperty
 								               ((const char*)((*e).name));
 						    if ((*e).isDeletion)
 							{
@@ -523,7 +522,7 @@ namespace commonj
 			}
 			LOGEXIT(INFO,"CSBuilder:buildChangeSummary Exit3");
 		}
-
+		
 // ========================================================================
 // Parsing code
 // ========================================================================
@@ -546,9 +545,9 @@ namespace commonj
 					localname.equalsIgnoreCase("delete"))
 				{
 					currentState = dealingWithCreateDelete;
-					// will be expecting a chars message to give the
+					// will be expecting a chars message to give the 
 					// contents
-
+			
 					createDeletes.insert(
 						createDeletes.end(),createDelete(localname));
 
@@ -560,7 +559,7 @@ namespace commonj
 				{
 					// we are starting a new change record here
 					currentState = dealingWithChange;
-
+					
 					// we expect the entry to have an sdo:ref, and possibly
 					// some attributes for the changed single-values
 					SDOXMLString ref = attributes.getValue("ref");
@@ -576,23 +575,23 @@ namespace commonj
 					LOGINFO_2(INFO,"CSBuilder: Processing a change:%s:%s",
 						(const char*)localname,
 						(const char*)ref);
-
+				
 					currentLocation.clear();
 
-					if (ref.equals("#/"))
+					if (ref.equals("#/")) 
 					{
 						ref = SDOXMLString("#");
 					}
 
 					currentLocation.push_back(ref);
-
+					
 					// clear out the change state - if there was any.
 
 					changeIndex = 0;
 					previousChange = SDOXMLString("");
 
 					// now insert any remaining attributes of this change
-
+					
 					for (i=0; i < attributes.size(); i++)
 					{
 						// push all the attributes into the change record.
@@ -644,7 +643,7 @@ namespace commonj
 					curr_loc = curr_loc + currentLocation[currentLocation.size()-1];
 				}
 
-				LOGINFO_1(INFO,"CSBuilder: Dropping into an element of a change:%s",
+				LOGINFO_1(INFO,"CSBuilder: Dropping into an element of a change:%s", 
 						(const char*)localname);
 				LOGINFO_1(INFO,"CSBuilder:currentLocation:%s",
 						(const char*)curr_loc);
@@ -663,13 +662,13 @@ namespace commonj
 								    attributes[0].getValue(), true, false));
 
 						LOGEXIT(INFO,"CSBuilder:processStart Exit3");
-						return;
+						return; 
 					}
 				}
 
 				if (attributes.size() == 0)
 				{
-					// It could be a many-valued primitive, or
+					// It could be a many-valued primitive, or 
 					// a deletion with no attributes
 					// can we match the current path to a known deletion?
 
@@ -688,10 +687,10 @@ namespace commonj
 							}
 						}
 					}
-					if (!isDelete)
+					if (!isDelete) 
 					{
 						LOGINFO(INFO,"CSBuilder: Change with no atts and not deletion- an element");
-
+						
 						// and will get picked up by the 'characters' method.
 						currentState = dealingWithChangeElement;
 						currentLocalName = SDOXMLString(localname);
@@ -703,12 +702,12 @@ namespace commonj
 
 				currentChange.addElement(changeElement(localname, curr_loc, false, true));
 				currentDeletion = deletion(localname, curr_loc);
-
+				
 				LOGINFO_2(INFO,"CSBuilder: Found a deletion:%s:%s",
 					(const char*)localname,
 					(const char*)curr_loc);
-
-
+				
+					
 				// clear out the change state - if there was any.
 				deletionLevel = 0;
 				deletionIndex = 0;
@@ -735,7 +734,7 @@ namespace commonj
 			}
 			if (currentState == dealingWithDeletion)
 			{
-				// we are already in a deletion, and entering an element
+				// we are already in a deletion, and entering an element 
 				if (!previousDeletion.equals(localname))
 				{
 					deletionIndex = 0;
@@ -758,11 +757,11 @@ namespace commonj
 					if (name.equalsIgnoreCase("ref"))
 					{
 						LOGINFO(INFO,"CSBuilder: The element is a reference to an existing entry in a list");
-
+						
 						currentState = dealingWithDeletionElement;
-
+						
 						LOGEXIT(INFO,"CSBuilder:processStart Exit6");
-						return;
+						return; 
 					}
 				}
 
@@ -779,7 +778,7 @@ namespace commonj
 
 				if (attributes.size() == 0)
 				{
-					// It could be a many-valued primitive, or
+					// It could be a many-valued primitive, or 
 					// a deletion with no attributes
 					// can we match the current path to a known deletion?
 					bool isDelete = false;
@@ -797,13 +796,13 @@ namespace commonj
 							}
 						}
 					}
-					if (!isDelete)
+					if (!isDelete) 
 					{
 						LOGINFO(INFO,"CSBuilder: Found a change with no atts, and no deletion matches - its an element");
-
+						
 						// and will get picked up by the 'characters' method.
 						currentState = dealingWithDeletionElement;
-
+						
 						LOGEXIT(INFO,"CSBuilder:processStart Exit7");
 						return;
 					}
@@ -814,10 +813,10 @@ namespace commonj
 
 				LOGINFO_2(INFO,"CSBuilder: Found a deletion within a deletion:%s:%s",
 					(const char*)localname, (const char*)curr_loc);
-
+					
 				deletionList.push_back(deletionListElement(currentDeletion,deletionIndex,
 				previousDeletion));
-
+								
 				currentDeletion = deletion(localname, curr_loc);
 
 				// we are in a nested delete - so record the level such that we can pop state
@@ -848,11 +847,11 @@ namespace commonj
 
 			}
 		}
-
+		
 // ========================================================================
 // Parser ends an element
 // ========================================================================
-
+		
 		void ChangeSummaryBuilder::processEnd(
 			const SDOXMLString& localname,
 			const SDOXMLString& prefix,
@@ -906,7 +905,7 @@ namespace commonj
 						SDOXMLString path = currentDeletion.reference;
 						SDOXMLString name = currentDeletion.name;
 
-						deletionListElement dl = deletionList[deletionList.size()-1];
+						deletionListElement dl = deletionList[deletionList.size()-1]; 
 						currentDeletion = dl.del;
 						deletionIndex = dl.index;
 						previousDeletion = dl.previous;
@@ -932,8 +931,8 @@ namespace commonj
 // ========================================================================
 // Parse characters
 // ========================================================================
-
-
+		
+		
 		void ChangeSummaryBuilder::processChars(
 			const SDOXMLString& chars)
 		{
@@ -941,9 +940,9 @@ namespace commonj
 
 			if (currentState == dealingWithCreateDelete)
 			{
-				// this is text within a create/delete indicating the
+				// this is text within a create/delete indicating the 
 				// value of the item deleted/created.
-				if (createDeletes.size() > 0)
+				if (createDeletes.size() > 0) 
 				{
 					createDeletes[createDeletes.size()-1].value = chars;
 					LOGINFO_1(INFO,"CSBuilder:characters create/delete:%s",
@@ -960,8 +959,8 @@ namespace commonj
 				currentChange.addElement(ce);
 
 				LOGINFO_1(INFO,"CSBuilder: Characters in a change element:%s",
-					(const char *)chars);
-
+					(const char *)chars); 
+				
 				LOGEXIT(INFO,"CSBuilder:processChars Exit2");
 				return;
 			}
@@ -971,20 +970,24 @@ namespace commonj
 				ce.value = chars;
 				ce.index = deletionIndex;
 				currentDeletion.addElement(ce);
-
+				
 				LOGINFO_1(INFO,"CSBuilder: Characters in a deletion element:%s",
-					(const char *)chars);
+					(const char *)chars); 
 
 				LOGEXIT(INFO,"CSBuilder:processChars Exit3");
 				return;
 			}
+
+			LOGINFO_1(INFO,"CSBuilder: Characters in nothing!!:%s",
+				(const char *)chars); 
+			LOGEXIT(INFO,"CSBuilder:processChars Exit4");
 		}
 
-
+	
 // ========================================================================
 // Classes holding temporary parsed information
 // ========================================================================
-
+		
 
 		/////////////////////////////////////////////////
 		// An element in the list of creates/deletes
@@ -1025,7 +1028,7 @@ namespace commonj
 		{
 		}
 
-		changeElement::changeElement(SDOXMLString inname,
+		changeElement::changeElement(SDOXMLString inname, 
 			SDOXMLString inpath, bool isRef, bool isDel)
 			: name(inname) , path(inpath)
 		{
@@ -1033,7 +1036,7 @@ namespace commonj
 			isDeletion= isDel;
 		}
 
-		changeElement::changeElement(SDOXMLString inname,
+		changeElement::changeElement(SDOXMLString inname, 
 			SDOXMLString inpath,
 			SDOXMLString invalue, bool isRef, bool isDel)
 			: name(inname), value(invalue), path(inpath)
@@ -1050,7 +1053,7 @@ namespace commonj
 		{
 		}
 
-		change::change(SDOXMLString inname, SDOXMLString ref):
+		change::change(SDOXMLString inname, SDOXMLString ref): 
 				name(inname), reference(ref)
 		{
 		}
@@ -1107,7 +1110,7 @@ namespace commonj
 		{
 		}
 
-		deletion::deletion(SDOXMLString inname, SDOXMLString ref):
+		deletion::deletion(SDOXMLString inname, SDOXMLString ref): 
 				name(inname), reference(ref)
 		{
 			completedprocessing=false;
@@ -1133,13 +1136,13 @@ namespace commonj
 		}
 
 		deletionListElement::deletionListElement(
-			deletion in_del,
-			int in_index,
+			deletion in_del, 
+			int in_index, 
 			SDOXMLString in_prev):
 			del(in_del), index(in_index), previous(in_prev)
 		{
 		}
-
+		
 	} // End - namespace sdo
 } // End - namespace commonj
 

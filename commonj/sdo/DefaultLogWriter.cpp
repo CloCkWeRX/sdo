@@ -41,12 +41,13 @@ namespace commonj
 
 		void DefaultLogWriter::log(int indent, int level, const char* msg)
 		{
-			formatindent += indent;
+			if (indent < 0) formatindent += indent;
 			for (int i=0; i < formatindent; i++)
 			{
 				cout << "  ";
 			}
 			cout << msg <<endl;
+			if (indent > 0) formatindent += indent;
 		}
 
 	} // End namespace sca

@@ -74,6 +74,8 @@ DataFactoryImpl::DataFactoryImpl()
 	// abstract
 	addType(Type::SDOTypeNamespaceURI,"ChangeSummary");
 
+	rootElementName = 0;
+
 
 }
 
@@ -91,7 +93,37 @@ DataFactoryImpl::~DataFactoryImpl()
 			delete typeIter->second;
 		}
 	}
+	if (rootElementName != 0)
+	{
+		delete rootElementName;
+		rootElementName = 0;
+	}
 
+}
+
+// ===================================================================
+// get the root element name 
+// ===================================================================
+const char* DataFactoryImpl::getRootElementName() const
+{
+	return (const char*)rootElementName;
+}
+
+// ===================================================================
+// set the root element name 
+// ===================================================================
+void DataFactoryImpl::setRootElementName(const char* ren)
+{
+	if (rootElementName != 0)
+	{
+		delete rootElementName;
+		rootElementName = 0;
+	}
+	if (ren != 0 && (strlen(ren) != 0)) 
+	{
+		rootElementName = new char[strlen(ren) +1];
+		strcpy(rootElementName, ren);
+	}
 }
 
 // ===================================================================
@@ -100,6 +132,8 @@ DataFactoryImpl::~DataFactoryImpl()
 DataFactoryImpl::DataFactoryImpl(const DataFactoryImpl& inmdg)
 {
 	isResolved = false;
+	rootElementName = 0;
+	setRootElementName(inmdg.getRootElementName());
 	copyTypes(inmdg);
 }
 
@@ -110,7 +144,9 @@ DataFactoryImpl& DataFactoryImpl::operator=(const DataFactoryImpl& inmdg)
 {
 	if (this != &inmdg)
 	{
+		rootElementName = 0;
 		copyTypes(inmdg);
+		setRootElementName(inmdg.getRootElementName());
 	}
 	return *this;
 }
@@ -177,12 +213,14 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
             if (props[i].getAliasCount() > 0) 
 			{
 
-				PropertyImpl& p = (typeIter2->second)->
+				PropertyImpl* p = (typeIter2->second)->
 					getPropertyImpl(props[i].getName());
-
-				for (int j=0;j<p.getAliasCount();j++)
+                if (p != 0)
 				{
-					p.setAlias(props[i].getAlias(j));
+					for (int j=0;j<p->getAliasCount();j++)
+					{
+						p->setAlias(props[i].getAlias(j));
+					}
 				}
 
 			}
@@ -354,7 +392,7 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
 	}
 	
 	// Check if its a ChangeSummary
-	if (!strcmp(propTypeUri,Type::SDOTypeNamespaceURI) &&
+	if (propTypeUri != 0 && !strcmp(propTypeUri,Type::SDOTypeNamespaceURI) &&
 		!strcmp(propTypeName,"ChangeSummary") )
 	{
 		if (checkForValidChangeSummary(typeIter->second)) 
@@ -617,6 +655,50 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 	(typeIter->second)->setBaseType(base);
 }
 
+
+// ===================================================================
+// setPropertySubstitute - additional type for a property
+// ===================================================================
+
+	void DataFactoryImpl::setPropertySubstitute(
+			const char* uri, 
+			const char* inTypeName,
+			const char* propname,
+			const char* subname,
+			const char* subTypeUri, 
+			const char* subTypeName)
+	{
+		const TypeImpl* cont = findTypeImpl(uri, inTypeName);
+		if (cont == 0)
+		{
+			string msg("Type not found :");
+			if (uri != 0) msg += uri;
+			msg += " ";
+			if (inTypeName != 0) msg += inTypeName;
+			SDO_THROW_EXCEPTION("setPropertySubstitute" ,
+			SDOTypeNotFoundException, msg.c_str());
+		}
+		PropertyImpl* pi = cont->getPropertyImpl(propname);
+		const Type& tsub = getType(subTypeUri,
+								subTypeName);
+		if (pi != 0)pi->setSubstitution(this,subname,tsub);
+	}
+
+	
+
+	void DataFactoryImpl::setPropertySubstitute(
+			const Type& containertype,
+			const char* propname,
+			const char* subname,
+			const Type& subtype)
+	{
+		setPropertySubstitute(
+			containertype.getURI(),
+			containertype.getName(),
+			propname,subname,
+			subtype.getURI(),subtype.getName());
+	}
+
 // ===================================================================
 // setDefault - sets the default value for a property of a type
 // ===================================================================
@@ -700,8 +782,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname, bool b ) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(b);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(b);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -709,8 +791,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , char c) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(c);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(c);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -718,8 +800,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , wchar_t c) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(c);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(c);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -727,8 +809,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , char* c) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(c);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(c);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -736,8 +818,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , short s) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(s);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(s);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -745,8 +827,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , long l) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(l);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(l);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -754,8 +836,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , int64_t i) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(i);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(i);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -763,8 +845,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , float f) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(f);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(f);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -772,8 +854,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , long double d) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(d);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(d);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -781,8 +863,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , const SDODate d) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(d);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(d);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -790,8 +872,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , const wchar_t* c, unsigned int len) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(c,len);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(c,len);
 	}
 
 	void DataFactoryImpl::setDefault(
@@ -799,8 +881,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 		const char* propname , const char* c, unsigned int len) 
 	{
 		const TypeImpl* ti = findTypeImpl(typuri,typnam);
-		PropertyImpl& pi = ti->getPropertyImpl(propname);
-		pi.setDefault(c,len);
+		PropertyImpl* pi = ti->getPropertyImpl(propname);
+		if (pi != 0)pi->setDefault(c,len);
 	}
 
 	void DataFactoryImpl::setOpposite(
@@ -902,8 +984,8 @@ void DataFactoryImpl::setAlias(const char* typeuri,
 							  const char* alias)
 {
 	const TypeImpl&  t = getTypeImpl(typeuri, typenam);
-	PropertyImpl& p  = t.getPropertyImpl(propname); 
-	p.setAlias(alias);
+	PropertyImpl* p  = t.getPropertyImpl(propname); 
+	if (p != 0)p->setAlias(alias);
 
 }
 
@@ -964,7 +1046,7 @@ RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const ch
 	if (!isResolved)
 	{
 		// Allow creation of types and properties before resolve.
-		if (!strcmp(uri,Type::SDOTypeNamespaceURI)) {
+		if (uri != 0 && !strcmp(uri,Type::SDOTypeNamespaceURI)) {
 			if (!strcmp(typeName,"Type") || !strcmp(typeName,"Property"))
 			{
 				DataObject* dob = (DataObject*)(new DataObjectImpl(this, getTypeImpl(uri, typeName)));
@@ -973,9 +1055,63 @@ RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const ch
 		}
 		resolve();
 	}
+
+	const TypeImpl* ti = findTypeImpl(uri,typeName);
+	if (ti == 0)
+	{
+		string msg("Instantiation of unknown type :");
+		if (uri != 0) msg += uri;
+		msg += " ";
+		msg += typeName;
+		SDO_THROW_EXCEPTION("create" ,
+		SDOTypeNotFoundException, msg.c_str());
+	}
+
+	if (ti->isAbstractType())
+	{
+		string msg("Instantiation of abstract type :");
+		msg += uri;
+		msg += " ";
+		msg += typeName;
+		SDO_THROW_EXCEPTION("create" ,
+		SDOUnsupportedOperationException, msg.c_str());
+	}
+
 	DataObject* dob = (DataObject*)(new DataObjectImpl(this, getTypeImpl(uri, typeName)));
 	return dob;
 }
+
+// ===================================================================
+// The openProperties map is a list of the curently present open
+// properties as used by this factory. It will cause the 
+// open properties to be written out as attributes and elements
+// of the root data object when a graph is serialized.
+// ===================================================================
+	const propertyMap& DataFactoryImpl::getOpenProperties()
+	{
+		return openProperties;
+	}
+
+	void DataFactoryImpl::addOpenProperty(const PropertyImpl& prop)
+	{
+		propertyMap::iterator i;
+		while ((i = openProperties.find(prop.getName())) !=
+			   openProperties.end())
+		{
+			openProperties.erase(i);
+		}
+		openProperties.insert(make_pair(prop.getName(),prop));
+	}
+
+	void DataFactoryImpl::removeOpenProperty(const char* name)
+	{
+		propertyMap::iterator i = 
+			openProperties.find(name);
+		if (i != openProperties.end())
+		{
+			openProperties.erase(i);
+		}
+	}
 
 
 // ===================================================================
@@ -1059,8 +1195,8 @@ void DataFactoryImpl::setDASValue(
 	const TypeImpl* type = findTypeImpl(typeuri, typenam);
 	if (type != NULL)
 	{
-		PropertyImpl& prop = type->getPropertyImpl(propertyName);
-		prop.setDASValue(name, value);
+		PropertyImpl* prop = type->getPropertyImplPure(propertyName);
+		if (prop != 0)prop->setDASValue(name, value);
 	}
 }
 
@@ -1086,8 +1222,8 @@ DASValue* DataFactoryImpl::getDASValue(
 	{
 		try
 		{
-			PropertyImpl& prop = type->getPropertyImpl(propertyName);
-			return prop.getDASValue(name);
+			PropertyImpl* prop = type->getPropertyImpl(propertyName);
+			if (prop != 0)return prop->getDASValue(name);
 		}
 		catch (const SDOPropertyNotFoundException&)
 		{

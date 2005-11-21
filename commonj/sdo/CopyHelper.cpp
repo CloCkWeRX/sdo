@@ -188,7 +188,7 @@ namespace sdo{
 		DataObjectPtr newob = fac->create(t);
 		if (!newob) return 0;
 
-		PropertyList pl = dataObject->getProperties();
+		PropertyList pl = dataObject->getInstanceProperties();
 		for (int i=0;i < pl.size(); i++)
 		{
 			if (dataObject->isSet(pl[i]))

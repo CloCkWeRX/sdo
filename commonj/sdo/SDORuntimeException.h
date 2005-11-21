@@ -287,6 +287,21 @@ class SDOTypeNotFoundException: public SDORuntimeException
 
 // ***************************************************************************
 //
+// General exception for file not found
+//
+// ***************************************************************************
+class SDOFileNotFoundException: public SDORuntimeException
+{
+  public:
+    SDOFileNotFoundException(const char* name)
+      : SDORuntimeException("SDOFileNotFoundException", Warning,
+                     name)
+    {
+    }
+  private:
+}; // End SDOFileNotFoundException class definition
+// ***************************************************************************
+//
 // General invalid action for type not found
 //
 // ***************************************************************************
@@ -380,6 +395,8 @@ class SDOXMLParserException: public SDORuntimeException
   // SDORuntimeException or a class derived from SDORuntimeException.
   // The parameter 'parameter' is the construction parameter for the exception
   // =========================================================================
+
+
   #define SDO_THROW_EXCEPTION(function_name, type, parameter )  \
 	{\
 	 type ex(parameter); \

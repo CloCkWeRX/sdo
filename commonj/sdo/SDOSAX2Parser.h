@@ -52,13 +52,37 @@ namespace commonj
 			SDOSAX2Parser(
 				DataFactoryPtr df,
 				const SDOXMLString& targetNamespaceURI,
-				DataObjectPtr& rootDO);
+				DataObjectPtr& rootDO,
+				ParserErrorSetter* insetter);
 			
 			virtual ~SDOSAX2Parser();
 
 			virtual void startDocument();
 			virtual void endDocument();
 			
+			virtual bool setDO(DataObjectPtr newDO, 
+			             SDOXMLString& propertyName);
+
+			virtual void setAttributes(
+				SDOXMLString& tns,
+				const SAX2Namespaces& namespaces,
+				const SAX2Attributes& attributes);
+
+		    virtual void  handleOpenAttribute(
+								SDOXMLString& tns,
+								const char* propuri,
+								const char* propname,
+								const char* value);
+
+			virtual const PropertyImpl* handleOpenType(
+						SDOXMLString& tns,
+						const SDOXMLString& localname,
+						DataObjectImpl* dob,
+						const SAX2Namespaces& namespaces,
+						const SAX2Attributes& attributes,
+						SDOXMLString& xsitypeURI,
+						SDOXMLString& xsitypeName,
+						bool bToBeNull);
 
 			virtual void startElementNs(
 				const SDOXMLString& localname,
@@ -82,6 +106,7 @@ namespace commonj
 			SDOXMLString targetNamespaceURI;
 			DataFactoryPtr dataFactory;
 			DataObjectPtr&  rootDataObject;
+
 			
 			std::stack<DataObjectPtr>	dataObjectStack;
 			

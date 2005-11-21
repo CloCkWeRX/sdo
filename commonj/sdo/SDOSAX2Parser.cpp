@@ -31,6 +31,9 @@
 #include "commonj/sdo/Logging.h"
 #include "commonj/sdo/DASType.h"
 #include "commonj/sdo/XSDTypeInfo.h"
+#include "commonj/sdo/TypeImpl.h"
+#include "commonj/sdo/DataObjectImpl.h"
+#include "commonj/sdo/DataFactoryImpl.h"
 
 namespace commonj
 {
@@ -40,7 +43,9 @@ namespace commonj
 		SDOSAX2Parser::SDOSAX2Parser(
 			DataFactoryPtr df,
 			const SDOXMLString& targetNamespace,
-			DataObjectPtr& rootDO)
+			DataObjectPtr& rootDO,
+			ParserErrorSetter* insetter
+			) 
 			
 			: dataFactory(df),
 			targetNamespaceURI(targetNamespace),
@@ -48,8 +53,10 @@ namespace commonj
 			currentDataObject(0),
 			isDataGraph(false),
 			ignoreEvents(false),
+			dealingWithChangeSummary(false),
 			csbuilder(0),
-			dealingWithChangeSummary(false)
+			SAX2Parser(insetter)
+			
 	
 		{
 			reset();
@@ -78,20 +85,23 @@ namespace commonj
 		
 		void SDOSAX2Parser::startDocument()
 		{
+			LOGINFO(INFO,"SDOSAX2Parser: startDocument");
 			setNamespaces = true;
 			reset();
 		}
 		
 		void SDOSAX2Parser::endDocument()
 		{
+			LOGENTRY(INFO,"SDOSAX2Parser: endDocument");
 			// Iterate over IDREFs list and set references
 			ID_REFS::iterator refsIter;
 			for (refsIter = IDRefs.begin(); refsIter != IDRefs.end(); refsIter++)
 			{
 				try
 				{
-					const Property& prop = refsIter->dataObject->getType().getProperty(refsIter->property);
-					const Type& propType = prop.getType();
+					const Type& type = refsIter->dataObject->getType();
+                    const Property& prop = refsIter->dataObject->getProperty(refsIter->property);
+					const Type& propType =	((TypeImpl&)type).getRealPropertyType(refsIter->property);
 
 					// Allowing referenes to DataObjects only
 					if (!propType.isDataType())
@@ -133,24 +143,418 @@ namespace commonj
 						}
 					}
 
-					// Now rebuild the changeSummary
-					if (csbuilder != 0)
-					{
-						csbuilder->buildChangeSummary(changeSummaryDO);
-						delete csbuilder;
-						csbuilder = 0;
-					}
 				}
 				catch (const SDORuntimeException&)
 				{
 				}
 			}
-			
+			try {
+				// Now rebuild the changeSummary
+				if (csbuilder != 0)
+				{
+					csbuilder->buildChangeSummary(changeSummaryDO);
+					delete csbuilder;
+					csbuilder = 0;
+				}
+			}
+			catch (SDORuntimeException&)
+			{
+			}
+
+			LOGEXIT(INFO,"SDOSAX2Parser: endDocument");
 		}
 
 
-		
-		
+        bool SDOSAX2Parser::setDO(DataObjectPtr newDO, 
+			                      SDOXMLString& propertyName)
+		{
+			LOGENTRY(INFO,"SDOSAX2Parser: setDO");
+
+			if (currentDataObject)
+			{
+				const Type& type = currentDataObject->getType();
+				// go lower level so we can find open properties w/o exception
+				DataObject* dob = currentDataObject;
+				const PropertyImpl* pprop = ((DataObjectImpl*)dob)->getPropertyImpl(propertyName);
+				if (pprop == 0)
+				{
+
+					LOGEXIT(INFO,"SDOSAX2Parser: setDO - exit1");
+					return false;
+				}
+
+				const Property& property = (Property&)*pprop;
+				const Type& propertyType = ((TypeImpl&)type).getRealPropertyType(propertyName);
+				if (currentDataObject->getType().isSequencedType())
+				{
+					SequencePtr seq = currentDataObject->getSequence();
+					seq->addDataObject(property, newDO);
+				}
+				else
+				{
+					if (!property.isMany())
+					{
+						currentDataObject->setDataObject(propertyName, newDO);
+					}
+					else
+					{
+						DataObjectList& dol = currentDataObject->getList(propertyName);
+						dol.append(newDO);
+					}
+				}
+			}
+			
+			setCurrentDataObject(newDO);
+
+			LOGEXIT(INFO,"SDOSAX2Parser: setDO - exit2");
+			return true;
+		}
+					
+		void SDOSAX2Parser::handleOpenAttribute(
+									SDOXMLString& tns,
+									const char* propuri,
+									const char* propname,
+									const char* value)
+		{
+			// first, see if there is a global element or attribute corresponding...
+			try 
+			{
+				DataFactory* df = dataFactory;
+				const PropertyImpl* prop = 0;
+				const TypeImpl* ti = 
+					((DataFactoryImpl*)df)->findTypeImpl(propuri,"RootType");
+				
+				if (ti != 0)
+				{
+					prop = (const PropertyImpl*)ti->getPropertyImpl(propname);
+				}
+                else
+				{
+                    ti = ((DataFactoryImpl*)df)->findTypeImpl(tns,"RootType");
+				}
+
+				if (ti != 0)
+				{
+					prop = (const PropertyImpl*)ti->getPropertyImpl(propname);
+				}
+			
+				if (prop == 0)
+				{
+					currentDataObject->setCString(propname,value);
+					return;
+				}
+
+				DataObject* dob = currentDataObject;
+
+				switch (prop->getTypeEnum())
+				{
+					case Type::BooleanType:
+						((DataObjectImpl*)dob)->defineBoolean(propname);
+						break;
+					case Type::ByteType:
+						((DataObjectImpl*)dob)->defineByte(propname);
+						break;
+					case Type::CharacterType:
+						((DataObjectImpl*)dob)->defineCharacter(propname);
+						break;
+					case Type::BytesType:
+						((DataObjectImpl*)dob)->defineBytes(propname);
+						break;
+					case Type::StringType:
+						((DataObjectImpl*)dob)->defineString(propname);
+						break;
+					case Type::ShortType:
+						((DataObjectImpl*)dob)->defineShort(propname);
+						break;
+					case Type::IntegerType:
+						((DataObjectImpl*)dob)->defineInteger(propname);
+						break;
+					case Type::LongType:
+						((DataObjectImpl*)dob)->defineLong(propname);
+						break;
+					case Type::DoubleType:
+						((DataObjectImpl*)dob)->defineDouble(propname);
+						break;
+					case Type::FloatType:
+						((DataObjectImpl*)dob)->defineFloat(propname);
+						break;
+					case Type::DateType:
+						((DataObjectImpl*)dob)->defineDate(propname);
+						break;
+				} // switch
+
+				// regardless of what type the property now is, we can set CString , and the
+				// right conversion will happen
+
+				currentDataObject->setCString(propname,value);
+			}
+			catch (SDORuntimeException)
+			{
+			}
+			return;
+		}
+
+
+		void SDOSAX2Parser::setAttributes(
+			SDOXMLString& tns,
+			const SAX2Namespaces& namespaces,
+			const SAX2Attributes& attributes) 
+		{
+
+			LOGENTRY(INFO,"SDOSAX2Parser::setAttributes");
+
+			//////////////////////////////////////////////
+			// The attributes are properties on the new DO
+			// Handle attributes
+			//////////////////////////////////////////////
+			for (int i=0; i < attributes.size(); i++)
+			{
+				// Should ignore attributes like xsi:type
+				if (!(attributes[i].getUri().equalsIgnoreCase("http://www.w3.org/2001/XMLSchema-instance")))
+				{							
+					try
+					{
+						const SDOXMLString& propertyName = getSDOName(*currentDataObjectType, attributes[i].getName());
+						DataObject* dob = currentDataObject;
+						const PropertyImpl* pprop = ((DataObjectImpl*)dob)->getPropertyImpl(propertyName);
+						if (pprop == 0 )
+						{
+							if (currentDataObject->getType().isOpenType())
+							{
+								// if its an open type, then attributes will be allowed to have 
+								// an invalid name, and setCString will create them all as bytes
+								handleOpenAttribute(tns, (const char*)attributes[i].getUri(),
+															(const char*)attributes[i].getName(),
+													(const char*)attributes[i].getValue());
+								
+							}
+							else 
+							{
+								LOGERROR_1(WARNING,"SDOSAX2Parser: Property not found on closed type (ignored):%s",
+									(const char*)(attributes[i].getName()));		
+							}
+						}
+						else 
+						{
+							const Property& prop = (Property&)*pprop;
+							SDOXMLString propValue;
+							
+							XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&prop)->getDASValue("XMLDAS::PropertyInfo");
+							if (pi && pi->getPropertyDefinition().isQName)
+							{
+								XMLQName qname(attributes[i].getValue(),
+									documentNamespaces, namespaces);
+								propValue = qname.getSDOName();
+							}
+							else
+							{
+								propValue = attributes[i].getValue();
+							}
+					
+							if ((pi && pi->getPropertyDefinition().isIDREF)
+								|| prop.isReference())
+							{
+								// remember this value to resolve later
+								IDRef ref(currentDataObject, attributes[i].getName(), propValue);
+								IDRefs.insert(IDRefs.end(), ref);
+							}
+							else
+							{	
+								if (pi && pi->getPropertyDefinition().isID)
+								{
+									// add this ID to the map
+									IDMap[propValue] = currentDataObject;
+								}
+								// Always set the property as a String. SDO will do the conversion
+								currentDataObject->setCString(attributes[i].getName(), propValue);
+							}
+						}
+					}
+					catch (const SDOPropertyNotFoundException&)
+					{
+						LOGERROR_1(WARNING,"SDOSAX2Parser: Error processing attribute (ignored):%s",
+							(const char*)(attributes[i].getName()));		
+					}
+				}
+			} // End iterate over attributes
+			
+			LOGEXIT(INFO,"SDOSAX2Parser:setAttributes");
+
+		}
+
+
+		const PropertyImpl* SDOSAX2Parser::handleOpenType(
+									SDOXMLString& tns,
+									const SDOXMLString& localname,
+									DataObjectImpl* dob,
+									const SAX2Namespaces& namespaces,
+									const SAX2Attributes& attributes,
+									SDOXMLString& xsitypeURI,
+									SDOXMLString& xsitypeName,
+									bool bToBeNull)
+		{
+			// first, see if there is a global element or attribute corresponding...
+			const PropertyImpl* pprop;
+			DataObjectPtr newDO = 0;
+			try 
+			{
+				DataFactory* df = dataFactory;
+				const TypeImpl* ti = 0;
+				const PropertyImpl* prop = 0;
+				SDOXMLString propertyName;
+
+				ti = ((DataFactoryImpl*)df)->findTypeImpl(tns,"RootType");
+				if (ti != 0)
+				{
+					propertyName = getSDOName((Type&)*ti, localname);
+					prop = ti->getPropertyImpl(propertyName);
+				}
+				else
+				{
+					propertyName = localname;
+				}
+
+				if (prop != 0)
+				{
+					if (prop->isMany())
+					{
+						pprop = ((DataObjectImpl*)dob)->defineList(propertyName);
+
+						// the type of the list needs to be set, as chars sets a CString
+						try 
+						{
+							DataObjectList& dl = ((DataObjectImpl*)dob)->getList(propertyName);
+							((DataObjectListImpl*)&dl)->setType(prop->getType().getURI(),
+								prop->getType().getName());
+						}
+						catch (SDORuntimeException)
+						{
+							// let it pass - the type will be Bytes
+						}
+
+						if (prop->getType().isDataType())
+						{
+							currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+								bToBeNull);
+						}
+						else
+						{
+							newDO = dataFactory->create(
+								prop->getType().getURI(),
+								prop->getType().getName());
+							DataObjectList& dol = dob->getList(propertyName);
+							dol.append(newDO);
+							setCurrentDataObject(newDO);
+							setAttributes(tns, namespaces,attributes);
+						}
+						return pprop;
+					}
+					else
+					{
+						switch (prop->getTypeEnum())
+						{
+							case Type::BooleanType:
+								pprop = ((DataObjectImpl*)dob)->defineBoolean(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::ByteType:
+								pprop = ((DataObjectImpl*)dob)->defineByte(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::CharacterType:
+								pprop = ((DataObjectImpl*)dob)->defineCharacter(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::BytesType:
+								pprop = ((DataObjectImpl*)dob)->defineBytes(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::StringType:
+								pprop = ((DataObjectImpl*)dob)->defineString(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::ShortType:
+								pprop = ((DataObjectImpl*)dob)->defineShort(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::IntegerType:
+								pprop = ((DataObjectImpl*)dob)->defineInteger(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::LongType:
+								pprop = ((DataObjectImpl*)dob)->defineLong(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::DoubleType:
+								pprop = ((DataObjectImpl*)dob)->defineDouble(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::FloatType:
+								pprop = ((DataObjectImpl*)dob)->defineFloat(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::DateType:
+								pprop = ((DataObjectImpl*)dob)->defineDate(propertyName);
+								currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+									bToBeNull);
+								break;
+							case Type::DataObjectType:
+								pprop = ((DataObjectImpl*)dob)->defineDataObject(propertyName,
+								prop->getType().getURI(), prop->getType().getName());
+								newDO = dataFactory->create(
+									prop->getType().getURI(),
+									prop->getType().getName());
+								dob->setDataObject(propertyName, newDO);
+								setCurrentDataObject(newDO);
+								setAttributes(tns,namespaces,attributes);
+								break;
+						}
+					} // else
+				} // if prop != 0
+				else 
+				{
+                    // The type is open, and the property doesnt exist, so we are creating
+					// a property, and need to find out the type to create.
+					// As I cannot tell if its a single value or many valued, I create all
+					// as many valued
+					// could be data object or primitive. All primitives will appear
+					// as bytes.
+					if (!xsitypeName.isNull())
+					{
+						// it has a type from xsi:type
+						pprop = ((DataObjectImpl*)dob)->defineList(propertyName);
+						newDO = dataFactory->create(xsitypeURI, xsitypeName);
+						DataObjectList& dol = dob->getList(propertyName);
+						dol.append(newDO);
+						setCurrentDataObject(newDO);
+						setAttributes(tns,namespaces,attributes);
+					}
+					else
+					{
+						pprop = ((DataObjectImpl*)dob)->defineList(propertyName);
+						currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+							bToBeNull);
+					}
+				}
+				return pprop;
+			}
+			catch (SDORuntimeException)
+			{
+				// fail to find the property or create a dummy
+				return 0;
+			}
+		}
+
 		void SDOSAX2Parser::startElementNs(
 			const SDOXMLString& localname,
 			const SDOXMLString& prefix,
@@ -159,6 +563,12 @@ namespace commonj
 			const SAX2Attributes& attributes)
 			
 		{
+			LOGENTRY(INFO,"SDOSAX2Parser: startElementNs");
+
+			LOGINFO_1(INFO,"SDOSAX2Parser: startElementNs:%s",
+				           (const char*)localname);
+
+			bool bToBeNull = false;
 			// Save the namespace information from the first element
 			if (setNamespaces)
 			{
@@ -175,14 +585,32 @@ namespace commonj
 				{
 					ignoreTag.tagCount++;
 				}
+				LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit1");
 				return;
 			}
+
+			if (URI.equalsIgnoreCase("http://www.w3.org/2001/XMLSchema"))
+			{
+				// ignore anything within a schema
+				LOGINFO_1(INFO,"SDOSAX2Parser ignores schema element:%s",
+									(const char *)localname);
+
+				// We need to ignore all events until the end tag for this element
+				ignoreEvents = true;
+				ignoreTag.localname = localname;
+				ignoreTag.uri = URI;
+				ignoreTag.prefix = prefix;
+				ignoreTag.tagCount = 0;
+				return;
+			}
+
 			
 			if (dealingWithChangeSummary)
 			{
 				if (csbuilder == 0)
 				{
 					LOGERROR(ERROR,"SDOSAX2Parser:Parser builds summary with no builder");
+					LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit2");
 					return;
 				}
 				csbuilder->processStart(
@@ -191,6 +619,7 @@ namespace commonj
 					URI,
 					namespaces,
 					attributes);
+				LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit3");
 				return;
 			}
 
@@ -232,6 +661,7 @@ namespace commonj
 
 					LOGINFO(INFO,"SDOSAX2Parser:Start change summary");
 					dealingWithChangeSummary = true;
+					LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit4");
 					return;
 					
 				}
@@ -253,38 +683,45 @@ namespace commonj
 				int i;
 				for (i=0; i < attributes.size(); i++)
 				{
-					if ((attributes[i].getUri().equalsIgnoreCase("http://www.w3.org/2001/XMLSchema-instance"))
-						&& (attributes[i].getName().equalsIgnoreCase("type")))
+					if (attributes[i].getUri().equalsIgnoreCase("http://www.w3.org/2001/XMLSchema-instance"))
 					{
-						SDOXMLString fullTypeName = attributes[i].getValue();
-						SDOXMLString pref;
+						if (attributes[i].getName().equalsIgnoreCase("type"))
+						{
+							SDOXMLString fullTypeName = attributes[i].getValue();
+							SDOXMLString pref;
 
-						int index = fullTypeName.firstIndexOf(':');
-						if (index < 0)
-						{
-							typeName = fullTypeName;
-						}
-						else
-						{
-							// Is the namespace prefix defined?
-							typeName = fullTypeName.substring(index+1);
-							pref = fullTypeName.substring(0, index);
-						}
+							int index = fullTypeName.firstIndexOf(':');
+							if (index < 0)
+							{
+								typeName = fullTypeName;
+							}
+							else
+							{	
+								// Is the namespace prefix defined?
+								typeName = fullTypeName.substring(index+1);
+								pref = fullTypeName.substring(0, index);
+							}
 
-						// Convert the prefix to a namespace URI
-						const SDOXMLString* namespaceURI = namespaces.find(pref);
-						if (namespaceURI == 0)
-						{
-							namespaceURI = documentNamespaces.find(pref);
+							// Convert the prefix to a namespace URI
+							const SDOXMLString* namespaceURI = namespaces.find(pref);
+							if (namespaceURI == 0)
+							{
+								namespaceURI = documentNamespaces.find(pref);
+							}
+							if (namespaceURI != 0)
+							{
+								typeURI = *namespaceURI;
+							}
 						}
-						if (namespaceURI != 0)
+						else if (attributes[i].getName().equalsIgnoreCase("nil"))
 						{
-							typeURI = *namespaceURI;
+							if (attributes[i].getValue().equalsIgnoreCase("true"))
+							{
+								// the current setting needs to be setNull
+								bToBeNull = true;
+							}
 						}
-						
-						break;
 					}
-					
 				} // End - attribute loop
 				
 				if (typeURI.isNull())
@@ -292,6 +729,7 @@ namespace commonj
 					typeURI = "";
 				}
 				
+				SDOXMLString tns = URI;
 				
 				try
 				{
@@ -303,7 +741,6 @@ namespace commonj
 						//   the targetNamespaceURI if specified 
 						//   or the URI of xsi:type if specified
 						//   or the URI of this element
-						SDOXMLString tns = URI;
 						if (!typeURI.equals(""))
 						{
 							tns = typeURI;
@@ -320,7 +757,9 @@ namespace commonj
 						{
 							const Type& rootType = dataFactory->getType(tns, "RootType");
 							propertyName = getSDOName(rootType, localname);
-							const Type& newType = rootType.getProperty(propertyName).getType();
+							const Type& newType = 
+								((TypeImpl&)(rootType)).getRealPropertyType(propertyName);
+
 							typeURI = newType.getURI();
 							typeName = newType.getName();
 						}
@@ -331,6 +770,11 @@ namespace commonj
 							DataObjectPtr rootdo = dataFactory->create(tns, "RootType");
 							setCurrentDataObject(rootdo);
 							changeSummaryDO = currentDataObject;
+						}
+						else
+						{
+							DataFactory* df = dataFactory;
+							((DataFactoryImpl*)df)->setRootElementName(localname);
 						}
 						
 						// NOTE: always creating DO doesn't cater for DataType as top element
@@ -343,67 +787,104 @@ namespace commonj
 						
 						// Get the Property from the dataObject
 						propertyName = getSDOName(*currentDataObjectType, localname);
-						const Property& prop = currentDataObject->getType().getProperty(propertyName);
-						const Type& propType = prop.getType();
-						XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&prop)->getDASValue("XMLDAS::PropertyInfo");
-						if ((pi && pi->getPropertyDefinition().isIDREF)
-							|| prop.isReference())
-						{
-							// The name of this element is the name of a property on the current DO
-							currentPropertySetting = PropertySetting(currentDataObject, propertyName, true);						
-						}
-						
-						// If it is a DataType then we need set the value
-						else if (propType.isDataType())
-						{
-							// The name of this element is the name of a property on the current DO
-							currentPropertySetting = PropertySetting(currentDataObject, propertyName);
-						}
-						else
-						{
-							// If typeName is not set then create object of Type of Property
-							// otherwise use the typeURI and typeName specified by e.g. xsi:type
-							if (typeName.isNull())
-							{
-								newDO = dataFactory->create(propType.getURI(), propType.getName());
-							}
-							else
-							{
-								newDO = dataFactory->create(typeURI, typeName);
-							}
-						}
-					}  // End // currentDataObject != 0
+                        const Type& type = currentDataObject->getType();
+
 					
-					if (newDO)
-					{
-						if (currentDataObject)
+						// go lower level so we can find open properties w/o exception
+						DataObject* dob = currentDataObject;
+						const PropertyImpl* pprop = ((DataObjectImpl*)dob)->getPropertyImpl(propertyName);
+						if (pprop == 0)
 						{
-							const Property& property = currentDataObject->getType().getProperty(propertyName);
-							const Type& propertyType = property.getType();
-							if (currentDataObject->getType().isSequencedType())
+							if (type.isOpenType())
 							{
-								SequencePtr seq = currentDataObject->getSequence();
-								seq->addDataObject(property, newDO);
+								pprop = handleOpenType(
+									tns,
+									localname,
+									(DataObjectImpl*)dob,
+									 namespaces,
+									 attributes,
+									 typeURI,
+									 typeName,
+									 bToBeNull);
 							}
-							else
+							if (pprop == 0)
 							{
-								if (!property.isMany())
+								// this is an open property , we will need to create it
+								LOGERROR_1(WARNING,"SDOSAX2Parser Unknown element:%s",
+									(const char *)localname);
+
+								// We need to ignore all events until the end tag for this element
+								ignoreEvents = true;
+								ignoreTag.localname = localname;
+								ignoreTag.uri = URI;
+								ignoreTag.prefix = prefix;
+								ignoreTag.tagCount = 0;
+							}
+							LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit5");
+							return;
+						}
+                        else
+						{
+                			const Property& prop = (Property&)*pprop;
+							const TypeImpl* propType = ((TypeImpl&)type).getRealPropertyTypeImpl(propertyName);
+							if (propType == 0)
+							{
+								// could be a previously created open type property
+								propType = (const TypeImpl*)pprop->getTypeImpl();
+							}
+                            if (propType != 0)
+							{
+								XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&prop)->getDASValue("XMLDAS::PropertyInfo");
+								if ((pi && pi->getPropertyDefinition().isIDREF)
+								|| prop.isReference())
 								{
-									currentDataObject->setDataObject(propertyName, newDO);
+									// The name of this element is the name of a property on the current DO
+									currentPropertySetting = PropertySetting(currentDataObject, propertyName, bToBeNull,
+										true);						
+								}
+						
+								// If it is a DataType then we need set the value
+								else if (propType->isDataType())
+								{
+									// The name of this element is the name of a property on the current DO
+									currentPropertySetting = PropertySetting(currentDataObject, propertyName,
+										bToBeNull);
 								}
 								else
 								{
-									DataObjectList& dol = currentDataObject->getList(propertyName);
-									dol.append(newDO);
+									// If typeName is not set then create object of Type of Property
+									// otherwise use the typeURI and typeName specified by e.g. xsi:type
+									if (typeName.isNull())
+									{
+										newDO = dataFactory->create(propType->getURI(), propType->getName());
+									}
+									else
+									{
+										newDO = dataFactory->create(typeURI, typeName);
+									}
 								}
 							}
+						}  // End // currentDataObject != 0
+					} // end prop != 0
+					if (newDO)
+					{
+						if (!setDO(newDO, propertyName))
+						{
+							LOGERROR_1(WARNING,"SDOSAX2Parser Unknown element:%s",
+								(const char *)localname);
+
+							// We need to ignore all events until the end tag for this element
+							ignoreEvents = true;
+							ignoreTag.localname = localname;
+							ignoreTag.uri = URI;
+							ignoreTag.prefix = prefix;
+							ignoreTag.tagCount = 0;
+							LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit6");
+							return;
 						}
-						
-						setCurrentDataObject(newDO);
 					}
-					
-					
 				} // end try
+
 				catch (const SDOTypeNotFoundException& )
 				{
 					
@@ -416,6 +897,7 @@ namespace commonj
 					ignoreTag.uri = URI;
 					ignoreTag.prefix = prefix;
 					ignoreTag.tagCount = 0;
+					LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit7");
 					return;
 				}
 
@@ -435,63 +917,14 @@ namespace commonj
 					ignoreTag.uri = URI;
 					ignoreTag.prefix = prefix;
 					ignoreTag.tagCount = 0;
+					LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit8");
 					return;
 				}
+
+				setAttributes(tns,namespaces, attributes);
 				
-				//////////////////////////////////////////////
-				// The attributes are properties on the new DO
-				// Handle attributes
-				//////////////////////////////////////////////
-				for (i=0; i < attributes.size(); i++)
-				{
-					// Should ignore attributes like xsi:type
-					if (!(attributes[i].getUri().equalsIgnoreCase("http://www.w3.org/2001/XMLSchema-instance")))
-					{							
-						try
-						{
-							const SDOXMLString& propertyName = getSDOName(*currentDataObjectType, attributes[i].getName());
-							const Property& prop = currentDataObject->getType().getProperty(propertyName);
-							SDOXMLString propValue;
-							
-							XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&prop)->getDASValue("XMLDAS::PropertyInfo");
-							if (pi && pi->getPropertyDefinition().isQName)
-							{
-								XMLQName qname(attributes[i].getValue(),
-									documentNamespaces, namespaces);
-								propValue = qname.getSDOName();
-							}
-							else
-							{
-								propValue = attributes[i].getValue();
-							}
-							
-							if ((pi && pi->getPropertyDefinition().isIDREF)
-								|| prop.isReference())
-							{
-								// remember this value to resolve later
-								IDRef ref(currentDataObject, attributes[i].getName(), propValue);
-								IDRefs.insert(IDRefs.end(), ref);
-							}
-							else
-							{	
-								if (pi && pi->getPropertyDefinition().isID)
-								{
-									// add this ID to the map
-									IDMap[propValue] = currentDataObject;
-								}
-								// Always set the property as a String. SDO will do the conversion
-								currentDataObject->setCString(attributes[i].getName(), propValue);
-							}
-						} 
-						catch (const SDOPropertyNotFoundException&)
-						{
-							LOGERROR_1(WARNING,"SDOSAX2Parser: Error processing attribute (ignored):%s",
-								(const char*)(attributes[i].getName()));		
-						}
-					}
-				} // End iterate over attributes								
 			}
-			
+			LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit9");
 		}
 		
 		
@@ -501,11 +934,14 @@ namespace commonj
 			const SDOXMLString& URI)
 		{
 
+			LOGENTRY(INFO,"SDOSAX2Parser: endElementNs");
+
 			if (localname.equals("changeSummary"))
 			{
 				// end of change summary
 				dealingWithChangeSummary = false;
 				LOGINFO(INFO,"SDOSAX2Parser: Finished change summary");
+				LOGEXIT(INFO,"SDOSAX2Parser: endElementNs - exit1");
 				return;
 			}
 
@@ -515,11 +951,13 @@ namespace commonj
 				if (csbuilder == 0) 
 				{
 					LOGERROR(WARNING,"SDOSAX2Parser: End change summary with no builder");
+					LOGEXIT(INFO,"SDOSAX2Parser: endElementNs - exit2");
 					return;
 				}
 				csbuilder->processEnd(localname,
 			                         prefix,
 			                         URI);
+				LOGEXIT(INFO,"SDOSAX2Parser: endElementNs - exit3");
 				return;
 			}
 
@@ -537,6 +975,7 @@ namespace commonj
 					}
 					ignoreTag.tagCount--;
 				}
+				LOGEXIT(INFO,"SDOSAX2Parser: endElementNs - exit4");
 				return;
 			}
 			
@@ -544,7 +983,14 @@ namespace commonj
 			// then we need to set the property now
 			if (!currentPropertySetting.name.isNull())
 			{
-				if (!currentPropertySetting.value.isNull())
+				if (currentPropertySetting.isNULL)
+				{
+
+					currentPropertySetting.dataObject->
+							setNull((const char*)currentPropertySetting.name);
+
+				}
+				else if (!currentPropertySetting.value.isNull())
 				{
 					try
 					{
@@ -567,7 +1013,7 @@ namespace commonj
 
 							// It might be a single setting for a many-valued property.
 							// may throw SDOPropertyNotFoundException
-							const Property& p = currentPropertySetting.dataObject->getType().getProperty(
+							const Property& p = currentPropertySetting.dataObject->getProperty(
 								currentPropertySetting.name);
 							if (p.isMany())
 							{
@@ -621,6 +1067,7 @@ namespace commonj
 					currentDataObjectType = &(currentDataObject->getType());
 				}
 			}
+			LOGEXIT(INFO,"SDOSAX2Parser: endElementNs - exit4");
 		}
 		
 		
@@ -675,7 +1122,8 @@ namespace commonj
 
 		const SDOXMLString& SDOSAX2Parser::getSDOName(const Type& type, const SDOXMLString& localName)
 		{
-			XSDTypeInfo* typeInfo = (XSDTypeInfo*)((DASType*)&type)->getDASValue("XMLDAS::TypeInfo");
+
+/*			XSDTypeInfo* typeInfo = (XSDTypeInfo*)((DASType*)&type)->getDASValue("XMLDAS::TypeInfo");
 			if (typeInfo)
 			{
 				const TypeDefinition& typeDefinition = typeInfo->getTypeDefinition();
@@ -687,9 +1135,41 @@ namespace commonj
 					{
 						return prop.name;
 					}
+					for (int i=0;i< prop.substituteNames.size();i++)
+					{
+						if (prop.substituteLocalNames[i].equals(localName))
+						{
+							return prop.substituteNames[i];
+							// possibly should be return prop.name;
+						}
+					}
 				}					
-
 			}
+			*/
+
+			PropertyList pl = type.getProperties();
+			for (int i = 0; i < pl.size(); i++)
+			{
+				XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&pl[i])->getDASValue("XMLDAS::PropertyInfo");
+				if (pi)
+				{
+					const PropertyDefinition&  propdef = pi->getPropertyDefinition();
+					if (localName .equals(propdef.localname))
+						return propdef.name;
+
+					for (int j=0;j< propdef.substituteNames.size();j++)
+					{
+						if (propdef.substituteLocalNames[j].equals(localName))
+						{
+							return propdef.substituteNames[j];
+							// possibly should be return propdef.name;
+						}
+					}
+				}
+			}
+				
+
+
 			return localName;
 		}
 

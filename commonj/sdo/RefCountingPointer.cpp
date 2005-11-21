@@ -37,8 +37,8 @@ namespace commonj{
 		// the templates, then they dont get generated.
 		void Test ()
 		{
-
-#if defined(WIN32)  || defined (_WINDOWS)
+			
+#if defined(WIN32) || defined (_WINDOWS)
 			/* 1) construct */
 			DataFactoryPtr fptr = DataFactory::getDataFactory();
 			

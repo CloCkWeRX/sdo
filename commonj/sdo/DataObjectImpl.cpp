@@ -40,6 +40,7 @@
 #include "commonj/sdo/TypeImpl.h"
 
 #include "commonj/sdo/ChangeSummaryImpl.h"
+#include "commonj/sdo/DataFactoryImpl.h"
 
 #include <string>
 using std::string;
@@ -54,23 +55,51 @@ using std::string;
 namespace commonj{
 namespace sdo {
 
+// RDO replaces the map which held index to do values
+	rdo::rdo(unsigned int infirst, DataObjectImpl* insecond)
+		: first(infirst), second(insecond)
+	{
+	}
+
+	rdo::rdo()
+	{
+		first = 0;
+		second = 0;
+	}
+
+	rdo::rdo (const rdo& inrdo)
+	{
+		first = inrdo.first;
+		second = inrdo.second;
+	}
+
+	rdo::~rdo()
+	{
+	}
+
+
 #define getPrimitive(primval,retval,defval)\
 	retval DataObjectImpl::get ##primval (unsigned int propertyIndex)\
 	{\
 		validateIndex(propertyIndex);\
-		if ((getType().getProperty(propertyIndex).isMany()))\
+		PropertyImpl* p = getPropertyImpl(propertyIndex);\
+		if (p != 0 ) \
 		{\
-			string msg("Get value not available on many valued property:");\
-			msg += getType().getProperty(propertyIndex).getName();\
-			SDO_THROW_EXCEPTION("get value", SDOUnsupportedOperationException,\
-				msg.c_str());\
+			if (p->isMany())\
+			{\
+				string msg("Get value not available on many valued property:");\
+				msg += p->getName();\
+				SDO_THROW_EXCEPTION("get value", SDOUnsupportedOperationException,\
+					msg.c_str());\
+			}\
+  			DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
+			if (d != 0) \
+			{\
+				if (!d->isNull())return d->get ##primval ();\
+			}\
+		    return p->get ##primval ##Default();\
 		}\
-  		DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
-		if (d != 0) {\
-			if (!d->isNull())return d->get ##primval ();\
-		}\
-  		PropertyImpl& p = getPropertyImplFromIndex(propertyIndex);\
-		return p.get ##primval ##Default();\
+		return (retval)0;\
 	}
 
 ////////////////////////////////////////////////////
@@ -81,19 +110,24 @@ namespace sdo {
 	unsigned int DataObjectImpl::get ##primval (unsigned int propertyIndex, retval valptr , unsigned int max)\
 	{\
 		validateIndex(propertyIndex);\
-		if ((getType().getProperty(propertyIndex).isMany()))\
+  		PropertyImpl* p = getPropertyImpl(propertyIndex);\
+		if (p != 0) \
 		{\
-			string msg("Get value not available on many valued property:");\
-			msg += getType().getProperty(propertyIndex).getName();\
-			SDO_THROW_EXCEPTION("character getter", SDOUnsupportedOperationException,\
-				msg.c_str());\
+			if (p->isMany())\
+			{\
+				string msg("Get value not available on many valued property:");\
+				msg += p->getName();\
+				SDO_THROW_EXCEPTION("character getter", SDOUnsupportedOperationException,\
+					msg.c_str());\
+			}\
+ 			DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
+			if (d != 0) \
+			{ \
+				if (!d->isNull()) return d->get ##primval ( valptr , max);\
+			}\
+			return p->get ##primval ##Default( valptr , max);\
 		}\
- 		DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
-		if (d != 0) { \
-			if (!d->isNull()) return d->get ##primval ( valptr , max);\
-		}\
-  		PropertyImpl& p = getPropertyImplFromIndex(propertyIndex);\
-		return p.get ##primval ##Default( valptr , max);\
+		return 0;\
 	}
 
 
@@ -105,33 +139,37 @@ namespace sdo {
 #define setPrimitive(primval,primtype,primnam)\
 	void DataObjectImpl::set ##primval (unsigned int propertyIndex, primtype value)\
 	{\
-	validateIndex(propertyIndex);\
-	if ((getType().getProperty(propertyIndex).isMany()))\
-	{\
-		string msg("Set value not available on many valued property:");\
-		msg += getType().getProperty(propertyIndex).getName();\
-		SDO_THROW_EXCEPTION("set value",SDOUnsupportedOperationException,\
-			msg.c_str());\
-	}\
-	PropertyValueMap::iterator i;\
-	for (i = PropertyValues.begin(); i != PropertyValues.end();++i)\
+		validateIndex(propertyIndex);\
+		PropertyImpl* pl = getPropertyImpl(propertyIndex);\
+		if (pl != 0) \
 		{\
-		if ((*i).first == propertyIndex)\
+			if (pl->isMany())\
 			{\
-			logChange(propertyIndex);\
-			(*i).second->unsetNull();\
-			(*i).second->set ##primval (value);\
-			return;\
+				string msg("Set value not available on many valued property:");\
+				msg += pl->getName();\
+				SDO_THROW_EXCEPTION("set value",SDOUnsupportedOperationException,\
+				msg.c_str());\
 			}\
+			PropertyValueMap::iterator i;\
+			for (i = PropertyValues.begin(); i != PropertyValues.end();++i)\
+			{\
+				if ((*i).first == propertyIndex)\
+				{\
+					logChange(propertyIndex);\
+					(*i).second->unsetNull();\
+					(*i).second->set ##primval (value);\
+					return;\
+				}\
+			}\
+			DataFactory* df = getDataFactory();\
+			DataObjectImpl* b = new DataObjectImpl(df, df->getType(Type::SDOTypeNamespaceURI, primnam));\
+			b->setContainer(this);\
+			b->setApplicableChangeSummary();\
+			logChange(propertyIndex);\
+			PropertyValues.insert(PropertyValues.end(), rdo(propertyIndex,b));\
+ 			b->set ##primval (value);\
 		}\
-		DataFactory* df = getDataFactory();\
-		DataObjectImpl* b = new DataObjectImpl(df, df->getType(Type::SDOTypeNamespaceURI, primnam));\
-		b->setContainer(this);\
-		b->setApplicableChangeSummary();\
-		PropertyValues.insert(std::make_pair(propertyIndex,	b));\
-		logChange(propertyIndex);\
- 		b->set ##primval (value);\
- 		return;\
+		return;\
 	}
 
 
@@ -142,33 +180,37 @@ namespace sdo {
 #define setCharsBasic(primval,primtype,primnam)\
 	void DataObjectImpl::set ##primval (unsigned int propertyIndex, primtype value, unsigned int len)\
 	{\
-	validateIndex(propertyIndex);\
-	if ((getType().getProperty(propertyIndex).isMany()))\
-	{\
-		string msg("Set value not available on many valued property:");\
-		msg += getType().getProperty(propertyIndex).getName();\
-		SDO_THROW_EXCEPTION("setter",SDOUnsupportedOperationException,\
-			msg.c_str());\
-	}\
-	PropertyValueMap::iterator i;\
-	for (i = PropertyValues.begin(); i != PropertyValues.end();++i)\
+		validateIndex(propertyIndex);\
+		PropertyImpl* pl = getPropertyImpl(propertyIndex);\
+		if (pl != 0) \
 		{\
-		if ((*i).first == propertyIndex)\
+			if (pl->isMany())\
 			{\
-			logChange(propertyIndex);\
-			(*i).second->unsetNull();\
-			(*i).second->set ##primval (value, len);\
-			return;\
+				string msg("Set value not available on many valued property:");\
+				msg += pl->getName();\
+				SDO_THROW_EXCEPTION("setter",SDOUnsupportedOperationException,\
+				msg.c_str());\
 			}\
+			PropertyValueMap::iterator i;\
+			for (i = PropertyValues.begin(); i != PropertyValues.end();++i)\
+			{\
+				if ((*i).first == propertyIndex)\
+				{\
+					logChange(propertyIndex);\
+					(*i).second->unsetNull();\
+					(*i).second->set ##primval (value, len);\
+					return;\
+				}\
+			}\
+			DataFactory* df = getDataFactory();\
+			DataObjectImpl* b = new DataObjectImpl(df, df->getType(Type::SDOTypeNamespaceURI, primnam));\
+			b->setContainer(this);\
+			b->setApplicableChangeSummary();\
+			logChange(propertyIndex);\
+			PropertyValues.insert(PropertyValues.end(),rdo(propertyIndex,b));\
+ 			b->set ##primval (value, len);\
 		}\
-		DataFactory* df = getDataFactory();\
-		DataObjectImpl* b = new DataObjectImpl(df, df->getType(Type::SDOTypeNamespaceURI, primnam));\
-		b->setContainer(this);\
-		b->setApplicableChangeSummary();\
-		PropertyValues.insert(std::make_pair(propertyIndex,b));\
-		logChange(propertyIndex);\
- 		b->set ##primval (value, len);\
- 		return;\
+		return;\
 	}
 
 
@@ -194,29 +236,32 @@ namespace sdo {
 					return d->get ##primval ();\
 				}\
 				else {\
-					PropertyImpl& p = d->getTypeImpl().getPropertyImpl(prop);\
-					if (p.isMany())\
+					PropertyImpl* p = d->getPropertyImpl(prop);\
+					if (p != 0) \
 					{\
-						long l;\
-						DataObjectImpl* doi = d->findDataObject(prop,&l);\
-						delete prop;\
-						prop = 0;\
-						if (doi != 0)	{\
-							return doi->get ## primval();\
+						if (p->isMany())\
+						{\
+							long l;\
+							DataObjectImpl* doi = d->findDataObject(prop,&l);\
+							delete prop;\
+							prop = 0;\
+							if (doi != 0)	{\
+								return doi->get ## primval();\
+							}\
+							string msg("Get value - index out of range:");\
+							msg += path;\
+							SDO_THROW_EXCEPTION("getter", SDOIndexOutOfRangeException,\
+							msg.c_str());\
 						}\
-						string msg("Get value - index out of range:");\
-						msg += path;\
-						SDO_THROW_EXCEPTION("getter", SDOIndexOutOfRangeException,\
-						msg.c_str());\
-					}\
-					else\
-					{\
-						delete prop;\
-						prop = 0;\
-						if (!isSet(p)) {\
-							return p.get ## primval ##Default();\
+						else\
+						{\
+							delete prop;\
+							prop = 0;\
+							if (!isSet(*p)) {\
+								return p->get ## primval ##Default();\
+							}\
+							return d->get ##primval (*p);\
 						}\
-						return d->get ##primval (p);\
 					}\
 				}\
 				if (prop) {\
@@ -258,28 +303,31 @@ namespace sdo {
 					return d->get ##primval ( valptr , max);\
 				}\
 				else {\
-					PropertyImpl& p = d->getTypeImpl().getPropertyImpl(prop);\
-					if (p.isMany())\
+					PropertyImpl* p = d->getPropertyImpl(prop);\
+					if (p != 0)\
 					{\
-						long l;\
-						DataObjectImpl* doi = d->findDataObject(prop,&l);\
-						delete prop;\
-						prop = 0;\
-						if (doi != 0)	{\
-							return doi->get ## primval (valptr, max);\
+						if (p->isMany())\
+						{\
+							long l;\
+							DataObjectImpl* doi = d->findDataObject(prop,&l);\
+							delete prop;\
+							prop = 0;\
+							if (doi != 0)	{\
+								return doi->get ## primval (valptr, max);\
+							}\
+							string msg("Get value - index out of range");\
+							msg += path;\
+							SDO_THROW_EXCEPTION("getChars", SDOIndexOutOfRangeException,\
+							msg.c_str());\
 						}\
-						string msg("Get value - index out of range");\
-						msg += path;\
-						SDO_THROW_EXCEPTION("getChars", SDOIndexOutOfRangeException,\
-						msg.c_str());\
-					}\
-					else { \
-						delete prop;\
-						prop = 0;\
-						if (!isSet(p)) {\
-							return p.get ## primval ##Default( valptr , max);\
+						else { \
+							delete prop;\
+							prop = 0;\
+							if (!isSet(*p)) {\
+								return p->get ## primval ##Default( valptr , max);\
+							}\
+							return d->get ##primval (*p, valptr , max);\
 						}\
-						return d->get ##primval (p, valptr , max);\
 					}\
 				}\
 				if (prop) {\
@@ -323,11 +371,15 @@ namespace sdo {
 					d->set ##primval (value);\
 				}\
 				else {\
-					const Property& p = d->getType().getProperty(prop);\
-					if (p.isMany())\
+					const PropertyImpl* p = d->getPropertyImpl(prop);\
+					if (p == 0 && d->getType().isOpenType()) \
+					{\
+						p = d->define ##primval (prop);\
+					}\
+					if (p->isMany())\
 					{\
 						long l;\
-						DataObjectList& dol = d->getList(p);\
+						DataObjectList& dol = d->getList((Property&)*p);\
 						DataObjectImpl* doi = d->findDataObject(prop,&l);\
 						delete prop;\
 						prop = 0;\
@@ -341,7 +393,7 @@ namespace sdo {
 					else {\
 						delete prop;\
 						prop = 0;\
-						d->set ##primval (p,value);\
+						d->set ##primval ((Property&)*p,value);\
 					}\
 				}\
 			}\
@@ -380,11 +432,15 @@ namespace sdo {
 					d->set ##primval (value, len);\
 				}\
 				else {\
-					const Property& p = d->getType().getProperty(prop);\
-					if (p.isMany())\
+					const PropertyImpl* p = d->getPropertyImpl(prop);\
+					if (p == 0 && d->getType().isOpenType())\
+					{\
+						p = d->define ##primval (prop);\
+					}\
+					if (p->isMany())\
 					{\
 						long l;\
-						DataObjectList& dol = d->getList(p);\
+						DataObjectList& dol = d->getList((Property&)*p);\
 						DataObjectImpl* doi = d->findDataObject(prop,&l);\
 						delete prop;\
 						prop = 0;\
@@ -398,7 +454,7 @@ namespace sdo {
 					else { \
 						delete prop;\
 						prop = 0;\
-						d->set ##primval (p,value, len);\
+						d->set ##primval ((Property&)*p,value, len);\
 					}\
 				}\
 			}\
@@ -583,7 +639,7 @@ namespace sdo {
 			}
 			else 
 			{
-				const Property& p  = d->getType().getProperty(prop);
+				const Property& p  = d->getProperty(prop);
 				delete prop;
 				return getLength(p);
 			}
@@ -592,7 +648,7 @@ namespace sdo {
 		{
 			if (prop)
 			{
-				const Property& p  = getType().getProperty(prop);
+				const Property& p  = getProperty(prop);
 				delete prop;
 				
 				return getLength(p);
@@ -606,7 +662,7 @@ namespace sdo {
 
 	unsigned int DataObjectImpl::getLength(unsigned int index)
 	{
-		return getLength(getPropertyFromIndex(index));
+		return getLength(getProperty(index));
 	}
 
 	getPrimitiveFromPath(Boolean,bool,false);
@@ -672,6 +728,145 @@ namespace sdo {
 	setPrimitive(Date,const SDODate,"Date");
 
 
+
+	// open type support
+
+	const PropertyImpl* DataObjectImpl::defineProperty(const char* propname, 
+		         const Type& t)
+	{
+		openProperties.insert(
+			openProperties.end(), PropertyImpl(getType(),propname,
+			(TypeImpl&)t, false, false, true));
+		DataFactory* df = factory;
+		((DataFactoryImpl*)df)->addOpenProperty(
+				PropertyImpl(getType(),propname,
+				(TypeImpl&)t, false, false, true));
+
+		return getPropertyImpl(propname);
+	}
+
+	void DataObjectImpl::undefineProperty(unsigned int index)
+	{
+		int point = index - openBase;
+		if (point < 0 || point >= openProperties.size()) return;
+
+		// downgrade all the property settings above this one
+
+		PropertyValueMap::iterator pit;
+		for (pit = PropertyValues.begin(); pit != PropertyValues.end();++pit)
+		{
+			if ((*pit).first > index)
+			{
+				if (getPropertyImpl((*pit).first)->isMany())
+				{
+					DataObjectListImpl* dl = (*pit).second->getListImpl();
+					if (dl != 0) dl->decrementPindex();
+				}
+				(*pit).first-=1;
+ 			}
+		}
+
+		// then remove this property from the list 
+
+		std::list<PropertyImpl>::iterator it = 
+			openProperties.begin();
+		for (int i=0;i<point;i++)++it; /* there must be a better way */
+
+		DataFactory* df = factory;
+		((DataFactoryImpl*)df)->removeOpenProperty((*it).getName());
+		
+		openProperties.erase(it);
+		
+		return;
+	}
+
+	const PropertyImpl* DataObjectImpl::defineList(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "DataObject");
+		openProperties.insert(
+			openProperties.end(), PropertyImpl(getType(),propname,
+			(TypeImpl&)t, true, false, true));
+
+		DataFactory* df = factory;
+		((DataFactoryImpl*)df)->addOpenProperty(PropertyImpl(getType(),propname,
+			(TypeImpl&)t, true, false, true));
+
+        return getPropertyImpl(propname);
+	}
+
+	const PropertyImpl* DataObjectImpl::defineBoolean(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Boolean");
+        return defineProperty(propname,t);
+	}
+
+	const PropertyImpl* DataObjectImpl::defineByte(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Byte");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineCharacter(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Character");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineString(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "String");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineBytes(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Bytes");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineShort(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Short");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineInteger(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Integer");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineLong(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Long");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineFloat(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Float");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineDouble(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Double");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineDate(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Date");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineCString(const char* propname)
+	{
+		const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "Bytes");
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineDataObject(const char* propname,
+		const Type& t)
+	{
+        return defineProperty(propname,t);
+	}
+	const PropertyImpl* DataObjectImpl::defineDataObject(const char* propname,
+		const char* typeURI, const char* typeName)
+	{
+		const Type& t = factory->getType(typeURI, typeName);
+        return defineProperty(propname,t);
+	}
+
 	// Used to return empty values - remove when defaults are there.
 	const char* DataObjectImpl::emptyString = "";
 
@@ -682,10 +877,10 @@ namespace sdo {
 	const char* DataObjectImpl::getCString(unsigned int propertyIndex)
 	{
 		validateIndex(propertyIndex);
-		if ((getType().getProperty(propertyIndex).isMany()))
+		if ((getProperty(propertyIndex).isMany()))
 		{
 			string msg("Get value not available on many valued property:");
-			msg += getType().getProperty(propertyIndex).getName();
+			msg += getProperty(propertyIndex).getName();
 			SDO_THROW_EXCEPTION("getCString", SDOUnsupportedOperationException,
 				msg.c_str());
 		}
@@ -693,8 +888,9 @@ namespace sdo {
 		if (d != 0) {
 			if (!d->isNull()) return d->getCString ();
 		}
-		PropertyImpl& p = (PropertyImpl&)getPropertyImplFromIndex(propertyIndex);
-		return p.getCStringDefault();
+		PropertyImpl* p = (PropertyImpl*)getPropertyImpl(propertyIndex);
+		if (p != 0) return p->getCStringDefault();
+		return 0;
 	}
 
 
@@ -702,10 +898,10 @@ namespace sdo {
 	{
 		validateIndex(propertyIndex);
 		PropertyValueMap::iterator i;
-		if ((getType().getProperty(propertyIndex).isMany()))
+		if ((getProperty(propertyIndex).isMany()))
 		{
 			string msg("Set value not available on many valued property:");
-			msg += getType().getProperty(propertyIndex).getName();
+			msg += getProperty(propertyIndex).getName();
 			SDO_THROW_EXCEPTION("setString", SDOUnsupportedOperationException,
 				msg.c_str());
 		}
@@ -723,8 +919,8 @@ namespace sdo {
 		DataObjectImpl* b = new DataObjectImpl(df, df->getType(Type::SDOTypeNamespaceURI,"String"));
 		b->setContainer(this);
 		b->setApplicableChangeSummary();
-		PropertyValues.insert(std::make_pair(propertyIndex,b));
 		logChange(propertyIndex);
+		PropertyValues.insert(PropertyValues.end(),rdo(propertyIndex,b));
 		b->setCString(value);
   		return;
 	}
@@ -747,28 +943,31 @@ namespace sdo {
 					return d->getCString();
 				}
 				else {
-					PropertyImpl& p  = d->getTypeImpl().getPropertyImpl(prop);
-					if (p.isMany())
+					PropertyImpl* p  = d->getPropertyImpl(prop);
+					if (p != 0) 
 					{
-						long l;
-						DataObjectImpl* doi = d->findDataObject(prop,&l);
-						delete prop;
-						prop = 0;
-						if (doi != 0)	{
-							return doi->getCString();
+						if (p->isMany())
+						{
+							long l;
+							DataObjectImpl* doi = d->findDataObject(prop,&l);
+							delete prop;
+							prop = 0;
+							if (doi != 0)	{
+								return doi->getCString();
+							}
+							string msg("Get CString - index out of range");
+							msg += path;
+							SDO_THROW_EXCEPTION("getter", SDOIndexOutOfRangeException,
+							msg.c_str());
 						}
-						string msg("Get CString - index out of range");
-						msg += path;
-						SDO_THROW_EXCEPTION("getter", SDOIndexOutOfRangeException,
-						msg.c_str());
-					}
-					else {
-						delete prop;
-						prop = 0;
-						if (!d->isSet(p)) {
-							return p.getCStringDefault();
+						else {
+							delete prop;
+							prop = 0;
+							if (!d->isSet(*p)) {
+								return p->getCStringDefault();
+							}
+							return d->getCString(*p);
 						}
-						return d->getCString(p);
 					}
 				}
 			}
@@ -805,23 +1004,30 @@ namespace sdo {
 				if (prop == 0 || (strlen(prop) == 0)) {
 					d->setCString(value);
 				}
-				else {
-					const Property& p = d->getType().getProperty(prop);
-					if (p.isMany()) {
-						long l;
-						DataObjectList& dol = d->getList(p);
-						DataObjectImpl* doi = d->findDataObject(prop,&l);
-						if (doi != 0)
-						{
-							doi->setCString(value);
-						}
-						else 
-						{
-							dol.append(value);
-						}
+				else { 
+					const PropertyImpl* p = d->getPropertyImpl(prop);
+					if (p == 0 && d->getType().isOpenType())
+					{
+						p = d->defineBytes(prop);
 					}
-					else {
-						d->setCString(p,value);
+					if (p != 0)
+					{
+						if (p->isMany()) {
+							long l;
+							DataObjectList& dol = d->getList((Property&)*p);
+							DataObjectImpl* doi = d->findDataObject(prop,&l);
+							if (doi != 0)
+							{
+								doi->setCString(value);
+							}
+							else 
+							{
+								dol.append(value);
+							}
+						}
+						else {
+							d->setCString((Property&)*p,value);
+						}
 					}
 					delete prop;
 					prop = 0;
@@ -857,7 +1063,7 @@ namespace sdo {
 	bool DataObjectImpl::isNull(const unsigned int propertyIndex)
 	{
 		validateIndex(propertyIndex);
-		if ((getType().getProperty(propertyIndex).isMany()))
+		if ((getProperty(propertyIndex).isMany()))
 		{
 			return false;
 		}
@@ -895,7 +1101,7 @@ namespace sdo {
 					return d->isNull();
 				}
 				else {
-					const Property& p = d->getType().getProperty(prop);
+					const Property& p = d->getProperty(prop);
 					delete prop;
 					return d->isNull(p);
 				}
@@ -916,10 +1122,10 @@ namespace sdo {
 	void DataObjectImpl::setNull(const unsigned int propertyIndex)
 	{
 		validateIndex(propertyIndex);
-		if ((getType().getProperty(propertyIndex).isMany()))
+		if ((getProperty(propertyIndex).isMany()))
 		{
 			string msg("Setting a list to null is not supported:");
-			msg += getType().getProperty(propertyIndex).getName();
+			msg += getProperty(propertyIndex).getName();
 			SDO_THROW_EXCEPTION("setNull", SDOUnsupportedOperationException,
 				msg.c_str());
 		}
@@ -938,10 +1144,10 @@ namespace sdo {
 		logChange(propertyIndex);
 		DataFactory* df = getDataFactory();
 		DataObjectImpl* b = new DataObjectImpl(df, 
-			getPropertyFromIndex(propertyIndex).getType());
+			getProperty(propertyIndex).getType());
 		b->setContainer(this);
 		b->setApplicableChangeSummary();
-		PropertyValues.insert(std::make_pair(propertyIndex,b));
+		PropertyValues.insert(PropertyValues.end(),rdo(propertyIndex,b));
 		b->setNull();
 
 
@@ -972,7 +1178,7 @@ namespace sdo {
 							pc = strrchr(path,'/');
 							if (pc != 0)pc++;
 						}
-						const Property& pcont = cont->getType().getProperty(pc);
+						const Property& pcont = cont->getProperty(pc);
 						cont->logChange(pcont);
 					}
 					catch (SDORuntimeException&)
@@ -981,7 +1187,7 @@ namespace sdo {
 					d->setNull();
 				}
 				else {
-					const Property& p = d->getType().getProperty(prop);
+					const Property& p = d->getProperty(prop);
 					delete prop;
 					d->setNull(p);
 					return;
@@ -1016,9 +1222,16 @@ namespace sdo {
 				return d->getList();
 			}
 			else {
-	            const Property& p = d->getType().getProperty(prop);
-				delete prop;
-				return d->getList(p);
+	            const PropertyImpl* p = d->getPropertyImpl(prop);
+				if (p == 0 && d->getType().isOpenType())
+				{
+					p = d->defineList(prop);
+				}
+				if (p != 0)
+				{
+					delete prop;
+					return d->getList((Property&)*p);
+				}
 			}
 		}
 		if (prop) delete prop;
@@ -1033,10 +1246,10 @@ namespace sdo {
 
 	DataObjectList& DataObjectImpl::getList(unsigned int propIndex)
 	{
-		if (!(getType().getProperty(propIndex).isMany()))
+		if (!(getProperty(propIndex).isMany()))
 		{
 		string msg("Get list not available on single valued property:");
-		msg += getType().getProperty(propIndex).getName();
+		msg += getProperty(propIndex).getName();
 		SDO_THROW_EXCEPTION("getList", SDOUnsupportedOperationException,
 			msg.c_str());
 		}
@@ -1068,10 +1281,10 @@ namespace sdo {
 			// empty data object to hold the list
 			DataFactory* df = getDataFactory();
 			d = new DataObjectImpl(df, df->getType(Type::SDOTypeNamespaceURI,"DataObject"));
-			PropertyValues.insert(std::make_pair(
-					propIndex,d));
+			PropertyValues.insert(PropertyValues.end(),rdo(propIndex,d));
 			d->setContainer(this);
 			d->setApplicableChangeSummary();
+			
 			DataObjectListImpl* list = new DataObjectListImpl(df,this,
 				propIndex,p.getType().getURI(),p.getType().getName());
 			d->setList(list); 
@@ -1087,6 +1300,11 @@ namespace sdo {
 		return *listValue;
 	}
 
+	DataObjectListImpl* DataObjectImpl::getListImpl()
+	{
+		return listValue;
+	}
+
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1098,12 +1316,27 @@ namespace sdo {
 
 	unsigned int DataObjectImpl::getPropertyIndex(const Property& p)
 	{
-		PropertyList props = getType().getProperties();  
+		PropertyList props = getType().getProperties(); 
+
 		for (int i = 0; i < props.size() ; ++i)
 		{
-			if (props[i].getName()==p.getName() )
+			if (!strcmp(props[i].getName(),p.getName()) )
 			{
 				return i;
+			}
+		}
+		if (getType().isOpenType())
+		{
+			std::list<PropertyImpl>::iterator j;
+			int count = 0;
+			for (j = openProperties.begin() ; 
+			     j != openProperties.end() ; ++j)
+			 {
+				if (!strcmp((*j).getName(),p.getName()))
+				{
+					return count+openBase;
+				}
+				count++;
 			}
 		}
 		string msg("Cannot find property:");
@@ -1112,23 +1345,42 @@ namespace sdo {
 			msg.c_str());
 	}
 
-	const Property& DataObjectImpl::getPropertyFromIndex(unsigned int index)
+	const Property& DataObjectImpl::getProperty(unsigned int index)
 	{
-		return (Property&)getPropertyImplFromIndex(index);
+		PropertyImpl* pi = getPropertyImpl(index);
+		if (pi == 0)
+		{
+			string msg("Index out of range");
+			SDO_THROW_EXCEPTION("getProperty", SDOIndexOutOfRangeException,
+			msg.c_str());
+		}
+		return (Property&)*pi;
 	}
 
-	PropertyImpl& DataObjectImpl::getPropertyImplFromIndex(unsigned int index)
+	PropertyImpl* DataObjectImpl::getPropertyImpl(unsigned int index)
 	{
 		PropertyList props = getType().getProperties();  
 		if (index < props.size())
 		{
-			return (PropertyImpl&)props[index];
+			return (PropertyImpl*)&props[index];
 		}
 
-		string msg("Index out of range::");
-		msg += index;
-		SDO_THROW_EXCEPTION("getPropertyFromIndex", SDOIndexOutOfRangeException,
-			msg.c_str());
+		if (getType().isOpenType())
+		{
+			if (index >= openBase && index - openBase  < openProperties.size())
+			{
+				std::list<PropertyImpl>::iterator j;
+				int val = 0;
+				j = openProperties.begin();
+				while (val < index-openBase && j != openProperties.end())
+				{
+					val++;
+					j++;
+				}
+				if (j != openProperties.end()) return &(*j);
+			}
+		}
+		return 0;
 	}
 
 
@@ -1193,14 +1445,14 @@ namespace sdo {
 		if (breaker == 0){
 			// its this object, and a property thereof 
 			*index = -1;
-			const Property& p = getType().getProperty(token);
+			const Property& p = getProperty(token);
 			return getDataObjectImpl(p);
 		
 		}
 
 		c = *breaker;
 		*breaker = 0;
-		const Property& p = getType().getProperty(token);
+		const Property& p = getProperty(token);
 		*breaker = c;
 
 	
@@ -1245,7 +1497,7 @@ namespace sdo {
             // TODO  comparison for double not ok
 
 			const Type & t = list[li]->getType();
-			const Property& p  = t.getProperty(breaker);
+			const Property& p  = list[li]->getProperty(breaker);
 			int ok = 0;
 
 			switch (p.getTypeEnum())
@@ -1332,12 +1584,37 @@ namespace sdo {
 					if (!strcmp(eq, list[li]->getCString(p))) ok = 1;
 					// try with quotes too
 					char *firstquote = strchr(eq,'"');
-					if (firstquote != 0) {
-						char* secondquote = strrchr(firstquote,'"');
-						if (secondquote && secondquote != firstquote) {
-							*secondquote = 0;
+					char *firstsingle = strchr(eq,'\'');
+                    char searchchar = 0;
+
+					if (firstsingle == 0)
+					{
+						if (firstquote != 0)
+						{
+							searchchar = '"';
+						}
+					}
+					else
+					{
+						if (firstquote != 0 && firstquote < firstsingle)
+						{
+							searchchar = '"';
+						}
+						else
+						{
+							searchchar = '\'';
+							firstquote = firstsingle;
+						}
+					}
+
+					if (searchchar != 0)
+					{
+						char* ender = strchr(firstquote+1,searchchar);
+						if (ender != 0)
+						{
+							*ender = 0;
 							if (!strcmp(firstquote+1, list[li]->getCString(p))) ok = 1;
-							*secondquote = '"';
+							*ender = searchchar;
 						}
 					}
 				}
@@ -1500,11 +1777,54 @@ namespace sdo {
 		for (int i = 0 ; i < propList.size() ; ++i)
 		{
 			Property& p = propList[i];
-// TODO getInstanceProperties should show all the props - including any 
-// properties of open types - which we dont have yet.
 			theVec.insert(theVec.end(),(PropertyImpl*)&p);
 		}
+		std::list<PropertyImpl>::iterator j;
+		for (j = openProperties.begin() ;
+		     j != openProperties.end() ; ++j)
+		{
+			theVec.insert(theVec.end(),&(*j));
+		}
 		return PropertyList(theVec);
+	}
+  
+	void DataObjectImpl::setInstancePropertyType(unsigned int index,
+		const Type* t)
+	{
+		if (index >= openBase && index - openBase  < openProperties.size())
+		{
+			std::list<PropertyImpl>::iterator j;
+			unsigned int count = openBase;
+			for (j = openProperties.begin() ;
+				 j != openProperties.end() ; ++j)
+			{
+            	if (count == index)
+				{
+					openProperties.insert(j,
+						PropertyImpl(getType(),
+						(*j).getName(),
+			            (TypeImpl&)*t,
+						(*j).isMany(),
+						(*j).isReadOnly(),
+						(*j).isContainment()));
+
+					DataFactory* df = factory;
+					((DataFactoryImpl*)df)->addOpenProperty(
+						PropertyImpl(getType(),
+						(*j).getName(),
+			            (TypeImpl&)*t,
+						(*j).isMany(),
+						(*j).isReadOnly(),
+						(*j).isContainment()));
+
+					openProperties.erase(j);
+					
+					return;
+				}
+				count++;
+			}
+		}
+		return;
 	}
   
    // Returns the Sequence for thIs DataObject.
@@ -1617,35 +1937,45 @@ namespace sdo {
 		if (d != 0)
 		{
 			if (prop != 0) {
-				const Property& p = d->getType().getProperty(prop);
-				if (p.isMany())
+				const PropertyImpl* p = d->getPropertyImpl(prop);
+				if (p == 0 && d->getType().isOpenType())
 				{
-					DataObjectList& dol = d->getList(p);
-					long index;
-					DataObjectImpl* dx = d->findDataObject(prop,&index);
-					if (index >= 0)
+					if (value != 0)
 					{
-						if(index < dol.size())
+						p = d->defineDataObject(prop, value->getType());
+					}
+				}
+				if (p != 0)
+				{
+					if (p->isMany())
+					{
+						DataObjectList& dol = d->getList((Property&)*p);
+						long index;
+						DataObjectImpl* dx = d->findDataObject(prop,&index);
+						if (index >= 0)
 						{
-							dol.setDataObject((unsigned int)index,value);
+							if(index < dol.size())
+							{
+								dol.setDataObject((unsigned int)index,value);
+							}
+							else 
+							{
+								dol.append(value);
+							}
+							delete prop;
+							return;
 						}
-						else 
-						{
-							dol.append(value);
-						}
-						delete prop;
+						string msg("Set of data object on many valued item");
+						msg += path;
+						SDO_THROW_EXCEPTION("setDataObject", SDOUnsupportedOperationException,
+						msg.c_str());
+					}
+					else 
+					{
+						d->setDataObject((Property&)*p,value);
+						delete(prop);
 						return;
 					}
-					string msg("Set of data object on many valued item");
-					msg += path;
-					SDO_THROW_EXCEPTION("setDataObject", SDOUnsupportedOperationException,
-					msg.c_str());
-				}
-				else 
-				{
-					d->setDataObject(p,value);
-					delete(prop);
-					return;
 				}
 			}
 		}
@@ -1663,6 +1993,14 @@ namespace sdo {
 
 		if (index >= pl.size()) {
 
+			// open type support
+			if (getType().isOpenType())
+			{
+				if (index < openBase + openProperties.size())
+				{
+					return;
+				}
+			}
 			string msg("Index of property out of range:");
 			msg += index;
 			SDO_THROW_EXCEPTION("Index Validation", SDOIndexOutOfRangeException,
@@ -1671,15 +2009,57 @@ namespace sdo {
 	}
 
 
+	void DataObjectImpl::checkType(	const Property& prop,
+									const Type& objectType)
+	{
+		const Type& propType = prop.getType();
+		if (propType.equals(objectType)) return;
+
+		DataFactory* df = (DataFactory*)factory;
+
+		const TypeImpl* ti = ((DataFactoryImpl*)df)->findTypeImpl
+			(objectType.getURI(),objectType.getName());
+		
+		do 
+		{
+			ti = (const TypeImpl*)ti->getBaseType();
+			if (ti == 0) break;
+			if (propType.equals(*ti)) return;
+		} while (ti != 0);
+
+		// allow types of any substitutes
+		const PropertyImpl* pi = 
+				getPropertyImpl(getPropertyIndex(prop));
+		if (pi != 0) 
+		{
+			unsigned int subcount = pi->getSubstitutionCount();
+			for (int i=0;i<subcount;i++)
+			{
+				const Type* tsub = pi->getSubstitutionType(i);
+				if (tsub != 0 && tsub->equals(objectType)) return;
+			}
+		}
+
+		// no match..
+		string msg("Insertion of object of incompatible type ");
+		msg += objectType.getName();
+		msg += " into property of type ";
+		msg += propType.getName();
+		SDO_THROW_EXCEPTION("TypeCheck", SDOInvalidConversionException,
+			msg.c_str());
+	}
+
 	void DataObjectImpl::setDataObject(unsigned int propertyIndex, RefCountingPointer<DataObject> value)
 	{
-		setDataObject(getType().getProperty(propertyIndex), value);
+		setDataObject(getProperty(propertyIndex), value);
 	}
 
 	void DataObjectImpl::setDataObject(const Property& prop, RefCountingPointer<DataObject> value)
 	{
 		unsigned int propertyIndex = getPropertyIndex(prop);
-		
+
+		if (value != 0)checkType(prop,value->getType());
+
 		validateIndex(propertyIndex);
 
 		if (prop.isReference() && value != 0)
@@ -1712,6 +2092,7 @@ namespace sdo {
 				msg.c_str());
 		}
 
+
 		if (value == 0) 
 		{
 			PropertyValueMap::iterator j;
@@ -1735,37 +2116,8 @@ namespace sdo {
 				}
 			}
 			logChange(prop);
-			PropertyValues.insert(std::make_pair(propertyIndex,
-			RefCountingPointer<DataObjectImpl>((DataObjectImpl*)0)));
+			PropertyValues.insert(PropertyValues.end(),rdo(propertyIndex,(DataObjectImpl*)0));
 			return;
-		}
-
-		const Type& t = prop.getType();
-		const Type* objectType = &value->getType();
-		bool typeMatch = false;
-		while (objectType != 0)
-		{
-			if (strcmp(t.getURI(), objectType->getURI()) == 0
-				&& strcmp(t.getName(),objectType->getName())==0)
-			{
-				typeMatch = true;
-				break;
-			}
-			objectType = objectType->getBaseType();
-		}
-
-		if (!typeMatch)
-		{
-			string msg("Set data object incompatible types:");
-			msg += value->getType().getURI();
-			msg += " ";
-			msg += value->getType().getName();
-			msg += " and ";
-			msg += t.getURI();
-			msg += " ";
-			msg += t.getName();
-			SDO_THROW_EXCEPTION("setDataObject", SDOUnsupportedOperationException,
-			msg.c_str());
 		}
 
 		DataObject* dob = value;
@@ -1815,8 +2167,7 @@ namespace sdo {
 
 		logChange(prop);
 
-		PropertyValues.insert(std::make_pair(propertyIndex,
-			RefCountingPointer<DataObjectImpl>((DataObjectImpl*)dob)));
+		PropertyValues.insert(PropertyValues.end(),rdo(propertyIndex,(DataObjectImpl*)dob));
 		return;
 	}
 
@@ -1833,7 +2184,7 @@ namespace sdo {
 		char* prop = findPropertyContainer(path,&d);
 		if (d != 0) {
 			if (prop != 0) {
-				const Property& p = d->getType().getProperty(prop);
+				const Property& p = d->getProperty(prop);
 				delete prop;
 			    return d->isSet(p);
 			}
@@ -1847,10 +2198,23 @@ namespace sdo {
 
 	bool DataObjectImpl::isSet(unsigned int propertyIndex)
 	{
+		return isSet(getProperty(propertyIndex), propertyIndex);
+	}
+
+	bool DataObjectImpl::isSet(const Property& prop, unsigned int propertyIndex)
+	{
 		PropertyValueMap::iterator i;
 		for (i = PropertyValues.begin(); i != PropertyValues.end(); ++i)
 		{
 			if ((*i).first == propertyIndex) {
+				if (prop.isMany())
+				{
+					DataObjectImpl* dol = (*i).second;
+					if (dol != 0 && dol->getList().size() == 0)
+					{
+						return false;
+					}
+				}
 				return true;
 			}
 		}
@@ -1859,7 +2223,7 @@ namespace sdo {
 
 	bool DataObjectImpl::isSet(const Property& property)
 	{
-		return isSet(getPropertyIndex(property));
+		return isSet(property, getPropertyIndex(property));
 	}
 
 	// unSets a property of either this Object or an Object reachable from it, 
@@ -1875,7 +2239,7 @@ namespace sdo {
 		if (d != 0)
 		{
 			if (prop != 0){
-				const Property& p = d->getType().getProperty(prop);
+				const Property& p = d->getProperty(prop);
 				if (p.isMany())
 				{
 					if (strchr(prop,'[') || strchr(prop,'.'))
@@ -1902,7 +2266,7 @@ namespace sdo {
 
 	void DataObjectImpl::unset(unsigned int propertyIndex)
 	{
-		unset(getPropertyFromIndex(propertyIndex));
+		unset(getProperty(propertyIndex));
 	}
 
 	void DataObjectImpl::unset(const Property& p)
@@ -1931,6 +2295,10 @@ namespace sdo {
 							RefCountingPointer<DataObject> dli = dl.remove(0);
 						}
 					}
+					else
+					{
+						PropertyValues.erase(i);
+					}
 				}
 				else {
 					// if its a reference, we dont want to delete anything
@@ -1954,16 +2322,30 @@ namespace sdo {
 							}
 							else 
 							{
+								PropertyValues.erase(i);
 								dol->logDeletion();
 								logChange(index);
 							}
 						}
+						else
+						{
+						logChange(index);
+						PropertyValues.erase(i);
+						}
 					}
 					else {
 						logChange(index);
+						PropertyValues.erase(i);
 					}
 				}
-				PropertyValues.erase(index);
+				if (getType().isOpenType() && index >= openBase)
+				{
+					if (p.isMany())
+					{
+						PropertyValues.erase(i);
+					}
+					undefineProperty(index);
+				}
 				return;
 			}
 		}
@@ -2011,7 +2393,7 @@ namespace sdo {
 						prop = 0;
 						return d;
 					}
-					const Property& p = d->getType().getProperty(prop);
+					const Property& p = d->getProperty(prop);
 					delete prop;
 					prop = 0;
 					return d->getDataObjectImpl(p);
@@ -2031,10 +2413,10 @@ namespace sdo {
 
 	RefCountingPointer<DataObject> DataObjectImpl::getDataObject(unsigned int propertyIndex)
 	{
-		if ((getType().getProperty(propertyIndex).isMany()))
+		if ((getProperty(propertyIndex).isMany()))
 		{
 			string msg("get operation on a many valued property:");
-			msg += getType().getProperty(propertyIndex).getName();
+			msg += getProperty(propertyIndex).getName();
 			SDO_THROW_EXCEPTION("getDataObject", SDOUnsupportedOperationException,
 				msg.c_str());
 		}
@@ -2081,8 +2463,7 @@ namespace sdo {
 	{
 		// Throws runtime exception for type or property not found 
 
-		const Type& t = getType();
-		const Property& p  = t.getProperty(propertyName);
+		const Property& p  = getProperty(propertyName);
 		return createDataObject(p);
 	}
 
@@ -2092,8 +2473,7 @@ namespace sdo {
 
 	RefCountingPointer<DataObject> DataObjectImpl::createDataObject(unsigned int propertyIndex)
 	{
-		const Type& t = getType();
-		const Property& p  = t.getProperty(propertyIndex);
+		const Property& p  = getProperty(propertyIndex);
  		return createDataObject(p);
 	}
 
@@ -2143,7 +2523,7 @@ namespace sdo {
 					df->create(Type::SDOTypeNamespaceURI,"DataObject");
 
 				DataObject* doptr = listptr;
-				PropertyValues.insert(std::make_pair(ind,(DataObjectImpl*)doptr));
+				PropertyValues.insert(PropertyValues.end(),rdo(ind,(DataObjectImpl*)doptr));
 				((DataObjectImpl*)doptr)->setContainer(this);
 				((DataObjectImpl*)doptr)->setApplicableChangeSummary();
 
@@ -2190,9 +2570,8 @@ namespace sdo {
 			logCreation(ditem, this, property);
 			logChange(property);
 
-			PropertyValues.insert(std::make_pair(
-					getPropertyIndex(property),
-					RefCountingPointer<DataObjectImpl>(ditem)));
+			PropertyValues.insert(PropertyValues.end(),
+				                  rdo(getPropertyIndex(property),ditem));
 			if (getType().isSequencedType())
 			{
 				SequenceImpl* sq = getSequenceImpl();
@@ -2214,7 +2593,7 @@ namespace sdo {
 		PropertyValueMap::iterator i;
 		for (i = PropertyValues.begin(); i != PropertyValues.end(); ++i)
 		{
-			const Property& prop = getPropertyFromIndex((*i).first);
+			const Property& prop = getProperty((*i).first);
 			if (prop.isMany())
 			{
 				DataObjectList& dol = ((*i).second)->getList();
@@ -2248,15 +2627,6 @@ namespace sdo {
 	{
 		// remove this data object from its tree
 		clearReferences();
-	// Change of spec - detach now doesnt clear the properties
-//		PropertyValueMap::iterator i = PropertyValues.begin();
-//
-//		while (i != PropertyValues.end()) 
-//		{
-//			unSet((*i).first);
-//			i = PropertyValues.begin();
-//		}
-//
         if (container == 0) return; 
 		container->remove(this);
 		return ;
@@ -2299,15 +2669,15 @@ namespace sdo {
 		PropertyValueMap::iterator i;
 		for (i = PropertyValues.begin() ;i != PropertyValues.end() ; ++i)
 		{
-			if (getType().getProperty((*i).first).isReference()) continue;
-			if (getType().getProperty((*i).first).isMany())
+			if (getProperty((*i).first).isReference()) continue;
+			if (getProperty((*i).first).isMany())
 			{
 				DataObjectList& dl = ((*i).second)->getList();
 				for (int j = 0 ; j < dl.size(); j++)
 				{
 					if (dl[j] == ob)
 					{
-						return &(getType().getProperty((*i).first));
+						return &(getProperty((*i).first));
 					}
 				}
 			}
@@ -2315,7 +2685,7 @@ namespace sdo {
 			{
 				if ((*i).second == ob) 
 				{
-					return &(getType().getProperty((*i).first));
+					return &(getProperty((*i).first));
 				}
 			}
 		}
@@ -2359,10 +2729,41 @@ namespace sdo {
 	}
 
 
-	PropertyList DataObjectImpl::getProperties()
+	// open type support
+
+	const Property& DataObjectImpl::getProperty(const char* prop)
 	{
-  		return getType().getProperties();
-	}
+		PropertyImpl* pi = getPropertyImpl(prop);
+		if (pi == 0)
+		{
+			string msg("Cannot find property:");
+			msg += prop;
+			SDO_THROW_EXCEPTION("getProperty", SDOPropertyNotFoundException,
+			msg.c_str());
+
+		}
+		return (Property&)*pi;
+ 	}
+
+	PropertyImpl* DataObjectImpl::getPropertyImpl(const char* prop)
+	{
+		PropertyImpl* pi = getTypeImpl().getPropertyImpl(prop);
+        if (pi != 0) return pi;
+
+		if (getType().isOpenType())
+		{
+			std::list<PropertyImpl>::iterator j;
+			for (j=openProperties.begin(); 
+			     j != openProperties.end(); ++j)
+			{
+				if (!strcmp((*j).getName(), prop))
+				{
+					return (PropertyImpl*)&(*j);
+				}
+			}
+		}
+		return 0;
+ 	}
 
 	DataFactory* DataObjectImpl::getDataFactory()
 	{
@@ -2574,6 +2975,10 @@ namespace sdo {
 		asStringBuffer = 0;
 //		asXPathBuffer = 0;
 		isnull = false;
+		
+		// open type support
+		openBase = t.getPropertiesSize() ;
+
 		userdata = (void*)0xFFFFFFFF;
 
 		if (t.isChangeSummaryType())
@@ -2602,6 +3007,10 @@ namespace sdo {
 		asStringBuffer = 0;
 //        asXPathBuffer = 0;
 		isnull = false;
+
+		// open type support
+		openBase = ObjectType.getPropertiesSize() ;
+
 		userdata = (void*)0xFFFFFFFF;
 
 		if (ObjectType.isChangeSummaryType())
@@ -2674,19 +3083,18 @@ namespace sdo {
 			}
 		}
 
-		// Let my containees go.
-
-		//PropertyValueMap::iterator i;
-		//for (i = PropertyValues.begin(); i != PropertyValues.end();++i)
-		//{
-		//	(*i).second->setContainer(0);
-		//}
 
 		clearReferences();
  		PropertyValueMap::iterator i = PropertyValues.begin();
 		while (i != PropertyValues.end()) 
 		{
 			unset((*i).first);
+			if (i == PropertyValues.begin())
+			{
+				// unset has not removed the item from the list - do it 
+				// here instead
+				PropertyValues.erase(i);
+			}
 			i = PropertyValues.begin();
 		}
 
@@ -2786,7 +3194,7 @@ namespace sdo {
 	{
 		if (getChangeSummaryImpl() != 0 && getChangeSummaryImpl()->isLogging())
 		{
-			getChangeSummaryImpl()->logChange(this,getPropertyFromIndex(propIndex));
+			getChangeSummaryImpl()->logChange(this,getProperty(propIndex));
 		}
 	}
 	// reference support
@@ -2932,7 +3340,7 @@ namespace sdo {
 			{
 				if (prop != 0)
 				{
-					const Property& p = d->getType().getProperty(prop);
+					const Property& p = d->getProperty(prop);
 					if (p.getType().isDataType()) return 0;
 					if (p.isMany())
 					{
@@ -2962,11 +3370,11 @@ namespace sdo {
 
 	void* DataObjectImpl::getUserData(unsigned int propertyIndex)
 	{
-		if ((getType().getProperty(propertyIndex).isMany()))
+		if ((getProperty(propertyIndex).isMany()))
 		{
 			return 0;
 		}
-		if ((getType().getProperty(propertyIndex).getType().isDataType()))
+		if ((getProperty(propertyIndex).getType().isDataType()))
 		{
 			return 0;
 		}
@@ -3012,7 +3420,7 @@ namespace sdo {
 			{
 				if (prop != 0)
 				{
-					const Property& p = d->getType().getProperty(prop);
+					const Property& p = d->getProperty(prop);
 					if (p.getType().isDataType()) return;
 					if (p.isMany())
 					{
@@ -3042,11 +3450,11 @@ namespace sdo {
 
 	void DataObjectImpl::setUserData(unsigned int propertyIndex, void* value)
 	{
-		if ((getType().getProperty(propertyIndex).isMany()))
+		if ((getProperty(propertyIndex).isMany()))
 		{
 			return;
 		}
-		if ((getType().getProperty(propertyIndex).getType().isDataType()))
+		if ((getProperty(propertyIndex).getType().isDataType()))
 		{
 			return;
 		}

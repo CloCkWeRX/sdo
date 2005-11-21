@@ -749,11 +749,11 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// Test simple XPath query
 		$dept_name = $this->company->departments[0]->name;
-		$this->assertEquals($this->company->departments[0], $this->company["departments[name=\"$dept_name\"]"], "Simple XPath query test failed.");
+		$this->assertEquals($this->company->departments[0], $this->company["departments[name='$dept_name']"], "Simple XPath query test failed.");
 
 		// Test compound XPath query support
 		$empl_name = $this->company->departments[0]->employees[0]->name;
-		$this->assertEquals($this->company->departments[0]->employees[0], $this->company["departments[name=\"$dept_name\"]/employees[name=\"$empl_name\"]"], "Compound XPath query test failed.");
+		$this->assertEquals($this->company->departments[0]->employees[0], $this->company["departments[name='$dept_name']/employees[name='$empl_name']"], "Compound XPath query test failed.");
 
 		// Test failure case for XPath dotted index form 
 		try {
@@ -1074,6 +1074,54 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	    $employees[] = $new_employee;
 	    $this->assertTrue($employees[0] != $employees[$emp_count], 'Cloned DataObject not independent of original');
 	    $this->assertEquals($employees[$emp_count], $new_employee, 'Append of cloned object failed');
+	}
+	
+	public function testBug45771() {
+			define('DAS_NAMESPACE', "das_namespace");
+			define('APP_NAMESPACE', "app_namespace");
+			define('DAS_ROOT_TYPE', "SDO_DAS_Relational_RootType");
+	
+			$data_factory = SDO_DAS_DataFactory :: getDataFactory();
+			$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
+			$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'cs', SDO_TYPE_NAMESPACE_URI, 'ChangeSummary');
+	
+			$data_factory->addType(APP_NAMESPACE, 'company');
+			$data_factory->addType(APP_NAMESPACE, 'department');
+	
+			// add company to the root type
+			$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); 
+	
+			$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); 
+			$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'department', APP_NAMESPACE, 'department', array('many'=>true));
+	
+			$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); 
+			$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'location', SDO_TYPE_NAMESPACE_URI, 'String'); 
+			$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'postcode', SDO_TYPE_NAMESPACE_URI, 'String'); 
+	
+	
+			$root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
+	
+			$acme = $root->createDataObject('company');
+			$shoe = $acme->createDataObject('department');
+			$shoe->name = 'Shoe';
+			$shoe->location = null;
+	
+			$root->getChangeSummary()->beginLogging();
+			$shoe->name = null;
+			$shoe->location = 'A-block';
+			$shoe->postcode = 'SO21 2JN';
+			
+			$change_summary	= $root->getChangeSummary();
+			$changed_data_objects = $change_summary->getChangedDataObjects();
+			$this->assertEquals(1, $changed_data_objects->count(), 'Wrong number of changed objects'); 
+			$settings = $change_summary->getOldValues($changed_data_objects[0]);
+			$this->assertEquals(3, $settings->count(), 'Wrong number of old values'); 
+			$this->assertTrue($settings[0]->isset(), 'Incorrect isset flag when new value is null');
+			$this->assertEquals('Shoe', $settings[0]->getValue(), 'Wrong old value when new value is null'); 
+			$this->assertTrue($settings[1]->isset(), 'Incorrect isset flag when old value is null');
+			$this->assertNull($settings[1]->getValue(), 'Wrong old value when old value is null'); 
+			// FAILED : tracker 46236
+			//$this->assertFalse($settings[2]->isset(), 'Incorrect isset flag when old value is unset');
 	}
 }
 

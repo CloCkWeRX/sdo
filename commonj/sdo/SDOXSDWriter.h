@@ -26,7 +26,7 @@
 #include <libxml/xmlwriter.h>
 #include "commonj/sdo/SDOXMLString.h"
 #include "commonj/sdo/DataObject.h"
-#include "commonj/sdo/DataFactory.h"
+#include "commonj/sdo/DataFactoryImpl.h"
 
 
 namespace commonj
@@ -43,7 +43,8 @@ namespace commonj
 
 			virtual ~SDOXSDWriter();
 
-			int write(const TypeList& types, const SDOXMLString& targetNamespaceURI);
+			int write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
+				const propertyMap& openprops);
 
 		protected:
 			void setWriter(xmlTextWriterPtr textWriter);
@@ -52,6 +53,8 @@ namespace commonj
 		private:
 			xmlTextWriterPtr writer;
 
+		    void writeProps( const propertyMap& pl, const SDOXMLString& targetNamespaceURI,
+				SDOXMLString& xsd);
 			int writeDO(DataObjectPtr dataObject, const SDOXMLString& elementName);
 
 			DataFactoryPtr	dataFactory;

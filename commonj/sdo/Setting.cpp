@@ -195,6 +195,8 @@ namespace sdo {
 	
 	unsigned int Setting::getBytesValue(char* buffer, unsigned int max) const
 	{
+		if (buffer == 0 && max == 0) return length;
+
 		TypeImpl* t = (TypeImpl*)&(getType());
 		return t->convertToBytes(value, buffer,length, max);
 		//int i;
@@ -209,6 +211,8 @@ namespace sdo {
 	
 	unsigned int Setting::getStringValue(wchar_t* buffer, unsigned int max) const
 	{
+		if (buffer == 0 && max == 0) return length;
+
 		TypeImpl* t = (TypeImpl*)&(getType());
 		return t->convertToString(value, buffer,length, max);
 		//int i;

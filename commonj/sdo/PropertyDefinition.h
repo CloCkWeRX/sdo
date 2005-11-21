@@ -25,6 +25,8 @@
 #define _PROPERTYDEFINITION_H_
 
 #include "commonj/sdo/SDOXMLString.h"
+#include <vector>
+using namespace std;
 
 namespace commonj
 {
@@ -39,7 +41,16 @@ namespace commonj
 			PropertyDefinition();
 			virtual ~PropertyDefinition();
 			
-			//SDOXMLString uri;
+			// where this property is to be substituted for another
+			SDOXMLString substituteName;
+			SDOXMLString substituteUri;
+
+			// where there are substitute names for this property.
+			std::vector<SDOXMLString> substituteNames;
+			std::vector<SDOXMLString> substituteLocalNames;
+
+			SDOXMLString aliases;
+
 			SDOXMLString name;
 			SDOXMLString localname;
 			
@@ -61,6 +72,8 @@ namespace commonj
 			bool isElement;
 						
 			bool isQName;
+
+			bool isSubstitute;
 		};
 	} // End - namespace sdo
 } // End - namespace commonj

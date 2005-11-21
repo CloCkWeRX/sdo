@@ -171,6 +171,10 @@ void sdo_comment(void *ctx, const xmlChar *value)
 
 void sdo_warning(void *ctx, const char *msg, ...)
 {
+	va_list args;
+    va_start(args, msg);
+	((SAX2Parser*)ctx)->warning(msg, args);
+    va_end(args);
 }
 
 void sdo_error(void *ctx, const char *msg, ...)
@@ -273,13 +277,21 @@ namespace commonj
 		
 		SAX2Parser::SAX2Parser()
 		{
+			setter = 0;
+			parserError = false;
+			currentFile = 0;
+		}
+
+		SAX2Parser::SAX2Parser(ParserErrorSetter* insetter)
+		{
+			setter = insetter;
 			parserError = false;
 			currentFile = 0;
 		}
 		
 		SAX2Parser::~SAX2Parser()
 		{
-			// not apparently needed xmlCleanupParser();
+			// xmlCleanupParser();
 			if (currentFile != 0)delete currentFile;
 			
 		}
@@ -303,16 +315,12 @@ namespace commonj
 			strcpy(currentFile,filename);
 
 			int rc = xmlSAXUserParseFile(handler, this, filename);
-			if (parserError)
-			{
-		       SDO_THROW_EXCEPTION("parse", SDOXMLParserException,messageBuffer);
-			}
-			if (rc != 0)
+			if (rc == -1)
 			{
 				sdo_error(this, "xmlSAXUserParseFile returned an error %d", rc);
-		        SDO_THROW_EXCEPTION("parse", SDOXMLParserException,messageBuffer);
+				SDO_THROW_EXCEPTION("parse", SDOFileNotFoundException,messageBuffer);
 			}
-			return 0;
+			return rc;
 		}
 
 		void SAX2Parser::startDocument()
@@ -344,28 +352,30 @@ namespace commonj
 		}
 					
 		
+		void SAX2Parser::warning(const char* msg, va_list args)
+		{
+			// warnings are perhaps too frequent
+		//	vsprintf(messageBuffer, msg, args);
+		//	if (setter != 0)setter->setError(messageBuffer);
+		}
+
 		void SAX2Parser::fatalError(const char* msg, va_list args)
 		{
-			if (!parserError)
-			{
-				vsprintf(messageBuffer, msg, args);
-			}
 			parserError = true;
+			vsprintf(messageBuffer, msg, args);
+			if (setter != 0)setter->setError(messageBuffer);
 		}
 		
 		void SAX2Parser::error(const char* msg, va_list args)
 		{
-			if (!parserError)
-			{
-				vsprintf(messageBuffer, msg, args);
-			}
-			parserError = true;
+			vsprintf(messageBuffer, msg, args);
+			if (setter != 0)setter->setError(messageBuffer);
 		}
 
 		void SAX2Parser::stream(std::istream& input)
 		{
-			parserError = false;
 			char buffer[100];
+			parserError = false;
 			xmlSAXHandlerPtr handler = &SDOSAX2HandlerStruct;
 			xmlParserCtxtPtr ctxt;
 			

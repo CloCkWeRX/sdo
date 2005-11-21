@@ -29,6 +29,7 @@ using namespace std;
 
 #include "commonj/sdo/DASProperty.h"
 #include "commonj/sdo/SDODate.h"
+#include "commonj/sdo/DataFactory.h"
 
 namespace commonj{
 namespace sdo{
@@ -36,6 +37,19 @@ namespace sdo{
 class Type;
 class TypeImpl;
 class DataObject;
+
+class Substitution
+{
+public:
+	Substitution();
+	Substitution(DataFactoryPtr mdg, const char* inname, 
+									 const Type& intype);
+	Substitution(const Substitution& s);
+	virtual ~Substitution();
+	const Type* type;
+	char* name;
+};
+
 
 ///////////////////////////////////////////////////////////////////////////
 // A representation of a property in the type of a data object.
@@ -101,6 +115,17 @@ class PropertyImpl :public DASProperty
 	virtual void setAlias(const char* alias) ;
 
 	///////////////////////////////////////////////////////////////////////////
+    // SubstitutionGroup support.
+    // @return nth alias
+	///////////////////////////////////////////////////////////////////////////
+	virtual const Type* getSubstitutionType(const char* name) const ;
+	virtual unsigned int getSubstitutionCount(void) const ;
+	virtual const Type* getSubstitutionType(unsigned int index) const ;
+	virtual const char* getSubstitutionName(unsigned int index) const ;
+	virtual void setSubstitution(DataFactoryPtr mdg, const char* alias, 
+		                          const Type& substype) ;
+
+	///////////////////////////////////////////////////////////////////////////
     // Returns the type of the property.
  	///////////////////////////////////////////////////////////////////////////
 	virtual SDO_API const Type& getType() const;
@@ -110,7 +135,7 @@ class PropertyImpl :public DASProperty
 	///////////////////////////////////////////////////////////////////////////
     // Returns the type as an impl
 	///////////////////////////////////////////////////////////////////////////
-	virtual SDO_API const TypeImpl& getTypeImpl() const;
+	virtual SDO_API const TypeImpl* getTypeImpl() const;
   
 	///////////////////////////////////////////////////////////////////////////
     // Returns whether the property is many-valued.
@@ -136,6 +161,8 @@ class PropertyImpl :public DASProperty
     // returns the opposite property, or zero if there is none
 	///////////////////////////////////////////////////////////////////////////
 	virtual SDO_API const Property* getOpposite() const;
+
+	virtual void setOpposite(const Property* opp);  
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -189,6 +216,7 @@ class PropertyImpl :public DASProperty
 	  
 	const TypeImpl& type;
 	const Type& containertype;
+	const Property* opposite;
 	char* name;
     char* stringdef;
 
@@ -198,6 +226,8 @@ class PropertyImpl :public DASProperty
 
 	// alias support
 	std::vector<char*> aliases;
+
+	std::vector<Substitution> substitutions;
 
 	typedef std::list<PropertyImpl*> REFEREE_LIST;
 	REFEREE_LIST references;

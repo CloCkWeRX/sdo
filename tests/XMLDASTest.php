@@ -22,6 +22,26 @@
 
 */
 require_once 'PHPUnit2/Framework/TestCase.php';
+require_once 'PHPUnit2/Framework/IncompleteTestError.php';
+
+
+// Following globals and error handler are used for catching I/O warnings when XSD or XML files not found
+$XMLDASTest_error_handler_called = false;
+$XMLDASTest_error_handler_severity;
+$XMLDASTest_error_handler_msg;
+//$XMLDASTest_error_handler_filename;
+//$XMLDASTest_error_handler_linenum;
+function XMLDASTest_user_error_handler($severity, $msg, $filename, $linenum) {
+	global $XMLDASTest_error_handler_called;
+	global $XMLDASTest_error_handler_severity;
+	global $XMLDASTest_error_handler_msg;
+
+	$XMLDASTest_error_handler_called = true;
+	$XMLDASTest_error_handler_severity = $severity;
+	$XMLDASTest_error_handler_msg = $msg;
+}
+
+
 
 class XMLDASTest extends PHPUnit2_Framework_TestCase {
 
@@ -46,17 +66,104 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 	public function tearDown() {
 		// Can add test case cleanup here.  PHPUnit2_Framework_TestCase will automatically call it
 	}
-	
+
 	public function testCannotCallPrivateConstructor() {
 		// This test is dummied out!!! We cannot actually supply a test as calling the constructor issues an E_ERROR
 		// to the effect that the constructor is private, and you cannot handle E_ERRORs
 		// ... but ...
 		// having this empty test here makes the --testdox-text log from phpunit look good
-//		try {
-//			$xmldas = new SDO_DAS_XML();
-//		} catch (SDO_Exception $e) {
-//			$this->assertTrue(false, "testCreate - Exception  Caught" . $e->getMessage());
-//		}
+		//		try {
+		//			$xmldas = new SDO_DAS_XML();
+		//		} catch (SDO_Exception $e) {
+		//			$this->assertTrue(false, "testCreate - Exception  Caught" . $e->getMessage());
+		//		}
+	}
+
+	public function testFileExceptionThrownAndWarningIssuedWhenXsdFileIsNotPresent() {
+		global $XMLDASTest_error_handler_called;
+		global $XMLDASTest_error_handler_severity;
+		global $XMLDASTest_error_handler_msg;
+
+		set_error_handler('XMLDASTest_user_error_handler');
+		$XMLDASTest_error_handler_called = false;
+		$exception_thrown = false;
+		try {
+			$xmldas = SDO_DAS_XML::create("a complete load of rubbish.xsd");
+		} catch (SDO_DAS_XML_FileException $e) {
+			$exception_thrown = true;
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for loadFromFile: ".$e->getMessage());
+		}
+		$this->assertTrue($XMLDASTest_error_handler_called, 'Error handler should have been called for file not found');
+		$this->assertTrue($XMLDASTest_error_handler_severity == E_WARNING, 'Expected an E_WARNING when file not found');
+		$this->assertTrue(strpos($XMLDASTest_error_handler_msg, 'I/O warning') > 0, 'Warning message not right: ' . $XMLDASTest_error_handler_msg);
+		$this->assertTrue($exception_thrown,'SDO_DAS_XML_FileException should have been thrown but was not');
+	}
+
+	public function testFileExceptionThrownAndWarningIssuedWhenXmlFileIsNotPresent() {
+		global $XMLDASTest_error_handler_called;
+		global $XMLDASTest_error_handler_severity;
+		global $XMLDASTest_error_handler_msg;
+
+		$xmldas = SDO_DAS_XML::create("company.xsd");
+		set_error_handler('XMLDASTest_user_error_handler');
+		$XMLDASTest_error_handler_called = false;
+		$exception_thrown = false;
+		try {
+			$xdoc = $xmldas->loadFromFile("what_a_load_of_rubbish.xml");
+		} catch (SDO_DAS_XML_FileException $e) {
+			$exception_thrown = true;
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for loadFromFile: ".$e->getMessage());
+		}
+		$this->assertTrue($XMLDASTest_error_handler_called, 'Error handler should have been called for file not found');
+		$this->assertTrue($XMLDASTest_error_handler_severity == E_WARNING, 'Expected an E_WARNING when file not found');
+		$this->assertTrue(strpos($XMLDASTest_error_handler_msg, 'I/O warning') > 0, 'Warning message not right: ' . $XMLDASTest_error_handler_msg);
+		$this->assertTrue($exception_thrown,'SDO_DAS_XML_FileException should have been thrown but was not');
+	}
+
+	public function testParseExceptionThrownWhenXmlParseErrorOccursInCreateButDoNotWorryOnLinux() {
+	/************************************
+	* This test is known not to work on Linux
+	* it should wok on Windows though
+	***********************************/
+		$exception_thrown = false;
+		try {
+		$xmldas = SDO_DAS_XML::create("parse_errors.xsd");
+		} catch (SDO_DAS_XML_ParserException $e) {
+			$exception_thrown = true;
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for xml parse errors in xsd: ".$e->getMessage());
+		}
+		$this->assertTrue($exception_thrown, 'SDO_DAS_XML_ParserException should have been thrown');
+	}
+
+	public function testParseExceptionThrownWhenXmlParseErrorOccursInLoadFromFile() {
+		$xmldas = SDO_DAS_XML::create("company.xsd");
+		$exception_thrown = false;
+		try {
+			$xdoc = $xmldas->loadFromFile("parse_errors.xml");
+			$do = $xdoc->getRootDataObject(); // don't expect to get here
+		} catch (SDO_DAS_XML_ParserException $e) {
+			$exception_thrown = true;
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for xml parse errors: ".$e->getMessage());
+		}
+		$this->assertTrue($exception_thrown, 'SDO_DAS_XML_ParserException should have been thrown');
+	}
+
+	public function testParseExceptionThrownWhenXmlParseErrorOccursInLoadFromString() {
+		$xmldas = SDO_DAS_XML::create("company.xsd");
+		$exception_thrown = false;
+		try {
+			$xdoc = $xmldas->loadFromString("<ugly<");
+			$do = $xdoc->getRootDataObject(); // don't expect to get here
+		} catch (SDO_DAS_XML_ParserException $e) {
+			$exception_thrown = true;
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for xml parse errors: ".$e->getMessage());
+		}
+		$this->assertTrue($exception_thrown, 'SDO_DAS_XML_ParserException should have been thrown');
 	}
 
 	public function testCreate_NormalPath_WorksWhenXsdFileIsPresent() {
@@ -66,19 +173,6 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, "testCreate - Exception  Caught" . $e->getMessage());
 		}
 	}
-
-	/* this one commented out as we get an SDO_XML_DAS_ParserException and not clear when or if the spec will change */
-	//	public function testFileExceptionThrownWhenXsdIsNotPresent() {
-	//        	$exception_thrown = false;
-	//            try {
-	//                $xmldas = SDO_DAS_XML::create("a complete load of rubbish.xsd");
-	//            } catch (SDO_DAS_XML_FileException $e) {
-	//            	$exception_thrown = true;
-	//            } catch (Exception $e) {
-	//				$this->assertTrue(false, "Incorrect exception thrown for SDO_DAS_XML::create: ".$e->getMessage());
-	//            }
-	//			$this->assertTrue($exception_thrown,'SDO_DAS_XML_FileException should have been thrown but was not');
-	//	}
 
 	public function testCreate_TypeNotFoundExceptionThrownWhenXsdFaulty() {
 		// the xsd has a company type that refers to an employe type but doesn't define the employee type
@@ -103,30 +197,16 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 		}
 	}
 
-	/* this one fails as we get an SDO_XML_DAS_ParserException */
-//	public function testFileExceptionThrownWhenXmlIsNotPresent() {
-//		$exception_thrown = false;
-//		$xmldas = SDO_DAS_XML::create("company.xsd");
-//		try {
-//			$xdoc = $xmldas->loadFromFile("another load of rubbish.xml");
-//		} catch (SDO_DAS_XML_FileException $e) {
-//			$exception_thrown = true;
-//		} catch (Exception $e) {
-//			$this->assertTrue(false, "Incorrect exception thrown for loadFromFile: ".$e->getMessage());
-//		}
-//		$this->assertTrue($exception_thrown,'SDO_DAS_XML_FileException should have been thrown but was not');
-//	}
-
-/*
-The XML for the following test looks like this:
-<company xmlns="companyNS" name="MegaCorp" employeeOfTheMonth="#/departments.0/employees.1">
-  <departments name="Advanced Technologies" location="NY" number="123">
-    <employees name="John Jones" SN="E0001"/>
-    <employees name="Jane Doe" SN="E0003"/>
-    <employees name="Al Smith" SN="E0004" manager="true"/>
-  </departments>
-</company>
-*/
+	/*
+	The XML for the following test looks like this:
+	<company xmlns="companyNS" name="MegaCorp" employeeOfTheMonth="#/departments.0/employees.1">
+	<departments name="Advanced Technologies" location="NY" number="123">
+	<employees name="John Jones" SN="E0001"/>
+	<employees name="Jane Doe" SN="E0003"/>
+	<employees name="Al Smith" SN="E0004" manager="true"/>
+	</departments>
+	</company>
+	*/
 	public function testLoadFromFile_LoadedGraphCorrespondsToTheXml() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
@@ -136,7 +216,7 @@ The XML for the following test looks like this:
 			$this->assertEquals(1, count($do->departments), 'Wrong number of departments.');
 			$this->assertEquals("Advanced Technologies", $do->departments[0]->name, 'Department name is not valid.');
 			$this->assertEquals("NY", $do->departments[0]->location, 'Department location invalid.');
-			$this->assertEquals("123", $do->departments[0]->number, 'Department number invalid.');
+			$this->assertEquals(123, $do->departments[0]->number, 'Department number invalid.');
 			$this->assertEquals(3, count($do->departments[0]->employees), 'Wrong number of employees.');
 			$this->assertEquals("John Jones", $do->departments[0]->employees[0]->name, 'Employee name is not valid.');
 			// use assertSame to check both ways to reach Jane Doe really reach the same object
@@ -145,7 +225,20 @@ The XML for the following test looks like this:
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
 		}
 	}
-	
+
+	public function testLoadFromFile_LoadedGraphCorrespondsToTheXmlWithNilSn() {
+		try {
+			$xmldas = SDO_DAS_XML::create("company_with_nillable_SN.xsd");
+			$xdoc = $xmldas->loadFromFile("company_with_nillable_SN.xml");
+			$do = $xdoc->getRootDataObject();
+			$department = $do->departments[0];
+			$jane = $department->employees[0];
+			$this->assertTrue($jane->SN === null && isset($jane->SN), 'Serial number is not null.');
+		} catch (SDO_Exception $e) {
+			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
+		}
+	}
+
 	public function testCreateDataObject_WorksCorrectly() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
@@ -305,53 +398,57 @@ The XML for the following test looks like this:
 			$this->assertEquals("MegaCorp", $xdoc->getRootDataObject()->name, 'testgetRootDataObject - was not the company');
 		} catch (SDO_Exception $e) {
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
-		}		
+		}
 	}
-	
-/* TODO reinstate this test */	
+
+	/* TODO reinstate this test */
 	public function testXMLDocument_getRootElementURI() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
 			$xdoc = $xmldas->loadFromFile("company.xml");
-//			$this->assertEquals("CompanyNS", $xdoc->getRootElementURI, 'testgetRootElementURI - wrong answer ');
+			throw new PHPUnit2_Framework_IncompleteTestError();
+			//			$this->assertEquals("CompanyNS", $xdoc->getRootElementURI, 'testgetRootElementURI - wrong answer ');
 		} catch (SDO_Exception $e) {
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
-		}		
+		}
 	}
-	
-/* TODO reinstate this test */	
+
+	/* TODO reinstate this test */
 	public function testXMLDocument_getRootElementName() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
 			$xdoc = $xmldas->loadFromFile("company.xml");
-//			$this->assertEquals("company", $xdoc->getRootElementName, 'testgetRootElementName - wrong answer ');
+			throw new PHPUnit2_Framework_IncompleteTestError();
+			//			$this->assertEquals("company", $xdoc->getRootElementName, 'testgetRootElementName - wrong answer ');
 		} catch (SDO_Exception $e) {
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
-		}		
+		}
 	}
-	
-/* TODO reinstate this test */	
+
+	/* TODO reinstate this test */
 	public function testXMLDocument_getEncoding() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
 			$xdoc = $xmldas->loadFromFile("company.xml");
-//			$this->assertEquals("UTF-8", $xdoc->getEncoding, 'testgetEncoding - wrong answer ');
+			throw new PHPUnit2_Framework_IncompleteTestError();
+			//			$this->assertEquals("UTF-8", $xdoc->getEncoding, 'testgetEncoding - wrong answer ');
 		} catch (SDO_Exception $e) {
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
-		}		
+		}
 	}
-	
-/* TODO reinstate this test */	
+
+	/* TODO reinstate this test */
 	public function testGetXmlDeclaration() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
 			$xdoc = $xmldas->loadFromFile("company_noxmldecl.xml");
-//			$this->assertEquals(false, $xdoc->getXMLDeclaration(), 'testgetXMLDeclaration - should return false');
+			throw new PHPUnit2_Framework_IncompleteTestError();
+			//			$this->assertEquals(false, $xdoc->getXMLDeclaration(), 'testgetXMLDeclaration - should return false');
 		} catch (SDO_Exception $e) {
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
-		}		
+		}
 	}
-	
+
 	public function testGetXmlVersion() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
@@ -359,9 +456,9 @@ The XML for the following test looks like this:
 			$this->assertEquals('1.0', $xdoc->getXMLVersion(), 'testgetXMLVersion - should be 1.0');
 		} catch (SDO_Exception $e) {
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
-		}		
+		}
 	}
-	
+
 	public function testGetSchemaLocation() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
@@ -369,9 +466,9 @@ The XML for the following test looks like this:
 			$this->assertEquals(null, $xdoc->getSchemaLocation(), 'testgetSchemaLocation - wrong answer');
 		} catch (SDO_Exception $e) {
 			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
-		}		
+		}
 	}
-	
+
 	public function testSetAndGetEncodingOnDocumentWorksCorrectly() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");

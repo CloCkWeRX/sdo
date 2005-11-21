@@ -595,7 +595,6 @@ static int sdo_sequence_cast_object(zval *readobj, zval *writeobj, int type, int
 	ostringstream	 print_buf;
 	zval			 free_obj;
 	int				 rc = SUCCESS;
-	int				 entries;
 	
 	if (should_free) {
 		free_obj = *writeobj;

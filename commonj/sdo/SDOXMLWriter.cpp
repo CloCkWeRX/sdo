@@ -1,22 +1,22 @@
-/*
+/* 
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005.                                  | 
 | All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
++----------------------------------------------------------------------+ 
+|                                                                      | 
+| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
+| may not use this file except in compliance with the License. You may | 
+| obtain a copy of the License at                                      | 
 |  http://www.apache.org/licenses/LICENSE-2.0                          |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Pete Robbins                                                 |
-+----------------------------------------------------------------------+
+|                                                                      | 
+| Unless required by applicable law or agreed to in writing, software  | 
+| distributed under the License is distributed on an "AS IS" BASIS,    | 
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
+| implied. See the License for the specific language governing         | 
+| permissions and limitations under the License.                       | 
++----------------------------------------------------------------------+ 
+| Author: Pete Robbins                                                 | 
++----------------------------------------------------------------------+ 
 
 */
 /* $Id$ */
@@ -38,27 +38,27 @@ namespace commonj
 {
 	namespace sdo
 	{
-
-
-
-
+		
+		
+		
+		
 		SDOXMLWriter::SDOXMLWriter(
 			DataFactoryPtr dataFact)
 			: dataFactory(dataFact)
 		{
-
+			
 		}
-
+		
 		SDOXMLWriter::~SDOXMLWriter()
 		{
 			freeWriter();
 		}
-
+		
 		void SDOXMLWriter::setWriter(xmlTextWriterPtr textWriter)
 		{
 			writer = textWriter;
 		}
-
+		
 		void SDOXMLWriter::freeWriter()
 		{
 			if (writer != NULL)
@@ -67,30 +67,30 @@ namespace commonj
 				writer = NULL;
 			}
 		}
-
+		
 		int SDOXMLWriter::write(XMLDocumentPtr doc)
 		{
 			if (!doc)
 			{
 				return 0;
 			}
-
+			
 			if (writer == NULL)
 			{
 				// Throw exception
 				return -1;
 			}
-
+			
 			int rc = 0;
-
+			
 			namespaceUriStack.empty();
 			namespaceUriStack.push(SDOXMLString());
 			namespaces.empty();
-
-
+			
+			
 			//xmlTextWriterSetIndent(writer, 1);
 			//xmlTextWriterSetIndentString(writer, SDOXMLString("  "));
-
+			
 			if (doc->getXMLDeclaration())
 			{
 				rc = xmlTextWriterStartDocument(writer, doc->getXMLVersion(), doc->getEncoding(), NULL);
@@ -98,7 +98,7 @@ namespace commonj
 					SDO_THROW_EXCEPTION("write", SDOXMLParserException, "xmlTextWriterStartDocument failed");
 				}
 			}
-
+			
 			DataObjectPtr root = doc->getRootDataObject();
 			if (root)
 			{
@@ -116,7 +116,7 @@ namespace commonj
 					elementName = elementName.toLower(0,1);
 					writeXSIType = true;
 				}
-
+				
 				writeDO(root, elementURI, elementName, true);
 			}
 			rc = xmlTextWriterEndDocument(writer);
@@ -124,10 +124,10 @@ namespace commonj
 					SDO_THROW_EXCEPTION("write", SDOXMLParserException, "xmlTextWriterEndDocument failed");
 				return rc;
 			}
-
+			
 			xmlTextWriterFlush(writer);
 			freeWriter();
-
+			
 			return rc;
 		}
 
@@ -136,13 +136,13 @@ namespace commonj
 		//////////////////////////////////////////////////////////////////////////
 
 		void SDOXMLWriter::handleChangeSummaryAttributes(
-			ChangeSummaryPtr cs,
+			ChangeSummaryPtr cs, 
 			DataObjectPtr dol)
 		{
 			int rc;
 
 			SettingList& sl = cs->getOldValues(dol);
-			if (sl.size() == 0)
+			if (sl.size() == 0) 
 			{
 				// no attributes
 				return;
@@ -151,40 +151,40 @@ namespace commonj
 			{
 				try {
 
-					if (sl[j].getProperty().isMany())
+					if (sl[j].getProperty().isMany()) 
 					{
 						// manys are elements
 						continue;
 					}
-
+		
 					if (sl[j].getProperty().getType().isDataType())
 					{
 						// data types are OK
-						rc = xmlTextWriterWriteAttribute(writer,
+						rc = xmlTextWriterWriteAttribute(writer, 
 							SDOXMLString(sl[j].getProperty().getName()),
 							SDOXMLString(sl[j].getCStringValue()));
 					}
-					else
+					else 
 					{
 						DataObjectPtr dob = sl[j].getDataObjectValue();
-						if (dob)
+						if (dob) 
 						{
 							if (cs->isDeleted(dob))
 							{
-							rc = xmlTextWriterWriteAttribute(writer,
+							rc = xmlTextWriterWriteAttribute(writer, 
 								SDOXMLString(sl[j].getProperty().getName()),
 								SDOXMLString(cs->getOldXpath(dob)));
 							}
-							else
+							else 
 							{
-							rc = xmlTextWriterWriteAttribute(writer,
+							rc = xmlTextWriterWriteAttribute(writer, 
 								SDOXMLString(sl[j].getProperty().getName()),
 								SDOXMLString(dob->objectToXPath()));
 							}
 						}
 						else
 						{
-							rc = xmlTextWriterWriteAttribute(writer,
+							rc = xmlTextWriterWriteAttribute(writer, 
 								SDOXMLString(sl[j].getProperty().getName()),
 								SDOXMLString(""));
 						}
@@ -200,29 +200,29 @@ namespace commonj
 		//////////////////////////////////////////////////////////////////////////
 		// Write  Change Summary elements
 		//////////////////////////////////////////////////////////////////////////
-
+		
 		void SDOXMLWriter::handleChangeSummaryElements(
-			ChangeSummaryPtr cs,
+			ChangeSummaryPtr cs, 
 			DataObjectPtr dob)
 		{
 			int rc;
 
 			SettingList& sl = cs->getOldValues(dob);
-
-			if (sl.size() == 0)
+		
+			if (sl.size() == 0) 
 			{
 			// there are no setting for this element.
 			return;
 			}
-
+	        
 			for (int j=0;j< sl.size(); j++)
 			{
-				try
+				try 
 				{
 
 					// single values will have been covered by the attributes.
 					if (!sl[j].getProperty().isMany()) continue;
-
+		
 					if (sl[j].getProperty().getType().isDataType())
 					{
 
@@ -230,12 +230,12 @@ namespace commonj
 							writer,
 							SDOXMLString(sl[j].getProperty().getName()),
 							SDOXMLString(sl[j].getCStringValue()));
-
+							
 					} // if datatype
 					else
 					{
 						DataObjectPtr dob2 = sl[j].getDataObjectValue();
-						if (!dob2)
+						if (!dob2) 
 						{
 							continue;
 						}
@@ -255,14 +255,14 @@ namespace commonj
 							rc = xmlTextWriterEndElement(
 								writer);
 						}
-					}
+					} 
 				}
 				catch (SDORuntimeException e)
 				{
 					// ignore this element
 				}
 			} // for
-		}
+		} 
 
 
 		//////////////////////////////////////////////////////////////////////////
@@ -270,42 +270,42 @@ namespace commonj
 		//////////////////////////////////////////////////////////////////////////
 
 		void SDOXMLWriter::handleChangeSummaryDeletedObject(
-			const char* name,
-			ChangeSummaryPtr cs,
+			const char* name, 
+			ChangeSummaryPtr cs, 
 			DataObjectPtr dob)
 		{
-
+		
 			int rc; // TODO error handling
-
+		
 			SettingList& sl = cs->getOldValues(dob);
-
+		
 			rc = xmlTextWriterStartElement(
 				writer,
 				SDOXMLString(name));
 
-			if (sl.size() == 0)
+			if (sl.size() == 0) 
 			{
-				rc = xmlTextWriterWriteAttribute(writer,
+				rc = xmlTextWriterWriteAttribute(writer, 
 					SDOXMLString("sdo:ref"),
 					SDOXMLString(cs->getOldXpath(dob)));
 				rc = xmlTextWriterEndElement(writer);
 				return;
 			}
 
-
-			try
+		
+			try 
 			{
 			    // print single valued datatypes as attributes
-
+		
 				for (int j=0;j< sl.size(); j++)
 				{
-					//if (!sl[j].isSet())
+					//if (!sl[j].isSet()) 
 					//{
 					//	// unset properties dont need recording - ah but they do!
                     //
 					//	continue;
 					//}
-					if ( sl[j].getProperty().isMany())
+					if ( sl[j].getProperty().isMany()) 
 					{
 						// manys are elements
 						continue;
@@ -316,16 +316,16 @@ namespace commonj
 						continue;
 					}
 
-					rc = xmlTextWriterWriteAttribute(writer,
+					rc = xmlTextWriterWriteAttribute(writer, 
 						SDOXMLString(sl[j].getProperty().getName()),
 						SDOXMLString(sl[j].getCStringValue()));
 
 				} // for attributes
-
-
-				// now we are onto the many-values,
+		
+	
+				// now we are onto the many-values, 
 				// and dataobject single values.
-				//
+				// 
 				// handle deletions within deletions in reverse order, so they match the
 				// deletion records above.
 
@@ -333,7 +333,7 @@ namespace commonj
 				{
 
              		if ( !sl[k].getProperty().getType().isDataType() &&
-						  sl[k].getProperty().isMany())
+						  sl[k].getProperty().isMany()) 
 					{
 						// its a dataobject type
 						DataObjectPtr dob2 = sl[k].getDataObjectValue();
@@ -344,30 +344,30 @@ namespace commonj
 					}
 				} // for attributes
 
-				for (int m=0;m< sl.size(); m++)
+				for (int kk=0;kk< sl.size(); kk++)
 				{
 
-             		if ( !sl[m].getProperty().getType().isDataType())
+             		if ( !sl[kk].getProperty().getType().isDataType())
 					{
-						if (sl[m].getProperty().isMany()) continue;
+						if (sl[kk].getProperty().isMany()) continue; 
 						// its a single valued dataobject type
 
-						DataObjectPtr dob2 = sl[m].getDataObjectValue();
+						DataObjectPtr dob2 = sl[kk].getDataObjectValue();
 						if (!dob2) continue;
 						if (!cs->isDeleted(dob2)) continue;
-						handleChangeSummaryDeletedObject(sl[m].
+						handleChangeSummaryDeletedObject(sl[kk].
 							       getProperty().getName(),cs,dob2);
 
 					}
-					else
+					else 
 					{
-						if ( !sl[m].getProperty().isMany()) continue;
-
+						if ( !sl[kk].getProperty().isMany()) continue; 
+						
 						// could only be many valued data type
-
-						rc = xmlTextWriterWriteElement(writer,
-							SDOXMLString(sl[m].getProperty().getName()),
-							SDOXMLString(sl[m].getCStringValue()));
+		
+						rc = xmlTextWriterWriteElement(writer, 
+							SDOXMLString(sl[kk].getProperty().getName()),
+							SDOXMLString(sl[kk].getCStringValue()));
 					}
 				} // for attributes
 			}
@@ -377,7 +377,7 @@ namespace commonj
 			}
 
 			rc = xmlTextWriterEndElement(writer);
-		}
+		} 
 
 
 		//////////////////////////////////////////////////////////////////////////
@@ -385,14 +385,14 @@ namespace commonj
 		//////////////////////////////////////////////////////////////////////////
 
 		void SDOXMLWriter::handleSummaryChange(
-			const SDOXMLString& elementName,
-			ChangeSummaryPtr cs,
+			const SDOXMLString& elementName, 
+			ChangeSummaryPtr cs, 
 			DataObjectPtr dob)
 		{
-			int rc;
+			int rc; 
 			DataObject* temp = dob;
             const char* name;
-			try
+			try 
 			{
 				name = temp->getContainmentProperty().getName();
 			}
@@ -400,9 +400,9 @@ namespace commonj
 			{
 				// This could be a root, and have no name.
 				name = 0;
-			}
+			}			
 
-			if (name == 0)
+			if (name == 0) 
 			{
 			rc = xmlTextWriterStartElement(
 				writer,
@@ -421,7 +421,7 @@ namespace commonj
 				return;
 			}
 
-			try
+			try 
 			{
 				name =  temp->objectToXPath();
 			}
@@ -430,7 +430,7 @@ namespace commonj
 				name = 0;
 			}
 
-			rc = xmlTextWriterWriteAttribute(writer,
+			rc = xmlTextWriterWriteAttribute(writer, 
 				SDOXMLString("sdo:ref"),
 				SDOXMLString(name));
 
@@ -451,7 +451,7 @@ namespace commonj
 			ChangeSummaryPtr cs)
 		{
 			int i;
-			int rc;
+			int rc; 
 
 			ChangedDataObjectList& changedDOs =  cs->getChangedDataObjects();
 			if (changedDOs.size() > 0)
@@ -468,13 +468,13 @@ namespace commonj
 			    for (i=0;i< changedDOs.size();i++)
 				{
 					if  (cs->isCreated(changedDOs[i])
-						&& changedDOs.getType(i) == ChangedDataObjectList::Create)
+						&& changedDOs.getType(i) == ChangedDataObjectList::Create) 
 					{
 						// TODO - should work out if theres a IDREF here
 						// TODO - can we have more than one create like this?
 						try
 						{
-							rc = xmlTextWriterWriteElement(writer,
+							rc = xmlTextWriterWriteElement(writer, 
 							SDOXMLString("create"),
 							SDOXMLString(changedDOs[i]->objectToXPath()));
 						}
@@ -484,12 +484,12 @@ namespace commonj
 						}
 					}
 					if  (cs->isDeleted(changedDOs[i])
-						&& changedDOs.getType(i) == ChangedDataObjectList::Delete)
+						&& changedDOs.getType(i) == ChangedDataObjectList::Delete) 
 					{
 						// TODO - should work out if theres a IDREF here
-						try
+						try 
 						{
-							rc = xmlTextWriterWriteElement(writer,
+							rc = xmlTextWriterWriteElement(writer, 
 							SDOXMLString("delete"),
 							SDOXMLString(cs->getOldXpath(changedDOs[i])));
 						}
@@ -502,12 +502,12 @@ namespace commonj
 
 				if (cs->isLogging())
 				{
-					rc = xmlTextWriterWriteAttribute(writer,
+					rc = xmlTextWriterWriteAttribute(writer, 
 						SDOXMLString("logging"),
 						SDOXMLString("true"));
 				}
-
-
+						
+			
 				for (i=0;i< changedDOs.size();i++)
 				{
 					if (cs->isModified(changedDOs[i]))
@@ -517,20 +517,23 @@ namespace commonj
 				}
 
 				rc = xmlTextWriterEndElement(writer);
-
+						
 				}
 		}
-
+		
 		//////////////////////////////////////////////////////////////////////////
 		// Write a DatObject tree
 		//////////////////////////////////////////////////////////////////////////
-
+		
 		int SDOXMLWriter::writeDO(
 			DataObjectPtr dataObject,
 			const SDOXMLString& elementURI,
 			const SDOXMLString& elementName,
 			bool writeXSIType)
 		{
+
+			int rc;
+
 			if (dataObject == 0)
 				return 0;
 
@@ -540,33 +543,103 @@ namespace commonj
 				uri = elementURI;
 				namespaceUriStack.push(elementURI);
 			}
+			
+			const Type& dataObjectType = dataObject->getType();
 
+			//////////////////////////////////////////////////////////////////////////
+			// suppose its a primitive type - just write the value
+			//////////////////////////////////////////////////////////////////////////
+            if (dataObjectType.isDataType())
+			{
+				if (dataObject->isNull(""))
+				{
+					rc = xmlTextWriterStartElementNS(writer, 
+						NULL, elementName, uri);
+					if (rc < 0) 
+					{
+						SDO_THROW_EXCEPTION("writeDO", 
+							SDOXMLParserException, 
+							"xmlTextWriterStartElementNS failed");
+					}				
+					rc = xmlTextWriterWriteAttribute(writer, 
+						(const unsigned char*)"xsi:nil", 
+						(const unsigned char*)"true");
+					rc = xmlTextWriterEndElement(writer);
+				}
+				else
+				{
+					xmlTextWriterWriteElement(
+					writer,
+					elementName,
+					SDOXMLString(dataObject->getCString("")));
+				}
+				return 0;
 
+			}
+			
 			//xmlTextWriterWriteString(writer,SDOXMLString("\n"));
-			int rc = xmlTextWriterStartElementNS(writer, NULL, elementName, uri);
+			rc = xmlTextWriterStartElementNS(writer, NULL, elementName, uri);
 			if (rc < 0) {
 				SDO_THROW_EXCEPTION("writeDO", SDOXMLParserException, "xmlTextWriterStartElementNS failed");
-			}
-
-			const Type& dataObjectType = dataObject->getType();
+			}				
+			
 
 			if (writeXSIType)
 			{
-				rc = xmlTextWriterWriteAttributeNS(writer,
-					SDOXMLString("xsi"), SDOXMLString("type"),
-					SDOXMLString("http://www.w3.org/2001/XMLSchema-instance"),
+				rc = xmlTextWriterWriteAttributeNS(writer, 
+					SDOXMLString("xsi"), SDOXMLString("type"), 
+					SDOXMLString("http://www.w3.org/2001/XMLSchema-instance"), 
 					SDOXMLString(dataObject->getType().getName()));
 			}
+
+
+			//////////////////////////////////////////////////////////////////////////
+			// write out the type if the xsi:type if the containing type is open
+	 		//////////////////////////////////////////////////////////////////////////
+			DataObject* dob = dataObject;
+            DataObjectImpl* cont = 
+				     ((DataObjectImpl*)dob)->getContainerImpl();
+			if (cont != 0)
+			{
+				if (cont->getType().isOpenType())
+				{
+					//if (dataObject->getType().getURI() != 0)
+					//{
+					//	std::string value = 
+					//		dataObject->getType().getURI();
+					//	value += ":";
+					//	value += dataObject->getType().getName();
+					//	rc = xmlTextWriterWriteAttribute(writer, 
+					//		(const unsigned char*)"xsi:type", 
+					//		(const unsigned char*)value.c_str());
+					//}
+					//else
+					//{
+						rc = xmlTextWriterWriteAttribute(writer, 
+						(const unsigned char*)"xsi:type", 
+						(const unsigned char*)dataObject->getType().getName());
+					//}
+				}
+			}
+
+			// write nil if required
+			if (dataObject->isNull(""))
+			{
+				rc = xmlTextWriterWriteAttribute(writer, 
+				(const unsigned char*)"xsi:nil", 
+				(const unsigned char*)"true");
+			}
+
 
 			//////////////////////////////////////////////////////////////////////////
 			// Iterate over all the properties to find attributes
 			//////////////////////////////////////////////////////////////////////////
 			int i;
-			PropertyList pl = dataObject->getProperties();
+			PropertyList pl = dataObject->getInstanceProperties();
 			for (i = 0; i < pl.size(); i++)
 			{
 				if (dataObject->isSet(pl[i]))
-				{
+				{					
 					SDOXMLString propertyName(pl[i].getName());
 					XSDPropertyInfo* pi = getPropertyInfo(dataObjectType, pl[i]);
 					PropertyDefinition propdef;
@@ -575,15 +648,15 @@ namespace commonj
 						propdef = pi->getPropertyDefinition();
 						propertyName = propdef.localname;
 					}
-
+					
 					// Elements are written as <element>
 					if (propdef.isElement)
 						continue;
-
+					
 					// Many-valued properties are written as <element>
 					if (pl[i].isMany())
 						continue;
-
+										
 				//	if (pl[i].isContainment())
 				//		continue;
 
@@ -591,7 +664,7 @@ namespace commonj
 					// Non contained properties become attributes
 					//////////////////////////////////////////////////////////////////////
 					const Type& propertyType = pl[i].getType();
-
+					
 					if (propertyType.isDataType())
 					{
 						SDOXMLString propertyValue = (dataObject->getCString(pl[i]));
@@ -610,13 +683,13 @@ namespace commonj
 								prefix = namespaces.findPrefix(qname.getURI());
 							}
 
-							rc = xmlTextWriterWriteAttributeNS(writer,
+							rc = xmlTextWriterWriteAttributeNS(writer, 
 							SDOXMLString("xmlns"), pref, NULL, qname.getURI());
 
 							propertyValue = pref + ":" + qname.getLocalName();
-
+							
 						}
-						rc = xmlTextWriterWriteAttribute(writer,
+						rc = xmlTextWriterWriteAttribute(writer, 
 							propertyName, propertyValue);
 					}
 					else
@@ -629,7 +702,7 @@ namespace commonj
 					}
 				}
 			}
-
+			
 			// --------------------
 			// Handle ChangeSummary
 			// --------------------
@@ -641,7 +714,7 @@ namespace commonj
 					handleChangeSummary(elementName, changeSummary);
 				}
 			}
-
+			
 			if (dataObjectType.isSequencedType())
 			{
 				SequencePtr sequence  = dataObject->getSequence();
@@ -649,7 +722,7 @@ namespace commonj
 				{
 					for (i=0; i<sequence->size(); i++)
 					{
-
+						
 						if (sequence->isText(i))
 						{
 							rc = xmlTextWriterWriteString(
@@ -663,7 +736,7 @@ namespace commonj
 						const Type& seqPropType = seqProp.getType();
 
 						if (seqPropType.isDataObjectType())
-						{
+						{								
 							DataObjectPtr doValue;
 							if (seqProp.isMany())
 							{
@@ -697,17 +770,17 @@ namespace commonj
 								writer,
 								seqPropName,
 								SDOXMLString(sequence->getCStringValue(i)));
-
+							
 						} // end DataType
 					} // end - iterate over sequence
-
+					
 				}
-
+			
 			} // end sequence handling
-
+			
 			else
 			{
-
+				
 				//////////////////////////////////////////////////////////////////////////
 				// Iterate over all the properties to find elements
 				//////////////////////////////////////////////////////////////////////////
@@ -715,7 +788,7 @@ namespace commonj
 				{
 					if (dataObject->isSet(pl[i]))
 					{
-
+						
 						SDOXMLString propertyName(pl[i].getName());
 						XSDPropertyInfo* pi = getPropertyInfo(dataObjectType, pl[i]);
 						if (pi)
@@ -724,9 +797,9 @@ namespace commonj
 								continue;
 							propertyName = pi->getPropertyDefinition().localname;
 						}
-
+						
 						const Type& propertyType = pl[i].getType();
-
+						
 						//////////////////////////////////////////////////////////////////////
 						// For a many-valued property get the list of values
 						//////////////////////////////////////////////////////////////////////
@@ -741,13 +814,13 @@ namespace commonj
 									writeReference(dataObject, pl[i], true, dol[j]);
 								}
 								else
-								{
+								{	
 									SDOXMLString typeURI = dol[j]->getType().getURI();
 									writeDO(dol[j], dol[j]->getType().getURI(), propertyName);
 								}
 							}
 						} // end IsMany
-
+						
 						//////////////////////////////////////////////////////////////////////
 						// For a dataobject write the do
 						//////////////////////////////////////////////////////////////////////
@@ -761,11 +834,11 @@ namespace commonj
 							}
 							else
 							{
-								DataObjectPtr propDO = dataObject->getDataObject(pl[i]);
+								DataObjectPtr propDO = dataObject->getDataObject(pl[i]);				
 								writeDO(propDO, propDO->getType().getURI(), propertyName);
 							}
 						}
-
+						
 						//////////////////////////////////////////////////////////////////////
 						// For a primitive
 						//////////////////////////////////////////////////////////////////////
@@ -774,12 +847,30 @@ namespace commonj
 							// Only write a primitive as an element if defined by the XSD
 							if (pi)
 							{
-								xmlTextWriterWriteElement(
+							if (dataObject->isNull(propertyName))
+								{
+									rc = xmlTextWriterStartElementNS(writer, 
+									NULL, elementName, uri);
+									if (rc < 0) 
+									{
+										SDO_THROW_EXCEPTION("writeDO", 
+										SDOXMLParserException, 
+										"xmlTextWriterStartElementNS failed");
+									}
+									rc = xmlTextWriterWriteAttribute(writer, 
+									(const unsigned char*)"xsi:nil", 
+									(const unsigned char*)"true");
+									rc = xmlTextWriterEndElement(writer);
+								}
+								else
+								{
+									xmlTextWriterWriteElement(
 									writer,
 									propertyName,
 									SDOXMLString(dataObject->getCString(pl[i])));
+								}
 							}
-
+							
 						}
 					}
 				}
@@ -787,7 +878,7 @@ namespace commonj
 			rc = xmlTextWriterEndElement(writer);
 			return rc;
 		}
-
+		
 		XSDPropertyInfo* SDOXMLWriter::getPropertyInfo(const Type& type, const Property& property)
 		{
 			if (dataFactory)
@@ -798,11 +889,11 @@ namespace commonj
 			{
 				return (XSDPropertyInfo*)((DASProperty*)&property)->getDASValue("XMLDAS::PropertyInfo");
 			}
-
+			
 		}
 
 		void SDOXMLWriter::writeReference(
-			DataObjectPtr dataObject,
+			DataObjectPtr dataObject, 
 			const Property& property,
 			bool isElement,
 			DataObjectPtr refferedToObject)
@@ -825,30 +916,30 @@ namespace commonj
 					refValue = reffedObject->getCString(typeDef.IDPropertyName);
 				}
 			}
-
+			
 			if (refValue.isNull())
 			{
 				// need to get XPATH
 				refValue = ((DataObjectImpl*)(DataObject*)reffedObject)->objectToXPath();
 			}
-
+			
 			if (!refValue.isNull())
 			{
 				if (isElement)
 				{
 					// Set the IDREF value
-					xmlTextWriterWriteElement(writer,
+					xmlTextWriterWriteElement(writer, 
 						SDOXMLString(property.getName()), refValue);
 				}
 				else
 				{
 					// Set the IDREF value
-					xmlTextWriterWriteAttribute(writer,
+					xmlTextWriterWriteAttribute(writer, 
 						SDOXMLString(property.getName()), refValue);
 				}
 			}
-		}
-
+		}	
+		
 	} // End - namespace sdo
 } // End - namespace commonj
 

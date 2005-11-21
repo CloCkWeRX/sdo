@@ -53,6 +53,8 @@ class DataFactory : public RefCountingObject
 		
 		virtual SDO_API ~DataFactory();
 
+		SDO_API virtual DataFactoryPtr clone();
+
 		///////////////////////////////////////////////////////////////////////////
 		// Create data objects
 		///////////////////////////////////////////////////////////////////////////
@@ -60,6 +62,7 @@ class DataFactory : public RefCountingObject
 		SDO_API virtual DataObjectPtr create(const char* uri, const char* typeName)  = 0;
 
 		SDO_API virtual DataObjectPtr create(const Type& type)  = 0;
+
 		
 		///////////////////////////////////////////////////////////////////////////
 		// Get back a type from this data factory
@@ -98,12 +101,34 @@ class DataFactory : public RefCountingObject
 			const char* basename) = 0;
 
 		///////////////////////////////////////////////////////////////////////////
+		// Set a SubstituteType for a property
+		///////////////////////////////////////////////////////////////////////////
+
+		virtual SDO_API void setPropertySubstitute(
+			const char* uri, 
+			const char* inTypeName,
+			const char* propname,
+			const char* subname,
+			const char* subTypeUri, 
+			const char* subTypeName) = 0;
+		
+
+		virtual SDO_API void setPropertySubstitute(
+			const Type& containertype,
+			const char* propname,
+			const char* subname,
+			const Type& subtype) = 0;
+
+
+		///////////////////////////////////////////////////////////////////////////
 		// Give a Type an alias
 		///////////////////////////////////////////////////////////////////////////
 
 		virtual SDO_API void setAlias(const char* typeuri,
 			const char* typenam,
 			const char* alias) = 0;
+
+
 
 		///////////////////////////////////////////////////////////////////////////
 		// Add properties to pre-existing types

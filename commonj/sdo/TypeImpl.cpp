@@ -128,17 +128,27 @@ namespace sdo{
 		isResolving = false;
 		isResolved = false;
 		localPropsSize = 0;
-        name = new char[strlen(inname)+1];
-		strcpy(name,inname);
-		typeURI = new char[strlen(uri)+1];
-		strcpy(typeURI,uri);
 		changeSummaryType = false;
 		isSequenced = isSeq;
 		isOpen = isOp;
 		isAbstract = isAbs;
 		isPrimitive = isData;
+        name = new char[strlen(inname)+1];
+		strcpy(name,inname);
+
+		if (uri == 0)
+		{
+			typeURI = new char[1];
+			typeURI[0] = 0;
+			typeEnum = DataObjectType;
+			return;
+		}
+
+		typeURI = new char[strlen(uri)+1];
+		strcpy(typeURI,uri);
+
 		if (!strcmp(uri,Type::SDOTypeNamespaceURI))  {
-            for (int i = 0; i < num_types ; i++) {
+	        for (int i = 0; i < num_types ; i++) {
 				if (!strcmp(inname,types[i])) {
 					typeEnum = (Types)i;
 					if (i <= UriType) isPrimitive = true;
@@ -148,9 +158,10 @@ namespace sdo{
 				}
 			}
 		}
+
 		// All other types are data object types - for now 
 		typeEnum = DataObjectType;
-     }
+	 }
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -233,7 +244,22 @@ namespace sdo{
 		}
 
 		isSequenced = baseType->isSequenced; 
+		// if the base is open then this type must be open too.
+
+		if (baseType->isOpenType())
+		{
+			isOpen = true;
+		}
 	}
+
+    bool TypeImpl::equals(const Type& tother) const
+	{
+		if (strcmp(typeURI,tother.getURI())) return false;
+		// TODO - aliases
+		if (strcmp(name, tother.getName())) return false;
+		return true;
+	}
+
 
 	const Type* TypeImpl::getBaseType() const 
 	{
@@ -255,6 +281,9 @@ namespace sdo{
 		strcpy(tmp,alias);
 		aliases.push_back(tmp); 
 	}
+
+
+	
 
 	const char* TypeImpl::getAlias(unsigned int index) const
 	{
@@ -283,20 +312,23 @@ namespace sdo{
 		for (i = props.begin(); i != props.end(); ++i)
 		{
 
-			const TypeImpl &t = ((*i)->getTypeImpl());
-			if (t.isDataObjectType())
+			const TypeImpl *t = ((*i)->getTypeImpl());
+			if (t != 0)
 			{
-				if (t.isChangeSummaryType())
+				if (t->isDataObjectType())
 				{
-					string msg(" Nested change summary type:");
-					msg += t.getURI();
-					msg += " ";
-					msg += t.getName();
-					SDO_THROW_EXCEPTION("resolve", 
-					SDOUnsupportedOperationException, 
-					msg.c_str());
+					if (t->isChangeSummaryType())
+					{
+						string msg(" Nested change summary type:");
+						msg += t->getURI();
+						msg += " ";
+						msg += t->getName();
+						SDO_THROW_EXCEPTION("resolve", 
+						SDOUnsupportedOperationException, 
+						msg.c_str());
+					}
+					t->throwIfNestedChangeSummary();
 				}
-				t.throwIfNestedChangeSummary();
 			}
 		}
 	}
@@ -366,111 +398,216 @@ namespace sdo{
 	{
 		return props;
 	}
-  
-	///////////////////////////////////////////////////////////////////////////
-    // Returns the property with the specified name.
-	///////////////////////////////////////////////////////////////////////////
-    const Property& TypeImpl::getProperty(const char* propertyName) const 
+
+	unsigned int TypeImpl::getPropertiesSize() const
 	{
-		return (Property&)getPropertyImpl(propertyName);
+		return props.size();
 	}
 
 	///////////////////////////////////////////////////////////////////////////
     // Returns the property with the specified name.
 	///////////////////////////////////////////////////////////////////////////
-	PropertyImpl& TypeImpl::getPropertyImpl(const char* propertyName) const
+    const Property& TypeImpl::getProperty(const char* propertyName) const 
+	{
+		PropertyImpl* pi = getPropertyImpl(propertyName);
+		if (pi == 0)
+		{
+			string msg("Property not found:");
+			msg += propertyName;
+			SDO_THROW_EXCEPTION("getProperty", 
+			SDOPropertyNotFoundException, msg.c_str());
+		}
+		return (Property&)*pi;
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////
+    // Substitute Support - get the real underlying type
+	///////////////////////////////////////////////////////////////////////////
+
+    const Type& TypeImpl::getRealPropertyType(const char* propertyName) const
+	{
+		const TypeImpl* ti = getRealPropertyTypeImpl(propertyName);
+		if (ti != 0)return (Type&)*ti;
+
+		string msg("Property not found:");
+		msg += propertyName;
+		SDO_THROW_EXCEPTION("getProperty", 
+		SDOPropertyNotFoundException, msg.c_str());
+
+	}
+
+	
+	const TypeImpl* TypeImpl::getRealPropertyTypeImpl(const char* propertyName) const
+	{
+
+		std::list<PropertyImpl*>::const_iterator i;	
+		for (i = props.begin(); i != props.end(); ++i)
+		{
+			if (!strcmp(propertyName,(*i)->getName()))
+			{
+					return ((*i)->getTypeImpl());
+			}
+			for (int k=0;k < (*i)->getAliasCount(); k++)
+			{
+				if (!strcmp(propertyName,(*i)->getAlias(k)))
+				{
+					return ((*i)->getTypeImpl());
+				}
+			}
+			for (int j=0;j < (*i)->getSubstitutionCount(); j++)
+			{
+				if (!strcmp(propertyName,(*i)->getSubstitutionName(j)))
+				{
+					return (TypeImpl*)(*i)->getSubstitutionType(j);
+				}
+			}
+		}
+		return 0;
+	}
+
+	///////////////////////////////////////////////////////////////////////////
+    // Returns the property with the specified name.
+	///////////////////////////////////////////////////////////////////////////
+	PropertyImpl* TypeImpl::getPropertyImpl(const char* propertyName) const
 	{
 
 		// Extension - find the property from an xpath
 		// not very elegant, but it will do.
 		// you should not be able to have "." and "[" before a "/" - this is assumed.
 
+		if (propertyName == 0 || strlen(propertyName) == 0) return 0;
+
 		char*	tokenend	= strchr(propertyName,'/');
 		char *	bracket		= strchr(propertyName,'[');
 		char*	dot			= strchr(propertyName,'.');
+        char*   copy;
+		
 
-		if (tokenend != 0 || bracket != 0 || dot != 0)
+		int len = strlen(propertyName);
+		if (tokenend != 0) 
 		{
-			int len;
-			if (tokenend != 0) 
-			{
-
-				len = tokenend  - propertyName;
-				if (bracket != 0 && bracket <  tokenend) len = bracket  - propertyName;
-				if (dot     != 0 && dot     <  tokenend) len = dot      - propertyName;
-			}
-			else 
-			{
-				if (bracket != 0) len = bracket - propertyName;
-				if (dot     != 0) len = dot     - propertyName;
-			}
-            if (len != 0)
-			{	
-				char *copy = new char[len+1];
-				strncpy(copy, propertyName,len);
-				copy[len] = 0;
-			
-				std::list<PropertyImpl*>::const_iterator i;	
-				for (i = props.begin(); i != props.end(); ++i)
-				{
-					if (!strcmp(copy,(*i)->getName()))
-					{
-						if (tokenend && strlen(tokenend) > 1) 
-						{ 
-							PropertyImpl& p = (*i)->getTypeImpl().
-								getPropertyImpl((const char *)(tokenend+1));
-							delete copy;
-							return p;
-						}
-						else {
-							delete copy;
-							return (PropertyImpl&)*(*i);
-						}
-					}
-					for (int j=0;j < (*i)->getAliasCount(); j++)
-					{
-						if (!strcmp(copy,(*i)->getAlias(j)))
-						{
-							if (tokenend && strlen(tokenend) > 1) 
-							{	 
-								PropertyImpl& p = (*i)->getTypeImpl().
-								getPropertyImpl((const char *)(tokenend+1));
-								delete copy;
-								return p;
-							}
-							else {
-								delete copy;
-								return (PropertyImpl&)*(*i);
-							}
-						}
-					}
-				}
-				delete copy;
-			}
+			len = tokenend  - propertyName;
+			if (bracket != 0 && bracket <  tokenend) len = bracket  - propertyName;
+			if (dot     != 0 && dot     <  tokenend) len = dot      - propertyName;
 		}
 		else 
 		{
-			std::list<PropertyImpl*>::const_iterator i;	
-			for (i = props.begin(); i != props.end(); ++i)
+			if (bracket != 0) len = bracket - propertyName;
+			if (dot     != 0) len = dot     - propertyName;
+		}
+        if (len != 0)
+		{
+			copy = new char[len+1];
+			strncpy(copy, propertyName,len);
+			copy[len] = 0;
+		}
+		else
+		{
+			copy = new char[strlen(propertyName)+1];
+			strcpy(copy,propertyName);
+		}
+			
+		std::list<PropertyImpl*>::const_iterator i;	
+		for (i = props.begin(); i != props.end(); ++i)
+		{
+			if (!strcmp(copy,(*i)->getName()))
 			{
-				if (!strcmp(propertyName,(*i)->getName()))
-				{
-					return (PropertyImpl&)*(*i);
-				}
-				for (int j=0;j < (*i)->getAliasCount(); j++)
-				{
-					if (!strcmp(propertyName,(*i)->getAlias(j)))
+				delete copy;
+				if (tokenend && strlen(tokenend) > 1) 
+				{ 
+					const TypeImpl* ti = (*i)->getTypeImpl();
+					if (ti != 0)
 					{
-					return (PropertyImpl&)*(*i);
+						PropertyImpl* p = ti->
+							getPropertyImpl((const char *)(tokenend+1));
+						return p;
 					}
-				}	
+					else
+					{
+						return (PropertyImpl*)(*i);
+					}
+				}
+				else {
+					return (PropertyImpl*)(*i);
+				}
+			}
+			for (int j=0;j < (*i)->getSubstitutionCount(); j++)
+			{
+				if (!strcmp(copy,(*i)->getSubstitutionName(j)))
+				{
+					delete copy;
+					if (tokenend && strlen(tokenend) > 1) 
+					{	 
+						const TypeImpl* ti = (*i)->getTypeImpl();
+						if (ti != 0)
+						{
+							PropertyImpl* p = ti->
+							getPropertyImpl((const char *)(tokenend+1));
+							return p;
+						}
+						else
+						{
+							return (PropertyImpl*)(*i);
+						}
+					}
+					else {
+						return (PropertyImpl*)(*i);
+					}
+				}
+			}
+			for (int k=0;k < (*i)->getAliasCount(); k++)
+			{
+				if (!strcmp(copy,(*i)->getAlias(k)))
+				{
+					delete copy;
+					if (tokenend && strlen(tokenend) > 1) 
+					{	 
+						const TypeImpl* ti = (*i)->getTypeImpl();
+						if (ti != 0)
+						{
+							PropertyImpl* p = ti->
+							getPropertyImpl((const char *)(tokenend+1));
+							return p;
+						}
+						else
+						{
+							return (PropertyImpl*)(*i);
+						}
+					}
+					else {
+						return (PropertyImpl*)(*i);
+					}
+				}
 			}
 		}
+		return 0;
+	}
 
-		string msg("Property not found:");
-		msg += propertyName;
-		SDO_THROW_EXCEPTION("getProperty", 
-			SDOPropertyNotFoundException, msg.c_str());
+
+	///////////////////////////////////////////////////////////////////////////
+    // Returns the property with the specified name.
+	///////////////////////////////////////////////////////////////////////////
+	PropertyImpl* TypeImpl::getPropertyImplPure(const char* propertyName) const
+	{
+
+		
+		std::list<PropertyImpl*>::const_iterator i;	
+		for (i = props.begin(); i != props.end(); ++i)
+		{
+			if (!strcmp(propertyName,(*i)->getName()))
+			{
+				return (PropertyImpl*)(*i);
+			}
+			for (int k=0;k < (*i)->getAliasCount(); k++)
+			{
+				if (!strcmp(propertyName,(*i)->getAlias(k)))
+				{
+					return (PropertyImpl*)(*i);
+				}
+			}
+		}
+		return 0;
 	}
 
 
@@ -499,25 +636,30 @@ namespace sdo{
 	///////////////////////////////////////////////////////////////////////////
 	const Property& TypeImpl::getProperty(unsigned int index) const
 	{
-		return (Property&)getPropertyImpl(index);
+		PropertyImpl* pi = getPropertyImpl(index);
+		if (pi == 0)
+		{
+			string msg("Property not found for index:");
+			msg += index;
+			SDO_THROW_EXCEPTION("getProperty" ,
+			SDOPropertyNotFoundException, msg.c_str());
+		}
+		return (Property&)*pi;
 	}
 
 	///////////////////////////////////////////////////////////////////////////
     // Returns the property with the specified index.
 	///////////////////////////////////////////////////////////////////////////
-	PropertyImpl& TypeImpl::getPropertyImpl(unsigned int index) const
+	PropertyImpl* TypeImpl::getPropertyImpl(unsigned int index) const
 	{
 		std::list<PropertyImpl*>::const_iterator i;
 		int count = 0;
 		for (i = props.begin() ; i != props.end() ; ++i)
 		{
-			if (count == index)return (PropertyImpl&)*(*i);
+			if (count == index)return (PropertyImpl*)(*i);
 			count++;
 		}
-		string msg("Property not found for index:");
-		msg += index;
-		SDO_THROW_EXCEPTION("getProperty" ,
-		  SDOPropertyNotFoundException, msg.c_str());
+		return 0;
 	}
 
 

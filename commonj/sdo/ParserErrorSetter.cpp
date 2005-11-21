@@ -1,3 +1,4 @@
+
 /* 
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  | 
@@ -20,34 +21,22 @@
 
 */
 /* $Id$ */
-
-///////////////////////////////////////////////////////////////////////////
-// A Factory for creating DataObjects.  
-// The created DataObjects are not connected to any other objects.
-///////////////////////////////////////////////////////////////////////////
-
-#include "commonj/sdo/DataFactory.h"
-#include "commonj/sdo/DataFactoryImpl.h"
-
-namespace commonj{
-namespace sdo{
-
-	DataFactory::~DataFactory()
+// ParserErrorSetter.cpp: class allowing parser to push errors back.
+//
+//////////////////////////////////////////////////////////////////////
+#include "commonj/sdo/ParserErrorSetter.h"
+namespace commonj
+{
+	namespace sdo
 	{
-	}
+		//////////////////////////////////////////////////////////////////////
+		// Construction/Destruction
+		//////////////////////////////////////////////////////////////////////
+		ParserErrorSetter::~ParserErrorSetter()
+		{
+		}
 
-	RefCountingPointer<DataFactory> DataFactory::getDataFactory()
-	{
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl());
-	return RefCountingPointer<DataFactory> (dob);
-	}
+	} // End - namespace sdo
+} // End - namespace commonj
 
-	RefCountingPointer<DataFactory> DataFactory::clone()
-	{
-	const DataFactoryImpl* df = (const DataFactoryImpl*)this;
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl(*df));
-	return RefCountingPointer<DataFactory> (dob);
-	}
 
-};
-};

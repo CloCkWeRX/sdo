@@ -119,6 +119,8 @@ public:
 	virtual unsigned int getAliasCount() const ;
 	virtual void setAlias(const char* alias);
 
+	
+
 	///////////////////////////////////////////////////////////////////////////
     // Returns the namespace URI of the type.
 	///////////////////////////////////////////////////////////////////////////
@@ -141,11 +143,25 @@ public:
     const Property& getProperty(const char* propertyName) const ;
     const Property& getProperty(unsigned int index)  const ;
 
-    PropertyImpl& getPropertyImpl(const char* propertyName) const ;
-    PropertyImpl& getPropertyImpl(unsigned int index)  const ;
+    PropertyImpl* getPropertyImpl(const char* propertyName) const ;
+    PropertyImpl* getPropertyImpl(unsigned int index)  const ;
+	
+
+	///////////////////////////////////////////////////////////////////////////
+    // Substitute support
+	///////////////////////////////////////////////////////////////////////////
+  	// get the property with no substitute possible.
+    PropertyImpl* getPropertyImplPure(const char* propertyName) const ;
+
+    // get the type of the property even if its a substitute
+    const Type& getRealPropertyType(const char* propertyName) const ;
+    const TypeImpl* getRealPropertyTypeImpl(const char* propertyName) const ;
+
+
 
     unsigned int getPropertyIndex(const char* propertyName)  const ;
 
+	unsigned int getPropertiesSize() const;
 	///////////////////////////////////////////////////////////////////////////
     // Indicates if this Type specifies DataObjects.
  	///////////////////////////////////////////////////////////////////////////
@@ -208,6 +224,8 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	void validateChangeSummary();
 
+	virtual bool equals(const Type& tother) const;
+
 private:
 	friend class DataFactoryImpl;
 
@@ -267,6 +285,7 @@ private:
 
 
 	PROPERTY_LIST props;
+
 
 	// type inheritance
 	TypeImpl* baseType;

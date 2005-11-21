@@ -32,6 +32,7 @@ namespace commonj
 			  isSequenced(false),
 			  isMany(false),
 			  isQName(false),
+			  isAbstract(false),
 			  groupElementCount(0)
 		{
 		}

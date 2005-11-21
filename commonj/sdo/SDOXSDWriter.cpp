@@ -27,6 +27,7 @@ using namespace::std;
 #include "commonj/sdo/DASProperty.h"
 #include "commonj/sdo/XSDPropertyInfo.h"
 #include "commonj/sdo/SDORuntimeException.h"
+#include "commonj/sdo/DataFactoryImpl.h"
 
 namespace commonj
 {
@@ -61,8 +62,106 @@ namespace commonj
 				writer = NULL;
 			}
 		}
+
 		
-		int SDOXSDWriter::write(const TypeList& types, const SDOXMLString& targetNamespaceURI)
+		void SDOXSDWriter::writeProps( const propertyMap& pl, const SDOXMLString& targetNamespaceURI,
+			SDOXMLString& xsd)
+		{
+ 		    int rc;
+			
+			// -------------------------------------------------------							
+			// Create <element> definitions 
+			// -------------------------------------------------------
+					
+			propertyMap::const_iterator j;
+			for (j = pl.begin(); j != pl.end(); ++j)
+			{
+				const PropertyImpl& prop = (*j).second;
+				const Type& propType = prop.getType();
+				SDOXMLString propTypeName = resolveName(propType.getURI(), 
+					propType.getName(), targetNamespaceURI);
+						
+						
+				if (prop.isMany() || !prop.getType().isDataType())
+				{
+					// -----------------------------
+					// Write an <element> definition
+					// -----------------------------
+					rc = xmlTextWriterStartElementNS(writer, xsd, SDOXMLString("element"), NULL);
+							
+					rc = xmlTextWriterWriteAttribute(writer, 
+						SDOXMLString("name"),
+						SDOXMLString(prop.getName()));
+							
+					if (!propType.isDataType() && !prop.isContainment())
+					{
+						rc = xmlTextWriterWriteAttribute(writer, 
+							SDOXMLString("sdoxml:propertyType"),
+							propTypeName);
+						propTypeName = "xsd:anyURI";
+					}
+
+							
+					rc = xmlTextWriterWriteAttribute(writer, 
+						SDOXMLString("type"),
+						propTypeName);
+							
+					rc = xmlTextWriterWriteAttribute(writer, 
+						SDOXMLString("minOccurs"),
+						SDOXMLString("0"));
+							
+					if (prop.isMany())
+					{
+						rc = xmlTextWriterWriteAttribute(writer, 
+							SDOXMLString("maxOccurs"),
+							SDOXMLString("unbounded"));
+					}
+							
+					// End element
+					rc = xmlTextWriterEndElement(writer);
+				}
+				else
+				{
+					// -------------------------------
+					// Write an <attribute> definition
+					// -------------------------------
+					rc = xmlTextWriterStartElementNS(writer, xsd, SDOXMLString("attribute"), NULL);
+							
+					rc = xmlTextWriterWriteAttribute(writer, 
+						SDOXMLString("name"),
+						SDOXMLString(prop.getName()));
+							
+					if (!propType.isDataType())
+					{
+						rc = xmlTextWriterWriteAttribute(writer, 
+							SDOXMLString("sdoxml:propertyType"),
+							propTypeName);
+						if (prop.isReference())
+						{
+							propTypeName = "xsd:IDREF";
+						}
+						else
+						{
+							propTypeName = "xsd:anyURI";
+						}
+					}
+							
+					rc = xmlTextWriterWriteAttribute(writer, 
+						SDOXMLString("type"),
+						propTypeName);
+							
+					// End attribute
+					rc = xmlTextWriterEndElement(writer);
+							
+				} // else 
+			} // for
+		}  // method
+					
+
+		////////////////////////////////////////
+
+		int SDOXSDWriter::write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
+								const propertyMap& openprops)
 		{
 			if (writer == NULL)
 			{
@@ -142,6 +241,25 @@ namespace commonj
 					rc = xmlTextWriterWriteAttribute(writer, 
 						SDOXMLString("name"),
 						name);
+
+					// --------------------------------------------------------------
+					// write any alias.
+					// --------------------------------------------------------------
+					if (type.getAliasCount() > 0)
+					{
+						unsigned int j = type.getAliasCount();
+						SDOXMLString value = "";
+						for (int i=0;i<j-1;i++)
+						{
+							value = value + type.getAlias(i);
+							value = value + " ";
+						}
+						value += type.getAlias(j-1);
+						rc = xmlTextWriterWriteAttribute(writer, 
+							SDOXMLString("sdo:aliasName"),value);
+
+					}
+
 					if (baseType != 0)
 					{
 						rc = xmlTextWriterStartElementNS(writer, xsd, SDOXMLString("restriction"), NULL);
@@ -186,6 +304,24 @@ namespace commonj
 						name);
 					
 					// -----------------------------------------------------
+					// If there is an alias, write it
+					// -----------------------------------------------------
+					if (type.getAliasCount() > 0)
+					{
+						unsigned int j = type.getAliasCount();
+						SDOXMLString value = "";
+						for (int i=0;i<j-1;i++)
+						{
+							value = value + type.getAlias(i);
+							value = value + " ";
+						}
+						value += type.getAlias(j-1);
+						rc = xmlTextWriterWriteAttribute(writer, 
+							SDOXMLString("sdo:aliasName"),value);
+
+					}
+
+					// -----------------------------------------------------
 					// If there is a base type then we need <complexContent>
 					// -----------------------------------------------------
 					if (baseType != 0)
@@ -206,6 +342,7 @@ namespace commonj
 					// Iterate over the properties
 					// ---------------------------
 					PropertyList pl = type.getProperties();
+					
 					if (pl.size() != 0)
 					{
 						bool inSequence = false;
@@ -297,12 +434,31 @@ namespace commonj
 										SDOXMLString("unbounded"));
 								}
 								
+								// -----------------------------------------------------
+								// If there is an alias...
+								// -----------------------------------------------------
+								if (prop.getAliasCount() > 0)
+								{
+									unsigned int j = prop.getAliasCount();
+									SDOXMLString value = "";
+									for (int i=0;i<j-1;i++)
+									{
+										value = value + prop.getAlias(i);
+										value = value + " ";
+									}
+									value += prop.getAlias(j-1);
+									rc = xmlTextWriterWriteAttribute(writer, 
+										SDOXMLString("sdo:aliasName"),value);
+
+								}
+
 								// End element
 								rc = xmlTextWriterEndElement(writer);
 							}								
 						}
 													
 						
+
 						// -----------------------------------------------------
 						// End <sequence> / <choice> if necessary
 						// -----------------------------------------------------
@@ -367,7 +523,14 @@ namespace commonj
 									rc = xmlTextWriterWriteAttribute(writer, 
 										SDOXMLString("sdoxml:propertyType"),
 										propTypeName);
-									propTypeName = "xsd:anyURI";
+									if (prop.isReference())
+									{
+										propTypeName = "xsd:IDREF";
+									}
+									else
+									{
+										propTypeName = "xsd:anyURI";
+									}
 								}
 								
 								rc = xmlTextWriterWriteAttribute(writer, 
@@ -383,7 +546,55 @@ namespace commonj
 						
 					}
 					
-					
+					// -----------------------------------------------------
+					// Write open type information
+					// -----------------------------------------------------
+					if (type.isOpenType())
+					{
+						// <any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+						
+						rc = xmlTextWriterStartElementNS(writer, xsd, SDOXMLString("any"), NULL);
+							
+						rc = xmlTextWriterWriteAttribute(writer, 
+								SDOXMLString("namespace"),
+								SDOXMLString("##other"));
+							
+						rc = xmlTextWriterWriteAttribute(writer, 
+								SDOXMLString("processContents"),
+								SDOXMLString("lax"));
+
+						rc = xmlTextWriterWriteAttribute(writer, 
+								SDOXMLString("minOccurs"),
+								SDOXMLString("0"));
+
+						rc = xmlTextWriterWriteAttribute(writer, 
+								SDOXMLString("maxOccurs"),
+								SDOXMLString("unbounded"));
+
+							
+						// End element
+						rc = xmlTextWriterEndElement(writer);
+
+						// -----------------------------------------------------
+						// Write open type information 2
+						// -----------------------------------------------------
+						//<anyAttribute namespace="##any" processContents="lax"/>
+						
+						rc = xmlTextWriterStartElementNS(writer, xsd, SDOXMLString("anyAttribute"), NULL);
+							
+						rc = xmlTextWriterWriteAttribute(writer, 
+								SDOXMLString("namespace"),
+								SDOXMLString("##any"));
+							
+						rc = xmlTextWriterWriteAttribute(writer, 
+								SDOXMLString("processContents"),
+								SDOXMLString("lax"));
+							
+						// End element
+						rc = xmlTextWriterEndElement(writer);
+
+					}
+
 					// -----------------------------------------------------
 					// End <complexContent> if necessary
 					// -----------------------------------------------------
@@ -396,7 +607,15 @@ namespace commonj
 					rc = xmlTextWriterEndElement(writer);
 				}
 			}
+
 			
+			// -----------------------------------------------
+			// Write any open content from the factory
+			// -----------------------------------------------
+			if (openprops.size() != 0)
+			{
+				writeProps(openprops, targetNamespaceURI, xsd);
+			}
 			// End the <schema> definition
 			rc = xmlTextWriterEndElement(writer);
 			return rc;

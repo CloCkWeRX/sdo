@@ -149,6 +149,8 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	virtual	SDO_API Type::Types getTypeEnum() const = 0;
 
+	virtual SDO_API bool equals(const Type& tother) const = 0;
+
 	static SDO_API const char* SDOTypeNamespaceURI;
 };
 

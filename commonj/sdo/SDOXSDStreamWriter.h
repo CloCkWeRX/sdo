@@ -40,7 +40,8 @@ namespace commonj
 			SDOXSDStreamWriter(std::ostream& outXML);				
 			virtual ~SDOXSDStreamWriter();
 			
-			int write(const TypeList& types, const SDOXMLString& targetNamespaceURI);
+			int write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
+				const propertyMap& openprops);
 		private:
 			std::ostream& outXmlStream;
 			

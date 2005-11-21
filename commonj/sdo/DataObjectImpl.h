@@ -26,7 +26,6 @@
 #include "commonj/sdo/DataObject.h"
 
 
-
 #include <ctime>
 #include <list>
 #include <map>
@@ -57,8 +56,17 @@ class DataFactory;
 #define DataObjectImplPtr RefCountingPointer<DataObjectImpl>
 #define ChangeSummaryImplPtr RefCountingPointer<ChangeSummaryImpl>
 
-typedef DataObjectImplPtr rdo;
-typedef std::map<unsigned int, rdo > PropertyValueMap;
+class rdo {
+public:
+	unsigned int first;
+	DataObjectImplPtr second;
+	rdo(unsigned int infirst, DataObjectImpl* insecond);
+	rdo();
+	rdo (const rdo& inrdo);
+	virtual ~rdo();
+};
+
+typedef std::list< rdo > PropertyValueMap;
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -113,11 +121,15 @@ class DataObjectImpl : public DataObject
 
 	virtual unsigned int getPropertyIndex(const Property& p);
 	
-	virtual PropertyImpl& getPropertyImplFromIndex(unsigned int index);
-
-	virtual const Property& getPropertyFromIndex(unsigned int index);
+	virtual const Property& getProperty(unsigned int index);
 	
-    // Returns a read-only List of the Properties currently used in this DataObject.
+	virtual const Property& getProperty(const char* prop);
+	
+	virtual PropertyImpl* getPropertyImpl(const char* prop);
+    
+	virtual PropertyImpl* getPropertyImpl(unsigned int index);
+
+	// Returns a read-only List of the Properties currently used in this DataObject.
     // This list will contain all of the properties in getType().getProperties()
     // and any properties where isSet(property) is true.
     // For example, properties resulting from the use of
@@ -157,10 +169,6 @@ class DataObjectImpl : public DataObject
 	
 	virtual const Type::Types getTypeEnum();
 
-	// returns the list of properties of this object - shorthand for
-	// getType().getProperties
-
-	virtual PropertyList getProperties();
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -357,6 +365,7 @@ class DataObjectImpl : public DataObject
 	virtual DataObjectList& getList(unsigned int propIndex);
 	virtual DataObjectList& getList(const Property& p);
 	virtual DataObjectList& getList();
+	virtual DataObjectListImpl* getListImpl();
 
 	void setList( DataObjectList* theList);
 
@@ -442,11 +451,41 @@ class DataObjectImpl : public DataObject
 
 	virtual void setApplicableChangeSummary();
 
+
+	// open type support
+	virtual void   setInstancePropertyType(unsigned int index,
+											const Type* t);
+
+	virtual const PropertyImpl* defineProperty(const char* propname, 
+		         const Type& t);
+
+	virtual const PropertyImpl* defineBoolean(const char* propname);
+	virtual const PropertyImpl* defineByte(const char* propname);
+	virtual const PropertyImpl* defineCharacter(const char* propname);
+	virtual const PropertyImpl* defineString(const char* propname);
+	virtual const PropertyImpl* defineBytes(const char* propname);
+	virtual const PropertyImpl* defineShort(const char* propname);
+	virtual const PropertyImpl* defineInteger(const char* propname);
+	virtual const PropertyImpl* defineLong(const char* propname);
+	virtual const PropertyImpl* defineFloat(const char* propname);
+	virtual const PropertyImpl* defineDouble(const char* propname);
+	virtual const PropertyImpl* defineDate(const char* propname);
+	virtual const PropertyImpl* defineCString(const char* propname);
+	virtual const PropertyImpl* defineDataObject(const char* propname,
+		const Type&t );
+	virtual const PropertyImpl* defineDataObject(const char* propname,
+		const char* typeURI, const char* typeName );
+	virtual const PropertyImpl* defineList(const char* propname);
+	virtual void  undefineProperty(unsigned int index);
+
 private:
 
 	void validateIndex(unsigned int index);
-  	
-	virtual bool DataObjectImpl::remove(DataObjectImpl* indol);
+ 	void checkType(	const Property& prop,
+					const Type& objectType);
+ 	
+	virtual bool remove(DataObjectImpl* indol);
+	virtual bool isSet(const Property& prop, unsigned int propertyIndex);
 
 
 
@@ -491,7 +530,6 @@ private:
 	
 	const TypeImpl& ObjectType;
 
-
 	DataObjectListImpl* listValue;
 	
 	// Holds the value , reallocated as necessary for strings
@@ -511,6 +549,9 @@ private:
 
     void setDataFactory(DataFactory *df);
 
+	// Support for open types
+    int openBase;
+	std::list<PropertyImpl> openProperties;
 
 	static const char* emptyString;
 	static const char* templateString;

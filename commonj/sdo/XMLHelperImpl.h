@@ -30,6 +30,7 @@
 #include "commonj/sdo/SAX2Namespaces.h"
 #include "commonj/sdo/SchemaInfo.h"
 #include "commonj/sdo/TypeDefinitions.h"
+#include "commonj/sdo/ParserErrorSetter.h"
 
 namespace commonj
 {
@@ -37,7 +38,7 @@ namespace commonj
 	{
 		
 		
-		class XMLHelperImpl : public XMLHelper
+		class XMLHelperImpl : public XMLHelper, ParserErrorSetter
 		{
 		public:			
 			// Constructor
@@ -46,6 +47,10 @@ namespace commonj
 			// Destructor
 			virtual ~XMLHelperImpl();
 			
+			virtual int  getErrorCount() const;
+			virtual const char*  getErrorMessage(int errnum) const;
+			virtual void setError(const char* error);
+
 
 			// load
 			// De-serializes the XML and builds a datagraph
@@ -90,6 +95,9 @@ namespace commonj
 							
 		private:
 			int	 parse(const char* source);
+			void clearErrors();
+
+			std::vector<char*> parseErrors;
 			
 			// Instance variables
 			DataFactoryPtr	dataFactory;

@@ -224,7 +224,7 @@ namespace sdo{
 			return;
 		}
 
- 		PropertyList pl = ob->getProperties();
+ 		PropertyList pl = ob->getInstanceProperties();
         DataObject* dob;
 
 		if (loggingChildren)
@@ -371,7 +371,7 @@ namespace sdo{
 		// we should check if this object has sub-objects, they will
 		// need to be created too
 
-		PropertyList pl = ob->getProperties();
+		PropertyList pl = ob->getInstanceProperties();
 		for (int p=0;p<pl.size();p++)
 		{
 			Property& thisprop = pl[p];

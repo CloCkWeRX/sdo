@@ -46,6 +46,8 @@ namespace commonj
 			SDOXMLString name;
 			SDOXMLString localname;
 
+			SDOXMLString aliases;
+
 			SDOXMLString parentTypeUri;
 			SDOXMLString parentTypeName;
 
@@ -56,6 +58,7 @@ namespace commonj
 
 			bool isOpen;
 			bool isSequenced;
+			bool isAbstract;
 
 			bool isMany;
 			int groupElementCount;

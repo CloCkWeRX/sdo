@@ -211,7 +211,6 @@ static HashTable *sdo_das_setting_get_properties(zval *object TSRMLS_DC)
 { 
 	sdo_das_setting_object	*my_object;
 	HashTable				*properties;
-	int						 entries;
 	zval					*tmp;
 	Setting					*setting;
 	
@@ -251,7 +250,6 @@ static int sdo_das_setting_cast_object(zval *readobj, zval *writeobj, int type, 
 	ostringstream	 print_buf;
 	zval			 free_obj;
 	int				 rc = SUCCESS;
-	int				 entries;
 	Setting			*setting;
 	
 	if (should_free) {

@@ -1,3 +1,4 @@
+
 /* 
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  | 
@@ -29,6 +30,7 @@
 #include "stack"
 #include "commonj/sdo/TypeDefinitions.h"
 #include "commonj/sdo/XMLQName.h"
+#include "commonj/sdo/ParserErrorSetter.h"
 
 namespace commonj
 {
@@ -41,7 +43,8 @@ namespace commonj
 			
 		public:
 			
-			SDOSchemaSAX2Parser(SchemaInfo& schemaInfo);
+			SDOSchemaSAX2Parser(SchemaInfo& schemaInfo,
+				ParserErrorSetter* insetter);
 			
 			virtual ~SDOSchemaSAX2Parser();
 
@@ -69,6 +72,7 @@ namespace commonj
 		private:
 
 			const char* currentFile;
+			bool bInSchema; // only parse when within a schema
 
 		
 			virtual void startInclude(

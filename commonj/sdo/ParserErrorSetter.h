@@ -20,34 +20,28 @@
 
 */
 /* $Id$ */
+// ParserErrorSetter.h: class allowing parser to push errors back.
+//
+//////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////
-// A Factory for creating DataObjects.  
-// The created DataObjects are not connected to any other objects.
-///////////////////////////////////////////////////////////////////////////
+#ifndef _PARSER_ERROR_SETTER_H_
+#define _PARSER_ERROR_SETTER_H_
 
-#include "commonj/sdo/DataFactory.h"
-#include "commonj/sdo/DataFactoryImpl.h"
+#include "commonj/sdo/export.h"
+
+using namespace std;
+#include <vector>
 
 namespace commonj{
 namespace sdo{
 
-	DataFactory::~DataFactory()
-	{
-	}
-
-	RefCountingPointer<DataFactory> DataFactory::getDataFactory()
-	{
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl());
-	return RefCountingPointer<DataFactory> (dob);
-	}
-
-	RefCountingPointer<DataFactory> DataFactory::clone()
-	{
-	const DataFactoryImpl* df = (const DataFactoryImpl*)this;
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl(*df));
-	return RefCountingPointer<DataFactory> (dob);
-	}
-
+class ParserErrorSetter
+{
+public:
+	virtual ~ParserErrorSetter();
+	virtual void setError(const char* message) = 0;
 };
 };
+};
+
+#endif

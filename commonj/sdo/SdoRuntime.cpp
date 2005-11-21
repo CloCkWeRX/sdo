@@ -28,8 +28,8 @@ namespace sdo{
 
 
 const unsigned int  SdoRuntime::major = 0;
-const unsigned int  SdoRuntime::minor = 8;
-const unsigned int  SdoRuntime::fix = 19;
+const unsigned int  SdoRuntime::minor = 9;
+const unsigned int  SdoRuntime::fix = 1;
 char* SdoRuntime::version = 0;
 
 

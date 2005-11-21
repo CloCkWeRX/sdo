@@ -38,11 +38,56 @@ using namespace std;
 #include "commonj/sdo/TypeImpl.h"
 #include "commonj/sdo/Property.h"
 #include "commonj/sdo/PropertyImpl.h"
+#include "commonj/sdo/DataFactoryImpl.h"
+#include "commonj/sdo/SDORuntimeException.h"
 
 namespace commonj{
 namespace sdo{
 	
 
+	Substitution::Substitution()
+	{
+		name = 0;
+		type = 0;
+	}
+
+	Substitution::Substitution(DataFactoryPtr mdg, const char* inname, 
+												   const Type& intype)
+	{
+		DataFactory* f = (DataFactory*)mdg;
+
+
+		if (inname != 0)
+		{
+			name = new char[strlen(inname) + 1];
+			strcpy(name,inname);
+		}
+		else
+		{
+			name = 0;
+		}
+
+		type = ((DataFactoryImpl*)f)->findType(intype.getURI(),intype.getName());
+	}
+
+	Substitution::Substitution(const Substitution& s)
+	{
+		type = s.type;
+		if (s.name != 0)
+		{
+			name = new char[strlen(s.name)+1];
+			strcpy(name,s.name);
+		}
+		else
+		{
+			name = 0;
+		}
+	}
+
+	Substitution::~Substitution()
+	{
+		if (name != 0) delete (char*)name;
+	}
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -60,6 +105,7 @@ namespace sdo{
 		strcpy(name,inname);
 		defvalue = 0;
 		defvaluelength = 0;
+		opposite = 0;
 		stringdef = 0;
 		bisMany = many;
 		bisReadOnly = ro;
@@ -76,16 +122,17 @@ namespace sdo{
 
 
 	PropertyImpl::PropertyImpl(const PropertyImpl& p) : 
-		                               type(p.getTypeImpl()),
+		                               type((*(p.getTypeImpl()))),
 		                               containertype (p.getContainingType())
 		
 		               
 	{
-        name = new char[strlen(p.getName()+1)];
+        name = new char[strlen(p.getName())+1];
 		strcpy(name,p.getName());
 		defvalue = 0;
 		defvaluelength = 0;
         stringdef = 0;
+		opposite = 0;
         bisMany = p.bisMany;
 		bisReadOnly = p.bisReadOnly;
 		bisContainer = p.bisContainer;
@@ -200,6 +247,50 @@ namespace sdo{
 		setDefaultString(c, len);
 	}
 
+ 	///////////////////////////////////////////////////////////////////////////
+    // Substitution groups.
+   	///////////////////////////////////////////////////////////////////////////
+	const Type* PropertyImpl::getSubstitutionType(const char* inname) const 
+	{
+		for (int i=0;i<substitutions.size();i++)
+		{
+			if (!strcmp(inname, substitutions[i].name))
+			{
+				return substitutions[i].type;
+			}
+		}
+		return 0;
+	}
+
+	const char * PropertyImpl::getSubstitutionName(unsigned int index) const 
+	{
+		if (index < getSubstitutionCount())
+		{
+			return (substitutions[index].name);
+		}
+		SDO_THROW_EXCEPTION("getSubstitutionName", SDOIndexOutOfRangeException,
+			"index out of range");
+	}
+
+	unsigned int PropertyImpl::getSubstitutionCount(void) const
+	{
+		return substitutions.size();
+	}
+
+	const Type* PropertyImpl::getSubstitutionType(unsigned int index) const 
+	{
+		if (index < getSubstitutionCount())
+		{
+			return (substitutions[index].type);
+		}
+		return 0;
+	}
+
+	void PropertyImpl::setSubstitution(DataFactoryPtr mdg, const char* alias, 
+		                          const Type& substype)
+	{
+		substitutions.push_back(Substitution(mdg,alias,substype));
+	}
 	
 
  	///////////////////////////////////////////////////////////////////////////
@@ -248,9 +339,9 @@ namespace sdo{
  	///////////////////////////////////////////////////////////////////////////
 	// Returns the type of the property.
 	///////////////////////////////////////////////////////////////////////////
- 	const TypeImpl& PropertyImpl::getTypeImpl() const
+ 	const TypeImpl* PropertyImpl::getTypeImpl() const
 	{
-		return type;
+		return &type;
 	}
   
 	///////////////////////////////////////////////////////////////////////////
@@ -290,10 +381,13 @@ namespace sdo{
 	///////////////////////////////////////////////////////////////////////////
 	const Property* PropertyImpl::getOpposite() const
 	{
-		//TODO
-  		return 0;
+  		return opposite;
 	}
 
+	void PropertyImpl::setOpposite(const Property* opp) 
+	{
+		opposite = opp;
+	}
 	///////////////////////////////////////////////////////////////////////////
     // Returns the default value this property will have in a 
     // data object where the property hasn't been set.
@@ -301,54 +395,54 @@ namespace sdo{
 	const char*      PropertyImpl::getCStringDefault() 
 	{
 		
-		return getTypeImpl().convertToCString(defvalue, &stringdef, defvaluelength);
+		return getTypeImpl()->convertToCString(defvalue, &stringdef, defvaluelength);
 	}
 	bool        PropertyImpl::getBooleanDefault() const
 	{
-		return getTypeImpl().convertToBoolean(defvalue,defvaluelength);
+		return getTypeImpl()->convertToBoolean(defvalue,defvaluelength);
 	}
 	char        PropertyImpl::getByteDefault() const
 	{
-		return getTypeImpl().convertToByte(defvalue,defvaluelength);
+		return getTypeImpl()->convertToByte(defvalue,defvaluelength);
 	}
 	wchar_t     PropertyImpl::getCharacterDefault() const
 	{
-		return getTypeImpl().convertToCharacter(defvalue,defvaluelength);
+		return getTypeImpl()->convertToCharacter(defvalue,defvaluelength);
 	}
 	short       PropertyImpl::getShortDefault() const
 	{
-		return getTypeImpl().convertToShort(defvalue,defvaluelength);
+		return getTypeImpl()->convertToShort(defvalue,defvaluelength);
 	}
 	long        PropertyImpl::getIntegerDefault() const
 	{
-		return getTypeImpl().convertToInteger(defvalue,defvaluelength);
+		return getTypeImpl()->convertToInteger(defvalue,defvaluelength);
 	}
 	int64_t     PropertyImpl::getLongDefault() const
 	{
-		return getTypeImpl().convertToLong(defvalue,defvaluelength);
+		return getTypeImpl()->convertToLong(defvalue,defvaluelength);
 	}
 	float       PropertyImpl::getFloatDefault() const
 	{
-		return getTypeImpl().convertToFloat(defvalue,defvaluelength);
+		return getTypeImpl()->convertToFloat(defvalue,defvaluelength);
 	}
 	long double PropertyImpl::getDoubleDefault() const
 	{
-		return getTypeImpl().convertToDouble(defvalue,defvaluelength);
+		return getTypeImpl()->convertToDouble(defvalue,defvaluelength);
 	}
 	const SDODate      PropertyImpl::getDateDefault() const 
 	{
-		return getTypeImpl().convertToDate(defvalue,defvaluelength);
+		return getTypeImpl()->convertToDate(defvalue,defvaluelength);
 	}
 	unsigned int PropertyImpl::getStringDefault(wchar_t* val, unsigned int max) 
 	{
 		if (val == 0 || max == 0) return defvaluelength; 
-		return getTypeImpl().convertToString(defvalue, val, defvaluelength, max);
+		return getTypeImpl()->convertToString(defvalue, val, defvaluelength, max);
 	
 	}
 	unsigned int PropertyImpl::getBytesDefault(char* val, unsigned int max) 
 	{
 		if (val == 0 || max == 0) return defvaluelength; 
-		return getTypeImpl().convertToBytes(defvalue, val, defvaluelength, max);
+		return getTypeImpl()->convertToBytes(defvalue, val, defvaluelength, max);
 	}
 
 
@@ -358,51 +452,51 @@ namespace sdo{
 
 	void PropertyImpl::setDefaultCString(const char* s) 
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,s); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,s); 
 	}
 	void PropertyImpl::setDefaultString(    const wchar_t* c , unsigned int len )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,c, len); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,c, len); 
 	}
 	void PropertyImpl::setDefaultBytes(    const char* c , unsigned int len )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,c, len); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,c, len); 
 	}
 	void PropertyImpl::setDefaultBoolean(    const bool b  )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,b); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,b); 
 	}
 	void PropertyImpl::setDefaultByte(    const char c   )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,c); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,c); 
 	}
 	void PropertyImpl::setDefaultCharacter(   const wchar_t c)
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,c); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,c); 
 	}
 	void PropertyImpl::setDefaultShort(   const short s  )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,s); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,s); 
 	}
 	void PropertyImpl::setDefaultInteger( const long i    )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,i); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,i); 
 	}
 	void PropertyImpl::setDefaultLong(const int64_t l)
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,l); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,l); 
 	}
 	void PropertyImpl::setDefaultFloat(   const float f  )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,f); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,f); 
 	}
 	void PropertyImpl::setDefaultDouble(  const long double d )
 	{
-		defvaluelength = getTypeImpl().convert(&defvalue,d); 
+		defvaluelength = getTypeImpl()->convert(&defvalue,d); 
 	}
 	void PropertyImpl::setDefaultDate(    const SDODate d )
 	{
-		defvaluelength = getTypeImpl().convertDate(&defvalue,d); 
+		defvaluelength = getTypeImpl()->convertDate(&defvalue,d); 
 	}
 
 	///////////////////////////////////////////////////////////////////////////

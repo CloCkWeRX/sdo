@@ -27,12 +27,18 @@
 #include "commonj/sdo/DataFactory.h"
 #include "commonj/sdo/TypeImpl.h"
 #include "commonj/sdo/RefCountingPointer.h"
+#include "commonj/sdo/PropertyImpl.h"
+#include "commonj/sdo/SDOXMLString.h"
+
 
 #include <map>
 using namespace std;
 
+
 namespace commonj{
 namespace sdo{
+
+typedef map<string, PropertyImpl> propertyMap;
 
 class  DataFactoryImpl  : public DataFactory
 {
@@ -138,6 +144,21 @@ public:
 							  const Type& opptype,
 							  const char* opppropname) ;
 
+
+	virtual void setPropertySubstitute(
+			const char* uri, 
+			const char* inTypeName,
+			const char* propname,
+			const char* subname,
+			const char* subTypeUri, 
+			const char* subTypeName);
+		
+
+	virtual void setPropertySubstitute(
+			const Type& containertype,
+			const char* propname,
+			const char* subname,
+			const Type& subtype);
 
 	////////////////////////////////////////////////////////
 	virtual void setDefault(
@@ -322,9 +343,24 @@ public:
 
 	virtual	void resolve();
 
+	const Type*	findType  (const char* uri, const char* inTypeName) const;
+	const TypeImpl*	findTypeImpl  (const char* uri, const char* inTypeName) const;
+
+	void addOpenProperty(const PropertyImpl& prop);
+	void removeOpenProperty(const char* name);
+	const propertyMap& getOpenProperties();
+	virtual const TypeImpl& getTypeImpl(const char* uri, const char* inTypeName) const;
+	virtual const char* getRootElementName() const;
+	virtual void setRootElementName(const char* ren);
+
+
 private:
 	typedef map<string, TypeImpl*> TYPES_MAP;
 	TYPES_MAP	types;
+
+	char * rootElementName;
+
+	propertyMap openProperties;
 
 	// Need to validate and 'lock' the data model for base types to
 	// work properly.
@@ -339,9 +375,6 @@ private:
 	
 	char*		getFullTypeName(const char* uri, const char* inTypeName) const;
 	char*		getAliasTypeName(const char* uri, const char* inTypeName) const;
-	const Type*	findType  (const char* uri, const char* inTypeName) const;
-	const TypeImpl*	findTypeImpl  (const char* uri, const char* inTypeName) const;
-	virtual const TypeImpl& getTypeImpl(const char* uri, const char* inTypeName) const;
 
 	void		copyTypes(const DataFactoryImpl& inmdg);
 };

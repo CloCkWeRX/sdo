@@ -15,7 +15,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini)                                  |
+| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
 +----------------------------------------------------------------------+
 
 */
@@ -29,14 +29,14 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
-
 #include "php_sdo_das_xml.h"
-#include <string>
 
-zend_class_entry* sdo_das_xml_class_entry;
-zend_object_handlers sdo_das_xml_object_handlers;
+#define PARSER_EXCEPTION_MSG_LEN 1000
 
-/* argument definations of SDO_DAS_XML class, start */
+zend_class_entry*     sdo_das_xml_class_entry;
+zend_object_handlers  sdo_das_xml_object_handlers;
+
+/* argument definitions of SDO_DAS_XML class, start */
 ZEND_BEGIN_ARG_INFO(sdo_das_xml___construct_args, 0)
     ZEND_ARG_INFO(0, schema)
 ZEND_END_ARG_INFO();
@@ -79,12 +79,9 @@ ZEND_BEGIN_ARG_INFO(sdo_das_xml_saveDOFile_args, 0)
     ZEND_ARG_INFO(0, rootName)
     ZEND_ARG_INFO(0, xmlFile)
 ZEND_END_ARG_INFO();
-/* argument definations of SDO_DAS_XML class, end */
-
+/* argument definitions of SDO_DAS_XML class, end */
 
 /* {{{ SDO_DAS_XML Class methods
- *
- * SDO_DAS_XML class methods muse be listed here in sdo_das_xml_methods.
  */
 function_entry sdo_das_xml_methods[] = {
     ZEND_ME(SDO_DAS_XML, __construct, sdo_das_xml___construct_args,
@@ -109,16 +106,10 @@ function_entry sdo_das_xml_methods[] = {
 };
 /* }}} */
 
-
-static void
-create_dataobject_tree(DataObjectPtr data_object TSRMLS_DC);
-
 /* {{{ initialize_sdo_das_xml_class
- *
- * Initializes sdo_das_xml class
  */
-void
-initialize_sdo_das_xml_class(TSRMLS_D) {
+void initialize_sdo_das_xml_class(TSRMLS_D) 
+{
     zend_class_entry ce;
 
     INIT_CLASS_ENTRY(ce, "SDO_DAS_XML", sdo_das_xml_methods);
@@ -133,8 +124,7 @@ initialize_sdo_das_xml_class(TSRMLS_D) {
 
 /* {{{ sdo_das_xml_object_create
  */
-zend_object_value
-sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC)
+zend_object_value sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC) 
 {
     zend_object_value retval;
     zval *tmp;
@@ -155,21 +145,20 @@ sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC)
 }
 /* }}} */
 
-
 /* {{{ sdo_das_xml_object_free_storage
- * Frees up the SDO_DAS_XML object also decrements reference to
- * PHP version of SDO_DAS_DataFactory
  */
-void
-sdo_das_xml_object_free_storage(void *object TSRMLS_DC)
+void sdo_das_xml_object_free_storage(void *object TSRMLS_DC)
 {
+    /*
+     * Frees up the SDO_DAS_XML object also decrements reference to
+     * PHP version of SDO_DAS_DataFactory
+     */
     sdo_das_df_object *das_obj;
     xmldas_object *obj = (xmldas_object *) object;
     zend_hash_destroy(obj->z_obj.properties);
     FREE_HASHTABLE(obj->z_obj.properties);
 
-    if (obj->xdh) {
-        delete obj->xdh;
+    if (obj->php_das_df) {
         das_obj = (sdo_das_df_object *)
                   zend_object_store_get_object(obj->php_das_df TSRMLS_CC);
 
@@ -182,279 +171,33 @@ sdo_das_xml_object_free_storage(void *object TSRMLS_DC)
 }
 /* }}} */
 
-
-/* {{{ PHP_METHOD(SDO_DAS_XML, __construct)
- * Private constructor for SDO_DAS_XML class
+/* {{{ create_dataobject_tree
  */
-PHP_METHOD(SDO_DAS_XML, __construct)
+void create_dataobject_tree(DataObjectPtr data_object TSRMLS_DC) 
 {
-    php_error(E_ERROR,
-              "SDO_DAS_XML::__construct - you can't instantiate SDO_DAS_XML by calling the constructor. Use SDO_DAS_XML::create static function instead.");
-}
-/* }}} */
-
-
-/* {{{ proto SDO_DAS_XML SDO_DAS_XML::create(string xsd_file)
- To create SDO_DAS_XML object for a given schema file.
- */
-
-/*
-  This is the only static method of SDO_DAS_XML class. used to instantiate
-  SDO_DAS_XML object.
-  Returns :
-  SDO_DAS_XML object with model information built-in which is extraced
-  Throws:
-  SDO_TypeNotFoundException      : when the type is not defined
-  SDO_DAS_XML_ParserExceptions   : for any symantical errors in xsd file.
- */
-PHP_METHOD(SDO_DAS_XML, create) {
-    xmldas_object *obj = NULL;
-    char* file_name;
-    int len = 0;
-    zval *retval = NULL;
-    zend_class_entry *ce = NULL;
-    sdo_das_df_object *das_obj;
-
-    if (ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name,
-                              &len) == FAILURE) {
-        RETURN_FALSE;
-    }
-    if (len) {
-        Z_TYPE_P(return_value) = IS_OBJECT;
-
-        if (object_init_ex(return_value, sdo_das_xml_class_entry) == FAILURE) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::create - Unable to create SDO_DAS_XML");
-            return;
-        }
-
-        obj = (xmldas_object *)
-              zend_object_store_get_object(return_value TSRMLS_CC);
-        try {
-            obj->xdh = XMLDAS::create(file_name);
-           if(!obj->xdh) {
-                /* At present the underlying XML DAS throws an exception rather than */
-                /* a bad return code so we are unlikely to get to here.              */
-                /* get to here. Nevertheless the code is here for when it happens.   */                        
-                sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
-                RETURN_NULL();
-            }
-        } catch (SDORuntimeException e) {
-            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
-            RETURN_NULL();
-        }
-    } else {
-        RETURN_FALSE;
-    }
-
-    /*
-     * Instantiate a SDO_DAS_DataFactoryImpl object now. No need to calll
-     * SDO_DAS_DataFactory::getDataFactory() method, as we can do the same here.
-     */
-
-    ce = zend_fetch_class("SDO_DAS_DataFactoryImpl",
-                          strlen("SDO_DAS_DataFactoryImpl"),
-                          ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-    if (!ce) {
-        php_error(E_ERROR,
-                  "SDO_DAS_XML::create - Unable to fetch SDO_DAS_DataFactoryImpl class");
-        RETURN_NULL();
-    }
-    MAKE_STD_ZVAL(retval);
-    if (object_init_ex(retval, ce) == FAILURE) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::create - Unable to create SDO_DAS_DataFactoryImpl");
-            return;
-    }
-
-    das_obj = (sdo_das_df_object *)
-              zend_object_store_get_object(retval TSRMLS_CC);
-    try {
-        das_obj->dfp = obj->xdh->getDataFactory();
-    } catch (SDORuntimeException e) {
-        sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
-    }
-    obj->php_das_df = retval;
-    zend_objects_store_add_ref(obj->php_das_df TSRMLS_CC);
- 
-}
-/* }}} end SDO_DAS_XML::create */
-
-
-/* {{{ proto SDO_XMLDocument SDO_DAS_XML::loadFromFile(string xml_file)
- Returns SDO_DAS_XML_Document object for a given path to xml instance document.
- */
-
-/*
- * Returns XMLDocument Object containing root SDO object built from the
- * given path to xml instance document.
- * Throws:
- * SDO_TypeNotFoundException      : when the type is not defined
- * SDO_PropertyNotFoundException  : when a property is not defined
- * SDO_DAS_XML_ParserExceptions   : for any symantical errors in xml file.
- */
-PHP_METHOD(SDO_DAS_XML, loadFromFile) {
-    xmldocument_object *doc_obj = NULL;
-    xmldas_object *xmldas_obj = NULL;
-    char* file_name;
-    int len = 0;
-    zval *this_obj = getThis();
-    zend_class_entry *ce = NULL;
-
-    if (ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name,
-                              &len) == FAILURE) {
-        RETURN_FALSE;
-    }
-    if (len) {
-        Z_TYPE_P(return_value) = IS_OBJECT;
-        ce = zend_fetch_class("SDO_DAS_XML_Document",
-                              strlen("SDO_DAS_XML_Document"),
-                              ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-        if (object_init_ex(return_value, ce) == FAILURE) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::loadFile - Unable to create SDO_DAS_XML");
-            RETURN_NULL();
-        }
-        doc_obj = (xmldocument_object *)
-                  zend_object_store_get_object(return_value TSRMLS_CC);
-        if (!doc_obj) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::loadFile - Unable to get XMLDocument object from object store");
-            RETURN_NULL();
-        }
-        xmldas_obj = (xmldas_object *)
-                     zend_object_store_get_object(this_obj TSRMLS_CC);
-        if(!xmldas_obj) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::loadFile - Unable to get XMLDAS object from object store");
-        }
-        try {
-            doc_obj->xdoch = xmldas_obj->xdh->loadFile(file_name);
-            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject()) {
-                create_dataobject_tree(doc_obj->xdoch->getRootDataObject()
-                                       TSRMLS_CC);
-            } else {
-                /* At present the underlying XML DAS throws an exception rather than */
-                /* a bad return code so we are unlikely to get to here.              */
-                /* get to here. Nevertheless the code is here for when it happens.   */                        
-                sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
-                RETURN_NULL();
-            }
-        } catch(SDORuntimeException e) {
-            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
-        }
-
-    } else {
-        RETURN_FALSE;
-    }
-}
-/* }}} SDO_DAS_XML::loadFile */
-
-
-/* {{{ proto SDO_DAS_XML_Document SDO_DAS_XML::loadFromString(string xml_string)
- Returns SDO_DAS_XML_Document for a given xml instance string.
- */
-
-/* Returns SDO_DAS_XML_Document Object containing root SDO object built from the
- * given xml string.
- * Throws:
- * SDO_TypeNotFoundException      : when the type is not defined
- * SDO_PropertyNotFoundException  : when a property is not defined
- * SDO_DAS_XML_ParserExceptions   : for any symantical errors in xml file.
- */
-PHP_METHOD(SDO_DAS_XML, loadFromString) {
-    xmldocument_object *xmldoc_obj = NULL;
-    xmldas_object *xmldas_obj = NULL;
-    char* xml_string;
-    int len = 0;
-    zval *this_obj = getThis();
-    zend_class_entry *ce = NULL;
-
-    if (ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &xml_string,
-                              &len) == FAILURE) {
-        RETURN_FALSE;
-    }
-    if (len) {
-        Z_TYPE_P(return_value) = IS_OBJECT;
-        ce = zend_fetch_class("SDO_DAS_XML_Document", strlen("SDO_DAS_XML_Document"),
-                              ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-        if (object_init_ex(return_value, ce) == FAILURE) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::load - Unable to create SDO_DAS_XML");
-            return;
-        }
-        xmldoc_obj = (xmldocument_object *)
-                     zend_object_store_get_object(return_value TSRMLS_CC);
-        if (!xmldoc_obj) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::load - Unable to get SDO_DAS_XML_Document object from object store");
-        }
-        xmldas_obj = (xmldas_object *)
-                     zend_object_store_get_object(this_obj TSRMLS_CC);
-        if (!xmldas_obj) {
-            php_error(E_ERROR,
-                      "SDO_DAS_XML::load - Unable to get SDO_DAS_XML object from object store");
-        }
-        try {
-            xmldoc_obj->xdoch = xmldas_obj->xdh->load(xml_string);
-            /*TODO : Throw appropriate exception*/
-            if (xmldoc_obj->xdoch) {
-                create_dataobject_tree(xmldoc_obj->xdoch->getRootDataObject()
-                                       TSRMLS_CC);
-            } else {
-                /* Actually we are not sure that we can ever get to here - all errors seem to */
-                /* come out as exceptions, not bad return codes                               */
-                php_error(E_ERROR,
-                          "SDO_DAS_XML::loadFromString - Unable to load the XML document");
-                RETURN_NULL();
-            }
-        } catch (SDORuntimeException e) {
-            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
-        }
-    } else {
-        RETURN_FALSE;
-    }
-}
-/* }}} SDO_DAS_XML::load */
-
-
-/* {{{ create_php_dataobject_tree
- *
- * Incarnation of PHP version of SDO_DataObject for every C++ SDO object
- */
-void
-create_dataobject_tree(DataObjectPtr data_object TSRMLS_DC) {
     zval    *z_obj;
     zend_object *php_das_obj = NULL;
     MAKE_STD_ZVAL(z_obj);
     if (!data_object) {
         return;
+        // tempting to raise an error as this should never happen - not going to do it though
+        // php_error(E_ERROR, "SDO_DAS_XML::create_dataobject_tree was passed a null argument");
     }
     if (data_object->getUserData() != (void*) 0xFFFFFFFF) {
         // if the user data is set then we have encountered this object before
-        // and already created a PHP object corresponding to it. For example,
-        // this will happen for the employee who is e.o.t.m when we follow the 
-        // non-containment reference: it was already visited following the 
-        // department.
+        // and already created a PHP object corresponding to it.
+        // This will happen when we follow a reference to an object that 
+        // was already visited following a different reference: for example following the
+        // employee_of_the_month non-containment reference to an employee who has already been 
+        // visited by following the department->employee containmment reference.
         // Since we already have a corresponding object, return without creating another.
         return;
     }
     sdo_do_new(z_obj, data_object TSRMLS_CC);
-    /*
-     * Not sure whether any need to increase the referece count?
-     */
-    //zend_objects_store_add_ref(z_obj TSRMLS_CC);
+    // not sure whether any need to increase the reference count?
+    // zend_objects_store_add_ref(z_obj TSRMLS_CC);
     const Type& data_object_type = data_object->getType();
-    PropertyList pl = data_object->getProperties();
+    PropertyList pl = data_object->getInstanceProperties();
     for (int i = 0; i < pl.size(); i++) {
         const Type& property_type = pl[i].getType();
         if (data_object->isSet(pl[i])) {
@@ -474,16 +217,283 @@ create_dataobject_tree(DataObjectPtr data_object TSRMLS_DC) {
 }
 /* }}} */
 
-/* {{{ proto SDO_DataObject SDO_DAS_XML::createDataObject(string namespace_uri, string type_name)
- Creates SDO_DataObject for a given namespace URI and type name.
+/* {{{ PHP_METHOD(SDO_DAS_XML, __construct)
  */
+PHP_METHOD(SDO_DAS_XML, __construct)
+{
+    php_error(E_ERROR, "SDO_DAS_XML::__construct - you cannot instantiate SDO_DAS_XML by calling the constructor. Use SDO_DAS_XML::create(xsd) static function instead.");
+}
+/* }}} */
 
-/*
- * Returns SDO_DataObject for a given namespace_uri and the type name.
- * Throws:
- * SDO_TypeNotFoundException      : when the type is not defined
+/* {{{ proto SDO_DAS_XML SDO_DAS_XML::create(string xsd_file)
  */
-PHP_METHOD(SDO_DAS_XML, createDataObject) {
+PHP_METHOD(SDO_DAS_XML, create) 
+{
+    /*****************************************************************************
+     *  This is the only static method of SDO_DAS_XML class. It is used to instantiate
+     *  the SDO_DAS_XML object.
+     *  Returns :
+     *  SDO_DAS_XML object with model information built-in 
+     *****************************************************************************/
+    xmldas_object *obj = NULL;
+    char* file_name;
+    int len = 0;
+    zval *retval = NULL;
+    zend_class_entry *ce = NULL;
+    sdo_das_df_object *das_df_obj;
+    DataFactoryPtr dataFactory;
+
+    if (ZEND_NUM_ARGS() != 1) {
+        WRONG_PARAM_COUNT;
+    }
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name,&len) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    if (len) {
+        Z_TYPE_P(return_value) = IS_OBJECT;
+        if (object_init_ex(return_value, sdo_das_xml_class_entry) == FAILURE) {
+            php_error(E_ERROR, "SDO_DAS_XML::create - Unable to create SDO_DAS_XML");
+            return;
+        }
+        obj = (xmldas_object *) zend_object_store_get_object(return_value TSRMLS_CC);
+        try {
+            dataFactory = DataFactory::getDataFactory();
+            obj->xsdHelper = HelperProvider::getXSDHelper((DataFactory*)dataFactory);
+            obj->xmlHelper = HelperProvider::getXMLHelper((DataFactory*)dataFactory);
+            obj->targetNamespaceURI = obj->xsdHelper->defineFile(file_name);
+            if (obj->xsdHelper->getErrorCount() != 0) {
+            	char parser_exception_msg[PARSER_EXCEPTION_MSG_LEN] = "SDO_DAS_XML::create - Unable to parse the supplied xsd file\n";
+            	int error_count = obj->xsdHelper->getErrorCount();
+			    if (error_count > 0) {
+			    	char parse_error_hdr[100];
+					sprintf(parse_error_hdr,"%d parse error(s) occured when parsing the XML file \"%s\":\n",error_count, file_name);
+					strcat(parser_exception_msg,parse_error_hdr);
+					for (int error_index=0;error_index<error_count;error_index++) {
+						const char * parse_error_msg = obj->xsdHelper->getErrorMessage(error_index);
+						if (strlen(parser_exception_msg) + strlen(parse_error_msg) + 10 < PARSER_EXCEPTION_MSG_LEN) {
+							char msg_number[10];
+							sprintf(msg_number,"%d. ",error_index);
+							strcat (parser_exception_msg, msg_number);
+							strcat (parser_exception_msg,parse_error_msg);
+						} else {
+							strncat(parser_exception_msg,"**TRUNCATED**",PARSER_EXCEPTION_MSG_LEN-strlen(parser_exception_msg)-1);
+							break;
+						}
+					}
+				}
+				sdo_das_xml_throw_parserexception(parser_exception_msg TSRMLS_CC);
+    	        RETURN_NULL();
+            }            
+        } catch (SDOFileNotFoundException e) {
+            sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
+            RETURN_NULL();
+        } catch (SDOXMLParserException *e) {
+        	const char* msg = e->getMessageText();
+            sdo_das_xml_throw_parserexception((char*)msg TSRMLS_CC);
+            RETURN_NULL();            
+        } catch (SDORuntimeException e) {
+            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
+            RETURN_NULL();
+        }
+    } else {
+        RETURN_FALSE;
+    }
+
+    /********************************************************************
+     * Instantiate an SDO_DAS_DataFactoryImpl object now. Fill in with the 
+     * dataFactory that we created above.
+     ********************************************************************/
+    ce = zend_fetch_class("SDO_DAS_DataFactoryImpl",
+                          strlen("SDO_DAS_DataFactoryImpl"),
+                          ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+    if (!ce) {
+        php_error(E_ERROR, "SDO_DAS_XML::create - Unable to fetch SDO_DAS_DataFactoryImpl class");
+        RETURN_NULL();
+    }
+    MAKE_STD_ZVAL(retval);
+    if (object_init_ex(retval, ce) == FAILURE) {
+        php_error(E_ERROR, "SDO_DAS_XML::create - Unable to create SDO_DAS_DataFactoryImpl");
+        return;
+    }
+    das_df_obj = (sdo_das_df_object *) zend_object_store_get_object(retval TSRMLS_CC);
+    if(!das_df_obj) {
+        php_error(E_ERROR, "SDO_DAS_XML::create - Unable to get SDO_DAS_DataFactory object from object store");
+    }
+    das_df_obj->dfp = dataFactory;  
+    obj->php_das_df = retval;
+    zend_objects_store_add_ref(obj->php_das_df TSRMLS_CC);
+}
+/* }}} end SDO_DAS_XML::create */
+
+/* {{{ proto SDO_XMLDocument SDO_DAS_XML::loadFromFile(string xml_file)
+ */
+PHP_METHOD(SDO_DAS_XML, loadFromFile) 
+{
+    /*
+     * Returns XMLDocument Object containing root SDO object built from the
+     * given path to xml instance document.
+     */
+    xmldocument_object *doc_obj = NULL;
+    xmldas_object *xmldas_obj = NULL;
+    char* file_name;
+    int len = 0;
+    zval *this_obj = getThis();
+    zend_class_entry *ce = NULL;
+
+    if (ZEND_NUM_ARGS() != 1) {
+        WRONG_PARAM_COUNT;
+    }
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name, &len) == FAILURE) {
+        RETURN_FALSE;
+    }
+    if (len) {
+        Z_TYPE_P(return_value) = IS_OBJECT;
+        ce = zend_fetch_class("SDO_DAS_XML_Document",
+                              strlen("SDO_DAS_XML_Document"),
+                              ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+        if (object_init_ex(return_value, ce) == FAILURE) {
+            php_error(E_ERROR,"SDO_DAS_XML::loadFile - Unable to create SDO_DAS_XML");
+            RETURN_NULL();
+        }
+        doc_obj = (xmldocument_object *) zend_object_store_get_object(return_value TSRMLS_CC);
+        if (!doc_obj) {
+            php_error(E_ERROR, "SDO_DAS_XML::loadFile - Unable to get XMLDocument object from object store");
+            RETURN_NULL();
+        }
+        xmldas_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
+        if(!xmldas_obj) {
+            php_error(E_ERROR, "SDO_DAS_XML::loadFromFile - Unable to get XMLDAS object from object store");
+        }
+        try {
+            doc_obj->xdoch = xmldas_obj->xmlHelper->loadFile(file_name,xmldas_obj->targetNamespaceURI);
+            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject() && (xmldas_obj->xmlHelper->getErrorCount() == 0)) {
+                create_dataobject_tree(doc_obj->xdoch->getRootDataObject() TSRMLS_CC);
+            } else {
+            	char parser_exception_msg[PARSER_EXCEPTION_MSG_LEN] = "SDO_DAS_XML::loadFromFile - Unable to obtain a root data object from the supplied XML\n";
+            	int error_count = xmldas_obj->xmlHelper->getErrorCount();
+			    if (error_count > 0) {
+			    	char parse_error_hdr[100];
+					sprintf(parse_error_hdr,"%d parse error(s) occured when parsing the XML file \"%s\":\n",error_count, file_name);
+					strcat(parser_exception_msg,parse_error_hdr);
+					for (int error_index=0;error_index<error_count;error_index++) {
+						const char * parse_error_msg = xmldas_obj->xmlHelper->getErrorMessage(error_index);
+						if (strlen(parser_exception_msg) + strlen(parse_error_msg) + 10 < PARSER_EXCEPTION_MSG_LEN) {
+							char msg_number[10];
+							sprintf(msg_number,"%d. ",error_index);
+							strcat (parser_exception_msg, msg_number);
+							strcat (parser_exception_msg,parse_error_msg);
+						} else {
+							strncat(parser_exception_msg,"**TRUNCATED**",PARSER_EXCEPTION_MSG_LEN-strlen(parser_exception_msg)-1);
+							break;
+						}
+					}
+				}
+				sdo_das_xml_throw_parserexception(parser_exception_msg TSRMLS_CC);
+    	        RETURN_NULL();
+            }
+        } catch (SDOXMLParserException *e) {
+        	const char* msg = e->getMessageText();
+            sdo_das_xml_throw_parserexception((char*)msg TSRMLS_CC);
+            RETURN_NULL();
+        } catch (SDOFileNotFoundException e) {
+            sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
+            RETURN_NULL();
+        } catch(SDORuntimeException e) {
+            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
+            RETURN_NULL();
+        }
+    } else {
+        RETURN_FALSE;
+    }
+}
+/* }}} SDO_DAS_XML::loadFile */
+
+/* {{{ proto SDO_DAS_XML_Document SDO_DAS_XML::loadFromString(string xml_string)
+ */
+PHP_METHOD(SDO_DAS_XML, loadFromString) 
+{
+    /* Returns SDO_DAS_XML_Document Object containing root SDO object built from the given xml string.
+     */
+    xmldocument_object *doc_obj = NULL;
+    xmldas_object *xmldas_obj = NULL;
+    char* xml_string;
+    int len = 0;
+    zval *this_obj = getThis();
+    zend_class_entry *ce = NULL;
+
+    if (ZEND_NUM_ARGS() != 1) {
+        WRONG_PARAM_COUNT;
+    }
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &xml_string, &len) == FAILURE) {
+        RETURN_FALSE;
+    }
+    if (len) {
+        Z_TYPE_P(return_value) = IS_OBJECT;
+        ce = zend_fetch_class("SDO_DAS_XML_Document", strlen("SDO_DAS_XML_Document"),
+                              ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+        if (object_init_ex(return_value, ce) == FAILURE) {
+            php_error(E_ERROR, "SDO_DAS_XML::load - Unable to create SDO_DAS_XML");
+            return;
+        }
+        doc_obj = (xmldocument_object *) zend_object_store_get_object(return_value TSRMLS_CC);
+        if (!doc_obj) {
+            php_error(E_ERROR, "SDO_DAS_XML::load - Unable to get SDO_DAS_XML_Document object from object store");
+        }
+        xmldas_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
+        if (!xmldas_obj) {
+            php_error(E_ERROR, "SDO_DAS_XML::load - Unable to get SDO_DAS_XML object from object store");
+        }
+        try {
+            istringstream str((const char *)xml_string);
+            doc_obj->xdoch = xmldas_obj->xmlHelper->load(str);
+            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject() && (xmldas_obj->xmlHelper->getErrorCount() == 0)) {
+                create_dataobject_tree(doc_obj->xdoch->getRootDataObject() TSRMLS_CC);
+            } else {
+            	char parser_exception_msg[PARSER_EXCEPTION_MSG_LEN] = "SDO_DAS_XML::loadFromFile - Unable to obtain a root data object from the supplied XML\n";
+            	int error_count = xmldas_obj->xmlHelper->getErrorCount();
+			    if (error_count > 0) {
+			    	char parse_error_hdr[100];
+					sprintf(parse_error_hdr,"%d parse error(s) occured when parsing the XML string:\n",error_count);
+					strcat(parser_exception_msg,parse_error_hdr);
+					for (int error_index=0;error_index<error_count;error_index++) {
+						const char * parse_error_msg = xmldas_obj->xmlHelper->getErrorMessage(error_index);
+						if (strlen(parser_exception_msg) + strlen(parse_error_msg) + 10 < PARSER_EXCEPTION_MSG_LEN) {
+							char msg_number[10];
+							sprintf(msg_number,"%d. ",error_index);
+							strcat (parser_exception_msg, msg_number);
+							strcat (parser_exception_msg,parse_error_msg);
+						} else {
+							strncat(parser_exception_msg,"**TRUNCATED**",PARSER_EXCEPTION_MSG_LEN-strlen(parser_exception_msg)-1);
+							break;
+						}
+					}
+				}
+				sdo_das_xml_throw_parserexception(parser_exception_msg TSRMLS_CC);
+    	        RETURN_NULL();
+            }
+        } catch (SDOXMLParserException *e) {
+        	const char* msg = e->getMessageText();
+            sdo_das_xml_throw_parserexception((char*)msg TSRMLS_CC);
+            RETURN_NULL();
+        } catch(SDORuntimeException e) {
+            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
+            RETURN_NULL();
+        }
+    } else {
+        RETURN_FALSE;
+    }
+}
+/* }}} SDO_DAS_XML::load */
+
+
+/* {{{ proto SDO_DataObject SDO_DAS_XML::createDataObject(string namespace_uri, string type_name)
+ */
+PHP_METHOD(SDO_DAS_XML, createDataObject) 
+{
+    /*
+     * Returns SDO_DataObject for a given namespace_uri and the type name.
+     */
     xmldas_object *obj = NULL;
     zval *this_obj = getThis();
     zval *namespace_uri = NULL;
@@ -501,14 +511,13 @@ PHP_METHOD(SDO_DAS_XML, createDataObject) {
 
     obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
     if (!obj) {
-        php_error(E_ERROR,
-                  "SDO_DAS_XML::createDataObject - Unable to get SDO_DAS_XML object from object sotre");
+        php_error(E_ERROR, "SDO_DAS_XML::createDataObject - Unable to get SDO_DAS_XML object from object store");
     }
     zend_call_method(&obj->php_das_df, Z_OBJCE_P(obj->php_das_df), NULL,
                      "create", strlen("create"), &retval, 2, namespace_uri,
                      type_name TSRMLS_CC);
     /*
-     *TODO, Check are we leaking memory here
+     *TODO, Check are we leaking memory here?
      */
     if (retval) {
         RETVAL_ZVAL(retval, 1, 0);
@@ -520,9 +529,9 @@ PHP_METHOD(SDO_DAS_XML, createDataObject) {
 
 
 /* {{{ proto string SDO_DAS_XML::saveDocumentToString(SDO_XMLDocument xdoc)
- Saves the SDO_DAS_XML_Document object to a string.
  */
-PHP_METHOD(SDO_DAS_XML, saveDocumentToString) {
+PHP_METHOD(SDO_DAS_XML, saveDocumentToString) 
+{
     zval *xml_doc_obj = NULL;
     zval *this_obj = getThis();
     sdo_do_object *php_do = NULL;
@@ -536,18 +545,15 @@ PHP_METHOD(SDO_DAS_XML, saveDocumentToString) {
         WRONG_PARAM_COUNT;
     }
     das_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z",
-        &xml_doc_obj) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z",&xml_doc_obj) == FAILURE) {
         RETURN_FALSE;
     }
-    xml_doc_ptr = (xmldocument_object *)
-                zend_object_store_get_object(xml_doc_obj TSRMLS_CC);
+    xml_doc_ptr = (xmldocument_object *) zend_object_store_get_object(xml_doc_obj TSRMLS_CC);
     if (!xml_doc_ptr) {
-        php_error(E_ERROR,
-                  "SDO_DAS_XML::save - Unable to get SDO_DAS_XML_Document object from object store");
+        php_error(E_ERROR, "SDO_DAS_XML::saveDocumentToString - Unable to get SDO_DAS_XML_Document object from object store");
     }
     try {
-        retval = das_obj->xdh->save(xml_doc_ptr->xdoch);
+        retval = das_obj->xmlHelper->save(xml_doc_ptr->xdoch);
     } catch (SDORuntimeException e) {
         sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
     }
@@ -565,9 +571,9 @@ PHP_METHOD(SDO_DAS_XML, saveDocumentToString) {
 
 
 /* {{{ proto void SDO_DAS_XML::saveDocumentToFile(SDO_XMLDocument xdoc, string xml_file)
- Saves the SDO_DAS_XML_Document object to a file.
  */
-PHP_METHOD(SDO_DAS_XML, saveDocumentToFile) {
+PHP_METHOD(SDO_DAS_XML, saveDocumentToFile) 
+{
     char *xml_file = NULL;
     zval *xml_doc_obj = NULL;
     zval *this_obj = getThis();
@@ -587,14 +593,12 @@ PHP_METHOD(SDO_DAS_XML, saveDocumentToFile) {
                               &file_len) == FAILURE) {
         RETURN_FALSE;
     }
-    xml_doc_ptr = (xmldocument_object *)
-                zend_object_store_get_object(xml_doc_obj TSRMLS_CC);
+    xml_doc_ptr = (xmldocument_object *) zend_object_store_get_object(xml_doc_obj TSRMLS_CC);
     if (!xml_doc_ptr) {
-        php_error(E_ERROR,
-                  "SDO_DAS_XML::save - Unable to get SDO_DAS_XML_Document object from object sotre");
+        php_error(E_ERROR, "SDO_DAS_XML::save - Unable to get SDO_DAS_XML_Document object from object sotre");
     }
     try {
-        das_obj->xdh->save(xml_doc_ptr->xdoch, xml_file);
+        das_obj->xmlHelper->save(xml_doc_ptr->xdoch, xml_file);
     } catch (SDORuntimeException e) {
         sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
     }
@@ -603,9 +607,9 @@ PHP_METHOD(SDO_DAS_XML, saveDocumentToFile) {
 
 
 /* {{{ proto string SDO_DAS_XML::saveDataObjectToString(SDO_DataObject do, string root_uri, string root_name)
- Saves the SDO_DataObject object to string.
  */
-PHP_METHOD(SDO_DAS_XML, saveDataObjectToString) {
+PHP_METHOD(SDO_DAS_XML, saveDataObjectToString) 
+{
     char *root_uri = NULL;
     char *root_name = NULL;
     zval *data_obj = NULL;
@@ -626,14 +630,12 @@ PHP_METHOD(SDO_DAS_XML, saveDataObjectToString) {
         RETURN_FALSE;
     }
     das_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
-    php_do = (sdo_do_object *)
-             zend_object_store_get_object(data_obj TSRMLS_CC);
+    php_do = (sdo_do_object *) zend_object_store_get_object(data_obj TSRMLS_CC);
     if (!php_do) {
-        php_error(E_ERROR,
-                  "XML_DAS::save - We are unable to get SDO_DataObject from object store");
+        php_error(E_ERROR, "XML_DAS::save - We are unable to get SDO_DataObject from object store");
     }
     try {
-        retval = das_obj->xdh->save(php_do->dop, root_uri, root_name);
+        retval = das_obj->xmlHelper->save(php_do->dop, root_uri, root_name);
     } catch (SDORuntimeException e) {
         sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
     }
@@ -651,9 +653,9 @@ PHP_METHOD(SDO_DAS_XML, saveDataObjectToString) {
 
 
 /* {{{ proto void  SDO_DAS_XML::saveDataObjectToFile(SDO_DataObject do, string root_uri, string root_name string xml_file)
- Saves the SDO_DataObject object to File.
  */
-PHP_METHOD(SDO_DAS_XML, saveDataObjectToFile) {
+PHP_METHOD(SDO_DAS_XML, saveDataObjectToFile) 
+{
     char *xml_file = NULL;
     char *root_uri = NULL;
     char *root_name = NULL;
@@ -676,14 +678,12 @@ PHP_METHOD(SDO_DAS_XML, saveDataObjectToFile) {
         RETURN_FALSE;
     }
     das_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
-    php_do = (sdo_do_object *)
-             zend_object_store_get_object(data_obj TSRMLS_CC);
+    php_do = (sdo_do_object *)  zend_object_store_get_object(data_obj TSRMLS_CC);
     if (!php_do) {
-        php_error(E_ERROR,
-                  "SDO_DAS_XML::save - We are unable to get SDO_DataObject from object store");
+        php_error(E_ERROR, "SDO_DAS_XML::save - We are unable to get SDO_DataObject from object store");
     }
     try {
-        das_obj->xdh->save(php_do->dop, root_uri, root_name, xml_file);
+        das_obj->xmlHelper->save(php_do->dop, root_uri, root_name, xml_file);
     } catch (SDORuntimeException e) {
         sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
     }

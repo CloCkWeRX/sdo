@@ -68,6 +68,20 @@ namespace commonj
 			return 0;
 		}		
 
+		void SAX2Namespaces::merge(const SAX2Namespaces& inspaces)
+		{
+			NAMESPACE_MAP::const_iterator nsIter;
+			for (nsIter = inspaces.namespaceMap.begin(); 
+			     nsIter != inspaces.namespaceMap.end(); nsIter++)
+			{
+			    // add will not overwrite if it already exists
+                namespaceMap[nsIter->first] = nsIter->second;
+			}
+			return;
+		}
+
+
+
 		void SAX2Namespaces::add(const SDOXMLString& prefix, const SDOXMLString& uri)
 		{
 			namespaceMap[prefix] = uri;

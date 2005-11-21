@@ -34,7 +34,8 @@ namespace commonj
 			  isReference(false),
 			  isQName(false),
 			  isID(false),
-			  isIDREF(false)
+			  isIDREF(false),
+			  isSubstitute(false)
 
 		{
 		}

@@ -30,6 +30,7 @@
 #include "commonj/sdo/SAX2Namespaces.h"
 #include "commonj/sdo/SchemaInfo.h"
 #include "commonj/sdo/TypeDefinitions.h"
+#include "commonj/sdo/ParserErrorSetter.h"
 
 namespace commonj
 {
@@ -37,7 +38,7 @@ namespace commonj
 	{
 		
 		
-		class XSDHelperImpl : public XSDHelper
+		class XSDHelperImpl : public XSDHelper, ParserErrorSetter
 		{
 		public:
 			
@@ -57,14 +58,19 @@ namespace commonj
 			virtual const char* define(std::istream& schema);
 			virtual const char* define(const char* schema);
 			
+			virtual int  getErrorCount() const;
+			virtual const char* getErrorMessage(int errnum) const;
+			virtual void setError(const char* error);
 			
 			virtual char* generate(
 				const TypeList& types,
-				const char* targetNamespaceURI = "");
+				const char* targetNamespaceURI = ""
+				);
 			void generate(
 				const TypeList& types,
 				std::ostream& outXsd,
-				const char* targetNamespaceURI = "");
+				const char* targetNamespaceURI = ""
+				);
 			virtual void generateFile(
 				const TypeList& types,
 				const char* fileName,
@@ -79,12 +85,22 @@ namespace commonj
 			}
 			
 		private:
+			virtual void clearErrors();
+
+			void newSubstitute(const char* entryName,
+			                   PropertyDefinition& prop);
+
+			void addSubstitutes(PropertyDefinition& prop,
+								TypeDefinition& ty);
+
 			void defineTypes(TypeDefinitions& types);
 			int	 parse(const char* source);
 			
 			// Instance variables
 			DataFactoryPtr	dataFactory;	// metadata
 			SchemaInfo		schemaInfo;
+
+			std::vector<char*> parseErrors;
 			
 		};
 		

@@ -15,39 +15,57 @@
 | implied. See the License for the specific language governing         | 
 | permissions and limitations under the License.                       | 
 +----------------------------------------------------------------------+ 
-| Author: Ed Slattery                                                  | 
+| Author: Colin Thorne / Pete Robbins                                  | 
 +----------------------------------------------------------------------+ 
 
 */
 /* $Id$ */
+#pragma warning(disable: 4786)
+#include "commonj/sdo/DataObjectInstance.h"
+using commonj::sdo::CopyHelper;
 
-///////////////////////////////////////////////////////////////////////////
-// A Factory for creating DataObjects.  
-// The created DataObjects are not connected to any other objects.
-///////////////////////////////////////////////////////////////////////////
+namespace commonj
+{
+	namespace sdo
+	{		
+		// ============
+		// Constructors
+		// ============	
+		DataObjectInstance::DataObjectInstance()
+		{
+		}
 
-#include "commonj/sdo/DataFactory.h"
-#include "commonj/sdo/DataFactoryImpl.h"
+		DataObjectInstance::DataObjectInstance(const DataObjectPtr& theDO)
+		{
+			dataObject = CopyHelper::copy(theDO);
+		}
+		
+		// ==========
+		// Destructor
+		// ==========
+		DataObjectInstance::~DataObjectInstance()
+		{
+		}
 
-namespace commonj{
-namespace sdo{
+		// ===================================
+		// Copy constructor: deep copy the DO
+		// ===================================
+		DataObjectInstance::DataObjectInstance(const DataObjectInstance& doi)
+		{
+			dataObject = CopyHelper::copy(doi.dataObject);
+		}
+		
+		// =============================
+		// operator= : deep copy the DO
+		// =============================
+		DataObjectInstance& DataObjectInstance::operator=(const DataObjectInstance& doi)
+		{
+			if (this != &doi)
+			{
+				dataObject = CopyHelper::copy(doi.dataObject);
+			}
+			return *this;
+		}
 
-	DataFactory::~DataFactory()
-	{
-	}
-
-	RefCountingPointer<DataFactory> DataFactory::getDataFactory()
-	{
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl());
-	return RefCountingPointer<DataFactory> (dob);
-	}
-
-	RefCountingPointer<DataFactory> DataFactory::clone()
-	{
-	const DataFactoryImpl* df = (const DataFactoryImpl*)this;
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl(*df));
-	return RefCountingPointer<DataFactory> (dob);
-	}
-
-};
-};
+	} // End namespace sca
+} // End namespace osoa

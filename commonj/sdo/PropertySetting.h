@@ -40,6 +40,7 @@ namespace commonj
 			PropertySetting();
 			PropertySetting(DataObjectPtr dataObj, 
 				const SDOXMLString& propertyName,
+				bool isNull=false,
 				bool isIDREF=false);
 			virtual ~PropertySetting();
 			
@@ -47,6 +48,7 @@ namespace commonj
 			SDOXMLString value;
 			DataObjectPtr dataObject;
 			bool isIDREF;
+			bool isNULL;
 						
 		};
 	} // End - namespace sdo

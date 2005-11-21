@@ -45,6 +45,8 @@ namespace commonj
 			virtual ~SAX2Namespaces();
 
 			void add(const SDOXMLString& prefix, const SDOXMLString& uri);
+
+			void merge(const SAX2Namespaces& inspaces);
 			
 			const SDOXMLString* SAX2Namespaces::find(const SDOXMLString& prefix) const;
 			const SDOXMLString* SAX2Namespaces::findPrefix(const SDOXMLString& uri) const;

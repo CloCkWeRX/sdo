@@ -205,15 +205,17 @@ ostream& SDORuntimeException :: PrintSelf(ostream &os) const
   os << " description:     " << message_text << endl;
   os << " location history:" << endl;
 
-  int i=1;
-  while (i < location_set)
-  {
-    os << "  " <<  i << ")" << endl;
-    os << "   file:          " << locations[i].file << endl;
-    os << "   line:          " << locations[i].line << endl;
-    os << "   function:      " << locations[i].function << endl;
-    i++;
-  }
+  // TODO - commented out - a two-location rethrow causes an access
+  // violation here.
+  //int i=1;
+  //while (i < location_set)
+  //{
+  //  os << "  " <<  i << ")" << endl;
+  //  os << "   file:          " << locations[i].file << endl;
+  //  os << "   line:          " << locations[i].line << endl;
+  //  os << "   function:      " << locations[i].function << endl;
+  //  i++;
+  //}
   return os;
 } // end ostream operator <<
     

@@ -27,6 +27,8 @@
 #include "commonj/sdo/SDOXMLString.h"
 #include "commonj/sdo/SAX2Namespaces.h"
 #include "commonj/sdo/SAX2Attributes.h"
+#include "commonj/sdo/ParserErrorSetter.h"
+
 #include "sstream"
 namespace commonj
 {
@@ -40,6 +42,8 @@ namespace commonj
 			
 			SAX2Parser();
 			
+			SAX2Parser(ParserErrorSetter* insetter);
+
 			virtual ~SAX2Parser();
 			
 			virtual int parse (const char* filename);
@@ -61,6 +65,8 @@ namespace commonj
 			
 			virtual void characters(const SDOXMLString& chars);
 			
+			virtual void warning(const char* msg, va_list args);
+
 			virtual void fatalError(const char* msg, va_list args);
 			
 			virtual void error(const char* msg, va_list args);
@@ -69,6 +75,7 @@ namespace commonj
 			
 			friend std::istream& operator>>(std::istream& input, SAX2Parser& parser);
 			
+			ParserErrorSetter* setter;
 			bool parserError;
 
 			char messageBuffer[1024];

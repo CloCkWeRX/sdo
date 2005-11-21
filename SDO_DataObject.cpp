@@ -104,7 +104,6 @@ static zend_object_value sdo_do_object_create(zend_class_entry *ce TSRMLS_DC)
  */
 static zend_object_value sdo_do_clone_obj(zval *object TSRMLS_DC)
 {
-	zend_object_value retval;
 	sdo_do_object *my_old_object;
 	DataObjectPtr new_dop;
 	zval *z_new;
@@ -1119,8 +1118,8 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 	serialized_graph = (char *)&buffer[1 + strlen(serialized_model)];
 
 	try {  
-		/* the XMLDAS contains the new DataFactory */
-		xmldasp = sdo_get_XMLDAS();
+		/* the XMLDAS contains the new DataFactory, so do not use a cached XMLDAS */
+		xmldasp = xmldas::XMLDAS::create();
 		/* Load the model from the serialized data */
 		xmldasp->loadSchema(serialized_model);
 		/* Create the PHP representation of the factory */
@@ -1190,7 +1189,7 @@ void sdo_do_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_do_object_handlers.unset_dimension = sdo_do_unset_dimension;
 	sdo_do_object_handlers.unset_property = sdo_do_unset_dimension;
 	sdo_do_object_handlers.get_properties = sdo_do_get_properties;
-	sdo_do_object_handlers.compare_objects = sdo_do_compare_objects;
+	sdo_do_object_handlers.compare_objects = sdo_do_compare_objects;	
 	/*TODO There's a signature change for cast_object in PHP6. */
 #if (PHP_MAJOR_VERSION < 6) 
 	sdo_do_object_handlers.cast_object = sdo_do_cast_object;

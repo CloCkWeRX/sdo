@@ -75,6 +75,11 @@ namespace commonj
 			// Return the URI for the root Type
 			SDO_API virtual const char* getRootTypeURI() = 0;
 			
+			///////////////////////////////////////////////////////////////////////
+			// Parser error passing to upper layers
+			///////////////////////////////////////////////////////////////////////
+			virtual int  getErrorCount() const = 0;
+			virtual const char* getErrorMessage(int errnum) const = 0;
 		};
 	} // End - namespace sdo
 } // End - namespace commonj

@@ -21,33 +21,29 @@
 */
 /* $Id$ */
 
-///////////////////////////////////////////////////////////////////////////
-// A Factory for creating DataObjects.  
-// The created DataObjects are not connected to any other objects.
-///////////////////////////////////////////////////////////////////////////
+#ifndef _SDOUTILS_H_
+#define _SDOUTILS_H_
 
-#include "commonj/sdo/DataFactory.h"
-#include "commonj/sdo/DataFactoryImpl.h"
+#include "commonj/sdo/DataObject.h"
 
-namespace commonj{
-namespace sdo{
-
-	DataFactory::~DataFactory()
+namespace commonj
+{
+	namespace sdo
 	{
-	}
+		
+		class SDOUtils
+		{
+			
+		public:
+			
+			static SDO_API void printDataObject(DataObjectPtr d);				
+			
+		private:
+			static void printTabs();
+			static int increment;
+		};
+	} // End - namespace sdo
+} // End - namespace commonj
 
-	RefCountingPointer<DataFactory> DataFactory::getDataFactory()
-	{
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl());
-	return RefCountingPointer<DataFactory> (dob);
-	}
 
-	RefCountingPointer<DataFactory> DataFactory::clone()
-	{
-	const DataFactoryImpl* df = (const DataFactoryImpl*)this;
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl(*df));
-	return RefCountingPointer<DataFactory> (dob);
-	}
-
-};
-};
+#endif //_SDOUTILS_H_

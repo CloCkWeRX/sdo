@@ -15,39 +15,44 @@
 | implied. See the License for the specific language governing         | 
 | permissions and limitations under the License.                       | 
 +----------------------------------------------------------------------+ 
-| Author: Ed Slattery                                                  | 
+| Author: Colin Thorne / Pete Robbins                                  | 
 +----------------------------------------------------------------------+ 
 
 */
 /* $Id$ */
+#ifndef commonj_sdo_DataObjectInstance_h
+#define commonj_sdo_DataObjectInstance_h
 
-///////////////////////////////////////////////////////////////////////////
-// A Factory for creating DataObjects.  
-// The created DataObjects are not connected to any other objects.
-///////////////////////////////////////////////////////////////////////////
-
-#include "commonj/sdo/DataFactory.h"
-#include "commonj/sdo/DataFactoryImpl.h"
-
-namespace commonj{
-namespace sdo{
-
-	DataFactory::~DataFactory()
+#include "commonj/sdo/export.h"
+#include "commonj/sdo/SDO.h"
+using commonj::sdo::DataObjectPtr;
+using commonj::sdo::DataObject;
+namespace commonj
+{
+	namespace sdo
 	{
-	}
+		class DataObjectInstance  
+		{
+		
+		public:
+			SDO_API DataObjectInstance();
+			SDO_API virtual ~DataObjectInstance();
 
-	RefCountingPointer<DataFactory> DataFactory::getDataFactory()
-	{
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl());
-	return RefCountingPointer<DataFactory> (dob);
-	}
+			SDO_API DataObjectInstance(const DataObjectPtr& theDO);
+			SDO_API DataObjectInstance(const DataObjectInstance&);
 
-	RefCountingPointer<DataFactory> DataFactory::clone()
-	{
-	const DataFactoryImpl* df = (const DataFactoryImpl*)this;
-	DataFactory* dob = (DataFactory*)(new DataFactoryImpl(*df));
-	return RefCountingPointer<DataFactory> (dob);
-	}
+			SDO_API DataObjectInstance& operator=(const DataObjectInstance&);
+			SDO_API bool operator!() {return (!dataObject);}
+			SDO_API operator bool() {return !!dataObject;}
 
-};
-};
+			SDO_API DataObject* operator->() {return dataObject;}
+
+			SDO_API DataObjectPtr getDataObject() {return dataObject;}
+			SDO_API operator DataObjectPtr() {return dataObject;}
+		private:
+			DataObjectPtr dataObject;
+		};
+	} // End namespace sdo
+} // End namespace commonj
+
+#endif // commonj_sdo_DataObjectInstance_h

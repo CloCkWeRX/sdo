@@ -50,6 +50,10 @@ public:
 		               const char* tURI, const char* tName);
 
 	virtual ~DataObjectListImpl();
+
+	// open type support
+	virtual void decrementPindex();
+
 	virtual DataObjectPtr operator[] (int pos);
 	virtual const DataObjectPtr operator[] (int pos) const;
 
@@ -130,6 +134,10 @@ public:
 	
 	virtual DataObjectPtr  remove (unsigned int index);
 
+	virtual void checkType(const Type& listType, const Type& objectType);
+    virtual void setType(const char* uri, const char* name);	
+
+
 
 private: 
 	DATAOBJECT_VECTOR plist;
@@ -138,6 +146,11 @@ private:
 	// For creation of items via the insert/append api.
 	char* typeURI;
 	char* typeName;
+
+	// for open types, the list may not have a type until the
+	// first item is entered
+
+	bool typeUnset;
 
 	// No reference count held on the factory
 	DataFactory* theFactory;

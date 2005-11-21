@@ -439,11 +439,11 @@ ObjectGetter(RefCountingPointer<DataObject> , DataObject, 0);
 #define adder(primtype,primval)\
 	bool SequenceImpl::add##primtype(const char* propertyName, primval v)\
 	{\
-		return add##primtype(the_do->getType().getProperty(propertyName),v);\
+		return add##primtype(the_do->getProperty(propertyName),v);\
 	}\
 	bool SequenceImpl::add##primtype(unsigned int propertyIndex, primval v)\
 	{\
-		return add##primtype(the_do->getPropertyFromIndex(propertyIndex), v);\
+		return add##primtype(the_do->getProperty(propertyIndex), v);\
 	}\
 	bool SequenceImpl::add##primtype(const Property& p, primval v)\
 	{\
@@ -485,11 +485,11 @@ adder(DataObject, RefCountingPointer<DataObject>);
 #define charAdder(primtype,primval)\
 	bool SequenceImpl::add##primtype(const char* propertyName, primval v, unsigned int len)\
 	{\
-		return add##primtype(the_do->getType().getProperty(propertyName),v, len);\
+		return add##primtype(the_do->getProperty(propertyName),v, len);\
 	}\
 	bool SequenceImpl::add##primtype(unsigned int propertyIndex, primval v, unsigned int len)\
 	{\
-		return add##primtype(the_do->getPropertyFromIndex(propertyIndex), v, len);\
+		return add##primtype(the_do->getProperty(propertyIndex), v, len);\
 	}\
 	bool SequenceImpl::add##primtype(const Property& p, primval v, unsigned int len)\
 	{\
@@ -524,11 +524,11 @@ charAdder ( Bytes , const char* );
 #define inserter(primtype,primval)\
 	bool SequenceImpl::add##primtype(unsigned int index, const char* propertyName, primval v)\
 	{\
-		return add##primtype(index,the_do->getType().getProperty(propertyName),v);\
+		return add##primtype(index,the_do->getProperty(propertyName),v);\
 	}\
 	bool SequenceImpl::add##primtype(unsigned int index, unsigned int propertyIndex, primval v)\
 	{\
-		return add##primtype(index,the_do->getPropertyFromIndex(propertyIndex), v);\
+		return add##primtype(index,the_do->getProperty(propertyIndex), v);\
 	}\
 	bool SequenceImpl::add##primtype(unsigned int index, const Property& p, primval v)\
 	{\
@@ -585,11 +585,11 @@ inserter(DataObject, RefCountingPointer<DataObject>);
 #define charInserter(primtype,primval)\
 	bool SequenceImpl::add##primtype(unsigned int index, const char* propertyName, primval v, unsigned int len)\
 	{\
-		return add##primtype(index,the_do->getType().getProperty(propertyName),v, len);\
+		return add##primtype(index,the_do->getProperty(propertyName),v, len);\
 	}\
 	bool SequenceImpl::add##primtype(unsigned int index, unsigned int propertyIndex, primval v, unsigned int len)\
 	{\
-		return add##primtype(index,the_do->getPropertyFromIndex(propertyIndex), v, len);\
+		return add##primtype(index,the_do->getProperty(propertyIndex), v, len);\
 	}\
 	bool SequenceImpl::add##primtype(unsigned int index, const Property& p, primval v, unsigned int len)\
 	{\

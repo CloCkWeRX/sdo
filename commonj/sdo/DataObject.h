@@ -86,9 +86,6 @@ class DataObject : public RefCountingObject
 
 	virtual unsigned int SDO_API getPropertyIndex(const Property& p) = 0;
 	
-	// Locates the property of this object from its index.
-
-	virtual SDO_API const Property& getPropertyFromIndex(unsigned int index) = 0;
 	
     // Returns a read-only List of the Properties currently used in this DataObject.
     // This list will contain all of the properties in getType().getProperties()
@@ -104,7 +101,16 @@ class DataObject : public RefCountingObject
    
 	virtual SDO_API PropertyList getInstanceProperties() = 0;
 
-    // Returns the sequence for this DataObject.
+	
+	// These are just like getType().getProperty(), but may return
+	// values other than the property list for open types
+
+ 	virtual const Property& getProperty(unsigned int index) = 0;
+	
+	virtual const Property& getProperty(const char* prop) = 0;
+ 
+ 
+	// Returns the sequence for this DataObject.
     // When Type.isSequencedType() == true,
     // the Sequence of a DataObject corresponds to the
     // XML elements representing the values of its properties.
@@ -133,10 +139,6 @@ class DataObject : public RefCountingObject
 
 	virtual SDO_API const Type::Types getTypeEnum() = 0;
 
-	// returns the list of properties of this object - shorthand for
-	// getType().getProperties
-
-	virtual SDO_API PropertyList getProperties() = 0;
 
 
     ///////////////////////////////////////////////////////////////////////////

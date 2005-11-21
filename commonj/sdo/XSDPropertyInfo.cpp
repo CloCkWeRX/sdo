@@ -42,6 +42,8 @@ namespace commonj
 		XSDPropertyInfo::~XSDPropertyInfo()
 		{
 		}
+
+
 	}
 }
 // end - namespace sdo

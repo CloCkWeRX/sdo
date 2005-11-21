@@ -44,6 +44,7 @@ namespace commonj
 			
 			const PropertyDefinition& getPropertyDefinition() {return property;}
 			
+			
 		private:
 			PropertyDefinition property;				
 		};

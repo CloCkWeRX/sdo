@@ -15,7 +15,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini)                                  |
+| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
 +----------------------------------------------------------------------+
 
 */
@@ -27,10 +27,10 @@
 #include "php_sdo_int.h"
 #include "commonj/sdo/SDO.h"
 #include "commonj/sdo/DataFactory.h"
-#include "commonj/sdo/xmldas/XMLDASExport.h"
-#include "commonj/sdo/xmldas/XMLDAS.h"
+#include "commonj/sdo/HelperProvider.h"
+#include "commonj/sdo/SDOXMLString.h"
 #include "commonj/sdo/XMLDocument.h"
-
+#include <sstream>
 
 using namespace commonj;
 using namespace sdo;
@@ -38,56 +38,43 @@ using namespace xmldas;
 
 #define SDO_DAS_XML_VERSION "0.6.0"
 
-/*
- * Internal structure for an SDO_DAS_XML
- */
-
+/* SDO_DAS_XML */
 typedef struct {
     zend_object z_obj;
-    XMLDAS *xdh;
+    XMLHelperPtr xmlHelper;
+    XSDHelperPtr xsdHelper;
+    SDOXMLString targetNamespaceURI;
     zval *php_das_df;
 } xmldas_object;
 
-/*
- * Internal structure for an SDO_DAS_XML_Document
- */
-
+/* SDO_DAS_XML_Document */
 typedef struct {
     zend_object z_obj;
     XMLDocumentPtr xdoch;
 } xmldocument_object;
+
+/* SDO_DAS_DataFactory */
+typedef struct {
+        zend_object zo;
+        DataFactoryPtr dfp;
+} sdo_das_df_object;
 
 extern zend_class_entry* sdo_das_xml_doc_cls_entry;
 extern zend_class_entry* sdo_xmlparserexcep_ce;
 extern zend_class_entry* sdo_xmlfileexcep_ce;
 extern zend_class_entry* sdo_das_xml_class_entry;
 
-void initialize_sdo_das_xml_class(TSRMLS_D);
-void sdo_das_xml_object_free_storage(void *object TSRMLS_DC);
-void initialize_sdo_das_xml_document_class(TSRMLS_D);
-void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC);
+void 				initialize_sdo_das_xml_class(TSRMLS_D);
+void 				initialize_sdo_das_xml_document_class(TSRMLS_D);
+void 				sdo_das_xml_object_free_storage(void *object TSRMLS_DC);
+void 				sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC);
 
-extern void sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
-extern void sdo_das_xml_throw_fileexception(char* filename TSRMLS_DC);
-
-static void
-sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *extra TSRMLS_DC);
-
-zend_object_value
-sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC);
-
-zend_object_value
-sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC);
-
-/*
- * Redefine the sdo_das_df_object here, as converting from DataFactoryPtr
- * to DASDataFactory is not allowed.
- */
-
-typedef struct {
-        zend_object zo;
-        DataFactoryPtr dfp;
-} sdo_das_df_object;
+extern 	void		sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
+extern 	void		sdo_das_xml_throw_fileexception(char* filename TSRMLS_DC);
+extern 	void		sdo_das_xml_throw_parserexception(char* filename TSRMLS_DC);
+static 	void 		sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *extra TSRMLS_DC);
+zend_object_value 	sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC);
+zend_object_value 	sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC);
 
 #endif /*_PHP_SDO_DEFS_H*/
 

@@ -50,7 +50,7 @@ namespace commonj{
 	const char* DataGraphImpl::getRootElementName()
 	{
 		if (root == 0) return 0; 
-		return root->getType().getProperties()[0].getName();
+		return root->getInstanceProperties()[0].getName();
 	}
 
     void DataGraphImpl::setRootObject(DataObjectPtr dob)
@@ -76,7 +76,7 @@ namespace commonj{
 				"Root data object already exists");
 		}
 		root = factory->create(uri,name);
-		if (root->getType().getProperties()[0].getType().isDataType())
+		if (root->getInstanceProperties()[0].getType().isDataType())
 		{
 			SDO_THROW_EXCEPTION("createRootObject",SDOUnsupportedOperationException,
 				"Root data object cannot have a datatype property at element 0");
@@ -96,7 +96,7 @@ namespace commonj{
 				"Root data object already exists");
 		}
 		root = factory->create(t);
-		if (root->getType().getProperties()[0].getType().isDataType())
+		if (root->getInstanceProperties()[0].getType().isDataType())
 		{
 			SDO_THROW_EXCEPTION("createRootObject",SDOUnsupportedOperationException,
 				"Root data object cannot have a datatype property at element 0");

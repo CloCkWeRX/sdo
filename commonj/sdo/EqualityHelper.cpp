@@ -311,7 +311,7 @@ namespace sdo{
 	{
 
 	
-		PropertyList pl = dataObject1->getProperties();
+		PropertyList pl = dataObject1->getInstanceProperties();
 		for (int i=0;i < pl.size(); i++)
 		{
 			// data objects are only compared the deep equality case

@@ -37,6 +37,7 @@
 #include "commonj/sdo/XSDPropertyInfo.h"
 #include "commonj/sdo/XSDTypeInfo.h"
 #include "commonj/sdo/SDORuntimeException.h"
+#include "commonj/sdo/DataFactoryImpl.h"
 
 
 namespace commonj
@@ -56,6 +57,7 @@ namespace commonj
 		
 		XMLHelperImpl::~XMLHelperImpl()
 		{
+			clearErrors();
 		}
 
 		DataFactoryPtr XMLHelperImpl::getDataFactory()
@@ -70,20 +72,33 @@ namespace commonj
 		XMLDocumentPtr XMLHelperImpl::createDocument(DataObjectPtr dataObject)
 		{
 			
-			SDOXMLString rootElementName;
+			SDOXMLString rootElementName = "";
+			SDOXMLString rootElementURI = "";
 			if (dataObject)
 			{
-				// Set the root element name to the name of the containment property or null
+				// Set the root element name to the name of the containment property
+				// or null if there is no container
    				try
 				{
-					const Property& containmentProp = dataObject->getContainmentProperty();
-					rootElementName = containmentProp.getName();
+					DataObjectPtr cont = dataObject->getContainer();
+					if (cont != 0)
+					{
+						const Property& containmentProp = dataObject->getContainmentProperty();
+						rootElementName = containmentProp.getName();
+						rootElementURI = cont->getType().getURI();
+					}
+					else
+					{
+						DataFactory* df = dataFactory;
+						rootElementURI = dataObject->getType().getURI();
+						rootElementName = ((DataFactoryImpl*)df)->getRootElementName();
+					}
 				}
 				catch (SDOPropertyNotFoundException&)
 				{}
 			}
 
-			return new XMLDocumentImpl(dataObject, NULL, rootElementName);
+			return new XMLDocumentImpl(dataObject, rootElementURI, rootElementName);
 		}
 
 		XMLDocumentPtr XMLHelperImpl::createDocument(
@@ -99,17 +114,25 @@ namespace commonj
 			const char* targetNamespaceURI)
 		{
 			DataObjectPtr rootDataObject;
-			SDOSAX2Parser sdoParser(getDataFactory(), targetNamespaceURI, rootDataObject);
-			sdoParser.parse(xmlFile);				
-			return createDocument(rootDataObject);
+			clearErrors();
+			SDOSAX2Parser sdoParser(getDataFactory(), targetNamespaceURI, rootDataObject,
+				this);
+			if (sdoParser.parse(xmlFile) == 0)
+			{				
+				return createDocument(rootDataObject);
+			}
+			return 0;
 		}
+
 		
 		XMLDocumentPtr XMLHelperImpl::load(
 			istream& inXml,
 			const char* targetNamespaceURI)
 		{
 			DataObjectPtr rootDataObject;
-			SDOSAX2Parser sdoParser(getDataFactory(), targetNamespaceURI, rootDataObject);
+			SDOSAX2Parser sdoParser(getDataFactory(), targetNamespaceURI, rootDataObject,
+				this);
+			clearErrors();
 			inXml>>sdoParser;
 			return createDocument(rootDataObject);
 		}
@@ -170,7 +193,42 @@ namespace commonj
 		{
 			return save(createDocument(dataObject,rootElementURI, rootElementName));
 		}
-		
+
+		int XMLHelperImpl::getErrorCount() const
+		{
+			return parseErrors.size();
+		}
+
+
+		const char* XMLHelperImpl::getErrorMessage(int errnum) const
+		{
+			if (errnum >= 0 && errnum < parseErrors.size())
+			{
+				return parseErrors[errnum];
+			}
+			return 0;
+		}
+
+		void XMLHelperImpl::setError(const char* message)
+		{
+			if (message == 0) return;
+			char * m = new char[strlen(message) + 1];
+			strcpy(m,message);
+			m[strlen(message)] = 0;
+			parseErrors.push_back(m);
+		}
+
+		void XMLHelperImpl::clearErrors()
+		{
+			while (!parseErrors.empty()) 
+			{
+				if (*parseErrors.begin() != 0)
+				{
+					delete (char*)(*parseErrors.begin());
+				}
+				parseErrors.erase(parseErrors.begin());
+			}
+		}
 		
 	} // End - namespace sdo
 } // End - namespace commonj

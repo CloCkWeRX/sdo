@@ -39,6 +39,7 @@ using namespace commonj::sdo;
 #define SDO_TYPE_NAME     "typeName"
 
 #define SDO_USER_DATA_EMPTY 0xffffffff
+
 #define SDO_TOSTRING_MAX 1024
 
 /**

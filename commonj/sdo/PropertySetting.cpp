@@ -27,14 +27,14 @@ namespace commonj
 	namespace sdo
 	{
 		PropertySetting::PropertySetting()
-			: dataObject(NULL), isIDREF(false)
+			: dataObject(NULL), isNULL(false), isIDREF(false)
 
 		{
 		}
 						
 		PropertySetting::PropertySetting(DataObjectPtr dataObj, const SDOXMLString& propertyName,
-			bool IDREF)
-			: dataObject(dataObj), name(propertyName), isIDREF(IDREF)
+			bool isNull, bool IDREF)
+			: dataObject(dataObj), name(propertyName), isNULL(isNull),isIDREF(IDREF)
 		{
 		}
 

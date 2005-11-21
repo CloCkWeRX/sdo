@@ -40,3 +40,4 @@
 #include "commonj/sdo/DataGraph.h"
 #include "commonj/sdo/ChangeSummary.h"
 #include "commonj/sdo/export.h"
+#include "commonj/sdo/SDOUtils.h"
