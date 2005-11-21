@@ -2,6 +2,10 @@
  /* $Id$ */
     require_once('PEAR/PackageFileManager.php');
     $packagexml = new PEAR_PackageFileManager;
+    if (PEAR::isError($packagexml)) {
+      echo $packagexml->getMessage();
+      exit; 
+    }
     $e = $packagexml->setOptions(
       array(
        'package' => 'sdo',
@@ -33,14 +37,14 @@
 //                .  "- The SDO_DataObject class now supports clone()",
 		'notes' => "Improved reporting of Schema and XML parse errors (libxml2 errors surfaced in an XML Data Access Service SDO_DAS_XML_ParserException).\n"
                  . "Various bug fixes, including PECL bugs 6002 and 6006.\n"
-                 . "Support for XML Schema \"nillable\".\n"
+                 . "Support for XML Schema 'nillable'.\n"
                  . "Support to build and run against PHP 6.0 (only with unicode semantics off)." ,
        'simpleoutput' => true,
        'version' => '0.6.1',
        'baseinstalldir' => 'SDO',
        'state' => 'beta',
        'license' => 'Apache 2.0',
-       'packagedirectory' => 'C:/Documents and Settings/matthew/workspace/sdo/',
+       'packagedirectory' => 'C:/eclipse-3.0/workspace/sdo/',
        'roles' => array('*.php' => 'php', '*.cpp' => 'src'),
        'ignore' => array('CVS/','sdo*tgz','.project','MakePackage.php',
        
@@ -62,51 +66,15 @@
        'filelistgenerator' => 'cvs' // generate from cvs, use file for directory
         )
      );
-//     'ignore' => array('*.), // ignore TODO, all files in tests/
-     //'installexceptions' => array('phpdoc' => '/*'), // baseinstalldir ="/" for phpdoc
-     //'exceptions' => array('README' => 'doc', // README would be data, now is doc
-     //                      'PHPLICENSE.txt' => 'doc'))); // same for the license
-	$packagexml->addMaintainer('gcc',0,'Graham Charters','charters@uk.ibm.com');
-	$packagexml->addMaintainer('cem',0,'Caroline Maynard','caroline.maynard@uk.ibm.com');
-	$packagexml->addMaintainer('mfp',0,'Matthew Peters','matthew_peters@uk.ibm.com');
-//	$packagexml->addRole('php','php');
-//	$packagexml->addRole('c','src');
-//	$packagexml->addRole('h','src');
-//	$packagexml->addRole('cpp','src');
-//	$packagexml->addRole('sql','data');
-//	$packagexml->addDependency('php','5.1.0b2','ge','php');
-     if (PEAR::isError($e)) {
+	$packagexml->addMaintainer('gcc','lead','Graham Charters','charters@uk.ibm.com');
+	$packagexml->addMaintainer('cem','lead','Caroline Maynard','caroline.maynard@uk.ibm.com');
+	$packagexml->addMaintainer('mfp','lead','Matthew Peters','matthew_peters@uk.ibm.com');
+    if (PEAR::isError($e)) {
         echo $e->getMessage();
         die();
     }
-//    $e = $test->addPlatformException('pear-phpdoc.bat', 'windows');
-//    if (PEAR::isError($e)) {
-//        echo $e->getMessage();
-//        exit;
-//    }
-//    $packagexml->addRole('pkg', 'doc'); // add a new role mapping
-//    if (PEAR::isError($e)) {
-//        echo $e->getMessage();
-//        exit;
-//    }
-//    // replace @PHP-BIN@ in this file with the path to php executable!  pretty neat
-//    $e = $test->addReplacement('pear-phpdoc', 'pear-config', '@PHP-BIN@', 'php_bin');
-//    if (PEAR::isError($e)) {
-//        echo $e->getMessage();
-//        exit;
-//    }
-//    $e = $test->addReplacement('pear-phpdoc.bat', 'pear-config', '@PHP-BIN@', 'php_bin');
-//    if (PEAR::isError($e)) {
-//        echo $e->getMessage();
-//        exit;
-//    }
 
-    // note use of debugPackageFile() - this is VERY important
-//    if (isset($_GET['make']) || $_SERVER['argv'][1] == 'make') {
-        $e = $packagexml->writePackageFile();
-//    } else {
-//        $e = $packagexml->debugPackageFile();
-//    }
+    $e = $packagexml->writePackageFile();
     if (PEAR::isError($e)) {
         echo $e->getMessage();
         die();
