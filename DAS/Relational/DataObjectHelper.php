@@ -45,8 +45,9 @@ class SDO_DAS_Relational_DataObjectHelper
 
 	public static function getApplicationType($data_object)
 	{
-		$type_array = $data_object->getType();
-		return $type_array[1];
+		$model_reflection_object = new SDO_Model_ReflectionDataObject($data_object);
+		$type = $model_reflection_object->getType();
+		return $type->name;
 	}
 
 	public static function getPrimaryKeyFromDataObject($object_model,$data_object)

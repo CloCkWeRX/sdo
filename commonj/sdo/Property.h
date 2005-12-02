@@ -27,6 +27,7 @@
 #include "commonj/sdo/export.h"
 
 #include "commonj/sdo/Type.h"
+#include "commonj/sdo/SDODate.h"
 
 namespace commonj{
 namespace sdo{
@@ -94,6 +95,41 @@ class Property
     // returns the opposite property, or zero if there is none
 	///////////////////////////////////////////////////////////////////////////
 	virtual SDO_API const Property* getOpposite() const = 0;
+
+	virtual SDO_API bool isDefaulted() const = 0 ;
+
+	///////////////////////////////////////////////////////////////////////////
+    // set the default value
+	///////////////////////////////////////////////////////////////////////////
+	virtual SDO_API void setDefault(bool b ) = 0;
+	virtual SDO_API void setDefault(char c) = 0;
+	virtual SDO_API void setDefault(wchar_t c) = 0;
+	virtual SDO_API void setDefault(char* c) = 0;
+	virtual SDO_API void setDefault(short s) = 0;
+	virtual SDO_API void setDefault(long l) = 0;
+	virtual SDO_API void setDefault(int64_t i) = 0;
+	virtual SDO_API void setDefault(float f) = 0;
+	virtual SDO_API void setDefault(long double d) = 0;
+	virtual SDO_API void setDefault(const SDODate d) = 0;
+	virtual SDO_API void setDefault(const wchar_t* c, unsigned int len) = 0;
+	virtual SDO_API void setDefault(const char* c, unsigned int len) = 0;
+
+	///////////////////////////////////////////////////////////////////////////
+    // get the default value
+	///////////////////////////////////////////////////////////////////////////
+	virtual SDO_API unsigned int 	getStringDefault(wchar_t* val, unsigned int max) const = 0;
+	virtual SDO_API unsigned int    getBytesDefault(char* val, unsigned int max) const = 0;
+	virtual SDO_API bool        getBooleanDefault() const = 0;
+	virtual SDO_API char        getByteDefault() const = 0;
+	virtual SDO_API wchar_t     getCharacterDefault() const = 0;
+	virtual SDO_API short       getShortDefault() const = 0;
+	virtual SDO_API long        getIntegerDefault() const = 0;
+	virtual SDO_API int64_t     getLongDefault() const = 0;
+	virtual SDO_API float       getFloatDefault() const = 0;
+	virtual SDO_API long double getDoubleDefault() const = 0;
+	virtual SDO_API const SDODate  getDateDefault() const = 0;
+	virtual SDO_API unsigned int getDefaultLength() const = 0;
+
 
 };
 

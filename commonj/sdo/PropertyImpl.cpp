@@ -110,6 +110,7 @@ namespace sdo{
 		bisMany = many;
 		bisReadOnly = ro;
 		bisContainer = contain;
+		bDefaulted=false;
 		if (contain == false && intype.isDataObjectType())
 		{
 			bisReference = true;
@@ -136,6 +137,7 @@ namespace sdo{
         bisMany = p.bisMany;
 		bisReadOnly = p.bisReadOnly;
 		bisContainer = p.bisContainer;
+		bDefaulted=false;
 		if (bisContainer == false && type.isDataObjectType())
 		{
 			bisReference = true;
@@ -392,9 +394,15 @@ namespace sdo{
     // Returns the default value this property will have in a 
     // data object where the property hasn't been set.
  	///////////////////////////////////////////////////////////////////////////
+
+	// check whether the property has a default first
+	bool PropertyImpl::isDefaulted() const
+	{
+		return bDefaulted;
+	}
+
 	const char*      PropertyImpl::getCStringDefault() 
 	{
-		
 		return getTypeImpl()->convertToCString(defvalue, &stringdef, defvaluelength);
 	}
 	bool        PropertyImpl::getBooleanDefault() const
@@ -433,18 +441,22 @@ namespace sdo{
 	{
 		return getTypeImpl()->convertToDate(defvalue,defvaluelength);
 	}
-	unsigned int PropertyImpl::getStringDefault(wchar_t* val, unsigned int max) 
+	unsigned int PropertyImpl::getStringDefault(wchar_t* val, unsigned int max) const
 	{
 		if (val == 0 || max == 0) return defvaluelength; 
 		return getTypeImpl()->convertToString(defvalue, val, defvaluelength, max);
 	
 	}
-	unsigned int PropertyImpl::getBytesDefault(char* val, unsigned int max) 
+	unsigned int PropertyImpl::getBytesDefault(char* val, unsigned int max) const
 	{
 		if (val == 0 || max == 0) return defvaluelength; 
 		return getTypeImpl()->convertToBytes(defvalue, val, defvaluelength, max);
 	}
 
+	unsigned int PropertyImpl::getDefaultLength() const
+	{
+		return defvaluelength;
+	}
 
 	///////////////////////////////////////////////////////////////////////////
     // sets the default value by type
@@ -452,50 +464,62 @@ namespace sdo{
 
 	void PropertyImpl::setDefaultCString(const char* s) 
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,s); 
 	}
 	void PropertyImpl::setDefaultString(    const wchar_t* c , unsigned int len )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,c, len); 
 	}
 	void PropertyImpl::setDefaultBytes(    const char* c , unsigned int len )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,c, len); 
 	}
 	void PropertyImpl::setDefaultBoolean(    const bool b  )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,b); 
 	}
 	void PropertyImpl::setDefaultByte(    const char c   )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,c); 
 	}
 	void PropertyImpl::setDefaultCharacter(   const wchar_t c)
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,c); 
 	}
 	void PropertyImpl::setDefaultShort(   const short s  )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,s); 
 	}
 	void PropertyImpl::setDefaultInteger( const long i    )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,i); 
 	}
 	void PropertyImpl::setDefaultLong(const int64_t l)
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,l); 
 	}
 	void PropertyImpl::setDefaultFloat(   const float f  )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,f); 
 	}
 	void PropertyImpl::setDefaultDouble(  const long double d )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convert(&defvalue,d); 
 	}
 	void PropertyImpl::setDefaultDate(    const SDODate d )
 	{
+		bDefaulted=true;
 		defvaluelength = getTypeImpl()->convertDate(&defvalue,d); 
 	}
 

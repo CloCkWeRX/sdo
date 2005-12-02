@@ -15,43 +15,21 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini)                                  |
+| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
 +----------------------------------------------------------------------+
 
 */
 /* $Id$ */
-
 #ifndef PHP_SDO_DAS_XML_H
 #define PHP_SDO_DAS_XML_H
 
-extern "C" {
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef PHP_WIN32
-#include <iostream>
-#include <math.h>
-#include "zend_config.w32.h"
-#endif
-
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
-
-#include "zend_exceptions.h"
-#include "zend_hash.h"
-#include "zend_interfaces.h"
 
 #ifdef ZTS
 #include "TSRM.h"
 #endif
-}
 
-#include "php_sdo_das_xml_int.h"
-
-extern zend_module_entry sdo_das_xml_module_entry;
+#define SDO_DAS_XML_VERSION "0.7.0"
 
 PHP_MINIT_FUNCTION(sdo_das_xml);
 PHP_MINFO_FUNCTION(sdo_das_xml);
@@ -66,7 +44,8 @@ PHP_METHOD(SDO_DAS_XML, saveDocumentToString);
 PHP_METHOD(SDO_DAS_XML, saveDocumentToFile);
 PHP_METHOD(SDO_DAS_XML, saveDataObjectToString);
 PHP_METHOD(SDO_DAS_XML, saveDataObjectToFile);
-
+//PHP_METHOD(SDO_DAS_XML, getProperty);
+//PHP_METHOD(SDO_DAS_XML, defineFromFile);
 
 /* SDO_DAS_XML_Document Class methods declarations */
 PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject);

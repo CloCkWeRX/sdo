@@ -15,10 +15,11 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini)                                  |
+| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
 +----------------------------------------------------------------------+
 
 */
+
 static char rcs_id[] = "$Id$";
 
 #ifdef PHP_WIN32
@@ -29,7 +30,19 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
-#include "php_sdo_das_xml.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php.h"
+#include "php_ini.h"
+#include "ext/standard/info.h"
+
+#include "zend_exceptions.h"
+#include "zend_interfaces.h"
+#include "ext/standard/info.h"
+
+#include "php_sdo_das_xml_int.h"
 
 /* {{{ sdo_das_xml_module_entry
  */
@@ -57,9 +70,6 @@ ZEND_GET_MODULE(sdo_das_xml)
 END_EXTERN_C()
 #endif
 
-zend_class_entry *sdo_xmlparserexcep_ce = NULL;
-zend_class_entry *sdo_xmlfileexcep_ce = NULL;
-
 /* {{{ PHP_MINIT_FUNCTION
  *
  * sdo_das_xml module initialization
@@ -67,24 +77,11 @@ zend_class_entry *sdo_xmlfileexcep_ce = NULL;
 
 PHP_MINIT_FUNCTION(sdo_das_xml)
 {
-
-    zend_class_entry ce;
-    /* Initializes sdo_das_xml class*/
     initialize_sdo_das_xml_class(TSRMLS_C);
-    /*Initializes sdo_xmldocument class*/
     initialize_sdo_das_xml_document_class(TSRMLS_C);
+    initialize_sdo_das_xml_parserexception_class(TSRMLS_C);
+    initialize_sdo_das_xml_fileexception_class(TSRMLS_C);
 
-    /* SDO_XMLParserException extends SDO_Exception */
-    INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_ParserException", sdo_get_exception_methods());
-    sdo_xmlparserexcep_ce = zend_register_internal_class_ex(
-                            &ce, NULL,
-                            "sdo_exception" TSRMLS_CC);
-
-    /* SDO_XMLFileException extends SDO_Exception */
-    INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_FileException", sdo_get_exception_methods());
-    sdo_xmlfileexcep_ce = zend_register_internal_class_ex(
-                            &ce, NULL,
-                            "sdo_exception" TSRMLS_CC);
     return SUCCESS;
 }
 /* }}} */

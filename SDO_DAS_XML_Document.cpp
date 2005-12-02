@@ -15,7 +15,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini)                                  |
+| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
 +----------------------------------------------------------------------+
 
 */
@@ -29,16 +29,15 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
-#include "php_sdo_das_xml.h"
+#include "php_sdo_das_xml_int.h"
 
+// Forward declarations for ths module only
+zend_object_value 	sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC);
+void 				sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC);
 
-extern
-zval* sdo_das_dfdefault_get_data_object(zend_object *me, void *doh TSRMLS_DC);
-
-zend_class_entry* sdo_das_xml_doc_cls_entry;
 zend_object_handlers sdo_das_xml_doc_object_handlers;
 
-/* argument definations of SDO_DAS_XML_Document class, start */
+/* argument definitions of SDO_DAS_XML_Document class, start */
 ZEND_BEGIN_ARG_INFO(sdo_xmldoc_setEncoding_args, 0)
     ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO();
@@ -96,6 +95,8 @@ function_entry sdo_das_xml_document_methods[] = {
 void
 initialize_sdo_das_xml_document_class(TSRMLS_D) {
     zend_class_entry ce;
+    zend_class_entry* sdo_das_xml_doc_cls_entry;
+    
     INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_Document", sdo_das_xml_document_methods);
     ce.create_object = sdo_das_xml_document_object_create;
     sdo_das_xml_doc_cls_entry = zend_register_internal_class(&ce TSRMLS_CC);
@@ -133,8 +134,7 @@ sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC) {
 
 /* {{{ sdo_das_xml_document_free_storage
  */
-void
-sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC) {
+void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC) {
 
     xmldocument_object *obj = (xmldocument_object *) object;
     zend_hash_destroy(obj->z_obj.properties);

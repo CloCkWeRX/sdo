@@ -22,6 +22,7 @@
 /* $Id$ */
 
 #include "commonj/sdo/SdoRuntime.h"
+#include <iostream>
 
 namespace commonj{
 namespace sdo{
@@ -29,7 +30,7 @@ namespace sdo{
 
 const unsigned int  SdoRuntime::major = 0;
 const unsigned int  SdoRuntime::minor = 9;
-const unsigned int  SdoRuntime::fix = 1;
+const unsigned int  SdoRuntime::fix =2;
 char* SdoRuntime::version = 0;
 
 

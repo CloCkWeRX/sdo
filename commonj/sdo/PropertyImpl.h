@@ -83,6 +83,7 @@ class PropertyImpl :public DASProperty
 	virtual SDO_API void setReadOnly(bool rdonly);
 	virtual SDO_API void setContainment(bool contains);
 
+	virtual SDO_API bool isDefaulted() const;
 	
 	virtual SDO_API void setDefault(bool b );
 	virtual SDO_API void setDefault(char c);
@@ -183,8 +184,8 @@ class PropertyImpl :public DASProperty
 	SDO_API void setDefaultDate(    const SDODate d );
 
 	SDO_API const char*	    getCStringDefault() ;
-	SDO_API unsigned int 	getStringDefault(wchar_t* val, unsigned int max) ;
-	SDO_API unsigned int    getBytesDefault(char* val, unsigned int max) ;
+	SDO_API unsigned int 	getStringDefault(wchar_t* val, unsigned int max) const;
+	SDO_API unsigned int    getBytesDefault(char* val, unsigned int max) const;
 	SDO_API bool        getBooleanDefault() const;
 	SDO_API char        getByteDefault() const;
 	SDO_API wchar_t     getCharacterDefault() const;
@@ -194,6 +195,7 @@ class PropertyImpl :public DASProperty
 	SDO_API float       getFloatDefault() const;
 	SDO_API long double getDoubleDefault() const;
 	SDO_API const SDODate  getDateDefault() const;
+	SDO_API unsigned int  getDefaultLength() const;
 
 	///////////////////////////////////////////////////////////////////////////
     // Returns true if values for this Property cannot be modified using the SDO APIs.
@@ -213,6 +215,8 @@ class PropertyImpl :public DASProperty
 	bool bisContainer;
 	bool bisReference;
 	bool bisMany;
+
+	bool bDefaulted;
 	  
 	const TypeImpl& type;
 	const Type& containertype;

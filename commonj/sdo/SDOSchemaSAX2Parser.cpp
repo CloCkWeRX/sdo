@@ -85,7 +85,7 @@ namespace commonj
 					
 					currentType.uri = schemaInfo.getTargetNamespaceURI();
 					currentType.name = "RootType";
-					currentType.localname = "RootType";
+					currentType.localname="RootType";
 					
 				} // end schema handling
 

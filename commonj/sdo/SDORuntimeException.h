@@ -302,6 +302,21 @@ class SDOFileNotFoundException: public SDORuntimeException
 }; // End SDOFileNotFoundException class definition
 // ***************************************************************************
 //
+// General exception for asking for the value of an unset/undefaulted prop
+//
+// ***************************************************************************
+class SDOPropertyNotSetException: public SDORuntimeException
+{
+  public:
+    SDOPropertyNotSetException(const char* name)
+      : SDORuntimeException("SDOPropertyNotSetException", Warning,
+                     name)
+    {
+    }
+  private:
+}; // End SDOPropertyNotSetException class definition
+// ***************************************************************************
+//
 // General invalid action for type not found
 //
 // ***************************************************************************

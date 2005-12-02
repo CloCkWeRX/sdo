@@ -121,7 +121,7 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 	
 	MAKE_STD_ZVAL(return_value);
 	try {
-		if (setting->isNull()) {
+		if ((!setting->isSet()) || setting->isNull()) {
 			RETVAL_NULL();
 		} else {
 			const Property& property = setting->getProperty();
@@ -284,7 +284,7 @@ static int sdo_das_setting_cast_object(zval *readobj, zval *writeobj, int type, 
 			
 			print_buf << '}';
 			
-			string print_string = print_buf.str().substr(0, SDO_TOSTRING_MAX);
+			string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
 			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
 			
 		} catch (SDORuntimeException e) {

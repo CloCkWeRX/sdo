@@ -36,9 +36,9 @@ namespace commonj {
 		SDO_API RefCountingObject();
 		SDO_API RefCountingObject(const RefCountingObject& rc);
 		SDO_API RefCountingObject& operator=(const RefCountingObject& rc);
-		SDO_API virtual RefCountingObject::~RefCountingObject() = 0;
-		SDO_API void RefCountingObject::addRef();
-		SDO_API void RefCountingObject::releaseRef();
+		SDO_API virtual ~RefCountingObject() = 0;
+		SDO_API void addRef();
+		SDO_API void releaseRef();
 
 		private:
 		unsigned int refCount;

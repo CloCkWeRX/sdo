@@ -95,9 +95,11 @@ namespace sdo {
   			DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
 			if (d != 0) \
 			{\
-				if (!d->isNull())return d->get ##primval ();\
+			    if (d->isNull())return (retval)0;\
+				return d->get ##primval ();\
 			}\
-		    return p->get ##primval ##Default();\
+			if (isSet(propertyIndex)) return (retval)0;\
+			return p->get ##primval ##Default();\
 		}\
 		return (retval)0;\
 	}
@@ -123,8 +125,10 @@ namespace sdo {
  			DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
 			if (d != 0) \
 			{ \
-				if (!d->isNull()) return d->get ##primval ( valptr , max);\
+				if (d->isNull()) return 0;\
+				return d->get ##primval ( valptr , max);\
 			}\
+			if (isSet(propertyIndex))return 0;\
 			return p->get ##primval ##Default( valptr , max);\
 		}\
 		return 0;\
@@ -258,7 +262,7 @@ namespace sdo {
 							delete prop;\
 							prop = 0;\
 							if (!isSet(*p)) {\
-								return p->get ## primval ##Default();\
+									return p->get ##primval ##Default();\
 							}\
 							return d->get ##primval (*p);\
 						}\
@@ -324,7 +328,7 @@ namespace sdo {
 							delete prop;\
 							prop = 0;\
 							if (!isSet(*p)) {\
-								return p->get ## primval ##Default( valptr , max);\
+								return p->get ##primval ##Default( valptr , max );\
 							}\
 							return d->get ##primval (*p, valptr , max);\
 						}\
@@ -549,7 +553,15 @@ namespace sdo {
 // char*, Date, List.
 // 
 
-	
+
+void DataObjectImpl::handlePropertyNotSet(const char* name)
+{
+	name;
+//	string msg("Get value on unset and undefaulted property:");
+//	msg += name;
+//	SDO_THROW_EXCEPTION("get value", SDOPropertyNotSetException,
+//		msg.c_str());
+}
 
 
 
@@ -887,9 +899,21 @@ namespace sdo {
   		DataObjectImpl* d = getDataObjectImpl(propertyIndex);
 		if (d != 0) {
 			if (!d->isNull()) return d->getCString ();
+			return 0;
 		}
 		PropertyImpl* p = (PropertyImpl*)getPropertyImpl(propertyIndex);
-		if (p != 0) return p->getCStringDefault();
+		if (p != 0) 
+		{
+			if (isSet(propertyIndex)) return 0;
+			//if (p->isDefaulted())
+			//{
+				return p->getCStringDefault();
+			//}
+			//else
+			//{
+			//	handlePropertyNotSet(p->getName());
+			//}
+		}
 		return 0;
 	}
 
@@ -964,7 +988,14 @@ namespace sdo {
 							delete prop;
 							prop = 0;
 							if (!d->isSet(*p)) {
-								return p->getCStringDefault();
+								//if (p->isDefaulted())
+								//{
+									return p->getCStringDefault();
+								//}
+								//else
+								//{
+								//	handlePropertyNotSet(p->getName());
+								//}
 							}
 							return d->getCString(*p);
 						}
@@ -2172,6 +2203,24 @@ namespace sdo {
 	}
 
 
+	bool DataObjectImpl::isValid(const char* path)
+	{
+		DataObjectImpl* d;
+		char* prop = findPropertyContainer(path,&d);
+		if (d != 0) {
+			if (prop != 0) {
+				const Property& p = d->getProperty(prop);
+				delete prop;
+			    return d->isValid(p);
+			}
+		}
+		if (prop != 0)delete prop;
+		string msg("Invalid path:");
+		msg += path;
+		SDO_THROW_EXCEPTION("isSet" ,SDOPathNotFoundException,
+			msg.c_str());
+	}
+
    
 	// Returns whether a property of either this object or an object reachable 
 	// from it, as identified by the specified path,
@@ -2196,9 +2245,26 @@ namespace sdo {
 			msg.c_str());
 	}
 
+	bool DataObjectImpl::isValid(unsigned int propertyIndex)
+	{
+		return isValid(getProperty(propertyIndex));
+	}
+
+	bool DataObjectImpl::isValid(const Property& p)
+	{
+		if (p.isDefaulted()) return true;
+		if (isSet(p))return true;
+		return false;
+	}
+
 	bool DataObjectImpl::isSet(unsigned int propertyIndex)
 	{
 		return isSet(getProperty(propertyIndex), propertyIndex);
+	}
+
+	bool DataObjectImpl::isSet(const Property& property)
+	{
+		return isSet(property, getPropertyIndex(property));
 	}
 
 	bool DataObjectImpl::isSet(const Property& prop, unsigned int propertyIndex)
@@ -2221,10 +2287,6 @@ namespace sdo {
 		return false;
 	}
 
-	bool DataObjectImpl::isSet(const Property& property)
-	{
-		return isSet(property, getPropertyIndex(property));
-	}
 
 	// unSets a property of either this Object or an Object reachable from it, 
 	// as identified by the specified path.

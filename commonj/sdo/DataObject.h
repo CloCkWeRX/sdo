@@ -288,6 +288,15 @@ class DataObject : public RefCountingObject
 	virtual SDO_API bool isSet(unsigned int propertyIndex) = 0;
 	virtual SDO_API bool isSet(const Property& property) = 0;
 
+
+	// A property can be set, null, or have a default value - all
+	// of these are valid. It can also be unset, and have no default
+	// in which case this returns false.
+
+	virtual SDO_API bool isValid(const char* path) = 0;
+	virtual SDO_API bool isValid(unsigned int propertyIndex) = 0;
+	virtual SDO_API bool isValid(const Property& property ) =0;
+	
 	// unSets a property of either this object or an object reachable 
 	// from it, as identified by the specified path.
 

@@ -275,7 +275,7 @@ namespace commonj
 			DataObjectPtr dob)
 		{
 		
-			int rc; // TODO error handling
+			int rc, k; // TODO error handling
 		
 			SettingList& sl = cs->getOldValues(dob);
 		
@@ -329,7 +329,7 @@ namespace commonj
 				// handle deletions within deletions in reverse order, so they match the
 				// deletion records above.
 
-				for (int k=sl.size()-1;k>=0; k--)
+				for (k=sl.size()-1;k>=0; k--)
 				{
 
              		if ( !sl[k].getProperty().getType().isDataType() &&
@@ -344,30 +344,30 @@ namespace commonj
 					}
 				} // for attributes
 
-				for (int kk=0;kk< sl.size(); kk++)
+				for (k=0;k< sl.size(); k++)
 				{
 
-             		if ( !sl[kk].getProperty().getType().isDataType())
+             		if ( !sl[k].getProperty().getType().isDataType())
 					{
-						if (sl[kk].getProperty().isMany()) continue; 
+						if (sl[k].getProperty().isMany()) continue; 
 						// its a single valued dataobject type
 
-						DataObjectPtr dob2 = sl[kk].getDataObjectValue();
+						DataObjectPtr dob2 = sl[k].getDataObjectValue();
 						if (!dob2) continue;
 						if (!cs->isDeleted(dob2)) continue;
-						handleChangeSummaryDeletedObject(sl[kk].
+						handleChangeSummaryDeletedObject(sl[k].
 							       getProperty().getName(),cs,dob2);
 
 					}
 					else 
 					{
-						if ( !sl[kk].getProperty().isMany()) continue; 
+						if ( !sl[k].getProperty().isMany()) continue; 
 						
 						// could only be many valued data type
 		
 						rc = xmlTextWriterWriteElement(writer, 
-							SDOXMLString(sl[kk].getProperty().getName()),
-							SDOXMLString(sl[kk].getCStringValue()));
+							SDOXMLString(sl[k].getProperty().getName()),
+							SDOXMLString(sl[k].getCStringValue()));
 					}
 				} // for attributes
 			}

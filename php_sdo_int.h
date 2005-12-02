@@ -33,7 +33,7 @@
 
 using namespace commonj::sdo;
 
-#define SDO_VERSION "0.6.0"
+#define SDO_VERSION "0.7.0"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
@@ -64,19 +64,27 @@ enum sdo_write_type {
 	TYPE_OVERWRITE
 };
 
-extern PHP_SDO_API zend_class_entry *sdo_das_datafactory_class_entry;
-extern PHP_SDO_API zend_class_entry *sdo_das_datafactoryimpl_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_dataobject_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_dataobjectimpl_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_list_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_dataobjectlist_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_changeddataobjectlist_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_sequence_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_sequenceimpl_class_entry;
+
+extern PHP_SDO_API zend_class_entry *sdo_das_datafactory_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_das_datafactoryimpl_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_das_dataobject_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_das_setting_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_das_settinglist_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_das_changesummary_class_entry;
-extern PHP_SDO_API zend_class_entry *sdo_sequence_class_entry;
-extern PHP_SDO_API zend_class_entry *sdo_sequenceimpl_class_entry;
+
+extern PHP_SDO_API zend_class_entry *sdo_model_type_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_model_typeimpl_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_model_property_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_model_propertyimpl_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_model_reflectiondataobject_class_entry;
+
 extern PHP_SDO_API zend_class_entry *sdo_exception_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_typenotfoundexception_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_propertynotsetexception_class_entry;
@@ -105,6 +113,16 @@ extern PHP_SDO_API void sdo_das_setting_new(zval *me, Setting *setting TSRMLS_DC
 
 extern PHP_SDO_API void sdo_sequence_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_sequence_new(zval *me, SequencePtr seqp, DataObjectPtr dop TSRMLS_DC);
+
+extern PHP_SDO_API void sdo_model_type_minit(zend_class_entry *tmp TSRMLS_DC);
+extern PHP_SDO_API void sdo_model_type_new(zval *me, const Type *typep TSRMLS_DC);
+extern PHP_SDO_API void sdo_model_type_string (ostringstream& print_buf, const Type *typep, const char *indent TSRMLS_DC);
+extern PHP_SDO_API void sdo_model_property_minit(zend_class_entry *tmp TSRMLS_DC);
+extern PHP_SDO_API void sdo_model_property_new(zval *me, const Property *propertyp TSRMLS_DC);
+extern PHP_SDO_API const Property *sdo_model_property_get_property(zval *me TSRMLS_DC);
+extern PHP_SDO_API void sdo_model_property_string (ostringstream& print_buf, const Property *propertyp, const char *indent TSRMLS_DC);
+
+extern PHP_SDO_API void sdo_model_rdo_minit(zend_class_entry *tmp TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_throw_propertytnotfoundexception(SDOPropertyNotFoundException *e TSRMLS_DC);
 extern PHP_SDO_API void sdo_throw_typenotfoundexception(SDOTypeNotFoundException *e TSRMLS_DC);

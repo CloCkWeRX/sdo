@@ -431,44 +431,113 @@ namespace sdo{
 		{
 			case Type::BooleanType:
 				*value = new long;
-				*(long*)*value = (long)ob->getBoolean(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = 0; 
+				}
+				else
+				{
+					*(long*)*value = (long)ob->getBoolean(prop);
+				}
 				break;
 			case Type::ByteType:
 				*value = new long;
-				*(long*)*value = (long)ob->getByte(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = 0; 
+				}
+				else
+				{
+					*(long*)*value = (long)ob->getByte(prop);
+				}
 				break;
 			case Type::CharacterType:
 				*value = new long;
-				*(long*)*value = (long)ob->getCharacter(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = 0; 
+				}
+				else
+				{
+					*(long*)*value = (long)ob->getCharacter(prop);
+				}
 				break;
 			case Type::IntegerType: 
 				*value = new long;
-				*(long*)*value = (long)ob->getInteger(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = 0; 
+				}
+				else
+				{
+					*(long*)*value = (long)ob->getInteger(prop);
+				}
 				break;
 			case Type::ShortType:
 				*value = new long;
-				*(long*)*value = (long)ob->getShort(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = 0; 
+				}
+				else
+				{
+					*(long*)*value = (long)ob->getShort(prop);
+				}
 				break;
 			case Type::DoubleType:
 				*value = new long double;
-				*(long double*)*value = (long double)ob->getDouble(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long double*)value = (long double)0; 
+				}
+				else
+				{
+					*(long double*)*value = (long double)ob->getDouble(prop);
+				}
 				break;
 			case Type::FloatType:
 				*value = new float;
-				*(float*)*value = (float)ob->getFloat(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(float*)value = (float)0; 
+				}
+				else
+				{
+					*(float*)*value = (float)ob->getFloat(prop);
+				}
 				break;
 			case Type::LongType:
 				*value = new int64_t;
-				*(int64_t*)*value = (int64_t)ob->getLong(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(int64_t*)value = (int64_t)0; 
+				}
+				else
+				{
+					*(int64_t*)*value = (int64_t)ob->getLong(prop);
+				}
 				break;
 			case Type::DateType:
 				*value = new long;
-				*(long*)*value = (long)(ob->getDate(prop).getTime());
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = (long)0; 
+				}
+				else
+				{
+					*(long*)*value = (long)(ob->getDate(prop).getTime());
+				}
 				break;
 			case Type::BigDecimalType: 
 			case Type::BigIntegerType: 
 			case Type::StringType: 
 			case Type::UriType:
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*value = 0;
+					*len = 0;
+				}
+				else
 				{
 					unsigned int siz = ob->getLength(prop);
 					if (siz > 0) {
@@ -482,6 +551,12 @@ namespace sdo{
 				}
 				break;
 			case Type::BytesType:
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*value = 0;
+					*len = 0;
+				}
+				else
 				{
 					unsigned int siz = ob->getLength(prop);
 					if (siz > 0) {
@@ -497,7 +572,14 @@ namespace sdo{
 			case Type::OtherTypes:
 			case Type::DataObjectType:
 			case Type::ChangeSummaryType:
-				*value = (void*)ob->getDataObject(prop);
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*value = 0; 
+				}
+				else
+				{
+					*value = (void*)ob->getDataObject(prop);
+				}
 				break;
 			default:
 				SDO_THROW_EXCEPTION("(ChangeSummary)setPropValue" ,
@@ -506,65 +588,143 @@ namespace sdo{
 		}
 	}
 
-	void ChangeSummaryImpl::setManyPropValue(void** value, unsigned int *len, DataObjectImpl* ob, const Property& prop)
+	void ChangeSummaryImpl::setManyPropValue(void** value, unsigned int *len, DataObjectImpl* ob, 
+												DataObjectImpl* listob, const Property& prop)
 	{
 
 		switch (prop.getTypeEnum())
 		{
 			case Type::BooleanType:
 				*value = new long;
-				*(long*)*value = (long)ob->getBoolean();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = (long)0; 
+				}
+				else
+				{
+					*(long*)*value = (long)listob->getBoolean();
+				}
 				break;
 			case Type::ByteType:
 				*value = new long;
-				*(long*)*value = (long)ob->getByte();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = (long)0; 
+				}
+				else
+				{
+					*(long*)*value = (long)listob->getByte();
+				}
 				break;
 			case Type::CharacterType:
 				*value = new long;
-				*(long*)*value = (long)ob->getCharacter();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = (long)0; 
+				}
+				else
+				{
+					*(long*)*value = (long)listob->getCharacter();
+				}
 				break;
 			case Type::IntegerType: 
 				*value = new long;
-				*(long*)*value = (long)ob->getInteger();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = (long)0; 
+				}
+				else
+				{
+					*(long*)*value = (long)listob->getInteger();
+				}
 				break;
 			case Type::ShortType:
 				*value = new long;
-				*(long*)*value = (long)ob->getShort();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = (long)0; 
+				}
+				else
+				{
+					*(long*)*value = (long)listob->getShort();
+				}
 				break;
 			case Type::DoubleType:
 				*value = new long double;
-				*(long double*)*value = (long double)ob->getDouble();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long double*)value = (long double)0; 
+				}
+				else
+				{
+					*(long double*)*value = (long double)listob->getDouble();
+				}
 				break;
 			case Type::FloatType:
 				*value = new float;
-				*(float*)*value = (float)ob->getFloat();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(float*)value = (float)0; 
+				}
+				else
+				{
+					*(float*)*value = (float)listob->getFloat();
+				}
 				break;
 			case Type::LongType:
 				*value = new int64_t;
-				*(int64_t*)*value = (int64_t)ob->getLong();
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(int64_t*)value = (int64_t)0; 
+				}
+				else
+				{
+					*(int64_t*)*value = (int64_t)listob->getLong();
+				}
 				break;
 			case Type::DateType:
 				*value = new long;
-				*(long*)*value = (long)(ob->getDate().getTime());
+				if (!ob->isSet(prop) && !prop.isDefaulted())
+				{
+					*(long*)value = (long)0; 
+				}
+				else
+				{
+					*(long*)*value = (long)(listob->getDate().getTime());
+				}
 				break;
 			case Type::BigDecimalType: 
 			case Type::BigIntegerType: 
 			case Type::StringType: 
 			case Type::UriType:
+				if (!ob->isSet(prop) && !prop.isDefaulted())
 				{
-					unsigned int siz = ob->getLength(prop);
-					if (siz > 0) {
+					*value = 0;
+					*len = 0; 
+				}
+				else
+				{
+					unsigned int siz = listob->getLength(prop);
+					if (siz > 0) 
+					{
 						*value = new wchar_t[siz];
-						*len = ob->getString((wchar_t*)*value, siz);
+						*len = listob->getString((wchar_t*)*value, siz);
 					}
 				}
 				break;
 			case Type::BytesType:
+				if (!ob->isSet(prop) && !prop.isDefaulted())
 				{
-					unsigned int siz = ob->getLength(prop);
-					if (siz > 0) {
+					*value = 0;
+					*len = 0; 
+				}
+				else
+				{
+					unsigned int siz = listob->getLength(prop);
+					if (siz > 0) 
+					{
 						*value = new char[siz];
-						*len = ob->getBytes((char*)*value, siz);
+						*len = listob->getBytes((char*)*value, siz);
 					}
 				}
 				break;
@@ -674,7 +834,8 @@ namespace sdo{
 			{
 				DataObject* dob = dol[i];
 				if (prop.getType().isDataType()) {
-					setManyPropValue(&value, &len, (DataObjectImpl*)dob,prop);
+					setManyPropValue(&value, &len, (DataObjectImpl*)ob,
+						(DataObjectImpl*)dob, prop);
 					slist.append(Setting(true,false,value,len,prop,i));
 				}
 				else{

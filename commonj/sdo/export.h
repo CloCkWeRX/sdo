@@ -21,9 +21,7 @@
 */
 /* $Id$ */
 
-#define SDO4CPP_VERSION 20051108
-
-#include "commonj/sdo/RefCountingPointer.h"
+#define SDO4CPP_VERSION 20051118
 
 #if defined(WIN32)  || defined (_WINDOWS)
 

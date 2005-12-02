@@ -119,6 +119,8 @@ class DataObjectImpl : public DataObject
 
 	// This locates a property index for this object from the property
 
+	void handlePropertyNotSet(const char* name);
+
 	virtual unsigned int getPropertyIndex(const Property& p);
 	
 	virtual const Property& getProperty(unsigned int index);
@@ -311,6 +313,10 @@ class DataObjectImpl : public DataObject
 	virtual bool isSet(const char* path);
 	virtual bool isSet(unsigned int propertyIndex);
 	virtual bool isSet(const Property& property);
+
+	virtual bool isValid(const char* path);
+	virtual bool isValid(unsigned int propertyIndex);
+	virtual bool isValid(const Property& property);
 
 	// unSets a property of either this object or an object reachable 
 	// from it, as identified by the specified path.

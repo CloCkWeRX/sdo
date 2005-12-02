@@ -10,7 +10,7 @@ if (PHP_SDO != "no") {
 		
 		/* first build the sdo core extension ... */
 		EXTENSION('sdo', 
-			'sdo.cpp SDO_DAS_ChangeSummary.cpp  SDO_DAS_DataFactory.cpp  SDO_DAS_Setting.cpp  SDO_DataObject.cpp  SDO_List.cpp  SDO_Sequence.cpp sdo_utils.cpp',
+			'sdo.cpp SDO_DAS_ChangeSummary.cpp  SDO_DAS_DataFactory.cpp  SDO_DAS_Setting.cpp  SDO_DataObject.cpp  SDO_List.cpp  SDO_Model_Type.cpp SDO_Model_Property.cpp SDO_Model_ReflectionDataObject.cpp SDO_Sequence.cpp sdo_utils.cpp',
 			'yes',
 			'/GX /D SDO_EXPORTS /D XMLDAS_EXPORTS');
 	

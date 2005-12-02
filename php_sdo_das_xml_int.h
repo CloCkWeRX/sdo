@@ -24,7 +24,13 @@
 #ifndef _PHP_SDO_DEFS_H
 #define _PHP_SDO_DEFS_H
 
+/***************** Our own external interface ************************/
+#include "php_sdo_das_xml.h"
+
+/***************** Dependencies on the PHP sdo extension *************/
 #include "php_sdo_int.h"
+
+/******************* Dependencies on the C++ SDO library *************/
 #include "commonj/sdo/SDO.h"
 #include "commonj/sdo/DataFactory.h"
 #include "commonj/sdo/HelperProvider.h"
@@ -34,10 +40,20 @@
 
 using namespace commonj;
 using namespace sdo;
-using namespace xmldas;
 
-#define SDO_DAS_XML_VERSION "0.6.0"
+/***************** Dependencies between files within XML_DAS ********/
+/*	 The following four are called from das_xml.cpp's MINIT, and will be found in SDO_DAS_XML., SDO_DAS_XML_Document., and xmldas_utils.cpp	*/
+void initialize_sdo_das_xml_class(TSRMLS_D);
+void initialize_sdo_das_xml_document_class(TSRMLS_D);
+void initialize_sdo_das_xml_parserexception_class(TSRMLS_D);
+void initialize_sdo_das_xml_fileexception_class(TSRMLS_D);
 
+/* 	 The following three are defined in xmldas_utils.cpp - they logically belong in a xmldas_utils.h file	*/
+void sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
+void sdo_das_xml_throw_fileexception(char* filename TSRMLS_DC);
+void sdo_das_xml_throw_parserexception(char* filename TSRMLS_DC);
+
+/******************* Our data types ***********************************/
 /* SDO_DAS_XML */
 typedef struct {
     zend_object z_obj;
@@ -55,26 +71,9 @@ typedef struct {
 
 /* SDO_DAS_DataFactory */
 typedef struct {
-        zend_object zo;
-        DataFactoryPtr dfp;
+    zend_object zo;
+    DataFactoryPtr dfp;
 } sdo_das_df_object;
-
-extern zend_class_entry* sdo_das_xml_doc_cls_entry;
-extern zend_class_entry* sdo_xmlparserexcep_ce;
-extern zend_class_entry* sdo_xmlfileexcep_ce;
-extern zend_class_entry* sdo_das_xml_class_entry;
-
-void 				initialize_sdo_das_xml_class(TSRMLS_D);
-void 				initialize_sdo_das_xml_document_class(TSRMLS_D);
-void 				sdo_das_xml_object_free_storage(void *object TSRMLS_DC);
-void 				sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC);
-
-extern 	void		sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
-extern 	void		sdo_das_xml_throw_fileexception(char* filename TSRMLS_DC);
-extern 	void		sdo_das_xml_throw_parserexception(char* filename TSRMLS_DC);
-static 	void 		sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *extra TSRMLS_DC);
-zend_object_value 	sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC);
-zend_object_value 	sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC);
 
 #endif /*_PHP_SDO_DEFS_H*/
 

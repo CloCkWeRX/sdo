@@ -1,0 +1,10 @@
+<letter:letters xmlns:letter="http://letterSchema">
+  <date>March 1, 2005</date>
+  Mutual of Omaha
+  Wild Kingdom, USA
+  Dear
+  <firstName>Casy</firstName>
+  <lastName>Crocodile</lastName>
+  Please buy more shark repellent.
+  Your premium is past due.
+</letter:letters>

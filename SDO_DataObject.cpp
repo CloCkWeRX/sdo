@@ -122,7 +122,46 @@ static zend_object_value sdo_do_clone_obj(zval *object TSRMLS_DC)
 	return z_new->value.obj;
 }
 /* }}} */
-	
+
+/* {{{ sdo_do_parse_offset_param
+ * internal function to get an sdo property offset from a zval parameter. 
+ * The value may have been passed as a SDO_Model_Property, an xpath or a property index.
+ */
+static int sdo_do_parse_offset_param (
+	zval *z_offset, const Property **prop_p, const char **xpath, int *xpath_len, long *prop_index TSRMLS_DC) {
+	switch(Z_TYPE_P(z_offset)) {
+	case IS_NULL:
+		php_error(E_WARNING, "%s::%s() parameter is NULL", 
+			CLASS_NAME, get_active_function_name(TSRMLS_C));
+		return FAILURE;
+	case IS_STRING:	
+		*xpath = Z_STRVAL_P(z_offset);
+		*xpath_len = Z_STRLEN_P(z_offset);
+		return IS_STRING;
+	case IS_LONG:
+	case IS_BOOL:
+	case IS_RESOURCE:
+		*prop_index = Z_LVAL_P(z_offset);
+		return IS_LONG;
+	case IS_DOUBLE:
+		*prop_index =(long)Z_DVAL_P(z_offset);
+		return IS_LONG;
+	case IS_OBJECT:
+		if (!instanceof_function(Z_OBJCE_P(z_offset), sdo_model_property_class_entry TSRMLS_CC)) {
+			php_error(E_WARNING, "%s::%s() expects object parameter to be SDO_Model_Property, %s given",
+				CLASS_NAME, get_active_function_name(TSRMLS_C), Z_OBJCE_P(z_offset)->name);
+			return FAILURE;
+		}
+		*prop_p = sdo_model_property_get_property(z_offset TSRMLS_CC);
+		return IS_OBJECT;
+	default:
+		php_error(E_ERROR, "%s::%s(): invalid dimension type %i", 
+			CLASS_NAME, get_active_function_name(TSRMLS_C), Z_TYPE_P(z_offset));
+		return FAILURE;
+	}
+}
+/* }}} */
+
 /* {{{ sdo_do_has_dimension
 */
 static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
@@ -135,6 +174,9 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 	int				  return_value = 0; 
 	
 	switch(Z_TYPE_P(offset)) {
+	case IS_NULL:
+		php_error(E_WARNING, "%s:%i: offset is NULL", CLASS_NAME, __LINE__);
+		return 0;
 	case IS_STRING:	
 		xpath = Z_STRVAL_P(offset);
 		xpath_len = Z_STRLEN_P(offset);
@@ -238,7 +280,7 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 
 /* {{{ sdo_do_read_list
  */
-static zval *sdo_do_read_list(sdo_do_object *sdo, const char *xpath, const Property& property TSRMLS_DC)
+static zval *sdo_do_read_list(sdo_do_object *sdo, const char *xpath, const Property *propertyp TSRMLS_DC)
 {
 	zval			*return_value;
 
@@ -249,7 +291,7 @@ static zval *sdo_do_read_list(sdo_do_object *sdo, const char *xpath, const Prope
 			RETVAL_NULL();
 		} else {
 			/* make a new SDO_DataObjectList */
-			sdo_dataobjectlist_new(return_value, property.getType(), &list_value TSRMLS_CC);
+			sdo_dataobjectlist_new(return_value, propertyp->getType(), &list_value TSRMLS_CC);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
@@ -261,7 +303,7 @@ static zval *sdo_do_read_list(sdo_do_object *sdo, const char *xpath, const Prope
 
 /* {{{ sdo_do_read_value
  */
-static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Property& property TSRMLS_DC)
+static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Property *propertyp TSRMLS_DC)
 {
 	DataObjectPtr	 dop = sdo->dop;
 	uint			 bytes_len;
@@ -277,7 +319,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 		RETVAL_NULL();
 	} else {
 		try {
-			switch(property.getTypeEnum()) {
+			switch(propertyp->getTypeEnum()) {
 			case Type::OtherTypes:
 				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
 				break;
@@ -333,7 +375,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 				doh_value = dop->getDataObject(xpath);
 				if (!doh_value) {
 					php_error(E_WARNING, "%s:%i: read a NULL DataObject for property '%s'", CLASS_NAME, __LINE__, 
-						property.getName());
+						propertyp->getName());
 					RETVAL_NULL();
 				} else {
 					doh_value_zval = (zval *)doh_value->getUserData();
@@ -352,7 +394,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 				break;
 			default:
 				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
-					property.getType().getName(), xpath);
+					propertyp->getType().getName(), xpath);
 			}
 			return return_value;
 		} catch (SDORuntimeException e) {
@@ -366,16 +408,23 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 
 /* {{{ sdo_do_read_dimension
  */
+
 static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 {
 	const char		 *xpath = NULL;
 	int				  xpath_len;
 	long			  propertyIndex;
-	sdo_do_object *my_object;
+	sdo_do_object    *my_object;
 	DataObjectPtr	  dop;
 	zval			 *return_value;
-
+	const Property   *propertyp = NULL;
+	
 	switch(Z_TYPE_P(offset)) {
+	case IS_NULL:
+		php_error(E_WARNING, "%s:%i: offset is NULL", CLASS_NAME, __LINE__);
+		MAKE_STD_ZVAL(return_value);
+		RETVAL_NULL();
+		return return_value;
 	case IS_STRING:	
 		xpath = Z_STRVAL_P(offset);
 		xpath_len = Z_STRLEN_P(offset);
@@ -387,6 +436,16 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 		break;
 	case IS_DOUBLE:
 		propertyIndex =(long)Z_DVAL_P(offset);
+		break;
+	case IS_OBJECT:
+		if (!instanceof_function(Z_OBJCE_P(offset), sdo_model_property_class_entry TSRMLS_CC)) {
+			php_error(E_WARNING, "%s::%s() expects object parameter to be SDO_Model_Property, %s given",
+				CLASS_NAME, __LINE__, Z_OBJCE_P(offset)->name);
+			MAKE_STD_ZVAL(return_value);
+			RETVAL_NULL();
+			return return_value;
+		}
+		propertyp = sdo_model_property_get_property(offset TSRMLS_CC);
 		break;
 	default:
 		php_error(E_ERROR, "%s:%i: invalid dimension type %i", CLASS_NAME, __LINE__, Z_TYPE_P(offset));
@@ -402,31 +461,35 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 		RETVAL_NULL();
 		return return_value;
 	}
-
+	
 	dop = my_object->dop;
 	
 	try {
-		const Property& property = xpath ? 
-			dop->getType().getProperty(xpath) :
-			dop->getType().getProperty(propertyIndex);
+		if (!propertyp) {
+			if (xpath)
+				propertyp = &dop->getType().getProperty(xpath);
+			else 
+				propertyp = &dop->getType().getProperty(propertyIndex);
+		}
 		
 		if (xpath == NULL)  {
-			xpath = property.getName();
+			xpath = propertyp->getName();
 		}
-
-/*		
- *		zend_printf("READ: xpath=%s, propertyName=%s, isSet=%i, isMany=%i, isIndexed=%i, type=%i\n", 
- *			xpath, property.getName(), dop->isSet(xpath), property.isMany(), XpathHelper::isIndexed(xpath), property.getTypeEnum()); 
- */
-
+		
+		/*		
+		*		zend_printf("READ: xpath=%s, propertyName=%s, isSet=%i, isMany=%i, isIndexed=%i, type=%i\n", 
+		*			xpath, property.getName(), dop->isSet(xpath), property.isMany(), XpathHelper::isIndexed(xpath), property.getTypeEnum()); 
+		*/
+		
 		/*
-		 * We need to discover whether the xpath should result in returning the list itself, or 
-		 * a list element, hence the XpathHelper test
-		 */
-		if (property.isMany() && ! XpathHelper::isIndexed(xpath)) {
-			return_value = sdo_do_read_list (my_object, xpath, property TSRMLS_CC);
-		} else if (dop->isSet(xpath)) {
-			return_value = sdo_do_read_value(my_object, xpath, property TSRMLS_CC);
+		* We need to discover whether the xpath should result in returning the list itself, or 
+		* a list element, hence the XpathHelper test
+		*/
+		if (propertyp->isMany() && ! XpathHelper::isIndexed(xpath)) {
+			return_value = sdo_do_read_list (my_object, xpath, propertyp TSRMLS_CC);
+		/* either it is set or it has a default value */
+		} else if (dop->isValid(xpath)) {
+			return_value = sdo_do_read_value(my_object, xpath, propertyp TSRMLS_CC);
 		} else {
 			MAKE_STD_ZVAL(return_value);
 			RETVAL_NULL();
@@ -450,6 +513,9 @@ static void sdo_do_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 	sdo_do_object	*my_object;
 	
 	switch(Z_TYPE_P(offset)) {
+	case IS_NULL:
+		php_error(E_WARNING, "%s:%i: offset is NULL", CLASS_NAME, __LINE__);
+		return;
 	case IS_STRING:	
 		xpath = Z_STRVAL_P(offset);
 		xpath_len = Z_STRLEN_P(offset);
@@ -670,12 +736,12 @@ static HashTable *sdo_do_get_properties(zval *object TSRMLS_DC)
 				if (my_object->dop->isSet(property)) { 
 					if (property.isMany()) {
 						long count = 0;
-						tmp = sdo_do_read_list(my_object, propertyName, property TSRMLS_CC);
+						tmp = sdo_do_read_list(my_object, propertyName, &property TSRMLS_CC);
 						sdo_list_count_elements (tmp, &count TSRMLS_CC);
 						if (count == 0)
 							continue;
 					} else {
-						tmp = sdo_do_read_value(my_object, propertyName, property TSRMLS_CC);
+						tmp = sdo_do_read_value(my_object, propertyName, &property TSRMLS_CC);
 					}
 				} else {
 					continue;
@@ -818,7 +884,7 @@ static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int shoul
 			}
 			
 			print_buf << '}';
-			string print_string = print_buf.str().substr(0, SDO_TOSTRING_MAX);
+			string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
 			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
 			
 		} catch (SDORuntimeException e) {
@@ -957,9 +1023,10 @@ static void sdo_do_iterator_current_data (zend_object_iterator *iter, zval ***da
 		/* It's safe to use the property directly here, it cannot be an xpath */
 		const Property& property = my_object->dop->getInstanceProperties()[iterator->index];
 		if (property.isMany()) {
-			iterator->value = sdo_do_read_list(my_object,  property.getName(), property TSRMLS_CC);
-		} else if (my_object->dop->isSet(property)) { 
-			iterator->value = sdo_do_read_value(my_object, property.getName(), property TSRMLS_CC);
+			iterator->value = sdo_do_read_list(my_object,  property.getName(), &property TSRMLS_CC);
+		/* either it is set or it has a default value */
+		} else if (my_object->dop->isValid(property)) { 
+			iterator->value = sdo_do_read_value(my_object, property.getName(), &property TSRMLS_CC);
 		} else {
 			MAKE_STD_ZVAL(iterator->value);
 			ZVAL_NULL(iterator->value);
@@ -986,7 +1053,7 @@ static void sdo_do_iterator_move_forward (zend_object_iterator *iter TSRMLS_DC)
 		try {
 			PropertyList pl = my_object->dop->getInstanceProperties();
 			for (iterator->index++; 
-			iterator->index < pl.size() && ! my_object->dop->isSet(iterator->index);
+			iterator->index < pl.size() && ! my_object->dop->isValid(iterator->index);
 			iterator->index++);
 			if (iterator->index >= pl.size()) 
 				iterator->valid = false;
@@ -1009,7 +1076,7 @@ static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
 	try {
 		PropertyList pl = my_object->dop->getInstanceProperties();
 		for (iterator->index = 0; 
-		    iterator->index < pl.size() && ! my_object->dop->isSet(iterator->index);
+		    iterator->index < pl.size() && ! my_object->dop->isValid(iterator->index);
 		    iterator->index++);
 		iterator->valid = (iterator->index < pl.size());
 	} catch (SDORuntimeException e) {
@@ -1247,6 +1314,9 @@ PHP_METHOD(SDO_DataObjectImpl, getContainer)
 PHP_METHOD(SDO_DataObjectImpl, getContainmentPropertyName)
 {
 	sdo_do_object *my_object;
+
+	php_error(E_WARNING, 
+		"SDO_DataObject::getContainmentPropertyName() is deprecated, and will be removed in the next release. Use SDO_Model_ReflectionDataObject::getContainmentProperty()");		
 	
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
 	if (my_object == (sdo_do_object *)NULL) {
@@ -1289,6 +1359,9 @@ PHP_METHOD(SDO_DataObjectImpl, clear)
 PHP_METHOD(SDO_DataObjectImpl, getType)
 {
 	sdo_do_object *my_object;
+	
+	php_error(E_WARNING, 
+		"SDO_DataObject::getType() is deprecated, and will be removed in the next release. Use SDO_Model_ReflectionDataObject::getType()");
 		
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
 	if (my_object == (sdo_do_object *)NULL) {
@@ -1316,48 +1389,39 @@ PHP_METHOD(SDO_DataObjectImpl, createDataObject)
 	zval				*z_property;
 	const char			*xpath = NULL;
 	int					 xpath_len;
-	long				 propertyIndex;
-	sdo_do_object	*my_object;
+	long				 property_index;
+	sdo_do_object		*my_object;
 	DataObjectPtr		 dop, new_dop;
 	zval				*z_new_do;
+	const Property		*propertyp = NULL;
+	int					 rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_property) == FAILURE) 
-		return;	
+		return;
 
-	switch(Z_TYPE_P(z_property)) {
-	case IS_STRING:	
-		xpath = Z_STRVAL_P(z_property);
-		xpath_len = Z_STRLEN_P(z_property);
-		break;
-	case IS_LONG:
-	case IS_BOOL:
-	case IS_RESOURCE:
-		propertyIndex = Z_LVAL_P(z_property);
-		break;
-	case IS_DOUBLE:
-		propertyIndex =(long)Z_DVAL_P(z_property);
-		break;
-	default:
-		php_error(E_ERROR, "%s:%i: invalid dimension type %i", CLASS_NAME, __LINE__, Z_TYPE_P(z_property));
-		RETURN_NULL();
+	rc = sdo_do_parse_offset_param(z_property, &propertyp, &xpath, &xpath_len, &property_index TSRMLS_CC);
+	if (rc == FAILURE) {
+		return;
 	}
 
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
 	if (my_object == (sdo_do_object *)NULL) {
 		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		RETURN_NULL();
+		return;
 	}
 	
 	dop = my_object->dop;	
 	
 	try {
-		if (xpath)
+		if (rc == IS_OBJECT)
+			new_dop = dop->createDataObject(*propertyp);
+		else if (rc == IS_STRING)
 			new_dop = dop->createDataObject(xpath);
 		else
-			new_dop = dop->createDataObject(propertyIndex);
+			new_dop = dop->createDataObject(property_index);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		RETURN_NULL();
+		return;
 	}
 	
 	/* We have a good data object, so set up its PHP incarnation */

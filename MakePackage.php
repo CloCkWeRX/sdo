@@ -35,35 +35,59 @@
 //				.  "- The Relational DAS now supports nulls: an SQL NULL in the database is represented as a PHP null in the data object and vice versa\n"
 //                .  "- The important SDO classes all support toString()\n"
 //                .  "- The SDO_DataObject class now supports clone()",
-		'notes' => "Improved reporting of Schema and XML parse errors (libxml2 errors surfaced in an XML Data Access Service SDO_DAS_XML_ParserException).\n"
-                 . "Various bug fixes, including PECL bugs 6002 and 6006.\n"
-                 . "Support for XML Schema 'nillable'.\n"
-                 . "Support to build and run against PHP 6.0 (only with unicode semantics off)." ,
+//		'notes' => "Improved reporting of Schema and XML parse errors (libxml2 errors surfaced in an XML Data Access Service SDO_DAS_XML_ParserException).\n"
+//                 . "Various bug fixes, including PECL bugs 6002 and 6006.\n"
+//                 . "Support for XML Schema 'nillable'.\n"
+//                 . "Support to build and run against PHP 6.0 (only with unicode semantics off)." ,
+       'notes'  => "This release adds support for reflection on a data object.
+                   The SDO_Model_ReflectionDataObject gives the programmer access to 
+                   the type and structure information in a data object's model.
+                   This can help with debugging, or be used in dynamic user interface generation.",
        'simpleoutput' => true,
-       'version' => '0.6.1',
+       'version' => '0.7.0',
        'baseinstalldir' => 'SDO',
        'state' => 'beta',
        'license' => 'Apache 2.0',
-       'packagedirectory' => 'C:/eclipse-3.0/workspace/sdo/',
+       'packagedirectory' => dirname(__FILE__),
        'roles' => array('*.php' => 'php', '*.cpp' => 'src'),
-       'ignore' => array('CVS/','sdo*tgz','.project','MakePackage.php',
-       
-               "aclocal.m4",
-        "config.guess",
-        "config.sub",
-        "configure",
-        "configure.ac",
-        "depcomp",
-        "install-sh",
-        "ltmain.sh",
-        "Makefile.am",
-        "Makefile.in",
-        "missing",
-        "mkinstalldirs"),
-        
-        
+       'ignore' => array(
+           'autom4te.cache/',
+           'build/',
+           'CVS/',
+           'include/',
+           'modules/',
+           '.project',
+           'acinclude.m4',
+           'aclocal.m4',
+           'config.guess',
+           'config.h',
+           'config.h.in',
+           'config.log',
+           'config.nice',
+           'config.sub',
+           'configure',
+           'configure.in',
+           'install.sh',
+           'libtool',
+           'ltmain.sh',
+           'Makefile',
+           'Makefile.fragments',
+           'Makefile.global',
+           'Makefile.objects',
+           'missing',
+           'mkinstalldirs',
+           'run-tests.php',
+                        // packaging
+           'MakePackage.php',
+           'package.xml',                      
+                        // wildcards
+           '*.la',
+           '*.lo',
+           'sdo*tgz'
+         ),
+                
      'dir_roles' => array('/' => 'src','tests'=> 'test', 'DAS' => 'php'),
-       'filelistgenerator' => 'cvs' // generate from cvs, use file for directory
+       'filelistgenerator' => 'file' // generate from cvs, use file for directory
         )
      );
 	$packagexml->addMaintainer('gcc','lead','Graham Charters','charters@uk.ibm.com');

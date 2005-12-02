@@ -58,6 +58,13 @@ PHP_SDO_API zend_class_entry *sdo_dataobjectlist_class_entry;
 PHP_SDO_API zend_class_entry *sdo_changeddataobjectlist_class_entry;
 PHP_SDO_API zend_class_entry *sdo_das_settinglist_class_entry;
 PHP_SDO_API zend_class_entry *sdo_sequenceimpl_class_entry;
+
+PHP_SDO_API zend_class_entry *sdo_model_type_class_entry;
+PHP_SDO_API zend_class_entry *sdo_model_typeimpl_class_entry;
+PHP_SDO_API zend_class_entry *sdo_model_property_class_entry;
+PHP_SDO_API zend_class_entry *sdo_model_propertyimpl_class_entry;
+PHP_SDO_API zend_class_entry *sdo_model_reflectiondataobject_class_entry;
+
 PHP_SDO_API zend_class_entry *sdo_exception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_propertynotsetexception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_propertynotfoundexception_class_entry;
@@ -65,6 +72,12 @@ PHP_SDO_API zend_class_entry *sdo_typenotfoundexception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_invalidconversionexception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_indexoutofboundsexception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_unsupportedoperationexception_class_entry;
+/* }}} */
+
+/* {{{ single SDO_DataObject parameter */
+static ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject, 0)
+    ZEND_ARG_OBJ_INFO(0, dataObject, SDO_DataObject, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /* {{{ SDO_PropertyAccess methods */
@@ -187,18 +200,14 @@ function_entry sdo_das_datafactory_methods[] = {
 /* }}} */
 
 /* {{{SDO_DAS_ChangeSummary methods */
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_das_changesummary_dataobject, 0)
-    ZEND_ARG_OBJ_INFO(0, dataObject, SDO_DataObject, 0)
-ZEND_END_ARG_INFO();
-
 function_entry sdo_das_changesummary_methods[] = {
 	ZEND_ME(SDO_DAS_ChangeSummary, beginLogging, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_ChangeSummary, endLogging, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_ChangeSummary, isLogging, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_ChangeSummary, getChangedDataObjects, 0, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_DAS_ChangeSummary, getChangeType, arginfo_sdo_das_changesummary_dataobject, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_DAS_ChangeSummary, getOldValues, arginfo_sdo_das_changesummary_dataobject, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_DAS_ChangeSummary, getOldContainer, arginfo_sdo_das_changesummary_dataobject, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_DAS_ChangeSummary, getChangeType, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_DAS_ChangeSummary, getOldValues, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_DAS_ChangeSummary, getOldContainer, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -249,6 +258,84 @@ function_entry sdo_sequenceimpl_methods[] = {
 	ZEND_ME(SDO_SequenceImpl, move, arginfo_sdo_sequence_move, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, insert, arginfo_sdo_sequence_insert, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, count, 0, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ SDO_Model_Type methods */
+static ZEND_BEGIN_ARG_INFO(arginfo_sdo_model_type_identifier, 0)
+    ZEND_ARG_INFO(0, identifier)
+ZEND_END_ARG_INFO();
+
+function_entry sdo_model_type_methods[] = {
+	ZEND_ABSTRACT_ME(SDO_Model_Type, getName, 0)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, getNamespaceURI, 0)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, isInstance, arginfo_sdo_dataobject)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, getProperties, 0)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, getProperty, arginfo_sdo_model_type_identifier)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, isDataType, 0)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, isSequencedType, 0)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, isOpenType, 0)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, getBaseType, 0)
+	{NULL, NULL, NULL}
+};
+
+function_entry sdo_model_typeimpl_methods[] = {
+ 	ZEND_ME(SDO_Model_TypeImpl, __construct, 0, ZEND_ACC_PRIVATE) /* can't be newed */
+	ZEND_ME(SDO_Model_TypeImpl, getName, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, getNamespaceURI, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, isInstance, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, getProperties, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, getProperty, arginfo_sdo_model_type_identifier, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, isDataType, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, isSequencedType, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, isOpenType, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, getBaseType, 0, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ SDO_Model_Property methods */
+function_entry sdo_model_property_methods[] = {
+    ZEND_ABSTRACT_ME(SDO_Model_Property, getName, 0)
+    ZEND_ABSTRACT_ME(SDO_Model_Property, getType, 0)
+    ZEND_ABSTRACT_ME(SDO_Model_Property, isMany, 0)
+    ZEND_ABSTRACT_ME(SDO_Model_Property, isReadOnly, 0)
+    ZEND_ABSTRACT_ME(SDO_Model_Property, isContainment, 0)
+    ZEND_ABSTRACT_ME(SDO_Model_Property, getOpposite, 0)
+    ZEND_ABSTRACT_ME(SDO_Model_Property, getContainingType, 0)
+    ZEND_ABSTRACT_ME(SDO_Model_Property, getDefault, 0)
+	{NULL, NULL, NULL}
+};
+
+function_entry sdo_model_propertyimpl_methods[] = {
+    ZEND_ME(SDO_Model_PropertyImpl, __construct, 0, ZEND_ACC_PRIVATE) /* can't be newed */
+    ZEND_ME(SDO_Model_PropertyImpl, getName, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_PropertyImpl, getType, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_PropertyImpl, isMany, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_PropertyImpl, isReadOnly, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_PropertyImpl, isContainment, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_PropertyImpl, getOpposite, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_PropertyImpl, getContainingType, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_PropertyImpl, getDefault, 0, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ SDO_Model_ReflectionDataObject methods */
+static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_model_reflectiondataobject_export, 0, ZEND_RETURN_VALUE, 1)
+    ZEND_ARG_OBJ_INFO(0, reflector, Reflector, 0)
+    ZEND_ARG_INFO(0, return_output)
+ZEND_END_ARG_INFO();
+
+function_entry sdo_model_reflectiondataobject_methods[] = {
+    ZEND_ME(SDO_Model_ReflectionDataObject, __construct, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC) 
+	ZEND_ME(SDO_Model_ReflectionDataObject, __toString, 0, ZEND_ACC_PUBLIC)
+	ZEND_FENTRY(export, ZEND_FN(SDO_Model_ReflectionDataObject_export), arginfo_sdo_model_reflectiondataobject_export,
+	    ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) 
+    ZEND_ME(SDO_Model_ReflectionDataObject, getType, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_ReflectionDataObject, getInstanceProperties, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_ReflectionDataObject, getContainmentProperty, 0, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -364,17 +451,49 @@ PHP_MINIT_FUNCTION(sdo)
 	sdo_das_datafactory_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_class_implements(sdo_das_datafactory_class_entry TSRMLS_CC, 1, sdo_datafactory_class_entry);
 
-	/* interface SDO_DAS_ChangeSummary */
+	/* class SDO_DAS_ChangeSummary */
 	INIT_CLASS_ENTRY(ce, "SDO_DAS_ChangeSummary", sdo_das_changesummary_methods);
 	sdo_das_changesummary_minit(&ce TSRMLS_CC);
 
-	/* interface SDO_DAS_Setting */
+	/* class SDO_DAS_Setting */
 	INIT_CLASS_ENTRY(ce, "SDO_DAS_Setting", sdo_das_setting_methods);
 	sdo_das_setting_minit(&ce TSRMLS_CC);
 
 	/* class SDO_DAS_SettingList implements SDO_List */
 	INIT_CLASS_ENTRY(ce, "SDO_DAS_SettingList", sdo_list_methods);
 	sdo_das_settinglist_class_entry = zend_register_internal_class_ex(&ce, sdo_list_class_entry, 0 TSRMLS_CC);
+
+	/* interface SDO_Model_Type */
+	INIT_CLASS_ENTRY(ce, "SDO_Model_Type", sdo_model_type_methods);
+	sdo_model_type_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
+
+	/* interface SDO_Property_Type */
+	INIT_CLASS_ENTRY(ce, "SDO_Model_Property", sdo_model_property_methods);
+	sdo_model_property_class_entry = zend_register_internal_interface(&ce TSRMLS_CC);
+
+	/* class SDO_DAS_DataFactoryImpl implements SDO_DAS_DataFactory */
+    INIT_CLASS_ENTRY(ce, "SDO_DAS_DataFactoryImpl", sdo_das_df_methods);
+	sdo_das_df_minit(&ce TSRMLS_CC);
+
+	/* class SDO_DataObjectImpl implements SDO_DAS_DataObject */
+    INIT_CLASS_ENTRY(ce, "SDO_DataObjectImpl", sdo_dataobjectimpl_methods);
+	sdo_do_minit(&ce TSRMLS_CC);
+
+	/* class SDO_SequenceImpl implements SDO_Sequence */
+    INIT_CLASS_ENTRY(ce, "SDO_SequenceImpl", sdo_sequenceimpl_methods);
+	sdo_sequence_minit(&ce TSRMLS_CC);
+
+	/* class SDO_Model_TypeImpl implements SDO_Model_Type */
+    INIT_CLASS_ENTRY(ce, "SDO_Model_TypeImpl", sdo_model_typeimpl_methods);
+	sdo_model_type_minit(&ce TSRMLS_CC);
+
+	/* class SDO_Model_PropertyImpl implements SDO_Model_Property */
+    INIT_CLASS_ENTRY(ce, "SDO_Model_PropertyImpl", sdo_model_propertyimpl_methods);
+	sdo_model_property_minit(&ce TSRMLS_CC);
+
+	/* class SDO_Model_ReflectionDataObject implements Reflector */
+    INIT_CLASS_ENTRY(ce, "SDO_Model_ReflectionDataObject", sdo_model_reflectiondataobject_methods);
+	sdo_model_rdo_minit(&ce TSRMLS_CC);
 
 	/* class SDO_Exception extends Exception */
     INIT_CLASS_ENTRY(ce, "SDO_Exception", sdo_exception_methods);
@@ -417,18 +536,6 @@ PHP_MINIT_FUNCTION(sdo)
     sdo_unsupportedoperationexception_class_entry = zend_register_internal_class_ex(
         &ce, sdo_exception_class_entry, NULL TSRMLS_CC);
 
-	/* class SDO_DAS_DataFactoryImpl implements SDO_DAS_DataFactory */
-    INIT_CLASS_ENTRY(ce, "SDO_DAS_DataFactoryImpl", sdo_das_df_methods);
-	sdo_das_df_minit(&ce TSRMLS_CC);
-
-	/* class SDO_DataObjectImpl implements SDO_DAS_DataObject */
-    INIT_CLASS_ENTRY(ce, "SDO_DataObjectImpl", sdo_dataobjectimpl_methods);
-	sdo_do_minit(&ce TSRMLS_CC);
-
-	/* class SDO_SequenceImpl implements SDO_Sequence */
-    INIT_CLASS_ENTRY(ce, "SDO_SequenceImpl", sdo_sequenceimpl_methods);
-	sdo_sequence_minit(&ce TSRMLS_CC);
-
    return SUCCESS;
 
 }
@@ -441,7 +548,7 @@ PHP_MINFO_FUNCTION(sdo)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "sdo support", "enabled");
 	php_info_print_table_row(2, "sdo version", SDO_VERSION);
-	php_info_print_table_row(2, "libsdo version", SdoRuntime::getVersion());
+	php_info_print_table_row(2, "sdo4cpp version", SdoRuntime::getVersion());
 	php_info_print_table_end();
 }
 /* }}} */

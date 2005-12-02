@@ -317,7 +317,8 @@ namespace sdo {
 
 
 		void setPropValue(void** value, unsigned int *len, DataObjectImpl* ob, const Property& prop);
-		void setManyPropValue(void** value, unsigned int *len, DataObjectImpl* ob, const Property& prop);
+		void setManyPropValue(void** value, unsigned int *len, DataObjectImpl* ob, 
+			DataObjectImpl* listob, const Property& prop);
 		bool logging;
 
 		typedef std::map<DataObjectImpl*, createLogItem>    CREATELOG_MAP;

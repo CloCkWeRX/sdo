@@ -6,8 +6,9 @@ SDO getType test
 <?php 
 include "test.inc";
 
-$type = $company->getType();
-print "$type[0]:$type[1]";
+$rdo = new SDO_Model_ReflectionDataObject($company);
+$type = $rdo->getType();
+print "$type->namespaceURI:$type->name";
 
 ?>
 --EXPECT--

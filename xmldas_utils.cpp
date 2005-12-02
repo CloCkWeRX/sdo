@@ -15,7 +15,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini)                                  |
+| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
 +----------------------------------------------------------------------+
 
 */
@@ -29,7 +29,34 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
-#include "php_sdo_das_xml.h"
+#include "php_sdo_das_xml_int.h"
+
+#include "zend_exceptions.h" // needed for zend_throw_exception_ex
+
+zend_class_entry *sdo_das_xml_parserexception_ce = NULL;
+zend_class_entry *sdo_das_xml_fileexception_ce = NULL;
+
+/* {{{ initialize_sdo_das_parserexception_class
+ */
+void initialize_sdo_das_xml_parserexception_class(TSRMLS_D) 
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_ParserException", sdo_get_exception_methods());
+    sdo_das_xml_parserexception_ce = zend_register_internal_class_ex(&ce, NULL, "sdo_exception" TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ initialize_sdo_das_parserexception_class
+ */
+void initialize_sdo_das_xml_fileexception_class(TSRMLS_D) 
+{
+    zend_class_entry ce;
+
+    INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_FileException", sdo_get_exception_methods());
+    sdo_das_xml_fileexception_ce = zend_register_internal_class_ex(&ce, NULL, "sdo_exception" TSRMLS_CC);
+}
+/* }}} */
 
 /* {{{ sdo_das_xml_throw_exception
  * Throws C++ SDO exception as PHP exception
@@ -52,37 +79,31 @@ sdo_das_xml_throw_exception(zend_class_entry *ce, SDORuntimeException *e, char *
 /* }}} */
 
 /* {{{ sdo_das_xml_throw_runtimeexception
- * This is an added functionality for PHP SDO's sdo_throw_runtimeexception
- * to capture C++ SDOXMLParserException
  */
 void
 sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC)
 {
-        zend_class_entry *exception_class;
         const char *exception_type = e->getEClassName();
-        if (strcmp(exception_type, "SDOXMLParserException") == 0) {
-                exception_class = sdo_xmlparserexcep_ce;
-                sdo_das_xml_throw_exception(exception_class, e, NULL TSRMLS_CC);
-        } else {
-            sdo_throw_runtimeexception(e TSRMLS_CC);
-        }
+        sdo_throw_runtimeexception(e TSRMLS_CC);
 }
 /* }}} */
 
+/* {{{ sdo_das_xml_throw_parserexception
+ */
 void
 sdo_das_xml_throw_parserexception(char * msg TSRMLS_DC)
 {
-        zend_class_entry *ce = sdo_xmlparserexcep_ce;
+        zend_class_entry *ce = sdo_das_xml_parserexception_ce;
 
 		zend_throw_exception_ex(ce, 0 TSRMLS_CC, "%s\n", msg);
 }
-
+/* }}} */
 
 /* {{{ sdo_das_xml_throw_fileexception
  */
 void sdo_das_xml_throw_fileexception(char *filename TSRMLS_DC)
 {
-        zend_class_entry *ce = sdo_xmlfileexcep_ce;
+        zend_class_entry *ce = sdo_das_xml_fileexception_ce;
         
 		zend_throw_exception_ex(ce, 0 TSRMLS_CC, "File \"%s\" could not be found.\n", filename);
 }

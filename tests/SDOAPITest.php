@@ -25,14 +25,28 @@
 */
 require_once 'PHPUnit2/Framework/TestCase.php';
 
-class SDOAPITest extends PHPUnit2_Framework_TestCase {
+define('ROOT_NS', 'xmldms');
+define('COMPANY_NS', 'companyNS');
+define('ROOT_TYPE', 'RootType');
+define('COMPANY_TYPE', 'CompanyType');
+define('DEPARTMENT_TYPE', 'DepartmentType');
+define('EMPLOYEE_TYPE', 'EmployeeType');
 
+define('GENE_NAMESPACE', 'genealogy');
+
+define('DAS_NAMESPACE', "das_namespace");
+define('APP_NAMESPACE', "app_namespace");
+define('DAS_ROOT_TYPE', 'SDO_RDAS_RootType');
+define('DAS_OBJECT_TYPE', 'SDO_RDAS_ObjectType');
+	
+class SDOAPITest extends PHPUnit2_Framework_TestCase {
+		
 	// Initialized in setUp();
 	private $dmsDf = null;
 
 	// Set by testDataFactory and used by subsequent tests
 	private $company = null;
-
+	
 	public function __construct($name) {
 		parent :: __construct($name);
 	}
@@ -44,20 +58,13 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// are we using the matched extension version?
 		$version = phpversion('sdo');
-		$this->assertTrue(($version >= '0.5.2'), 'Incompatible version of php_sdo extension.');
+		$this->assertTrue(($version >= '0.7.0'), 'Incompatible version of php_sdo extension.');
 
 		// We don''t want to force direct type comparison (e.g. we want (int)100 to be the same as "100")
 		$this->setLooselyTyped(true);
 
 		// A DMSDataFactory is used to create Types and Properties - it holds the model
 		$this->dmsDf = SDO_DAS_DataFactory :: getDataFactory();
-
-		define('ROOT_NS', 'xmldms');
-		define('COMPANY_NS', 'companyNS');
-		define('ROOT_TYPE', 'RootType');
-		define('COMPANY_TYPE', 'CompanyType');
-		define('DEPARTMENT_TYPE', 'DepartmentType');
-		define('EMPLOYEE_TYPE', 'EmployeeType');
 
 		// Create the types
 		$this->dmsDf->addType(ROOT_NS, ROOT_TYPE);
@@ -101,6 +108,10 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'long', SDO_TYPE_NAMESPACE_URI, 'Long');
 		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'short', SDO_TYPE_NAMESPACE_URI, 'Short');
 		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'uri', SDO_TYPE_NAMESPACE_URI, 'URI');
+		
+		/* properties with defaults */
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'boolD', SDO_TYPE_NAMESPACE_URI, 'Boolean', array('default'=>true));
+		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'uriD', SDO_TYPE_NAMESPACE_URI, 'URI',  array('default'=>'DEFAULT'));
 
 		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mstring', SDO_TYPE_NAMESPACE_URI, 'String', array('many'=>true));
 		$this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'Mbool', SDO_TYPE_NAMESPACE_URI, 'Boolean', array('many'=>true));
@@ -148,11 +159,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, 'Create with invalid type name succeeded');
 		} catch (SDO_TypeNotFoundException $e) {
 		}
-
-		// Test getType
-		$type = $this->company->getType();
-		$this->assertEquals(COMPANY_NS, $type[0], 'Type namespace URI does not match.');
-		$this->assertEquals(COMPANY_TYPE, $type[1], 'Type name does not match.');
 	}
 
 	public function testDataObject() {
@@ -206,12 +212,18 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$iters = 0;
 		try {
 			foreach ($this->company as $name => $value) {
-				$this->assertEquals($this->company[$set_props[$iters]], $value, "SDO_DataObject iteration failed - values do not match.");
-				$iters ++;
+			    // HACK Since the introduction of default values, foreach cannot differentiate
+			    // between a set property and an unset property with a default value. 
+			    if (isset($this->company[$name])) {
+				    $this->assertEquals($this->company[$set_props[$iters]], $value, "SDO_DataObject iteration failed - values do not match.");
+				    $iters ++;
+				} else { // HACK
+				    $this->assertContains($name, array('boolD','uriD'), 'SDO_DataObject iteration failed - foreach returned property which was neither set nor defaulted.');
+				}
 			}
 		} catch (Exception $e) {
 			$this->assertTrue(false, "SDO_DataObject iteration test failed - Exception thrown: ".$e->getMessage());
-		}
+		}		
 		$this->assertEquals(count($set_props), $iters, "SDO_DataObject iteration test failed - incorrect number of interations.");
 		$this->assertTrue(($iters > 0), "SDO_DataObject iteration test failed - zero iterations performed.");
 	}
@@ -266,7 +278,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->assertEquals(-128, $this->company->byte, "Byte Type test failed.");
 
 		// Test the Bytes type
-		$bytes = pack("c", 12, 63, 65, 66);
+		$bytes = pack('C*', 12, 63, 65, 66);
 		$this->company->bytes = $bytes;
 		$this->assertEquals($bytes, $this->company->bytes, "Bytes Type test failed.");
 
@@ -277,7 +289,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		// Test the Date type
 		$date = time();
 		$this->company->date = $date;
-		$this->assertEquals(date("D-M-Y H:m:s", $date), date("D-M-Y H:m:s", $this->company->date), "Date Type test failed.");
+		$this->assertEquals(gmdate("D-M-Y H:m:s", $date), gmdate("D-M-Y H:m:s", $this->company->date), "Date Type test failed.");
 
 		// Test the Double type
 		$this->company->double = pi();
@@ -299,7 +311,10 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// Test the Long type
 		$this->company->long = 1000000;
-		$this->assertEquals(1000000, $this->company->long, "Long Type test failed.");
+		/* Can't use assertEquals here because PHPUnit2 takes the type into account for comparisons.
+		 * SDO Longs are returned as Strings, because they may overflow a PHP Integer.
+		 */
+		$this->assertTrue(1000000 == $this->company->long, "Long Type test failed.");
 
 		// Test the Short type
 		$this->company->short = 100;
@@ -365,19 +380,14 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// Check nativation back up to a container
 		$ceo = $this->company->CEO;
-		// FAILED - serialization problem with non-containment references
-		//$this->assertEquals($this->company, $ceo->getContainer(), "getContainer test failed - company is not the CEOs container.");
-		$this->assertEquals($this->company->name, $ceo->getContainmentPropertyName(), "getContainer test failed - company is not the CEOs container.");
+		$this->assertEquals($this->company, $ceo->getContainer(), "getContainer test failed - company is not the CEOs container.");
 
 		// Check navigation for a non-containment reference
-		// FAILED - serialization problem with non-containment references
-		//$this->assertEquals($this->company, $this->company->employeeOfTheMonth->getContainer(),
-		//                    'getContainer test failed - company is not the employeeOfTheMonth container.');
-		$this->assertEquals($this->company->name, $this->company->employeeOfTheMonth->getContainmentPropertyName(), 'getContainer test failed - company is not the employeeOfTheMonth container.');
+		$this->assertEquals($this->company, $this->company->employeeOfTheMonth->getContainer(),
+		                    'getContainer test failed - company is not the employeeOfTheMonth container.');
 
 		// root's container should be null
 		$this->assertNull($this->company->getContainer(), 'Root object\'s container should be NULL');
-		$this->assertNull($this->company->getContainmentPropertyName(), 'Root object\'s container should be NULL');
 	}
 
 	public function testNavigation2() {
@@ -398,10 +408,9 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$it_parent = $it->getContainer();
 		$sue_parent = $sue->getContainer();
 		$ron_parent = $ron->getContainer();
-		// FAILED - again this is a problem with the serialized data
-		//$this->assertEquals($acme, $shoe_parent, 'Container test 2a failed;');
+		$this->assertEquals($acme, $shoe_parent, 'Container test 2a failed;');
 		$this->assertEquals($acme->name, $shoe_parent->name, 'Container test 2a failed;');
-		//$this->assertEquals($acme, $it_parent, 'Container test 2b failed;');
+		$this->assertEquals($acme, $it_parent, 'Container test 2b failed;');
 		$this->assertEquals($acme->name, $it_parent->name, 'Container test 2b failed;');
 		$this->assertEquals($shoe, $sue_parent, 'Container test 2c failed;');
 		$this->assertEquals($it, $ron_parent, 'Container test 2d failed;');
@@ -446,7 +455,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		// Test insert at a specific index
 		$employee = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
 		$employee->name = 'Rum Tum Tugger';
-		$employee = $departments[0]->employees->insert($employee, 1);
+		$departments[0]->employees->insert($employee, 1);
 		$this->assertEquals($employee, $departments[0]->employees[1], "SDOList insert at specified index failed.");
 
 		// Test insert out of range
@@ -562,14 +571,11 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, 'Incorrect Exception thrown:'.$e->getMessage());
 		}
 
-		// get old values for department
-		// FAILED actually I'm not sure what to expect here, but I don't like what I get
-
 		// get old values for employees
 		$ov_simon = $cs->getOldValues($simon);
 		$this->assertEquals(1, count($ov_simon), 'Should be exactly one entry in the SettingList.');
 		$this->assertEquals('SN', $ov_simon[0]->getPropertyName(), 'Property name in DAS_Setting is incorrect.');
-		$this->assertEquals($oldSN, $ov_simon[0]->getValue(), 'Old value in DAS_Setting is incorrect.');
+		$this->assertFalse($ov_simon[0]->isSet(), 'Old value in DAS_Setting is incorrect.');
 		$this->assertEquals(-1, $ov_simon[0]->getListIndex(), 'List index set for single-valued property.');
 
 		// many more tests needed
@@ -665,7 +671,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 	public function testXPath1() {
 		// single-valued primitives */
-		define('GENE_NAMESPACE', 'genealogy');
 
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(GENE_NAMESPACE, 'person');
@@ -683,8 +688,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 	public function testXPath2() {
 		// multi-valued primitives */
-		//$this->assertTrue(false, 'Multi-valued xpath not working in this release.');
-		define('GENE_NAMESPACE', 'genealogy');
 
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(GENE_NAMESPACE, 'person');
@@ -705,10 +708,10 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		$this->assertEquals('The Garden', $root['address_line.0'], 'Xpath navigation 2a failed: ');
 		$this->assertEquals('Paradise', $root['address_line[2]'], 'Xpath navigation 2b failed: ');
-		$this->assertEquals('Cain', $root['children'][0][name], 'Xpath navigation 2c failed: ');
+		$this->assertEquals('Cain', $root['children'][0]['name'], 'Xpath navigation 2c failed: ');
 		$this->assertEquals('Cain', $cain->name, 'Xpath navigation 2d failed: ');
 		$this->assertEquals('Abel', $abel->name, 'Xpath navigation 2e failed: ');
-		$this->assertEquals('Abel', $root->children[1][name], 'XPath navigation 2f failed: ');
+		$this->assertEquals('Abel', $root->children[1]['name'], 'XPath navigation 2f failed: ');
 		$this->assertEquals('Abel', $root['children.1/name'], 'XPath navigation 2g failed: ');
 		$this->assertEquals('Abel', $root['children[2]/name'], 'XPath navigation 2h failed: ');
 	}
@@ -794,9 +797,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testBug448() {
-		define('DAS_NAMESPACE', 'das_namespace');
-		define('APP_NAMESPACE', 'app_namespace');
-		define('DAS_ROOT_TYPE', 'SDO_RDAS_RootType');
 
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
@@ -823,9 +823,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testBug437() {
-		define('DAS_NAMESPACE', "das_namespace");
-		define('APP_NAMESPACE', "app_namespace");
-		define('DAS_ROOT_TYPE', "SDO_RDAS_RootType");
 
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
@@ -846,9 +843,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testBug459() {
-		define('DAS_NAMESPACE', "das_namespace");
-		define('APP_NAMESPACE', "app_namespace");
-		define('DAS_ROOT_TYPE', "SDO_DAS_Relational_RootType");
 
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
@@ -876,10 +870,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testBug455() {
-		define('DAS_NAMESPACE', "das_namespace");
-		define('APP_NAMESPACE', "app_namespace");
-		define('DAS_ROOT_TYPE', "SDO_DAS_Relational_RootType");
-
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
 		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'cs', SDO_TYPE_NAMESPACE_URI, 'ChangeSummary');
@@ -926,16 +916,16 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testSerialization1() {
+	// sesion_start(); /* This is done within phpunit */
 		$this->testDataObject();
-		session_start();
 		$_SESSION['my_datagraph'] = $this->company;
 		session_write_close();
 		unset($this->company);
 	}
 
 	public function testSerialization2() {
+	// sesion_start(); /* This is done within phpunit */
 		$this->testDataObject();
-		session_start();
 		$company2 = $_SESSION['my_datagraph'];
 		$this->assertEquals($this->company->name, $company2->name, 'unserializing failed.');
 		$this->assertEquals($this->company->departments[0]->name, $company2->departments[0]->name, 'unserializing failed.');
@@ -1014,23 +1004,19 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 	
 	public function testAddPropertyToType() {
-	    define('DAS_NAMESPACE', "das_namespace");
-		define('APP_NAMESPACE', "app_namespace");
-		define('DAS_ROOT_TYPE', "TheRootType");
-		define('DAS_OBJECT_TYPE', 'TheObjectType');
 	
 		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
 		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
 		$data_factory->addType(DAS_NAMESPACE, DAS_OBJECT_TYPE);
 	
 		/* We shall use SDO_Model_Property to test these settings. For now, just see what errors occur */
-		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p1', SDO_TYPE_NAMESPACE_URI, 'String', true, false, true); // multivalued, not readonly, containment
-	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p2', SDO_TYPE_NAMESPACE_URI, 'String', true);	
-	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p3', SDO_TYPE_NAMESPACE_URI, 'String', array("many", "readonly"=>true));	
-	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p4', SDO_TYPE_NAMESPACE_URI, 'String', array("blob"));	
-	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p5', SDO_TYPE_NAMESPACE_URI, 'String', array("blob"=>"blob"));	
-	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p6', SDO_TYPE_NAMESPACE_URI, 'String', 42);	
-	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p7', SDO_TYPE_NAMESPACE_URI, 'String', array(42=>0));	
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p1', SDO_TYPE_NAMESPACE_URI, 'String', array('many'=>true)); 
+//	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p2', SDO_TYPE_NAMESPACE_URI, 'String', true);	
+//	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p3', SDO_TYPE_NAMESPACE_URI, 'String', array("many", "readonly"=>true));	
+//	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p4', SDO_TYPE_NAMESPACE_URI, 'String', array("blob"));	
+//	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p5', SDO_TYPE_NAMESPACE_URI, 'String', array("blob"=>"blob"));	
+//	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p6', SDO_TYPE_NAMESPACE_URI, 'String', 42);	
+//	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p7', SDO_TYPE_NAMESPACE_URI, 'String', array(42=>0));	
 	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p8', SDO_TYPE_NAMESPACE_URI, 'String', array("many"=>42));	
 	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p9', SDO_TYPE_NAMESPACE_URI, 'String', array("many"=>0));	
 	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'p10', SDO_TYPE_NAMESPACE_URI, 'String', array("many"=>NULL));	
@@ -1041,7 +1027,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, "Failed to throw exception in multivalued setDefault test.");
 		} catch (SDO_UnsupportedOperationException $e) {
 		} catch (SDO_Exception $e) {
-					$this->assertTrue(false, 'Incorrect exception thrown in multivalued setDefault test:'.$e->getMessage());
+		    $this->assertTrue(false, 'Incorrect exception thrown in multivalued setDefault test:'.$e->getMessage());
 		}
 		
 		try {
@@ -1049,7 +1035,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, "Failed to throw exception in DataObject setDefault test.");
 		} catch (SDO_UnsupportedOperationException $e) {
 		} catch (SDO_Exception $e) {
-					$this->assertTrue(false, 'Incorrect exception thrown in DataObject setDefault test:'.$e->getMessage());
+		    $this->assertTrue(false, 'Incorrect exception thrown in DataObject setDefault test:'.$e->getMessage());
 		}
 
 	    $data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'defsi', SDO_TYPE_NAMESPACE_URI, 'Integer', array('default'=>5));
@@ -1077,51 +1063,113 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 	
 	public function testBug45771() {
-			define('DAS_NAMESPACE', "das_namespace");
-			define('APP_NAMESPACE', "app_namespace");
-			define('DAS_ROOT_TYPE', "SDO_DAS_Relational_RootType");
 	
-			$data_factory = SDO_DAS_DataFactory :: getDataFactory();
-			$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
-			$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'cs', SDO_TYPE_NAMESPACE_URI, 'ChangeSummary');
+		$data_factory = SDO_DAS_DataFactory :: getDataFactory();
+		$data_factory->addType(DAS_NAMESPACE, DAS_ROOT_TYPE);
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'cs', SDO_TYPE_NAMESPACE_URI, 'ChangeSummary');
 	
-			$data_factory->addType(APP_NAMESPACE, 'company');
-			$data_factory->addType(APP_NAMESPACE, 'department');
-	
-			// add company to the root type
-			$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); 
-	
-			$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); 
-			$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'department', APP_NAMESPACE, 'department', array('many'=>true));
-	
-			$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); 
-			$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'location', SDO_TYPE_NAMESPACE_URI, 'String'); 
-			$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'postcode', SDO_TYPE_NAMESPACE_URI, 'String'); 
-	
-	
-			$root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
-	
-			$acme = $root->createDataObject('company');
-			$shoe = $acme->createDataObject('department');
-			$shoe->name = 'Shoe';
-			$shoe->location = null;
-	
-			$root->getChangeSummary()->beginLogging();
-			$shoe->name = null;
-			$shoe->location = 'A-block';
-			$shoe->postcode = 'SO21 2JN';
+		$data_factory->addType(APP_NAMESPACE, 'company');
+		$data_factory->addType(APP_NAMESPACE, 'department');
+
+		// add company to the root type
+		$data_factory->addPropertyToType(DAS_NAMESPACE, DAS_ROOT_TYPE, 'company', APP_NAMESPACE, 'company', array('many'=>true)); 
+
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); 
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'company', 'department', APP_NAMESPACE, 'department', array('many'=>true));
+
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'name', SDO_TYPE_NAMESPACE_URI, 'String'); 
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'location', SDO_TYPE_NAMESPACE_URI, 'String'); 
+		$data_factory->addPropertyToType(APP_NAMESPACE, 'department', 'postcode', SDO_TYPE_NAMESPACE_URI, 'String'); 
+
+
+		$root = $data_factory->create(DAS_NAMESPACE, DAS_ROOT_TYPE);
+
+		$acme = $root->createDataObject('company');
+		$shoe = $acme->createDataObject('department');
+		$shoe->name = 'Shoe';
+		$shoe->location = null;
+
+		$root->getChangeSummary()->beginLogging();
+		$shoe->name = null;
+		$shoe->location = 'A-block';
+		$shoe->postcode = 'SO21 2JN';
 			
-			$change_summary	= $root->getChangeSummary();
-			$changed_data_objects = $change_summary->getChangedDataObjects();
-			$this->assertEquals(1, $changed_data_objects->count(), 'Wrong number of changed objects'); 
-			$settings = $change_summary->getOldValues($changed_data_objects[0]);
-			$this->assertEquals(3, $settings->count(), 'Wrong number of old values'); 
-			$this->assertTrue($settings[0]->isset(), 'Incorrect isset flag when new value is null');
-			$this->assertEquals('Shoe', $settings[0]->getValue(), 'Wrong old value when new value is null'); 
-			$this->assertTrue($settings[1]->isset(), 'Incorrect isset flag when old value is null');
-			$this->assertNull($settings[1]->getValue(), 'Wrong old value when old value is null'); 
-			// FAILED : tracker 46236
-			//$this->assertFalse($settings[2]->isset(), 'Incorrect isset flag when old value is unset');
+		$change_summary	= $root->getChangeSummary();
+		$changed_data_objects = $change_summary->getChangedDataObjects();
+		$this->assertEquals(1, $changed_data_objects->count(), 'Wrong number of changed objects'); 
+		$settings = $change_summary->getOldValues($changed_data_objects[0]);
+		$this->assertEquals(3, $settings->count(), 'Wrong number of old values'); 
+		$this->assertTrue($settings[0]->isset(), 'Incorrect isset flag when new value is null');
+		$this->assertEquals('Shoe', $settings[0]->getValue(), 'Wrong old value when new value is null'); 
+		$this->assertTrue($settings[1]->isset(), 'Incorrect isset flag when old value is null');
+		$this->assertNull($settings[1]->getValue(), 'Wrong old value when old value is null'); 
+		// tracker 46236
+		$this->assertFalse($settings[2]->isset(), 'Incorrect isset flag when old value is unset');
+	}
+	
+	public function testReflection() {
+	    $this->testDataObject();
+	    
+	    $rdo = new SDO_Model_ReflectionDataObject($this->company);
+	    
+		$do_type = $rdo->getType();
+		$this->assertEquals(COMPANY_NS, $do_type->namespaceURI, 'Wrong reflected value for type namespaceURI');
+		$this->assertEquals(COMPANY_TYPE, $do_type->getName(), 'Wrong reflected value for type name');
+		$this->assertTrue($do_type->isInstance($this->dmsDf->create(COMPANY_NS, COMPANY_TYPE)), 
+		    'Two objects of the same type should be type-equal');
+		$this->assertFalse($do_type->isInstance($this->company->departments[0]),
+		    'Two objects of the different types should not be type-equal');
+		$this->assertFalse($do_type->isDataType(), 'Unexpected value for SDO_Model_Type->isDataType()');
+		$this->assertTrue($do_type->isSequencedType(), 'Unexpected value for SDO_Model_Type->isSequencedType()');
+		$this->assertFalse($do_type->isOpenType(), 'Unexpected value for SDO_Model_Type->isOpenType()');
+		$this->assertNull($do_type->getBaseType(), 'Unexpected value for SDO_Model_Type->getBaseType()');
+		
+		$do_property = $do_type->getProperty(0);
+		$this->assertEquals($do_property, $do_type->getProperty($do_property->name), 
+		    'Reflected properties should be equal');
+		$do_property = $do_type->getProperty('departments');
+		$this->assertEquals($do_property->getName(), 'departments', 'Unexpected value for SDO_Model_Property->getName()');
+		$this->assertEquals($do_property->getContainingType(), $do_type, 
+		    'Unexpected value for SDO_Model_Property->getContainingType()');
+		$this->assertFalse($do_property->isReadOnly(), 'Unexpected value for SDO_Model_Property->isReadOnly()');
+		$this->assertTrue($do_property->isMany(), 'Unexpected value for SDO_Model_Property->isMany()');
+		$this->assertTrue($do_property->isContainment(), 'Unexpected value for SDO_Model_Property->isContainment()');
+		$this->assertNull($do_property->getOpposite(), 'Unexpected value for SDO_Model_Property->getOpposite()');
+		
+		$all_props = $do_type->getProperties();
+		$this->assertEquals(count($all_props), count($this->company), 
+		    'Different number of properties in reflected data object');
+		
+		$iters = 0;		
+		foreach ($all_props as $do_property) {
+		    $do = $this->company[$do_property->name];				
+		    $iters ++;
+		}
+		$this->assertEquals(count($all_props), $iters, 
+		    'SDO_Model_ReflectionDataObject iteration test failed - incorrect number of interations.');
+		$this->assertTrue($iters > 0, 
+		    'SDO_Model_ReflectionDataObject iteration test failed - zero iterations performed.');
+		    
+		/* Create a dataobject using a SDO_Model_Property */
+		$department_property = $do_type->getProperty('departments');
+		$department2 = $this->company->createDataObject($department_property);
+		$department2->name = 'IT';
+		$this->assertEquals($department2->getContainer(), $this->company, 
+		    'getContainer() test failed for object created using reflected property');
+	}
+	
+	public function testDefaultValue() {
+	    $this->testDataFactory();
+	    $this->assertFalse(isset($this->company->boolD), 'isset is true for uninitialized Boolean property with default value');
+	    $this->assertTrue($this->company->boolD, 'Unexpected default value for uninitialized Boolean property with default value');
+	    
+	    $this->company->boolD = false;
+	    $this->assertTrue(isset($this->company->boolD), 'isset is false for set Boolean property with default value');
+	    $this->assertFalse($this->company->boolD, 'Unexpected value for set Boolean property with default value');
+	    
+	    unset($this->company->boolD);
+	    $this->assertFalse(isset($this->company->boolD), 'isset is true for unset Boolean property with default value');
+	    $this->assertTrue($this->company->boolD, 'Unexpected value for unset Boolean property with default value');
 	}
 }
 

@@ -29,8 +29,8 @@
 
 #include "commonj/sdo/export.h"
 
-using namespace std;
 #include <vector>
+using namespace std;
 
 namespace commonj{
 namespace sdo{

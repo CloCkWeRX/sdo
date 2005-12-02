@@ -120,7 +120,7 @@ void sdo_das_df_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 /* }}} */
 
 /* {{{ SDO_DAS_DataFactory::getDataFactory
- * This is s static factory method
+ * This is a static factory method
  */
 PHP_METHOD(SDO_DAS_DataFactory, getDataFactory)
 {
@@ -200,11 +200,6 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
 
-	/* return the type as a PHP array */
-	array_init(return_value);
-	add_assoc_string(return_value, SDO_NAMESPACE_URI, namespaceURI, 1);	
-	add_assoc_string(return_value, SDO_TYPE_NAME, typeName, 1);
-
 	return;
 }
 /* }}} */
@@ -271,7 +266,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 		&namespaceURI, &namespaceURI_len, &typeName, &typeName_len,
 		&many, &readOnly, &containment) == SUCCESS) {
 		/* the old (deprecated) signature */
-		php_error(E_NOTICE, "use of deprecated signature for %s", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "use of deprecated signature for %s", get_active_function_name(TSRMLS_C));
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssss|a",
 			&parent_namespaceURI, &parent_namespaceURI_len, &parent_typeName, &parent_typeName_len,
