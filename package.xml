@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.2">
+<package version="1.0" packagerversion="1.4.5">
  <name>sdo</name>
  <summary>Service Data Objects (SDOs) for PHP</summary>
  <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (like a database query, an XML file, or a spreadsheet) using a single interface.
@@ -26,14 +26,11 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>0.6.1</version>
-  <date>2005-11-21</date>
+  <version>0.7.0</version>
+  <date>2005-12-02</date>
   <license>Apache 2.0</license>
   <state>beta</state>
-  <notes>Improved reporting of Schema and XML parse errors (libxml2 errors surfaced in an XML Data Access Service SDO_DAS_XML_ParserException).
-Various bug fixes, including PECL bugs 6002 and 6006.
-Support for XML Schema &apos;nillable&apos;.
-Support to build and run against PHP 6.0 (only with unicode semantics off).
+  <notes>This release adds support for reflection on a data object. The SDO_Model_ReflectionDataObject gives the programmer access to the type and structure information in a data object&apos;s model. This can help with debugging, or be used in dynamic user interface generation.
   </notes>
   <filelist>
    <dir name="/" baseinstalldir="SDO">
@@ -273,6 +270,28 @@ Support to build and run against PHP 6.0 (only with unicode semantics off).
      <file role="php" name="Relational.php"/>
     </dir> <!-- /DAS -->
     <dir name="tests">
+     <dir name="XMLDAS">
+      <dir name="Examples">
+       <file role="test" name="Example1.php"/>
+       <file role="test" name="Example2.php"/>
+       <file role="test" name="Example3.php"/>
+       <file role="test" name="letter.xml"/>
+       <file role="test" name="letter.xsd"/>
+      </dir> <!-- /tests/XMLDAS/Examples -->
+      <dir name="PHPUnitTests">
+       <file role="test" name="company.xml"/>
+       <file role="test" name="company.xsd"/>
+       <file role="test" name="company_missing_type.xsd"/>
+       <file role="test" name="company_noxmldecl.xml"/>
+       <file role="test" name="company_with_nillable_SN.xml"/>
+       <file role="test" name="company_with_nillable_SN.xsd"/>
+       <file role="test" name="contractor_only.xsd"/>
+       <file role="test" name="open_company.xsd"/>
+       <file role="test" name="parse_errors.xml"/>
+       <file role="test" name="parse_errors.xsd"/>
+       <file role="test" name="XMLDASTest.php"/>
+      </dir> <!-- /tests/XMLDAS/PHPUnitTests -->
+     </dir> <!-- /tests/XMLDAS -->
      <file role="test" name="001.phpt"/>
      <file role="test" name="002.phpt"/>
      <file role="test" name="003.phpt"/>
@@ -280,14 +299,7 @@ Support to build and run against PHP 6.0 (only with unicode semantics off).
      <file role="test" name="005.phpt"/>
      <file role="test" name="company.xml"/>
      <file role="test" name="company.xsd"/>
-     <file role="test" name="company1.xsd"/>
-     <file role="test" name="company_noxmldecl.xml"/>
-     <file role="test" name="company_with_nillable_SN.xml"/>
-     <file role="test" name="company_with_nillable_SN.xsd"/>
-     <file role="test" name="parse_errors.xml"/>
-     <file role="test" name="parse_errors.xsd"/>
      <file role="test" name="SDOAPITest.php"/>
-     <file role="test" name="test.inc"/>
      <file role="test" name="XMLDASTest.php"/>
     </dir> <!-- /tests -->
     <file role="src" name="config.m4"/>
@@ -309,6 +321,9 @@ Support to build and run against PHP 6.0 (only with unicode semantics off).
     <file role="src" name="SDO_DAS_XML_Document.cpp"/>
     <file role="src" name="SDO_DataObject.cpp"/>
     <file role="src" name="SDO_List.cpp"/>
+    <file role="src" name="SDO_Model_Property.cpp"/>
+    <file role="src" name="SDO_Model_ReflectionDataObject.cpp"/>
+    <file role="src" name="SDO_Model_Type.cpp"/>
     <file role="src" name="SDO_Sequence.cpp"/>
     <file role="src" name="sdo_utils.cpp"/>
     <file role="src" name="xmldas_utils.cpp"/>
@@ -368,6 +383,14 @@ Added some tests for the XML DAS.
 Various bug fixes, including PECL bugs 6002 and 6006.
 Support for XML Schema &apos;nillable&apos;.
 Support to build and run against PHP 6.0 (only with unicode semantics off).
+    </notes>
+   </release>
+   <release>
+    <version>0.7.0</version>
+    <date>2005-12-02</date>
+    <license>Apache 2.0</license>
+    <state>beta</state>
+    <notes>This release adds support for reflection on a data object. The SDO_Model_ReflectionDataObject gives the programmer access to the type and structure information in a data object&apos;s model. This can help with debugging, or be used in dynamic user interface generation.
     </notes>
    </release>
  </changelog>
