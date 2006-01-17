@@ -29,7 +29,8 @@
     <date>2006-01-17</date>
     <license>Apache 2.0</license>
     <state>beta</state>
-    <notes>This release adds support for open types, that is, types which can have additional properties added to a runtime instance, for example to support an XML &lt;any/&gt; element.Also various bug fixes. </notes>
+    <notes>This release adds support for open types. These are types which can have additional properties added to a runtime instance, for example to support an XML &lt;any/&gt; element.
+Also various bug fixes. </notes>
     <filelist>
       <dir baseinstalldir="SDO" name="/">
        <dir name="commonj">
@@ -396,7 +397,8 @@ Support to build and run against PHP 6.0 (only with unicode semantics off).</not
       <date>2006-01-17</date>
       <license>Apache 2.0</license>
       <state>beta</state>
-      <notes>This release adds support for open types, that is, types which can have additional properties added to a runtime instance, for example to support an XML &lt;any/&gt; element.Also various bug fixes. </notes>
+      <notes>This release adds support for open types. These are types which can have additional properties added to a runtime instance, for example to support an XML &lt;any/&gt; element.
+Also various bug fixes. </notes>
     </release>
   </changelog>
 </package>

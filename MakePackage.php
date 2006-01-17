@@ -43,9 +43,9 @@
 //           . "The SDO_Model_ReflectionDataObject gives the programmer access to " 
 //           . "the type and structure information in a data object's model. "
 //           . "This can help with debugging, or be used in dynamic user interface generation.",
-       'notes' => "This release adds support for open types, that is, types which " 
+       'notes' => "This release adds support for open types. These are types which " 
              . "can have additional properties added to a runtime instance, for example "
-             . "to support an XML <any/> element."
+             . "to support an XML <any/> element.\n"
              . "Also various bug fixes. ",
        'simpleoutput' => true,
        'version' => '0.7.1',
