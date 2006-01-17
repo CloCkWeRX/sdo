@@ -50,18 +50,8 @@ PHP_MINFO_FUNCTION(sdo);
 PHP_METHOD(SDO_PropertyAccess, __get);
 PHP_METHOD(SDO_PropertyAccess, __set);
 
-/* {{{ proto array SDO_DataObject::getType()
-Return array containing the type information for the SDO_DataObject.
-The first element contains the namespace URI string and the second
-contains the type name string.
-For example, if the SDO_DataObject were of type 'CompanyType' from
-the namespace 'CompanyNS', then getType() would return the equivalent to
-array('CompanyNS', 'CompanyType');
 
-Returns an array containing the namespace URI and type name for the data object.
- */
-PHP_METHOD(SDO_DataObject, getType);
-/* }}} */
+PHP_METHOD(SDO_DataObject, getType); /* deprecated */
 
 /* {{{ proto SDO_Sequence SDO_DataObject::getSequence()
 Return the SDO_Sequence for this SDO_DataObject.  Accessing the SDO_DataObject
@@ -101,23 +91,16 @@ if this is a root SDO_DataObject.
 PHP_METHOD(SDO_DataObject, getContainer);
 /* }}} */
 
-/* {{{ proto string SDO_DataObject::getContainmentPropertyName()
-Get the property name used to refer to this data object by its containing data object.
+PHP_METHOD(SDO_DataObject, getContainmentPropertyName); /* deprecated */
 
-Returns the name of the container's property which references this SDO_DataObject
-*/
-PHP_METHOD(SDO_DataObject, getContainmentPropertyName);
-/* }}} */
-
-
-/* {{{ proto integer SDO_Sequence::getPropertyIndex(integer sequenceIndex)
-Return the property index for the specified sequence index.
+/* {{{ proto SDO_Model_Property SDO_Sequence::getProperty(integer sequence_index)
+Return the property for the specified sequence index.
 
 The sequence index
 
-The corresponding property index.  A value of -1 means the element does not belong to a property and must therefore be unstructured text.
+The corresponding property.  A value of NULL means the element does not belong to a property and must therefore be unstructured text.
 
-Should throw SDO_IndexOutOfBoundsException, but doesn't at the moment.
+Throws SDO_IndexOutOfBoundsException.
 */
 PHP_METHOD(SDO_Sequence, getProperty);
 /* }}} */
@@ -133,7 +116,7 @@ No return value.
 The destination sequence index
 The source sequence index
 
-Should throw SDO_IndexOutOfBoundsException, but doesn't at the moment.
+Throws SDO_IndexOutOfBoundsException.
 */
 PHP_METHOD(SDO_Sequence, move);
 /* }}} */
@@ -203,13 +186,18 @@ Return: SDO_DataFactory (an SDO_DataFactory)
 PHP_METHOD(SDO_DAS_DataFactory, getDataFactory);
 /* }}} */
 
-/* {{{ proto void SDO_DAS_DataFactory::addType(string namespaceURI, string typeName)
+/* {{{ proto void SDO_DAS_DataFactory::addType(string namespaceURI, string typeName [, array options])
 Add a new type to the SDO_DAS_DataFactory, defined by its namespace and type
 name.
 
 The namespace of the type
 
 The name of the type
+
+ Optional associative array of optional arguments for the new type.
+Valid keys are:
+"open" for an open type (default false)
+"sequenced" for a sequenced type (default false)
 
 For example, the following adds a new SDO_DataObject type of 'CompanyType'
 where that type belongs to the namespace 'CompanyNS'
