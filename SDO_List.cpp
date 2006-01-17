@@ -481,11 +481,11 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 		case Type::UriType:
 			convert_to_string(&temp_zval);
 			if (write_type == TYPE_APPEND)
-				dol.append(Z_STRVAL(temp_zval), 1 + Z_STRLEN(temp_zval));
+				dol.append(Z_STRVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
-				dol.insert(index, Z_STRVAL(temp_zval), 1 + Z_STRLEN(temp_zval));
+				dol.insert(index, Z_STRVAL(temp_zval));
 			else
-				dol.setBytes(index, Z_STRVAL(temp_zval), 1 + Z_STRLEN(temp_zval));
+				dol.setCString(index, Z_STRVAL(temp_zval));
 			break;
 		case Type::DataObjectType:
 			convert_to_object(&temp_zval);

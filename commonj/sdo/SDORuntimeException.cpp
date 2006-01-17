@@ -1,25 +1,21 @@
-/* 
-+----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  | 
-| All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+ 
-|                                                                      | 
-| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
-| may not use this file except in compliance with the License. You may | 
-| obtain a copy of the License at                                      | 
-|  http://www.apache.org/licenses/LICENSE-2.0                          |
-|                                                                      | 
-| Unless required by applicable law or agreed to in writing, software  | 
-| distributed under the License is distributed on an "AS IS" BASIS,    | 
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
-| implied. See the License for the specific language governing         | 
-| permissions and limitations under the License.                       | 
-+----------------------------------------------------------------------+ 
-| Author: Ed Slattery                                                  | 
-+----------------------------------------------------------------------+ 
+/*
+ *
+ *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 
-*/
-/* $Id$ */
+/* $Rev$ $Date$ */
 
 #include "commonj/sdo/SDORuntimeException.h"
               
@@ -31,10 +27,10 @@ SDORuntimeException :: SDORuntimeException(const char* name,
                              const char* msg_text)
               : severity(sev),location_set(0)
 {
-	class_name = new char[strlen(name) + 1];
-	strcpy(class_name,name);
-	message_text = new char[strlen(msg_text)+1];
-	strcpy(message_text,msg_text);
+    class_name = new char[strlen(name) + 1];
+    strcpy(class_name,name);
+    message_text = new char[strlen(msg_text)+1];
+    strcpy(message_text,msg_text);
 
 } // end SDORuntimeException constuctor
   
@@ -46,18 +42,18 @@ SDORuntimeException ::  SDORuntimeException(const SDORuntimeException& c)
                 severity(c.getSeverity()), location_set(c.location_set)
                 
 {
-	class_name = new char[strlen(c.getEClassName()) + 1];
-	strcpy(class_name, c.getEClassName());
-	message_text = new char[strlen(c.getMessageText())+1];
-	strcpy(message_text,c.getMessageText());
-	for (int i=0;i<c.location_set;i++)
-	{
-		locations[i].file = new char[strlen(c.locations[i].file) + 1];
-		strcpy(locations[i].file,c.locations[i].file);
-		locations[i].line = c.locations[i].line;
-		locations[i].function = new char[strlen(c.locations[i].function) + 1];
-		strcpy(locations[i].function, c.locations[i].function);
-	}
+    class_name = new char[strlen(c.getEClassName()) + 1];
+    strcpy(class_name, c.getEClassName());
+    message_text = new char[strlen(c.getMessageText())+1];
+    strcpy(message_text,c.getMessageText());
+    for (int i=0;i<c.location_set;i++)
+    {
+        locations[i].file = new char[strlen(c.locations[i].file) + 1];
+        strcpy(locations[i].file,c.locations[i].file);
+        locations[i].line = c.locations[i].line;
+        locations[i].function = new char[strlen(c.locations[i].function) + 1];
+        strcpy(locations[i].function, c.locations[i].function);
+    }
 }
            
 // ========================================================================
@@ -65,13 +61,13 @@ SDORuntimeException ::  SDORuntimeException(const SDORuntimeException& c)
 // ========================================================================
 SDORuntimeException :: ~SDORuntimeException()
 {
-	if (class_name) delete class_name;
-	if (message_text) delete message_text;
-	for (int i=0;i<location_set;i++)
-	{
-		if (locations[i].file) delete locations[i].file;
-		if (locations[i].function) delete locations[i].function;
-	}
+    if (class_name) delete class_name;
+    if (message_text) delete message_text;
+    for (int i=0;i<location_set;i++)
+    {
+        if (locations[i].file) delete locations[i].file;
+        if (locations[i].function) delete locations[i].function;
+    }
 
 } // end SDORuntimeException destructor
                     
@@ -153,10 +149,10 @@ void SDORuntimeException :: setExceptionLocation(const char* file,
   if (location_set == 0)
   {
     locations[0].file = new char[strlen(file)+1];
-	strcpy(locations[0].file,file);
+    strcpy(locations[0].file,file);
     locations[0].line = line;
     locations[0].function = new char[strlen(function) + 1];
-	strcpy(locations[0].function,function);
+    strcpy(locations[0].function,function);
     location_set = 1;
   }
 } // end setLocation()
@@ -171,10 +167,10 @@ void SDORuntimeException :: setLocation(const char* file,
   if (location_set < num_locations)
   {
     locations[location_set].file = new char[strlen(file) + 1];
-	strcpy(locations[location_set].file,file);
+    strcpy(locations[location_set].file,file);
     locations[location_set].line = line;
     locations[location_set].function = new char[strlen(function) + 1];
-	strcpy(locations[location_set].function,function);
+    strcpy(locations[location_set].function,function);
 
     location_set++;
   }
@@ -185,7 +181,7 @@ void SDORuntimeException :: setLocation(const char* file,
 // ========================================================================
 void SDORuntimeException :: trace(const char* text)
 {
-	/* TODO */
+    /* TODO */
   // TRACE_STREAM(0, SDORuntimeException::trace, " ", (*this));
 } // end Trace()
 

@@ -173,38 +173,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, create)
 }
 /* }}} */
 
-/* {{{ SDO_DAS_DataFactoryImpl::addType
- * This is a static factory method
- */
-PHP_METHOD(SDO_DAS_DataFactoryImpl, addType) 
-{
-	sdo_das_df_object *my_object;
-	char       *namespaceURI;
-	int         namespaceURI_len;
-	char       *typeName;
-	int         typeName_len;
-
-	/* optional parameters with default values */
-	zend_bool	sequenced = false;
-	zend_bool	open = false;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bb", 
-		    &namespaceURI, &namespaceURI_len, &typeName, &typeName_len, &sequenced, &open) == FAILURE) 
-		return;
-	
-	my_object = sdo_das_df_get_instance(getThis() TSRMLS_CC);
-
-	try {
-		my_object->dfp->addType(namespaceURI, typeName, ZEND_TRUTH(sequenced), ZEND_TRUTH(open));
-	} catch (SDORuntimeException e) {
-		sdo_throw_runtimeexception(&e TSRMLS_CC);
-	}
-
-	return;
-}
-/* }}} */
-
-
+/* {{{ */
 static zend_bool sdo_get_boolean_value (zval *z_value) {
 	
 	zend_bool bool_value;
@@ -220,6 +189,81 @@ static zend_bool sdo_get_boolean_value (zval *z_value) {
 	}
 	return bool_value;
 }
+/* }}} */
+
+/* {{{ SDO_DAS_DataFactoryImpl::addType
+ * This is a static factory method
+ */
+PHP_METHOD(SDO_DAS_DataFactoryImpl, addType) 
+{
+	sdo_das_df_object *my_object;
+	char       *namespaceURI;
+	int         namespaceURI_len;
+	char       *typeName;
+	int         typeName_len;
+
+	/* optional parameters with default values */
+	zend_bool	sequenced = false;
+	zend_bool	open = false;
+	
+	/* optional array of optional argumants */
+	zval	  *args = NULL;
+	HashTable *args_hash;
+	HashPosition args_pointer;
+	zval	 **value;
+	char	  *key_string;
+	uint	   key_string_len;
+	ulong	   key_index;
+	
+	if (ZEND_NUM_ARGS() < 2)
+		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "ssb|b",
+		&namespaceURI, &namespaceURI_len, &typeName, &typeName_len,
+		&sequenced, &open) == SUCCESS) {
+		/* the old (deprecated) signature */
+		php_error(E_WARNING, "use of deprecated signature for %s", get_active_function_name(TSRMLS_C));
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|a",
+			&namespaceURI, &namespaceURI_len, &typeName, &typeName_len,
+			&args) == FAILURE) {
+			return;		
+		} else if (args != NULL) {
+			args_hash = Z_ARRVAL_P(args);
+			
+			for (zend_hash_internal_pointer_reset_ex(args_hash, &args_pointer);
+			    zend_hash_get_current_data_ex(args_hash, (void **)&value, &args_pointer) == SUCCESS;
+			    zend_hash_move_forward_ex(args_hash, &args_pointer)) {
+				if (zend_hash_get_current_key_ex(
+					args_hash, &key_string, &key_string_len, &key_index, 0, &args_pointer) == HASH_KEY_IS_STRING) {
+					if (strcmp(key_string, "sequenced") == SUCCESS) {
+						sequenced = sdo_get_boolean_value (*value);
+					} else 
+						if (strcmp(key_string, "open") == SUCCESS) {
+							open = sdo_get_boolean_value (*value);		
+					} else {	
+						php_error(E_WARNING, "unrecognized option %s in parameter array for %s", 
+							key_string, get_active_function_name(TSRMLS_C));						
+					}
+				} else {
+					php_error(E_WARNING, "%i : option name must be a string in parameter array for %s", 
+						key_index, get_active_function_name(TSRMLS_C));
+				}
+			} 
+		} 
+	}
+	
+	my_object = sdo_das_df_get_instance(getThis() TSRMLS_CC);
+
+	try {
+		my_object->dfp->addType(namespaceURI, typeName, ZEND_TRUTH(sequenced), ZEND_TRUTH(open));
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	}
+
+	return;
+}
+/* }}} */
 
 /* {{{ SDO_DAS_DataFactoryImpl::addPropertyToType
  * This is a static factory method
@@ -388,7 +432,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 				case Type::UriType:
 				case Type::TextType:
 					convert_to_string(&temp_zval);
-					my_object->dfp->setDefault(parentType, propertyName, Z_STRVAL(temp_zval), 1 + Z_STRLEN(temp_zval));
+					my_object->dfp->setDefault(parentType, propertyName, Z_STRVAL(temp_zval));
 					break;
 				case Type::DataObjectType:
 					zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC, 

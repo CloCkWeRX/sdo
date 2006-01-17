@@ -136,6 +136,23 @@ static int sdo_model_type_compare_objects(zval *object1, zval *object2 TSRMLS_DC
 }
 /* }}} */
 
+/* {{{ sdo_model_type_sumary_string
+*/
+void sdo_model_type_summary_string (ostringstream& print_buf, const Type *typep TSRMLS_DC) 
+{	
+	if (typep->isOpenType()) {
+		print_buf << "<open> ";
+	}
+	if (typep->isSequencedType()) {
+		print_buf << "<sequenced> ";
+	}
+	if (typep->isDataObjectType()) {
+		print_buf << "<dataObject> ";
+	}
+	print_buf << typep->getURI() << ":" << typep->getName();
+}
+/* }}} */
+
 /* {{{ sdo_model_type_string
 */
 void sdo_model_type_string (ostringstream& print_buf, const Type *typep, const char *old_indent TSRMLS_DC) 
@@ -147,16 +164,7 @@ void sdo_model_type_string (ostringstream& print_buf, const Type *typep, const c
 	
 	print_buf << indent;
 	
-	if (typep->isOpenType()) {
-		print_buf << "<open> ";
-	}
-	if (typep->isSequencedType()) {
-		print_buf << "<sequenced> ";
-	}
-	if (typep->isDataObjectType()) {
-		print_buf << "<dataObject> ";
-	}
-	print_buf << typep->getURI() << ":" << typep->getName();
+	sdo_model_type_summary_string (print_buf, typep TSRMLS_CC);
 	
 	print_buf << "[" << pl.size() <<"]";
 

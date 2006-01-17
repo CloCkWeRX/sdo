@@ -78,6 +78,55 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 		//		}
 	}
 
+	public function testCreateCanBeCalledWithNoFilename() {
+		global $XMLDASTest_error_handler_called;
+		global $XMLDASTest_error_handler_severity;
+		global $XMLDASTest_error_handler_msg;
+
+		set_error_handler('XMLDASTest_user_error_handler');
+		$XMLDASTest_error_handler_called = false;
+		$exception_thrown = false;
+		try {
+			$xmldas = SDO_DAS_XML::create();
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Exception was thrown from create() when it should not have been: ".$e->getMessage());
+		}
+		$this->assertFalse($XMLDASTest_error_handler_called, 'Error handler should not have been called for create(). Message was ' . $XMLDASTest_error_handler_msg);
+	}
+
+	public function testaddTypes() {
+		global $XMLDASTest_error_handler_called;
+		global $XMLDASTest_error_handler_severity;
+		global $XMLDASTest_error_handler_msg;
+
+		set_error_handler('XMLDASTest_user_error_handler');
+		$XMLDASTest_error_handler_called = false;
+		$exception_thrown = false;
+		try {
+			$xmldas = SDO_DAS_XML::create();
+			$xmldas->addTypes("menagerie.xsd"); // this is an open type i.e. the xsd specifies it can contain "any" type
+			$xmldas->addTypes('animalTypes.xsd');
+			$xdoc = $xmldas->loadFromFile("menagerie.xml");
+		    $do = $xdoc->getRootDataObject();
+			// check the types were loaded OK
+			$giraffe = $xmldas->createDataObject('','giraffeType');
+			$giraffe->name = "Victor";
+			$giraffe->height = 21;
+			$hippo = $xmldas->createDataObject('','hippoType');
+			$hippo->name = "Henry";
+			$hippo->weight = 1000;
+			$snake = $xmldas->createDataObject('','snakeType');
+			$snake->name = "Kaa";
+			$snake->length = 25;
+			$do->giraffe = $giraffe;
+			$do->hippo = $hippo;
+			$do->snake = $snake;
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Exception was thrown from addTypes test when it should not have been: ".$e->getMessage());
+		}
+		$this->assertFalse($XMLDASTest_error_handler_called, 'Error handler should not have been called for add types test. Message was ' . $XMLDASTest_error_handler_msg);
+	}
+
 	public function testFileExceptionThrownAndWarningIssuedWhenXsdFileIsNotPresent() {
 		global $XMLDASTest_error_handler_called;
 		global $XMLDASTest_error_handler_severity;
@@ -97,6 +146,23 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 		$this->assertTrue($XMLDASTest_error_handler_severity == E_WARNING, 'Expected an E_WARNING when file not found');
 		$this->assertTrue(strpos($XMLDASTest_error_handler_msg, 'I/O warning') > 0, 'Warning message not right: ' . $XMLDASTest_error_handler_msg);
 		$this->assertTrue($exception_thrown,'SDO_DAS_XML_FileException should have been thrown but was not');
+	}
+
+	public function testaddTypesCanBeCalled() {
+		global $XMLDASTest_error_handler_called;
+		global $XMLDASTest_error_handler_severity;
+		global $XMLDASTest_error_handler_msg;
+
+		set_error_handler('XMLDASTest_user_error_handler');
+		$XMLDASTest_error_handler_called = false;
+		$exception_thrown = false;
+		try {
+			$xmldas = SDO_DAS_XML::create("company.xsd");
+			$xmldas->addTypes("company.xsd");
+		} catch (Exception $e) {
+			$this->assertTrue(false, "Exception should not have been thrown: ".$e->getMessage());
+		}
+		$this->assertFalse($XMLDASTest_error_handler_called, 'Error handler should not have been called');
 	}
 
 	public function testFileExceptionThrownAndWarningIssuedWhenXmlFileIsNotPresent() {
@@ -485,29 +551,6 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, "testsetEncoding - Exception  Caught" . $e->getMessage());
 		}
 	}
-
-	public function testOpenTypes() {
-		try {
-			throw new PHPUnit2_Framework_IncompleteTestError();
-			$xmldas = SDO_DAS_XML::create("open_company.xsd");
-			$xmldas->defineFromFile("contractor_only.xsd");
-			$xmldas->getProperty("companyNS","ContractorType");
-//			$xdoc = $xmldas->loadFromFile("mixed_company.xml");
-//			$do = $xdoc->getRootDataObject();
-//			$this->assertEquals("MegaCorp", $do->name, 'Company name is not valid.');
-//			$this->assertEquals(1, count($do->departments), 'Wrong number of departments.');
-//			$this->assertEquals("Advanced Technologies", $do->departments[0]->name, 'Department name is not valid.');
-//			$this->assertEquals("NY", $do->departments[0]->location, 'Department location invalid.');
-//			$this->assertEquals(123, $do->departments[0]->number, 'Department number invalid.');
-//			$this->assertEquals(3, count($do->departments[0]->employees), 'Wrong number of employees.');
-//			$this->assertEquals("John Jones", $do->departments[0]->employees[0]->name, 'Employee name is not valid.');
-//			// use assertSame to check both ways to reach Jane Doe really reach the same object
-//			$this->assertSame($do->departments[0]->employees[1], $do->employeeOfTheMonth, 'Two ways to reach e.o.t.m do not agree.');
-		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught\n" . $e->getMessage());
-		}
-	}
-
 }
 
 /* Graveyard

@@ -29,7 +29,7 @@
 #include "TSRM.h"
 #endif
 
-#define SDO_DAS_XML_VERSION "0.7.0"
+#define SDO_DAS_XML_VERSION "0.7.1"
 
 PHP_MINIT_FUNCTION(sdo_das_xml);
 PHP_MINFO_FUNCTION(sdo_das_xml);
@@ -37,6 +37,7 @@ PHP_MINFO_FUNCTION(sdo_das_xml);
 /* SDO_DAS_XML Class methods declarations */
 PHP_METHOD(SDO_DAS_XML, __construct);
 PHP_METHOD(SDO_DAS_XML, create);
+PHP_METHOD(SDO_DAS_XML, addTypes);
 PHP_METHOD(SDO_DAS_XML, loadFromFile);
 PHP_METHOD(SDO_DAS_XML, loadFromString);
 PHP_METHOD(SDO_DAS_XML, createDataObject);

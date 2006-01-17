@@ -47,7 +47,11 @@ ZEND_BEGIN_ARG_INFO(sdo_das_xml___construct_args, 0)
     ZEND_ARG_INFO(0, schema)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(sdo_das_xml_create_args, 0)
+ZEND_BEGIN_ARG_INFO_EX(sdo_das_xml_create_args, 0, ZEND_RETURN_VALUE, 1)
+    ZEND_ARG_INFO(0, schema)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(sdo_das_xml_addTypes_args, 0)
     ZEND_ARG_INFO(0, schema)
 ZEND_END_ARG_INFO();
 
@@ -104,6 +108,8 @@ function_entry sdo_das_xml_methods[] = {
             ZEND_ACC_PRIVATE)
     ZEND_ME(SDO_DAS_XML, create, sdo_das_xml_create_args,
             ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+    ZEND_ME(SDO_DAS_XML, addTypes, sdo_das_xml_addTypes_args,
+            ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML, loadFromFile, sdo_das_xml_loadFile_args,
             ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML, loadFromString, sdo_das_xml_loadString_args,
@@ -119,8 +125,6 @@ function_entry sdo_das_xml_methods[] = {
     ZEND_ME(SDO_DAS_XML, createDataObject, sdo_das_xml_createdo_args,
             ZEND_ACC_PUBLIC)
 //    ZEND_ME(SDO_DAS_XML, getProperty, sdo_das_xml_getProperty_args,
-//            ZEND_ACC_PUBLIC)
-//    ZEND_ME(SDO_DAS_XML, defineFromFile, sdo_das_xml_defineFromFile_args,
 //            ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
@@ -245,6 +249,83 @@ PHP_METHOD(SDO_DAS_XML, __construct)
 }
 /* }}} */
 
+/* {{{ proto SDO_DAS_XML SDO_DAS_XML::addTypes(string xsd_file)
+ */
+PHP_METHOD(SDO_DAS_XML, addTypes) 
+{
+    xmldas_object*	xmldas = NULL;
+    char* 			file_name;
+    int 			len = 0;
+    zval *			retval = NULL;
+    zend_class_entry *ce = NULL;
+    zval *this_obj = getThis();
+
+	// TODO lots of code duplicated with create()
+	
+    if (ZEND_NUM_ARGS() != 1) {
+        WRONG_PARAM_COUNT;
+    }
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name,&len) == FAILURE) {
+        RETURN_FALSE;
+    }
+    if (!len) {
+    	RETURN_FALSE;
+    }
+    
+    xmldas = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
+    if(!xmldas) {
+        php_error(E_ERROR, "SDO_DAS_XML::addTypes - Unable to get XMLDAS object from object store");
+    }
+    try {
+        xmldas->targetNamespaceURI = xmldas->xsdHelper->defineFile(file_name);
+
+        int error_count = xmldas->xsdHelper->getErrorCount();
+        if (error_count > 0) { 
+        	// TODO so sorry that this code is repeated in slightly differing forms four times now. They vary with
+        	// line 1 of the message and whether they call the xsdhelper or the xml helper for the messages
+        	int 	max_errors = 50;
+        	int 	total_msg_len = 0;
+        	int 	error_ix = 0;
+        	char* 	buffer; 						// to contain text of parser exception message: will be emalloc'd and efree'd in this block
+        	char 	parser_exception_line_1[] 		= "SDO_DAS_XML::addTypes - Unable to parse the supplied xsd file\n";
+        	char 	parser_exception_line_2[1000];  // nice and long in case there is a very long file name
+
+        	if (error_count > max_errors) {
+				sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\"  (only the first %d shown):\n",error_count, file_name, max_errors);
+        	} else {
+				sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\":\n",error_count, file_name);            	
+        	}
+        	total_msg_len = strlen(parser_exception_line_1) + strlen(parser_exception_line_2);
+        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
+        		total_msg_len += strlen(xmldas->xsdHelper->getErrorMessage(error_ix));
+        	}
+        	// TODO improve on this temporary fix (+1) for 0.7.0
+        	buffer = (char*) emalloc(total_msg_len+1);
+        	strcpy(buffer, parser_exception_line_1);
+        	strcat(buffer, parser_exception_line_2);
+        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
+        		strcat(buffer, xmldas->xsdHelper->getErrorMessage(error_ix));
+        	}
+			sdo_das_xml_throw_parserexception(buffer TSRMLS_CC);
+			efree(buffer);
+	        RETURN_NULL();
+        }            
+    } catch (SDOFileNotFoundException e) {
+        sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
+        RETURN_NULL();
+    } catch (SDOXMLParserException *e) {
+    	const char* msg = e->getMessageText();
+        sdo_das_xml_throw_parserexception((char*)msg TSRMLS_CC);
+        RETURN_NULL();            
+    } catch (SDORuntimeException e) {
+        sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
+        RETURN_NULL();
+    }
+
+}
+/* }}} */
+
+
 /* {{{ proto SDO_DAS_XML SDO_DAS_XML::create(string xsd_file)
  */
 PHP_METHOD(SDO_DAS_XML, create) 
@@ -263,93 +344,74 @@ PHP_METHOD(SDO_DAS_XML, create)
     sdo_das_df_object *das_df_obj;
     DataFactoryPtr 	dataFactory;
 
-    if (ZEND_NUM_ARGS() != 1) {
+    if (ZEND_NUM_ARGS() > 1) {
         WRONG_PARAM_COUNT;
     }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name,&len) == FAILURE) {
-        RETURN_FALSE;
+    
+    Z_TYPE_P(return_value) = IS_OBJECT;
+    if (object_init_ex(return_value, sdo_das_xml_class_entry) == FAILURE) {
+        php_error(E_ERROR, "SDO_DAS_XML::create - Unable to create SDO_DAS_XML");
+        return;
     }
+    
+    xmldas = (xmldas_object *) zend_object_store_get_object(return_value TSRMLS_CC);
 
-    if (len) {
-        Z_TYPE_P(return_value) = IS_OBJECT;
-        if (object_init_ex(return_value, sdo_das_xml_class_entry) == FAILURE) {
-            php_error(E_ERROR, "SDO_DAS_XML::create - Unable to create SDO_DAS_XML");
-            return;
-        }
-        xmldas = (xmldas_object *) zend_object_store_get_object(return_value TSRMLS_CC);
-        try {
-            dataFactory = DataFactory::getDataFactory();
-            xmldas->xsdHelper = HelperProvider::getXSDHelper((DataFactory*)dataFactory);
-            xmldas->xmlHelper = HelperProvider::getXMLHelper((DataFactory*)dataFactory);
-            xmldas->targetNamespaceURI = xmldas->xsdHelper->defineFile(file_name);
+    dataFactory = DataFactory::getDataFactory();
+    xmldas->xsdHelper = HelperProvider::getXSDHelper((DataFactory*)dataFactory);
+    xmldas->xmlHelper = HelperProvider::getXMLHelper((DataFactory*)dataFactory);
 
-            int error_count = xmldas->xsdHelper->getErrorCount();
-            if (error_count > 0) {
-            	int 	max_errors = 50;
-            	int 	total_msg_len = 0;
-            	int 	error_ix = 0;
-            	char* 	buffer; 						// to contain text of parser exception message: will be emalloc'd and efree'd in this block
-            	char 	parser_exception_line_1[] 		= "SDO_DAS_XML::create - Unable to parse the supplied xsd file\n";
-            	char 	parser_exception_line_2[1000];  // nice and long in case there is a very long file name
-
-            	if (error_count > max_errors) {
+	if (ZEND_NUM_ARGS() == 1) {
+	    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name,&len) == FAILURE) {
+	        RETURN_FALSE;
+	    }
+	    if(!len) {
+	        RETURN_FALSE;
+	    }	
+	
+	    try {
+	        xmldas->targetNamespaceURI = xmldas->xsdHelper->defineFile(file_name);
+	
+	        int error_count = xmldas->xsdHelper->getErrorCount();
+	        if (error_count > 0) {
+	        	int 	max_errors = 50;
+	        	int 	total_msg_len = 0;
+	        	int 	error_ix = 0;
+	        	char* 	buffer; 						// to contain text of parser exception message: will be emalloc'd and efree'd in this block
+	        	char 	parser_exception_line_1[] 		= "SDO_DAS_XML::create - Unable to parse the supplied xsd file\n";
+	        	char 	parser_exception_line_2[1000];  // nice and long in case there is a very long file name
+	
+	        	if (error_count > max_errors) {
 					sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\"  (only the first %d shown):\n",error_count, file_name, max_errors);
-            	} else {
+	        	} else {
 					sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\":\n",error_count, file_name);            	
-            	}
-            	total_msg_len = strlen(parser_exception_line_1) + strlen(parser_exception_line_2);
-            	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
-            		total_msg_len += strlen(xmldas->xsdHelper->getErrorMessage(error_ix));
-            	}
-            	// TODO improve on this temporary fix (+1) for 0.7.0
-            	buffer = (char*) emalloc(total_msg_len+1);
-            	strcpy(buffer, parser_exception_line_1);
-            	strcat(buffer, parser_exception_line_2);
-            	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
-            		strcat(buffer, xmldas->xsdHelper->getErrorMessage(error_ix));
-            	}
+	        	}
+	        	total_msg_len = strlen(parser_exception_line_1) + strlen(parser_exception_line_2);
+	        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
+	        		total_msg_len += strlen(xmldas->xsdHelper->getErrorMessage(error_ix));
+	        	}
+	        	// TODO improve on this temporary fix (+1) for 0.7.0
+	        	buffer = (char*) emalloc(total_msg_len+1);
+	        	strcpy(buffer, parser_exception_line_1);
+	        	strcat(buffer, parser_exception_line_2);
+	        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
+	        		strcat(buffer, xmldas->xsdHelper->getErrorMessage(error_ix));
+	        	}
 				sdo_das_xml_throw_parserexception(buffer TSRMLS_CC);
 				efree(buffer);
-    	        RETURN_NULL();
-            }            
-
-//            if (obj->xsdHelper->getErrorCount() != 0) {
-//            	char parser_exception_msg[PARSER_EXCEPTION_MSG_LEN] = "SDO_DAS_XML::create - Unable to parse the supplied xsd file\n";
-//            	int error_count = obj->xsdHelper->getErrorCount();
-//			    if (error_count > 0) {
-//			    	char parse_error_hdr[100];
-//					sprintf(parse_error_hdr,"%d parse error(s) occured when parsing the XML file \"%s\":\n",error_count, file_name);
-//					strcat(parser_exception_msg,parse_error_hdr);
-//					for (int error_index=0;error_index<error_count;error_index++) {
-//						const char * parse_error_msg = obj->xsdHelper->getErrorMessage(error_index);
-//						if (strlen(parser_exception_msg) + strlen(parse_error_msg) + 10 < PARSER_EXCEPTION_MSG_LEN) {
-//							char msg_number[10];
-//							sprintf(msg_number,"%d. ",error_index);
-//							strcat (parser_exception_msg, msg_number);
-//							strcat (parser_exception_msg,parse_error_msg);
-//						} else {
-//							strncat(parser_exception_msg,"**TRUNCATED**",PARSER_EXCEPTION_MSG_LEN-strlen(parser_exception_msg)-1);
-//							break;
-//						}
-//					}
-//				}
-//				sdo_das_xml_throw_parserexception(parser_exception_msg TSRMLS_CC);
-//    	        RETURN_NULL();
-//            }            
-        } catch (SDOFileNotFoundException e) {
-            sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
-            RETURN_NULL();
-        } catch (SDOXMLParserException *e) {
-        	const char* msg = e->getMessageText();
-            sdo_das_xml_throw_parserexception((char*)msg TSRMLS_CC);
-            RETURN_NULL();            
-        } catch (SDORuntimeException e) {
-            sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
-            RETURN_NULL();
-        }
-    } else {
-        RETURN_FALSE;
-    }
+		        RETURN_NULL();
+	        }            
+	    } catch (SDOFileNotFoundException e) {
+	        sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
+	        RETURN_NULL();
+	    } catch (SDOXMLParserException *e) {
+	    	const char* msg = e->getMessageText();
+	        sdo_das_xml_throw_parserexception((char*)msg TSRMLS_CC);
+	        RETURN_NULL();            
+	    } catch (SDORuntimeException e) {
+	        sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
+	        RETURN_NULL();
+	    }
+	}
 
     /********************************************************************
      * Instantiate an SDO_DAS_DataFactoryImpl object now. Fill in with the 
@@ -374,6 +436,7 @@ PHP_METHOD(SDO_DAS_XML, create)
     das_df_obj->dfp = dataFactory;  
     xmldas->php_das_df = retval;
     zend_objects_store_add_ref(xmldas->php_das_df TSRMLS_CC);
+    
 }
 /* }}} end SDO_DAS_XML::create */
 

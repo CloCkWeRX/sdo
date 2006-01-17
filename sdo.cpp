@@ -76,7 +76,7 @@ PHP_SDO_API zend_class_entry *sdo_unsupportedoperationexception_class_entry;
 
 /* {{{ single SDO_DataObject parameter */
 static ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject, 0)
-    ZEND_ARG_OBJ_INFO(0, dataObject, SDO_DataObject, 0)
+    ZEND_ARG_OBJ_INFO(0, data_object, SDO_DataObject, 0)
 ZEND_END_ARG_INFO();
 /* }}} */
 
@@ -89,6 +89,7 @@ static ZEND_BEGIN_ARG_INFO(arginfo___set, 0)
     ZEND_ARG_INFO(0, name)
     ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
+
 function_entry sdo_propertyaccess_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_PropertyAccess, __get, arginfo___get)
 	ZEND_ABSTRACT_ME(SDO_ProperytAccess, __set, arginfo___set)
@@ -112,28 +113,25 @@ function_entry sdo_dataobject_methods[] = {
 /* }}} */
 
 /* {{{ SDO_Sequence methods */
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_getpropertyindex, 0)
-    ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO();
-
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_getpropertyname, 0)
-    ZEND_ARG_INFO(0, index)
+static ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_getproperty, 0)
+    ZEND_ARG_INFO(0, sequence_index)
 ZEND_END_ARG_INFO();
 
 static ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_move, 0)
-    ZEND_ARG_INFO(0, toIndex)
-    ZEND_ARG_INFO(0, fromIndex)
+    ZEND_ARG_INFO(0, to_index)
+    ZEND_ARG_INFO(0, from_index)
 ZEND_END_ARG_INFO();
 
 static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_sequence_insert, 0, ZEND_RETURN_VALUE, 1)
     ZEND_ARG_INFO(0, value)
-    ZEND_ARG_INFO(0, sequenceIndex)
-	ZEND_ARG_INFO(0, propertyIdentifier)
+    ZEND_ARG_INFO(0, sequence_index)
+	ZEND_ARG_INFO(0, property_identifier)
 ZEND_END_ARG_INFO();
 
 function_entry sdo_sequence_methods[] = {
-	ZEND_ABSTRACT_ME(SDO_Sequence, getPropertyIndex, arginfo_sdo_sequence_getpropertyindex)
-	ZEND_ABSTRACT_ME(SDO_Sequence, getPropertyName, arginfo_sdo_sequence_getpropertyname)
+	ZEND_ABSTRACT_ME(SDO_Sequence, getProperty, arginfo_sdo_sequence_getproperty)
+	ZEND_ABSTRACT_ME(SDO_Sequence, getPropertyIndex, arginfo_sdo_sequence_getproperty)
+	ZEND_ABSTRACT_ME(SDO_Sequence, getPropertyName, arginfo_sdo_sequence_getproperty)
 	ZEND_ABSTRACT_ME(SDO_Sequence, move, arginfo_sdo_sequence_move)
 	ZEND_ABSTRACT_ME(SDO_Sequence, insert, arginfo_sdo_sequence_insert)
 	ZEND_ABSTRACT_ME(SDO_Sequence, count, 0)
@@ -157,8 +155,8 @@ function_entry sdo_list_methods[] = {
 
 /* {{{ SDO_DataFactory methods */
 static ZEND_BEGIN_ARG_INFO(arginfo_sdo_datafactory_create, 0)
-    ZEND_ARG_INFO(0, namespaceURI)
-    ZEND_ARG_INFO(0, typeName)
+    ZEND_ARG_INFO(0, namespace_uri)
+    ZEND_ARG_INFO(0, type_name)
 ZEND_END_ARG_INFO();
 
 function_entry sdo_datafactory_methods[] = {
@@ -176,18 +174,17 @@ function_entry sdo_das_dataobject_methods[] = {
 
 /* {{{ SDO_DAS_DataFactory methods */
 static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addType, 0, ZEND_RETURN_VALUE, 2)
-    ZEND_ARG_INFO(0, namespaceURI)
-    ZEND_ARG_INFO(0, typeName)
-    ZEND_ARG_INFO(0, sequenced)
-    ZEND_ARG_INFO(0, open)
+    ZEND_ARG_INFO(0, namespace_uri)
+    ZEND_ARG_INFO(0, type_name)
+    ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
 static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addPropertyToType, 0, ZEND_RETURN_VALUE, 5)
-    ZEND_ARG_INFO(0, parentNamespaceURI)
-    ZEND_ARG_INFO(0, parentTypeName)
-    ZEND_ARG_INFO(0, propertyName)
-    ZEND_ARG_INFO(0, namespaceURI)
-    ZEND_ARG_INFO(0, typeName)
+    ZEND_ARG_INFO(0, parent_namespace_uri)
+    ZEND_ARG_INFO(0, parent_type_name)
+    ZEND_ARG_INFO(0, property_name)
+    ZEND_ARG_INFO(0, namespace_uri)
+    ZEND_ARG_INFO(0, type_name)
     ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
@@ -253,8 +250,9 @@ function_entry sdo_dataobjectimpl_methods[] = {
 
 /* {{{ SDO_SequenceImpl methods */
 function_entry sdo_sequenceimpl_methods[] = {
-	ZEND_ME(SDO_SequenceImpl, getPropertyIndex, arginfo_sdo_sequence_getpropertyindex, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_SequenceImpl, getPropertyName, arginfo_sdo_sequence_getpropertyname, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_SequenceImpl, getProperty, arginfo_sdo_sequence_getproperty, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_SequenceImpl, getPropertyIndex, arginfo_sdo_sequence_getproperty, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_SequenceImpl, getPropertyName, arginfo_sdo_sequence_getproperty, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, move, arginfo_sdo_sequence_move, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, insert, arginfo_sdo_sequence_insert, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, count, 0, ZEND_ACC_PUBLIC)
@@ -394,21 +392,9 @@ PHP_MINIT_FUNCTION(sdo)
 	if (SdoRuntime::getMajor() != 0) {
 		php_error (E_ERROR, "SDO: incompatible versions of SDO extension and SDO library");
 	}
-
-	/* TODO I'd like this to be extern rather than have to redefine it
-	 * REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", (char *)Type::SDOTypeNamespaceURI, CONST_CS | CONST_PERSISTENT);
-	 */
-	REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", "commonj.sdo", CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", (char *)Type::SDOTypeNamespaceURI, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("SDO_VERSION", SDO_VERSION, CONST_CS | CONST_PERSISTENT);
-
-	/*
-	 * TODO The following should be class constants, but were defined as module constants to work around a problem.
-	 * These are now deprecated and will be removed in a future release.
-	 */
-	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_NONE", CS_NONE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_MODIFICATION", CS_MODIFICATION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_ADDITION", CS_ADDITION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SDO_DAS_CHANGE_SUMMARY_DELETION", CS_DELETION, CONST_CS | CONST_PERSISTENT);
 
 	/* interface SDO_PropertyAccess */
 	INIT_CLASS_ENTRY(ce, "SDO_PropertyAccess", sdo_propertyaccess_methods);

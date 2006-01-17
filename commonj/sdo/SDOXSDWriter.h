@@ -1,28 +1,27 @@
 /*
-+----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
-| All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
-|  http://www.apache.org/licenses/LICENSE-2.0                          |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Pete Robbins                                                 |
-+----------------------------------------------------------------------+
+ *
+ *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 
-*/
-/* $Id$ */
+/* $Rev$ $Date$ */
 
 #ifndef _SDOXSDWRITER_H_
 #define _SDOXSDWRITER_H_
+
+#include "commonj/sdo/disable_warn.h"
+
 #include <libxml/xmlwriter.h>
 #include "commonj/sdo/SDOXMLString.h"
 #include "commonj/sdo/DataObject.h"
@@ -31,38 +30,45 @@
 
 namespace commonj
 {
-	namespace sdo
-	{
+    namespace sdo
+    {
 
-		class SDOXSDWriter
-		{
+/** 
+ * SDOXSDWriter writes XSD from types and properties.
+ * The writer takes the contents of a data factory and writes an
+ * XSD which will be usable to serialize data from the graph.
+ */
+        class SDOXSDWriter
+        {
 
-		public:
+        public:
 
-			SDOXSDWriter(DataFactoryPtr dataFactory = NULL);
+            SDOXSDWriter(DataFactoryPtr dataFactory = NULL);
 
-			virtual ~SDOXSDWriter();
+            virtual ~SDOXSDWriter();
 
-			int write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
-				const propertyMap& openprops);
+            int write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
+                const propertyMap& openprops);
 
-		protected:
-			void setWriter(xmlTextWriterPtr textWriter);
-			void freeWriter();
+        protected:
+            void setWriter(xmlTextWriterPtr textWriter);
+            void freeWriter();
 
-		private:
-			xmlTextWriterPtr writer;
+        private:
+            xmlTextWriterPtr writer;
 
-		    void writeProps( const propertyMap& pl, const SDOXMLString& targetNamespaceURI,
-				SDOXMLString& xsd);
-			int writeDO(DataObjectPtr dataObject, const SDOXMLString& elementName);
+            std::map<SDOXMLString,SDOXMLString> namespaceMap;
 
-			DataFactoryPtr	dataFactory;
+            void writeProps( const propertyMap& pl, const SDOXMLString& targetNamespaceURI,
+                SDOXMLString& xsd);
+            int writeDO(DataObjectPtr dataObject, const SDOXMLString& elementName);
 
-			SDOXMLString resolveName(const SDOXMLString& uri, const SDOXMLString& name, const SDOXMLString& targetNamespaceURI);
+            DataFactoryPtr    dataFactory;
 
-		};
-	} // End - namespace sdo
+            SDOXMLString resolveName(const SDOXMLString& uri, const SDOXMLString& name, const SDOXMLString& targetNamespaceURI);
+
+        };
+    } // End - namespace sdo
 } // End - namespace commonj
 
 

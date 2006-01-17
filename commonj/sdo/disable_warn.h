@@ -17,32 +17,11 @@
 
 /* $Rev$ $Date$ */
 
-#ifndef _PARSER_ERROR_SETTER_H_
-#define _PARSER_ERROR_SETTER_H_
+#ifndef _DISABLE_WARN_H_
+#define _DISABLE_WARN_H_
 
-#include "commonj/sdo/export.h"
-
-#include "commonj/sdo/disable_warn.h"
-
-#include <vector>
-using namespace std;
-
-namespace commonj{
-namespace sdo{
-
-/**
- * The ParserErrorSetter builds a list of all the errors which 
- * occurred during a parse, so they can be displayed for the
- * user of an XSDHelper or XMLHelper
- */
-
-class ParserErrorSetter
-{
-public:
-    virtual ~ParserErrorSetter();
-    virtual void setError(const char* message) = 0;
-};
-};
-};
+#if defined(WIN32)  || defined (_WINDOWS)
+#pragma warning(disable: 4786)
+#endif
 
 #endif

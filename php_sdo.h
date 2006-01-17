@@ -119,20 +119,11 @@ The corresponding property index.  A value of -1 means the element does not belo
 
 Should throw SDO_IndexOutOfBoundsException, but doesn't at the moment.
 */
-PHP_METHOD(SDO_Sequence, getPropertyIndex);
+PHP_METHOD(SDO_Sequence, getProperty);
 /* }}} */
 
-/* {{{ proto string SDO_Sequence::getPropertyName(integer sequenceIndex)
-Return the property name for the specified sequence index.
-
-The sequence index
-
-The corresponding property name.  A value of NULL means the element does not belong to a property and must therefore be unstructured text.
-
-Should throw SDO_IndexOutOfBoundsException, but doesn't at the moment.
-*/
-PHP_METHOD(SDO_Sequence, getPropertyName);
-/* }}} */
+PHP_METHOD(SDO_Sequence, getPropertyIndex); /*deprecated */
+PHP_METHOD(SDO_Sequence, getPropertyName); /* deprecated */
 
 /* {{{ proto void SDO_Sequence::move(integer toIndex, integer fromIndex)
 Modify the position of the item in the sequence, without altering the value of the property in the SDO_DataObject.
@@ -399,7 +390,7 @@ Get the array of properties defined for the type.
 
 An array of SDO_Model_Property objects.
 */
-PHP_METHOD(SDO_Model_Type, getProperty);
+PHP_METHOD(SDO_Model_Type, getProperties);
 /* }}} */
 
 /* {{{ proto SDO_Model_Property SDO_Model_Type::getProperty(mixed identifier)
@@ -547,6 +538,7 @@ PHP_METHOD(SDO_DataObjectImpl, __get);
 PHP_METHOD(SDO_DataObjectImpl, __set);
 PHP_METHOD(SDO_DataObjectImpl, count);
 
+PHP_METHOD(SDO_SequenceImpl, getProperty);
 PHP_METHOD(SDO_SequenceImpl, getPropertyIndex);
 PHP_METHOD(SDO_SequenceImpl, getPropertyName);
 PHP_METHOD(SDO_SequenceImpl, move);

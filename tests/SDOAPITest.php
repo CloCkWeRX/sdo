@@ -58,7 +58,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// are we using the matched extension version?
 		$version = phpversion('sdo');
-		$this->assertTrue(($version >= '0.7.0'), 'Incompatible version of php_sdo extension.');
+		$this->assertTrue(($version >= '0.7.1'), 'Incompatible version of php_sdo extension.');
 
 		// We don''t want to force direct type comparison (e.g. we want (int)100 to be the same as "100")
 		$this->setLooselyTyped(true);
@@ -68,9 +68,13 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// Create the types
 		$this->dmsDf->addType(ROOT_NS, ROOT_TYPE);
-		$this->dmsDf->addType(COMPANY_NS, COMPANY_TYPE, true); /*sequenced */
+		$this->dmsDf->addType(COMPANY_NS, COMPANY_TYPE, array('sequenced'=>'true'));
 		$this->dmsDf->addType(COMPANY_NS, DEPARTMENT_TYPE);
 		$this->dmsDf->addType(COMPANY_NS, EMPLOYEE_TYPE);
+
+		$this->dmsDf->addType(COMPANY_NS, 'OpenType', array('open'=>true));		
+		$this->dmsDf->addType(COMPANY_NS, 'OpenSeqType', array('open'=>true, 'sequenced'=>true));
+
 
 		// add properties to the root type
 		$this->dmsDf->addPropertyToType(ROOT_NS, ROOT_TYPE, 'company', COMPANY_NS, COMPANY_TYPE);
@@ -162,8 +166,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testDataObject() {
-		// We require this to have been done
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		// Test array operator and setting a property
 		$this->company[0] = 'Acme';
@@ -226,11 +229,29 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		}		
 		$this->assertEquals(count($set_props), $iters, "SDO_DataObject iteration test failed - incorrect number of interations.");
 		$this->assertTrue(($iters > 0), "SDO_DataObject iteration test failed - zero iterations performed.");
+
+		/* set a non-existent property */
+		try {
+			$this->company->nonexistent = 11;
+			$this->assertTrue(false, 'SDODataObject setting an invalid property succeeded.');
+		} catch (SDO_PropertyNotFoundException $e) {
+		} catch (SDO_Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for SDODataObject Setting an invalid property: ".$e->getMessage());
+		}
+
+		/* get a non-existent property */
+		try {
+			$value = $this->company->nonexistent;
+			$this->assertTrue(false, 'SDODataObject getting an invalid property succeeded.');
+		} catch (SDO_PropertyNotFoundException $e) {
+		} catch (SDO_Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for SDODataObject Getting an invalid property: ".$e->getMessage());
+		}
 	}
 
 	public function testBoolean() {
 		// We require this to have been done
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		// Test the Boolean type
 		$this->company->bool = true;
@@ -255,7 +276,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	public function testTypes() {
 
 		// We require this to have been done
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		// Test the String type
 		$this->company->string = "An SDO String";
@@ -330,7 +351,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	/* test multi-valued primitives */
 	public function testMTypes() {
 		// We require this to have been done
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		$mstring = $this->company->Mstring;
 
@@ -370,7 +391,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 	public function testNavigation() {
 		// Run this to initialize the data object
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		// Test use of non-containment reference
 		$ceo = $this->company->createDataObject('CEO');
@@ -419,7 +440,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	public function testList() {
 
 		// We need to do this as part of the setup
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		$department = $this->company->createDataObject('departments');
 		$departments = $this->company->departments;
@@ -502,7 +523,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testListEquality() {
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 		$department1 = $this->company->createDataObject('departments');
 		$department1->name = 'Duplicate';
 		$department2 = $this->company->createDataObject('departments');
@@ -522,7 +543,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 
 	public function testChangeSummary() {
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		$department = $this->company->createDataObject('departments');
 		$department->name = 'Zoology';
@@ -541,7 +562,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// get the change type
 		$ct = $cs->getChangeType($simon);
-		$this->assertEquals(SDO_DAS_CHANGE_SUMMARY_NONE, $ct, 'Change type set but no changes have been made.');
+		$this->assertEquals(SDO_DAS_ChangeSummary::NONE, $ct, 'Change type set but no changes have been made.');
 
 		// make some changes
 		$oldSN = $simon->SN;
@@ -552,11 +573,11 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// get the change type
 		$ct = $cs->getChangeType($simon);
-		$this->assertEquals(SDO_DAS_CHANGE_SUMMARY_MODIFICATION, $ct, 'Change type should be MODIFICATION.');
+		$this->assertEquals(SDO_DAS_ChangeSummary::MODIFICATION, $ct, 'Change type should be MODIFICATION.');
 		$ct = $cs->getChangeType($david);
-		$this->assertEquals(SDO_DAS_CHANGE_SUMMARY_ADDITION, $ct, 'Change type should be ADDITION.');
+		$this->assertEquals(SDO_DAS_ChangeSummary::ADDITION, $ct, 'Change type should be ADDITION.');
 		$ct = $cs->getChangeType($saba);
-		$this->assertEquals(SDO_DAS_CHANGE_SUMMARY_NONE, $ct, 'Change type should be NONE.');
+		$this->assertEquals(SDO_DAS_ChangeSummary::NONE, $ct, 'Change type should be NONE.');
 
 		// get changed objects
 		$changed = $cs->getChangedDataObjects();
@@ -583,7 +604,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 	public function testPrimitiveSequence() {
 		// We need to do this as part of the setup
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		$company = $this->company;
 
@@ -596,10 +617,8 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		$this->assertEquals(4, $seq->count(), 'Sequence count is wrong.');
 		$this->assertEquals($seq[1], $company->string, 'Sequence and property access not equal.');
-		$this->assertNull($seq->getPropertyName(0), 'Property name of Text should be NULL.');
-		$this->assertEquals(-1, $seq->getPropertyIndex(0), 'Property index of Text should be -1.');
-		$this->assertEquals('string', $seq->getPropertyName(1), 'Property name incorrect.');
-		$this->assertEquals(4, $seq->getPropertyIndex(1), 'Property index incorrect.');
+		$this->assertNull($seq->getProperty(0), 'Property of Text should be NULL.');
+		$this->assertEquals('string', $seq->getProperty(1)->getName(), 'Property name incorrect.');
 
 		// modify the sequence
 		$seq[0] = 'new'.$seq[0];
@@ -615,13 +634,13 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$seq->move(3, 0);
 		$this->assertEquals(4, $seq->count(), 'After move, sequence count is wrong.');
 		$this->assertEquals($seq[3], $company->string, 'After move, sequence and property access not equal.');
-		$this->assertEquals('string', $seq->getPropertyName(3), 'After move, property name incorrect.');
-
+		$this->assertEquals('string', $seq->getProperty(3)->getName(), 'After move, property name incorrect.');
+		
 	}
 
 	public function testMultiPrimitiveSequence() {
 		// We need to do this as part of the setup
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		$company = $this->company;
 
@@ -654,7 +673,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 	public function testDataObjectSequence() {
 		// We need to do this as part of the setup
-		$this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
 		$company = $this->company;
 
@@ -987,20 +1006,18 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 	
 	public function testNull() {
-	    $this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 	    $this->company->name = 'ACME Corp';
 	    $this->assertNotNull ($this->company->name, 'company name property is null.');
 	    $this->company->name = NULL;
-	    $this->assertNull ($this->company->name, 'nulled company name property is not null.');
+	    $this->assertNull ($this->company->name, 'nulled company name property has value "'.$this->company->name.'" ');
 	    $this->company->name = ''; /* an empty string is not null */
 	    $this->assertNotNull ($this->company->name, 'empty company name property is null.');
 	    
-	    $this->assertNull($this->company->int, 'unset int property is not null.');
 	    $this->company->int = NULL;
-	    $this->assertNull($this->company->int, 'nulled int property is not null.');
+	    $this->assertNull($this->company->int, 'nulled int property has value "'.$this->company->int.'" ');
 	    $this->company->int = 4;
-	    $this->assertNotNull($this->company->int, 'initialized int property is null.');
-	   
+	    $this->assertNotNull($this->company->int, 'initialized int property is null.');	   
 	}
 	
 	public function testAddPropertyToType() {
@@ -1159,7 +1176,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	}
 	
 	public function testDefaultValue() {
-	    $this->testDataFactory();
+		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 	    $this->assertFalse(isset($this->company->boolD), 'isset is true for uninitialized Boolean property with default value');
 	    $this->assertTrue($this->company->boolD, 'Unexpected default value for uninitialized Boolean property with default value');
 	    
@@ -1171,6 +1188,117 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	    $this->assertFalse(isset($this->company->boolD), 'isset is true for unset Boolean property with default value');
 	    $this->assertTrue($this->company->boolD, 'Unexpected value for unset Boolean property with default value');
 	}
+	
+	public function testOpenType() {
+	    $this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'open', COMPANY_NS, 'OpenType');
+	    $this->dmsDf->addPropertyToType(COMPANY_NS, 'OpenType', 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+	
+	    $company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
+	    $company->name = "ACME Corp";
+	
+	    $open = $company->createDataObject('open');
+	    $rdo = new SDO_Model_ReflectionDataObject($open);	    
+	    $prop_count = count($rdo->getInstanceProperties());
+	    $this->assertEquals($prop_count, count($rdo->getType()->getProperties()), 
+	        'count of instance properties differs from count of type properties');
+	    $this->assertTrue($rdo->getType()->isOpenType(), 'isOpen flag not set');
+	    
+	    $old_prop_count = $prop_count;    
+	    $open->name = 'OpenName';
+	    $open->stringA = "StringValue";
+	    $prop_count++;
+	    $open->numberA = 42;
+	    $prop_count++;
+	    $open->object = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
+	    $prop_count++;
+	    $open->object->name='Alien';
+	    $open['stringB'] = $open['stringA'];
+	    $prop_count++;
+	    $open['numberB'] = $open['numberA'];
+	    $prop_count++;
+	    $this->assertEquals(42, $open->numberB, 
+	        'wrong value for number property of open type');
+	    $this->assertEquals('StringValue', $open->stringB, 
+	        'wrong value for string property of open type');
+	        
+	    $rdo = new SDO_Model_ReflectionDataObject($open);
+	    $this->assertEquals($prop_count, count($rdo->getInstanceProperties()), 
+	        'wrong number of instance properties after adding open types');
+	    /* ... but the Type should not have changed */
+	    $this->assertEquals($old_prop_count, count($rdo->getType()->getProperties()), 
+	        'count of instance properties differs from count of type properties');
+	        
+	    unset ($open->numberA);
+	    $prop_count--;
+	    $this->assertEquals($prop_count, count($rdo->getInstanceProperties()), 
+	        'wrong number of instance properties after unsetting open type');
+	        
+	    $this->assertTrue(isset($open->numberB), 'valid instance property of open type fails isset()');
+	    $this->assertFalse(isset($open->numberA), 'unset instance property of open type satisfies isset()');
+	    $this->assertFalse(isset($open->numberC), 'non-existent instance property of open type satisfies isset()');
+
+		/* get a non-existent property from an open type */
+		try {
+			$value = $open->nonexistent;
+			$this->assertTrue(false, 'SDODataObject getting an invalid property from an open type succeeded.');
+		} catch (SDO_PropertyNotFoundException $e) {
+		} catch (SDO_Exception $e) {
+			$this->assertTrue(false, "Incorrect exception thrown for SDODataObject Getting an invalid property from an open type: ".$e->getMessage());
+		}
+    }
+
+	public function testOpenSeqType() {
+	    $this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'openSeq', COMPANY_NS, 'OpenSeqType');
+	    $this->dmsDf->addPropertyToType(COMPANY_NS, 'OpenSeqType', 'name', SDO_TYPE_NAMESPACE_URI, 'String');
+	
+	    $company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
+	    $company->name = "ACME Corp";
+	
+	    $open = $company->createDataObject('openSeq');
+
+		$seq = $open->getSequence();
+
+		/* first add an existing property */
+		$seq->insert('Sequence name=>');
+		$seq->insert('OpenSeqName', NULL, 'name');
+		$this->assertEquals($open->name, 'OpenSeqName', 'sequence and property access not equal;');
+
+// FAILED: can't yet set open type through sequence interface
+//		/* now add an unknown property to the open type */
+//		$seq->insert(' stringA=>');
+//		$seq->insert('StringValue', NULL, 'stringA');
+//		$this->assertEquals($open->stringA, 'StringValue', 'sequence and property access for open type not equal;');
+//	    
+//		$seq->insert(' numberA=>');
+//		$seq->insert(42, NULL, 'numberA');
+//		$this->assertEquals($open->numberA, 42, 'sequence and property access for open type not equal;');
+//
+//		/* add an unknown data object property */
+  		$employee = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
+//		$seq->insert($employee, NULL, 'object');
+//		$index = $seq->count() - 1;
+		$employee->name = 'Alien';
+//		$this->assertEquals($seq[$index]->name, 'Alien', 'sequence and property access for open type not equal;');
+
+/* bypass the above problem by pre-initializing the open types through the DataObject interface.
+ * Then we can test setting them through the sequence 
+ */
+		$open->stringB = 'BAD';
+		$open->numberB = -1;
+		$open->object = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
+
+		$seq->insert(' numberB=>');
+		$seq->insert(42, NULL, 'numberB');
+		$this->assertEquals($open->numberB, 42, 'sequence and property access for open type not equal;');
+
+		$seq->insert(' stringB=>');
+		$seq->insert('StringValue', NULL, 'stringB');
+		$this->assertEquals($open->stringB, 'StringValue', 'sequence and property access for open type not equal;');
+
+		$seq->insert(' object=>');
+		$seq->insert($employee, NULL, 'object');
+		$this->assertEquals($open->object->name, 'Alien', 'sequence and property access for open type not equal;');
+    }
 }
 
 ?>
