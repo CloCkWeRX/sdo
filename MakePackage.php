@@ -39,12 +39,16 @@
 //                 . "Various bug fixes, including PECL bugs 6002 and 6006.\n"
 //                 . "Support for XML Schema 'nillable'.\n"
 //                 . "Support to build and run against PHP 6.0 (only with unicode semantics off)." ,
-       'notes'  => "This release adds support for reflection on a data object. " 
-                   . "The SDO_Model_ReflectionDataObject gives the programmer access to " 
-                   . "the type and structure information in a data object's model. "
-                   . "This can help with debugging, or be used in dynamic user interface generation.",
+// 'notes'  => "This release adds support for reflection on a data object. " 
+//           . "The SDO_Model_ReflectionDataObject gives the programmer access to " 
+//           . "the type and structure information in a data object's model. "
+//           . "This can help with debugging, or be used in dynamic user interface generation.",
+       'notes' => "This release adds support for open types, that is, types which " 
+             . "can have additional properties added to a runtime instance, for example "
+             . "to support an XML <any/> element."
+             . "Also various bug fixes. ",
        'simpleoutput' => true,
-       'version' => '0.7.0',
+       'version' => '0.7.1',
        'baseinstalldir' => 'SDO',
        'state' => 'beta',
        'license' => 'Apache 2.0',
