@@ -383,7 +383,9 @@ class SDO_DAS_Relational {
 
 	private static function isRoot($do)
 	{
-		return ($do->getType() == array(SDO_DAS_Relational::DAS_NAMESPACE , SDO_DAS_Relational::DAS_ROOT_TYPE));
+		$reflection_do = new SDO_Model_ReflectionDataObject($do);
+		$type = $reflection_do->getType();
+		return ($type->namespaceURI == SDO_DAS_Relational::DAS_NAMESPACE && $type->name == SDO_DAS_Relational::DAS_ROOT_TYPE);
 	}
 
 	private static function createRoot($df)
