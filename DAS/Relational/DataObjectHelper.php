@@ -54,8 +54,12 @@ class SDO_DAS_Relational_DataObjectHelper
 	{
 		$type = self::getApplicationType($data_object);
 		$pk_property_name = $object_model->getPropertyRepresentingPrimaryKeyFromType($type);
-		$pk = $data_object[$pk_property_name];
-		return $pk;
+		if (!isset($data_object[$pk_property_name])) {
+			return null;
+		} else {
+			$pk = $data_object[$pk_property_name];
+			return $pk;
+		}
 	}
 
 	public static function listNameValuePairs($data_object,$object_model)
