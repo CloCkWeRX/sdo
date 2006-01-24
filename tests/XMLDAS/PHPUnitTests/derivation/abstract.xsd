@@ -1,0 +1,27 @@
+<xs:schema  
+  
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <!-- test abstract type cannot be created
+       load this xsd and try to create a root object of type testAbstractType
+       The example is based on Chapters 7 and 11 of http://examples.oreilly.com/xmlschema/
+       -->
+  
+  <xs:element name="testAbstract" type="testAbstractType"/>
+  
+  <xs:complexType name="basePerson" abstract="true">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="born" type="xs:string"/>
+      <xs:element name="dead" type="xs:string" minOccurs="0"/>
+      <xs:element name="qualification" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="testAbstractType" abstract="true">
+    <xs:element name="person" type="basePerson"/>
+  </xs:complexType>
+  
+
+</xs:schema>
+  

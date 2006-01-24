@@ -1,0 +1,51 @@
+<xs:schema  
+  
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <!-- test derivation by extension
+       load this xsd and create a root object of type testExtensionType
+       this contains two elements, author and character, which are derived from basePerson
+       we will test that we can get to the extended properties author->dead and character->qualification
+       The basic example comes from Chapter 7 of http://examples.oreilly.com/xmlschema/
+       -->
+  
+  <xs:element name="testExtension" type="testExtensionType"/>
+  
+  <xs:complexType name="basePerson">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="born" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="testExtensionType">
+    <xs:element name="testExtension">
+      <xs:element name="author">
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="basePerson">
+              <xs:sequence>
+                <xs:element name="dead" type="xs:string" minOccurs="0"/>
+              </xs:sequence>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="character">
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="basePerson">
+              <xs:sequence>
+                <xs:element name="qualification" type="xs:string"/>
+              </xs:sequence>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:element>
+  </xs:complexType>
+  
+
+</xs:schema>
+  
+  

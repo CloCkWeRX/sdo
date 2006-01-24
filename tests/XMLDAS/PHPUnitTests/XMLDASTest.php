@@ -107,7 +107,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$xmldas->addTypes("menagerie.xsd"); // this is an open type i.e. the xsd specifies it can contain "any" type
 			$xmldas->addTypes('animalTypes.xsd');
 			$xdoc = $xmldas->loadFromFile("menagerie.xml");
-		    $do = $xdoc->getRootDataObject();
+			$do = $xdoc->getRootDataObject();
 			// check the types were loaded OK
 			$giraffe = $xmldas->createDataObject('','giraffeType');
 			$giraffe->name = "Victor";
@@ -551,6 +551,61 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(false, "testsetEncoding - Exception  Caught" . $e->getMessage());
 		}
 	}
+
+	public function testDerivationByExtension() {
+		try {
+			$xmldas = SDO_DAS_XML::create("derivation/extension.xsd");
+			$do = $xmldas->createDataObject("", "testExtensionType");
+			$author = $do->createDataObject('author');
+			$character = $do->createDataObject('character');
+			$author->name = "Jane Austen";
+			$author->born = "1775";
+			$author->dead = "1817";
+			$character->name="Elizabeth Bennett";
+			$character->qualification="lively playful disposition";
+			$this->assertTrue($author->dead == '1817', "testDerivationByExtension - extended element not set correctly");
+			$this->assertTrue($character->qualification == 'lively playful disposition', "testDerivationByExtension - extended element not set correctly");
+		} catch (SDO_Exception $e) {
+			$this->assertTrue(false, "testDerivationByExtension - Exception  Caught" . $e->getMessage());
+		}
+	}
+
+
+	public function testDerivationByRestriction() {
+		try {
+			$xmldas = SDO_DAS_XML::create("derivation/restriction.xsd");
+			$do = $xmldas->createDataObject("", "testRestrictionType");
+			$author = $do->createDataObject('author');
+			$character = $do->createDataObject('character');
+			$author->name = "Jane Austen";
+			$author->born = "1775";
+			$author->dead = "1817";
+			$character->name="Elizabeth Bennett";
+			$character->qualification="lively playful disposition";
+			$this->assertTrue($author->dead == '1817', "testDerivationByRestriction - extended element not set correctly");
+			$this->assertTrue($character->qualification == 'lively playful disposition', "testDerivationByRestriction - extended element not set correctly");
+		} catch (SDO_Exception $e) {
+			$this->assertTrue(false, "testDerivationByRestriction - Exception  Caught" . $e->getMessage());
+		}
+	}
+
+
+	public function testAbstractType() {
+		try {
+			$xmldas = SDO_DAS_XML::create("derivation/abstract.xsd");
+			// hopefully will not be able to create an object of abstract type
+			$do = $xmldas->createDataObject("", "testAbstractType");
+
+		} catch (SDO_Exception $e) {
+			$exception_thrown = true;
+			$msg = $e->getMessage();
+		}
+		$this->assertTrue($exception_thrown, "testAbstractType - SDO_Exception should have been thrown");
+		$this->assertTrue(strpos($msg,'Instantiation of abstract type') != 0, "testAbstractType - wrong message" . $e->getMessage());
+
+	}
+
+
 }
 
 /* Graveyard
