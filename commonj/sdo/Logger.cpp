@@ -21,6 +21,7 @@
 #include <iostream>
 #include <stdarg.h>
 #include "commonj/sdo/DefaultLogWriter.h"
+#include <stdio.h>
 
 using namespace std;
 

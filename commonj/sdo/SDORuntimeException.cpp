@@ -18,6 +18,8 @@
 /* $Rev$ $Date$ */
 
 #include "commonj/sdo/SDORuntimeException.h"
+
+#include <stdio.h>
               
 // ========================================================================
 // Constructor

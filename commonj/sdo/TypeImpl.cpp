@@ -17,12 +17,18 @@
 
 /* $Rev$ $Date$ */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "commonj/sdo/Logger.h"
 
 #include "commonj/sdo/PropertyImpl.h"
 #include "commonj/sdo/TypeImpl.h"
 
 #include <iostream>
+#include <wchar.h>
+#include <stdio.h>
 using namespace std;
 
 #include <list>

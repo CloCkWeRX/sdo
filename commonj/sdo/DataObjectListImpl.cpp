@@ -30,6 +30,8 @@
 #include "commonj/sdo/DataObjectImpl.h"
 #include "commonj/sdo/DataFactoryImpl.h"
 
+#include <stdio.h>
+
 namespace commonj{
 namespace sdo {
 

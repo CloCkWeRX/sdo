@@ -28,6 +28,8 @@
  */
 #include "php_sdo.h"
 
+#include <sstream>
+
 #include "commonj/sdo/SDOSPI.h"
 #include "commonj/sdo/xmldas/XMLDAS.h"
 

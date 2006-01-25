@@ -19,6 +19,7 @@
 
 #include "commonj/sdo/SdoRuntime.h"
 #include <iostream>
+#include <stdio.h>
 
 namespace commonj{
 namespace sdo{

@@ -40,6 +40,7 @@
 #include "commonj/sdo/DataFactoryImpl.h"
 
 #include <string>
+#include <stdio.h>
 using std::string;
 
 

@@ -27,8 +27,6 @@ static char rcs_id[] = "$Id$";
 #include "zend_config.w32.h"
 #endif
 
-#include <sstream>
-
 #include "php.h"
 #include "zend_exceptions.h"
 

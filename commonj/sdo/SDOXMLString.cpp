@@ -21,6 +21,8 @@
 #include <iostream>
 #include "libxml/globals.h"
 
+#include <ctype.h>
+
 namespace commonj
 {
     namespace sdo
