@@ -17,6 +17,11 @@ PHP_SETUP_LIBXML(SIMPLEXML_SHARED_LIBADD, [
   AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
 ])
 
+PHP_CHECK_FUNC(swprintf)
+if test "$ac_cv_func_swprintf" = "no"; then
+  AC_DEFINE(NO_SWPRINTF, 1, [ ])
+fi
+
 PHP_REQUIRE_CXX()
 
 dnl This step should not be necessary, but the PHP_REQUIRE_CXX does
