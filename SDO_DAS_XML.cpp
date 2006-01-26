@@ -90,10 +90,10 @@ ZEND_BEGIN_ARG_INFO(sdo_das_xml_saveDOFile_args, 0)
     ZEND_ARG_INFO(0, xmlFile)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO(sdo_das_xml_getProperty_args, 0)
-    ZEND_ARG_INFO(0, nameSpaceURI)
-    ZEND_ARG_INFO(0, typeName)
-ZEND_END_ARG_INFO();
+//ZEND_BEGIN_ARG_INFO(sdo_das_xml_getProperty_args, 0)
+//    ZEND_ARG_INFO(0, nameSpaceURI)
+//    ZEND_ARG_INFO(0, typeName)
+//ZEND_END_ARG_INFO();
 
 /* argument definitions of SDO_DAS_XML class, end */
 
@@ -119,6 +119,10 @@ function_entry sdo_das_xml_methods[] = {
     ZEND_ME(SDO_DAS_XML, saveDataObjectToFile, sdo_das_xml_saveDOFile_args,
             ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML, createDataObject, sdo_das_xml_createdo_args,
+            ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_DAS_XML, getTypes, 0,
+            ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_DAS_XML, __toString, 0,
             ZEND_ACC_PUBLIC)
 //    ZEND_ME(SDO_DAS_XML, getProperty, sdo_das_xml_getProperty_args,
 //            ZEND_ACC_PUBLIC)
@@ -347,7 +351,6 @@ PHP_METHOD(SDO_DAS_XML, create)
     if (ZEND_NUM_ARGS() > 1) {
         WRONG_PARAM_COUNT;
     }
-    
     Z_TYPE_P(return_value) = IS_OBJECT;
     if (object_init_ex(return_value, sdo_das_xml_class_entry) == FAILURE) {
         php_error(E_ERROR, "SDO_DAS_XML::create - Unable to create SDO_DAS_XML");
@@ -357,6 +360,7 @@ PHP_METHOD(SDO_DAS_XML, create)
     xmldas = (xmldas_object *) zend_object_store_get_object(return_value TSRMLS_CC);
 
     dataFactory = DataFactory::getDataFactory();
+    xmldas->dataFactory = dataFactory;
     xmldas->xsdHelper = HelperProvider::getXSDHelper((DataFactory*)dataFactory);
     xmldas->xmlHelper = HelperProvider::getXMLHelper((DataFactory*)dataFactory);
 
@@ -416,7 +420,7 @@ PHP_METHOD(SDO_DAS_XML, create)
 	        RETURN_NULL();
 	    }
 	}
-
+	
     /********************************************************************
      * Instantiate an SDO_DAS_DataFactoryImpl object now. Fill in with the 
      * dataFactory that we created above.
@@ -807,6 +811,102 @@ PHP_METHOD(SDO_DAS_XML, saveDataObjectToFile)
     } catch (SDORuntimeException e) {
         sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
     }
+}
+/* }}} */
+
+
+/* {{{ proto void  SDO_DAS_XML::getTypes()
+ */
+PHP_METHOD(SDO_DAS_XML, getTypes) 
+{
+    xmldas_object *das_obj 	= NULL;
+    zval*	this_obj 		= getThis();
+    char* 	namespace_uri 	= NULL;
+    char* 	type_name 		= NULL;
+    int 	namespace_uri_len = 0;
+    int 	type_name_len	= 0;
+
+printf("entered get types\n");
+
+    if (ZEND_NUM_ARGS() != 0) {
+        WRONG_PARAM_COUNT;
+    }
+    das_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
+    if (!das_obj) {
+        php_error(E_ERROR, "SDO_DAS_XML::getTypes - Unable to get SDO_DAS_XML object from object store");
+    }
+    
+    TypeList t = das_obj->dataFactory->getTypes();
+    int count = t.size();
+    printf("%d types defined\n", count);
+    for (int i = 0; i < count ; i++) {
+    	printf ("%i %s\n", i, t[i].getName());
+    }
+//    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+//				&namespace_uri,&namespace_uri_len, &type_name, &type_name_len) == FAILURE) {
+//        RETURN_FALSE;
+//    }
+    // at this point we have char* versions of uri and type name
+    // TODO: get a property of the requested type from Hydra
+    // pass to SDO_Model_Property::sdo_model_property_new
+    // return to the user
+    return;
+}
+/* }}} */
+
+/* {{{ xmldas_cast_object
+*/ 
+static int xmldas_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+{
+	xmldas_object			*my_object;
+	ostringstream			 print_buf;
+	zval					 free_obj;
+	int						 rc = SUCCESS;
+	const char				*indent = "\n";
+	
+	if (should_free) {
+		free_obj = *writeobj;
+	}
+	
+    my_object = (xmldas_object *) zend_object_store_get_object(readobj TSRMLS_CC);
+    if (!my_object) {
+        php_error(E_ERROR, "SDO_DAS_XML::cast object - Unable to get SDO_DAS_XML object from object store");
+	} else {		
+		try {			
+			print_buf << indent << "object(" << "SDO_DAS_XML" << ")#" << readobj->value.obj.handle << " {";
+	    	TypeList t = my_object->dataFactory->getTypes();
+    		int count = t.size();
+    		print_buf << "\n" << count  << " types defined:\n";
+    		for (int i = 0; i < count ; i++) {
+    			if (strlen (t[i].getURI()) == 0) {
+	    			print_buf << " " << i << " " << "(no namespace)" << ":" << t[i].getName() << "\n";
+    			} else {
+	    			print_buf << " " << i << " " << t[i].getURI() << ":" << t[i].getName() << "\n";
+    			}
+    		}
+			print_buf << "}";
+
+			string print_string = print_buf.str();
+			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+		} catch (SDORuntimeException e) {
+			ZVAL_NULL(writeobj);
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
+			rc = FAILURE;
+		}
+	}
+	
+	if (should_free) {
+		zval_dtor(&free_obj);
+	}
+	return rc;
+}
+/* }}} */
+
+/* {{{ SDO_DAS_XML::__toString
+ */
+PHP_METHOD(SDO_DAS_XML, __toString)
+{
+	xmldas_cast_object(getThis(), return_value, IS_STRING, 0 TSRMLS_CC);
 }
 /* }}} */
 

@@ -45,6 +45,9 @@ PHP_METHOD(SDO_DAS_XML, saveDocumentToString);
 PHP_METHOD(SDO_DAS_XML, saveDocumentToFile);
 PHP_METHOD(SDO_DAS_XML, saveDataObjectToString);
 PHP_METHOD(SDO_DAS_XML, saveDataObjectToFile);
+PHP_METHOD(SDO_DAS_XML, getTypes);
+PHP_METHOD(SDO_DAS_XML, __toString);
+
 //PHP_METHOD(SDO_DAS_XML, getProperty);
 
 /* SDO_DAS_XML_Document Class methods declarations */

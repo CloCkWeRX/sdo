@@ -61,6 +61,7 @@ typedef struct {
     XSDHelperPtr xsdHelper;
     SDOXMLString targetNamespaceURI;
     zval *php_das_df;
+    DataFactoryPtr dataFactory;  // Hydra dF
 } xmldas_object;
 
 /* SDO_DAS_XML_Document */
