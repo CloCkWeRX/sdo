@@ -259,6 +259,7 @@ PHP_METHOD(SDO_DAS_XML, addTypes)
     zval *			retval = NULL;
     zend_class_entry *ce = NULL;
     zval *this_obj = getThis();
+    	ostringstream	 print_buf;
 
 	// TODO lots of code duplicated with create()
 	
@@ -281,37 +282,21 @@ PHP_METHOD(SDO_DAS_XML, addTypes)
 
         int error_count = xmldas->xsdHelper->getErrorCount();
         if (error_count > 0) { 
-        	// TODO so sorry that this code is repeated in slightly differing forms four times now. They vary with
-        	// line 1 of the message and whether they call the xsdhelper or the xml helper for the messages
         	int 	max_errors = 50;
-        	int 	total_msg_len = 0;
         	int 	error_ix = 0;
-        	char* 	buffer; 						// to contain text of parser exception message: will be emalloc'd and efree'd in this block
-        	char 	parser_exception_line_1[] 		= "SDO_DAS_XML::addTypes - Unable to parse the supplied xsd file\n";
-        	char 	parser_exception_line_2[1000];  // nice and long in case there is a very long file name
-
-        	if (error_count > max_errors) {
-				sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\"  (only the first %d shown):\n",error_count, file_name, max_errors);
-        	} else {
-				sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\":\n",error_count, file_name);            	
-        	}
-        	total_msg_len = strlen(parser_exception_line_1) + strlen(parser_exception_line_2);
+	    	ostringstream	 print_buf;
+	
+       		print_buf << "SDO_DAS_XML::addTypes - Unable to parse the supplied xsd file\n";
+       		if (error_count > max_errors) {
+				print_buf << error_count << " parse error(s) occured when parsing the file \"" << file_name << "\"  (only the first " << max_errors << " shown):\n";
+   	    	} else {
+				print_buf << error_count << " parse error(s) occured when parsing the file \"" << file_name << "\":\n";
+       		}
         	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
-        		total_msg_len += strlen(xmldas->xsdHelper->getErrorMessage(error_ix));
-        	}
-        	total_msg_len += 4 * max_errors; // allow room for numbers
-        	// TODO improve on this temporary fix (+1) for 0.7.0
-        	buffer = (char*) emalloc(total_msg_len+1);
-        	strcpy(buffer, parser_exception_line_1);
-        	strcat(buffer, parser_exception_line_2);
-        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
-    			char msg_number[10];
-				sprintf(msg_number,"%d. ",error_ix);
-				strcat(buffer, msg_number);
-	    		strcat(buffer, xmldas->xsdHelper->getErrorMessage(error_ix));
-        	}
-			sdo_das_xml_throw_parserexception(buffer TSRMLS_CC);
-			efree(buffer);
+				print_buf << error_ix << ") " << xmldas->xsdHelper->getErrorMessage(error_ix);
+       		}
+			string print_string = print_buf.str();
+			sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
 	        RETURN_NULL();
         }            
     } catch (SDOFileNotFoundException e) {
@@ -378,34 +363,20 @@ PHP_METHOD(SDO_DAS_XML, create)
 	        int error_count = xmldas->xsdHelper->getErrorCount();
 	        if (error_count > 0) {
 	        	int 	max_errors = 50;
-	        	int 	total_msg_len = 0;
 	        	int 	error_ix = 0;
-	        	char* 	buffer; 						// to contain text of parser exception message: will be emalloc'd and efree'd in this block
-	        	char 	parser_exception_line_1[] 		= "SDO_DAS_XML::create - Unable to parse the supplied xsd file\n";
-	        	char 	parser_exception_line_2[1000];  // nice and long in case there is a very long file name
+		    	ostringstream	 print_buf;
 	
-	        	if (error_count > max_errors) {
-					sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\"  (only the first %d shown):\n",error_count, file_name, max_errors);
-	        	} else {
-					sprintf(parser_exception_line_2,"%d parse error(s) occured when parsing the file \"%s\":\n",error_count, file_name);            	
-	        	}
-	        	total_msg_len = strlen(parser_exception_line_1) + strlen(parser_exception_line_2);
+        		print_buf << "SDO_DAS_XML::addTypes - Unable to parse the supplied xsd file\n";
+        		if (error_count > max_errors) {
+					print_buf << error_count << " parse error(s) occured when parsing the file \"" << file_name << "\"  (only the first " << max_errors << " shown):\n";
+    	    	} else {
+					print_buf << error_count << " parse error(s) occured when parsing the file \"" << file_name << "\":\n";
+        		}
 	        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
-	        		total_msg_len += strlen(xmldas->xsdHelper->getErrorMessage(error_ix));
-	        	}
-	        	// TODO improve on this temporary fix (+1) for 0.7.0
-	        	total_msg_len += max_errors; // allow space for \n at end of every message
-	        	buffer = (char*) emalloc(total_msg_len+1);
-	        	strcpy(buffer, parser_exception_line_1);
-	        	strcat(buffer, parser_exception_line_2);
-	        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
-	    			char msg_number[10];
-					sprintf(msg_number,"%d. ",error_ix);
-					strcat (buffer, msg_number);
-		    		strcat(buffer, xmldas->xsdHelper->getErrorMessage(error_ix));
-	        	}
-				sdo_das_xml_throw_parserexception(buffer TSRMLS_CC);
-				efree(buffer);
+					print_buf << error_ix << ") " << xmldas->xsdHelper->getErrorMessage(error_ix);
+        		}
+				string print_string = print_buf.str();
+				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
 		        RETURN_NULL();
 	        }            
 	    } catch (SDOFileNotFoundException e) {
@@ -457,7 +428,7 @@ PHP_METHOD(SDO_DAS_XML, loadFromFile)
      * given path to xml instance document.
      */
     xmldocument_object *doc_obj = NULL;
-    xmldas_object *xmldas_obj = NULL;
+    xmldas_object *xmldas = NULL;
     char* file_name;
     int len = 0;
     zval *this_obj = getThis();
@@ -483,37 +454,34 @@ PHP_METHOD(SDO_DAS_XML, loadFromFile)
             php_error(E_ERROR, "SDO_DAS_XML::loadFile - Unable to get XMLDocument object from object store");
             RETURN_NULL();
         }
-        xmldas_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
-        if(!xmldas_obj) {
+        xmldas = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
+        if(!xmldas) {
             php_error(E_ERROR, "SDO_DAS_XML::loadFromFile - Unable to get XMLDAS object from object store");
         }
         try {
-            doc_obj->xdoch = xmldas_obj->xmlHelper->loadFile(file_name,xmldas_obj->targetNamespaceURI);
-            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject() && (xmldas_obj->xmlHelper->getErrorCount() == 0)) {
+            doc_obj->xdoch = xmldas->xmlHelper->loadFile(file_name,xmldas->targetNamespaceURI);
+            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject() && (xmldas->xmlHelper->getErrorCount() == 0)) {
                 create_dataobject_tree(doc_obj->xdoch->getRootDataObject() TSRMLS_CC);
             } else {
-            	char parser_exception_msg[PARSER_EXCEPTION_MSG_LEN] = "SDO_DAS_XML::loadFromFile - Unable to obtain a root data object from the supplied XML\n";
-            	int error_count = xmldas_obj->xmlHelper->getErrorCount();
-			    if (error_count > 0) {
-			    	char parse_error_hdr[100];
-					sprintf(parse_error_hdr,"%d parse error(s) occured when parsing the XML file \"%s\":\n",error_count, file_name);
-					strcat(parser_exception_msg,parse_error_hdr);
-					for (int error_index=0;error_index<error_count;error_index++) {
-						const char * parse_error_msg = xmldas_obj->xmlHelper->getErrorMessage(error_index);
-						if (strlen(parser_exception_msg) + strlen(parse_error_msg) + 10 < PARSER_EXCEPTION_MSG_LEN) {
-							char msg_number[10];
-							sprintf(msg_number,"%d. ",error_index);
-							strcat (parser_exception_msg, msg_number);
-							strcat (parser_exception_msg,parse_error_msg);
-							strcat (parser_exception_msg,"\n");
-						} else {
-							strncat(parser_exception_msg,"**TRUNCATED**",PARSER_EXCEPTION_MSG_LEN-strlen(parser_exception_msg)-1);
-							break;
-						}
-					}
-				}
-				sdo_das_xml_throw_parserexception(parser_exception_msg TSRMLS_CC);
-    	        RETURN_NULL();
+	    		ostringstream	 print_buf;
+        		print_buf << "SDO_DAS_XML::loadFromFile - Unable to obtain a root data object from the supplied XML\n";
+            	int error_count = xmldas->xmlHelper->getErrorCount();
+		        if (error_count > 0) {
+		        	int 	max_errors = 50;
+	    	    	int 	error_ix = 0;
+	
+    	    		if (error_count > max_errors) {
+						print_buf << error_count << " parse error(s) occured when parsing the file \"" << file_name << "\"  (only the first " << max_errors << " shown):\n";
+    	    		} else {
+						print_buf << error_count << " parse error(s) occured when parsing the file \"" << file_name << "\":\n";
+	        		}
+		        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
+						print_buf << error_ix << ") " << xmldas->xmlHelper->getErrorMessage(error_ix);
+        			}
+	        	}            
+				string print_string = print_buf.str();
+				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
+		        RETURN_NULL();
             }
         } catch (SDOXMLParserException *e) {
         	const char* msg = e->getMessageText();
@@ -539,7 +507,7 @@ PHP_METHOD(SDO_DAS_XML, loadFromString)
     /* Returns SDO_DAS_XML_Document Object containing root SDO object built from the given xml string.
      */
     xmldocument_object *doc_obj = NULL;
-    xmldas_object *xmldas_obj = NULL;
+    xmldas_object *xmldas = NULL;
     char* xml_string;
     int len = 0;
     zval *this_obj = getThis();
@@ -563,38 +531,35 @@ PHP_METHOD(SDO_DAS_XML, loadFromString)
         if (!doc_obj) {
             php_error(E_ERROR, "SDO_DAS_XML::load - Unable to get SDO_DAS_XML_Document object from object store");
         }
-        xmldas_obj = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
-        if (!xmldas_obj) {
+        xmldas = (xmldas_object *) zend_object_store_get_object(this_obj TSRMLS_CC);
+        if (!xmldas) {
             php_error(E_ERROR, "SDO_DAS_XML::load - Unable to get SDO_DAS_XML object from object store");
         }
         try {
             istringstream str((const char *)xml_string);
-            doc_obj->xdoch = xmldas_obj->xmlHelper->load(str);
-            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject() && (xmldas_obj->xmlHelper->getErrorCount() == 0)) {
+            doc_obj->xdoch = xmldas->xmlHelper->load(str);
+            if (doc_obj->xdoch && doc_obj->xdoch->getRootDataObject() && (xmldas->xmlHelper->getErrorCount() == 0)) {
                 create_dataobject_tree(doc_obj->xdoch->getRootDataObject() TSRMLS_CC);
             } else {
-            	char parser_exception_msg[PARSER_EXCEPTION_MSG_LEN] = "SDO_DAS_XML::loadFromFile - Unable to obtain a root data object from the supplied XML\n";
-            	int error_count = xmldas_obj->xmlHelper->getErrorCount();
-			    if (error_count > 0) {
-			    	char parse_error_hdr[100];
-					sprintf(parse_error_hdr,"%d parse error(s) occured when parsing the XML string:\n",error_count);
-					strcat(parser_exception_msg,parse_error_hdr);
-					for (int error_index=0;error_index<error_count;error_index++) {
-						const char * parse_error_msg = xmldas_obj->xmlHelper->getErrorMessage(error_index);
-						if (strlen(parser_exception_msg) + strlen(parse_error_msg) + 10 < PARSER_EXCEPTION_MSG_LEN) {
-							char msg_number[10];
-							sprintf(msg_number,"%d. ",error_index);
-							strcat (parser_exception_msg, msg_number);
-							strcat (parser_exception_msg,parse_error_msg);
-							strcat (parser_exception_msg,"\n");
-						} else {
-							strncat(parser_exception_msg,"**TRUNCATED**",PARSER_EXCEPTION_MSG_LEN-strlen(parser_exception_msg)-1);
-							break;
-						}
-					}
-				}
-				sdo_das_xml_throw_parserexception(parser_exception_msg TSRMLS_CC);
-    	        RETURN_NULL();
+	    		ostringstream	 print_buf;
+        		print_buf << "SDO_DAS_XML::loadFromString - Unable to obtain a root data object from the supplied XML\n";
+            	int error_count = xmldas->xmlHelper->getErrorCount();
+		        if (error_count > 0) {
+		        	int 	max_errors = 50;
+	    	    	int 	error_ix = 0;
+	
+    	    		if (error_count > max_errors) {
+						print_buf << error_count << " parse error(s) occured when parsing the XML string (only the first " << max_errors << " shown):\n";
+    	    		} else {
+						print_buf << error_count << " parse error(s) occured when parsing the XML string:\n";
+	        		}
+		        	for (error_ix = 0; error_ix < min(error_count,max_errors); error_ix++) {
+						print_buf << error_ix << ") " << xmldas->xmlHelper->getErrorMessage(error_ix);
+        			}
+	        	}            
+				string print_string = print_buf.str();
+				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
+		        RETURN_NULL();
             }
         } catch (SDOXMLParserException *e) {
         	const char* msg = e->getMessageText();
