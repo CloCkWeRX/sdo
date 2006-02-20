@@ -35,7 +35,7 @@
 
 using namespace commonj::sdo;
 
-#define SDO_VERSION "0.7.1"
+#define SDO_VERSION "0.9.0"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
