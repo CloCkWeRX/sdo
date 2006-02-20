@@ -15,7 +15,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
+| Author: Anantoju V Srinivas(Srini), Matthew Peters, Caroline Maynard |
 +----------------------------------------------------------------------+
 
 */
@@ -77,10 +77,10 @@ END_EXTERN_C()
 
 PHP_MINIT_FUNCTION(sdo_das_xml)
 {
-    initialize_sdo_das_xml_class(TSRMLS_C);
-    initialize_sdo_das_xml_document_class(TSRMLS_C);
-    initialize_sdo_das_xml_parserexception_class(TSRMLS_C);
-    initialize_sdo_das_xml_fileexception_class(TSRMLS_C);
+    sdo_das_xml_minit(TSRMLS_C);
+    sdo_das_xml_document_minit(TSRMLS_C);
+    sdo_das_xml_parserexception_minit(TSRMLS_C);
+    sdo_das_xml_fileexception_minit(TSRMLS_C);
 
     return SUCCESS;
 }
@@ -92,11 +92,11 @@ PHP_MINIT_FUNCTION(sdo_das_xml)
 PHP_MINFO_FUNCTION(sdo_das_xml)
 {
     php_info_print_table_start();
-    php_info_print_table_header(2, "sdo_das_xml support", "enabled");
-    php_info_print_table_header(2, "sdo_das_xml version", SDO_DAS_XML_VERSION);
+    php_info_print_table_row(2, "sdo_das_xml support", "enabled");
+    php_info_print_table_row(2, "sdo_das_xml version", SDO_DAS_XML_VERSION);
     php_info_print_table_end();
 }
-/* }}} */
+/* }}} */ 
 
 /*
  * Local variables:

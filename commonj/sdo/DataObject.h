@@ -109,7 +109,11 @@ class DataObject : public RefCountingObject
    
     virtual SDO_API PropertyList getInstanceProperties() = 0;
 
-    
+    /**
+     * See if the property currently exists
+     */
+
+    virtual SDO_API bool hasProperty(const char* name) = 0;
     /**
      * These are just like getType().getProperty(), but may return
      * values other than the property list for open types.

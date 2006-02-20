@@ -1,5 +1,7 @@
 --TEST--
 SDO reflection test
+--INI--
+display_errors=off
 --SKIPIF--
 <?php if (!extension_loaded("sdo") ||
     phpversion('sdo') < '0.7.1') print "skip"; ?>

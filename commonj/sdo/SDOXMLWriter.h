@@ -50,7 +50,7 @@ namespace commonj
             
             virtual ~SDOXMLWriter();
             
-            int write(XMLDocumentPtr doc);
+            int write(XMLDocumentPtr doc, int indent=-1);
 
         protected:
             void setWriter(xmlTextWriterPtr textWriter);

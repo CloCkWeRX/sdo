@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<person xmlns="TNS"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-Instance"
+      title="Mr." gender="male">
+  <first>William</first>
+  <middle>Henry</middle>
+  <last>Harrison</last>
+  <age>223</age>
+  <birthdate>1773-02-09</birthdate>  
+</person>

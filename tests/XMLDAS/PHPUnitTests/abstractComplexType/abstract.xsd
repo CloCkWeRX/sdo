@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="TNS" 
+        xmlns:tns="TNS">
+
+<element name="employee" type="fullpersoninfo"/>
+
+<complexType name="personinfo" abstract="true">
+  <sequence>
+    <element name="firstname" type="string"/>
+    <element name="lastname" type="string"/>
+  </sequence>
+</complexType>
+
+<complexType name="fullpersoninfo">
+  <complexContent>
+    <extension base="personinfo">
+      <sequence>
+        <element name="address" type="string"/>
+        <element name="city" type="string"/>
+        <element name="country" type="string"/>
+      </sequence>
+    </extension>
+  </complexContent>
+</complexType>
+
+</schema>

@@ -521,36 +521,39 @@ namespace commonj
         void XSDHelperImpl::generateFile(
             const TypeList& types,
             const char* fileName, 
-            const char* targetNamespaceURI
+            const char* targetNamespaceURI,
+            int indent
             )
         {
             SDOXSDFileWriter writer(fileName);
             DataFactory* fac = dataFactory;
             writer.write(types, targetNamespaceURI, 
-                ((DataFactoryImpl*)fac)->getOpenProperties());
+                ((DataFactoryImpl*)fac)->getOpenProperties(), indent);
         }
         
         void XSDHelperImpl::generate(
             const TypeList& types,
             std::ostream& outXml,
-            const char* targetNamespaceURI
+            const char* targetNamespaceURI,
+            int indent
             )
         {
             SDOXSDStreamWriter writer(outXml);
             DataFactory* fac = dataFactory;
             writer.write(types,    targetNamespaceURI, 
-                ((DataFactoryImpl*)fac)->getOpenProperties());                
+                ((DataFactoryImpl*)fac)->getOpenProperties(), indent);                
         }
         
         char* XSDHelperImpl::generate(
             const TypeList& types,
-            const char* targetNamespaceURI
+            const char* targetNamespaceURI,
+            int indent
             )
         {
             SDOXSDBufferWriter writer;
             DataFactory* fac = dataFactory;
             writer.write(types, targetNamespaceURI, 
-                ((DataFactoryImpl*)fac)->getOpenProperties());
+                ((DataFactoryImpl*)fac)->getOpenProperties(), indent);
             SDOXMLString ret = writer.getBuffer();
             char* retString = new char[strlen(ret) +1];
             strcpy(retString, ret);

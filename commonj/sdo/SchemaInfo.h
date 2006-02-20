@@ -49,7 +49,7 @@ namespace commonj
             
         private:
             SAX2Namespaces    schemaNamespaces;
-            SDOXMLString    targetNamespaceURI;            
+            SDOXMLString    targetNamespaceURI;
             
         };
     } // End - namespace sdo

@@ -56,7 +56,6 @@ typedef struct {
 		const ChangedDataObjectList	*cdolp;
 		const SettingList			*slp;
 	};
-	const Type *typep;				/* only used for DataObjectList */
 } sdo_list_object;
 /* }}} */
 
@@ -124,10 +123,13 @@ static zend_object_value sdo_list_object_create(zend_class_entry *ce TSRMLS_DC)
 static sdo_list_object *sdo_list_new(zval *me, zend_class_entry *ce TSRMLS_DC)
 {	
 	sdo_list_object *my_object;
+	char *class_name, *space;
 
 	Z_TYPE_P(me) = IS_OBJECT;	
 	if (object_init_ex(me, ce) == FAILURE) {
-		php_error(E_ERROR, "%s:%i: object_init failed", CLASS_NAME, __LINE__);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		return (sdo_list_object *)NULL;
 	}
 
@@ -145,7 +147,6 @@ void sdo_dataobjectlist_new(zval *me, const Type& type, DataObjectList *dolp TSR
 	my_object = sdo_list_new(me, sdo_dataobjectlist_class_entry TSRMLS_CC);
 
 	my_object->list_type = TYPE_DataObjectList;
-	my_object->typep = &type;
 	my_object->dolp = dolp;
 }
 /* }}} */
@@ -160,7 +161,6 @@ void sdo_changeddataobjectlist_new(zval *me, const ChangedDataObjectList *cdolp 
 
 	my_object->list_type = TYPE_ChangedDataObjectList;
 	my_object->cdolp = cdolp;
-	my_object->typep = NULL;
 }
 /* }}} */
 
@@ -174,7 +174,6 @@ void sdo_das_settinglist_new(zval *me, SettingList& sl TSRMLS_DC)
 
 	my_object->list_type = TYPE_SettingList;
 	my_object->slp = &sl;
-	my_object->typep = NULL;
 }
 /* }}} */
 
@@ -187,20 +186,23 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 	wchar_t			 wchar_value;
 	zval			*return_value;
 	DataObjectPtr	 doh_value;
-	zval			*doh_value_zval;
+	char			*class_name, *space;
 	
-	const DataObjectList& dol = *my_object->dolp;
-	const Type *type = my_object->typep;
+	DataObjectList& dol = *my_object->dolp;
 	
-	MAKE_STD_ZVAL(return_value);
+	ALLOC_INIT_ZVAL(return_value);
+	return_value->refcount = 0;
+
 	try {	
 		if (index >= dol.size()) {
 			RETVAL_NULL();
 		} else {
-			MAKE_STD_ZVAL(return_value);
-			switch(type->getTypeEnum()) {
+			const Type& type = dol.getType();
+			switch(type.getTypeEnum()) {
 			case Type::OtherTypes:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::BigDecimalType:
 			case Type::BigIntegerType:
@@ -222,7 +224,9 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 			case Type::CharacterType:
 				wchar_value = dol.getCharacter(index);
 				if (wchar_value > INT_MAX) {
-					php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_WARNING, "%s%s%s(): wide character data lost reading many-valued property", 
+						class_name, space, get_active_function_name(TSRMLS_C));
 				}
 				char_value = dol.getByte(index);
 				RETVAL_STRINGL(&char_value, 1, 1);
@@ -256,18 +260,23 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 				if (!doh_value) {
 					RETVAL_NULL();
 				} else {
-					doh_value_zval = (zval *)doh_value->getUserData();
-					RETVAL_ZVAL(doh_value_zval, 1, 0);
+					sdo_do_new(return_value, doh_value TSRMLS_CC);
 				}
 				break;
 			case Type::ChangeSummaryType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::TextType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			default:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type %i", CLASS_NAME, __LINE__, type->getTypeEnum());
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__, type.getTypeEnum());
 			}
 			
 		}
@@ -284,10 +293,11 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 static zval *sdo_changeddataobjectlist_read_value(sdo_list_object *my_object, long index TSRMLS_DC) {
 	
 	const ChangedDataObjectList& dol = *my_object->cdolp;
-	zval *doh_value_zval;
 	zval *return_value;
 	
 	MAKE_STD_ZVAL(return_value);
+	return_value->refcount = 0;
+
 	/* Elements of a ChangedDataObjectList are all DataObject type */
 	try {	
 		if (index >= dol.size()) {
@@ -298,8 +308,7 @@ static zval *sdo_changeddataobjectlist_read_value(sdo_list_object *my_object, lo
 			if (!doh_value) {
 				RETVAL_NULL();
 			} else {
-				doh_value_zval = (zval *)doh_value->getUserData();
-				RETVAL_ZVAL(doh_value_zval, 1, 0);
+				sdo_do_new(return_value, doh_value TSRMLS_CC);
 			}	
 		}
 	} catch (SDORuntimeException e) {
@@ -317,6 +326,7 @@ static zval *sdo_das_settinglist_read_value(sdo_list_object *my_object, long ind
 	const SettingList& sl = *my_object->slp;
 	
 	MAKE_STD_ZVAL(return_value);
+	return_value->refcount = 0;
 
 	/* Elements of a SettingList are all DAS_Setting type */
 	try {	
@@ -336,13 +346,12 @@ static zval *sdo_das_settinglist_read_value(sdo_list_object *my_object, long ind
  */
 static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long index, zval *z_value, sdo_write_type write_type TSRMLS_DC)
 {	
-	sdo_do_object *value_object;
 	zval temp_zval;
+	char *class_name, *space;
 
 	DataObjectList& dol = *my_object->dolp;
-  	const Type *type = my_object->typep;
 
-	try {	
+	try {
 		if (write_type != TYPE_APPEND && 
 			(index < 0 || index >= dol.size())) {
 			zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry, 0 TSRMLS_CC, 
@@ -351,7 +360,7 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 		}
 		
 		/*
-		 * Since we may have to coerce the type, we make a local copy of the zval, so that the
+		* Since we may have to coerce the type, we make a local copy of the zval, so that the
 		 * original is unaffected. 
 		 * 
 		 * TODO This could be optimized to only copy if we do actually change the type.
@@ -361,10 +370,13 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 
         /* we must have at least the type enum here in case this is an append and 
 		 * we don't know what type to append
-		 */
-		switch(type->getTypeEnum()) {
+		 */	
+		const Type& type = dol.getType();
+		switch(type.getTypeEnum()) {
 		case Type::OtherTypes:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 			break;
 		case Type::BigDecimalType:
 		case Type::BigIntegerType:
@@ -492,24 +504,30 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 				"Class %s is not an instance of %s", 
 					Z_OBJCE(temp_zval)->name, sdo_dataobjectimpl_class_entry->name);
 			} else {
-				value_object = (sdo_do_object *)zend_object_store_get_object(&temp_zval TSRMLS_CC);
+				DataObjectPtr dop = sdo_do_get(&temp_zval TSRMLS_CC);
 				if (write_type == TYPE_APPEND) {
-					dol.append(value_object->dop);
+					dol.append(dop);
 				} else if (write_type == TYPE_INSERT) {
-					dol.insert(index, value_object->dop);
+					dol.insert(index, dop);
 				} else {
-					dol.setDataObject(index, value_object->dop);
+					dol.setDataObject(index, dop);
 				}
 			}
 			break;
 		case Type::ChangeSummaryType:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 			break;
 		case Type::TextType:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 			break;
 		default:
-			php_error(E_ERROR, "%s:%i: unexpected DataObject type %s", CLASS_NAME, __LINE__, type->getName());
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s'", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, type.getName());
 			}
 	    zval_dtor(&temp_zval);
 	} catch (SDORuntimeException e) {
@@ -522,8 +540,8 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
  */
 static int sdo_dataobjectlist_valid(sdo_list_object *my_object, long index, int check_empty TSRMLS_DC)
 {
-	int				  return_value = 0;
-	const Type		 *type; 
+	int	return_value = 0;
+	char *class_name, *space;
 		
 	try {
 		return_value = (index >= 0 && index < my_object->dolp->size());
@@ -531,10 +549,12 @@ static int sdo_dataobjectlist_valid(sdo_list_object *my_object, long index, int 
 		if (return_value && check_empty) {
 			/* cf SDO_DataObject.read_dimension() */
 			DataObjectList& dol = *my_object->dolp;
-			type = my_object->typep;
-			switch (type->getTypeEnum()) {
+			const Type& type = dol.getType();
+			switch (type.getTypeEnum()) {
 			case Type::OtherTypes:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				return_value = 0;
 				break;
 			case Type::BigDecimalType:
@@ -567,15 +587,21 @@ static int sdo_dataobjectlist_valid(sdo_list_object *my_object, long index, int 
 				return_value = (!(dol[index]));
 				break;
 			case Type::ChangeSummaryType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				return_value = 0;
 				break;
 			case Type::TextType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				return_value = 0;
 				break;
 			default:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type %i", CLASS_NAME, __LINE__, type->getTypeEnum());
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__, type.getTypeEnum());
 				return_value = 0;
 			}
 		}
@@ -637,20 +663,19 @@ static int sdo_list_has_dimension(zval *object, zval *offset, int check_empty TS
 	char			 *propertyName = NULL;
 	long			  index;
 	int				  return_value = 0;
-	sdo_list_object *my_object;
+	sdo_list_object  *my_object;
+	char			 *class_name, *space;
 
-	if (Z_TYPE_P(offset) != IS_LONG) {		
-		php_error(E_ERROR, "%s:%i: invalid dimension type %i", CLASS_NAME, __LINE__, Z_TYPE_P(offset));
+	if (Z_TYPE_P(offset) != IS_LONG) {
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, Z_TYPE_P(offset));	
 		return 0;
 	}
-
+	
 	index = Z_LVAL_P(offset);
-
+	
 	my_object = sdo_list_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_list_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return 0;
-	}
 	
 	switch (my_object->list_type) {
 	case TYPE_DataObjectList:
@@ -663,9 +688,11 @@ static int sdo_list_has_dimension(zval *object, zval *offset, int check_empty TS
 		return_value = sdo_das_settinglist_valid(my_object, index, check_empty TSRMLS_CC);
 		break;
 	default:
-		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 	}
-
+	
 	return return_value;
 }
 /* }}} */
@@ -677,20 +704,17 @@ static zval *sdo_list_read_dimension(zval *object, zval *offset, int type TSRMLS
 	long			  index;
 	sdo_list_object	 *my_object;
 	zval			 *return_value;
+	char			 *class_name, *space;
 	
-	if (Z_TYPE_P(offset) != IS_LONG) {		
-		php_error(E_ERROR, "%s:%i: invalid dimension type %i", CLASS_NAME, __LINE__, Z_TYPE_P(offset));
+	if (Z_TYPE_P(offset) != IS_LONG) {
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, Z_TYPE_P(offset));	
 		return 0;
 	}
 
 	index = Z_LVAL_P(offset);
 	my_object = sdo_list_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_list_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		MAKE_STD_ZVAL(return_value);
-		RETVAL_NULL();
-		return return_value;
-	}
 	
 	switch (my_object->list_type) {
 	case TYPE_DataObjectList:
@@ -703,7 +727,9 @@ static zval *sdo_list_read_dimension(zval *object, zval *offset, int type TSRMLS
 		return_value = sdo_das_settinglist_read_value(my_object, index TSRMLS_CC);
 		break;
 	default:
-		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 	}
 	
 	return return_value;
@@ -717,18 +743,17 @@ static void sdo_list_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 	long			  index;
 	sdo_list_object	 *my_object;
 	DataObjectList   *dol;
+	char			 *class_name, *space;
 	
-	if (Z_TYPE_P(offset) != IS_LONG) {		
-		php_error(E_ERROR, "%s:%i: invalid dimension type %i", CLASS_NAME, __LINE__, Z_TYPE_P(offset));
+	if (Z_TYPE_P(offset) != IS_LONG) {	
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, Z_TYPE_P(offset));	
 		return;
 	}
 	index = Z_LVAL_P(offset);
 	
-	my_object = sdo_list_get_instance(object TSRMLS_CC);	
-	if (my_object == (sdo_list_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}	
+	my_object = sdo_list_get_instance(object TSRMLS_CC);
 	
 	switch(my_object->list_type) {		
 	case TYPE_DataObjectList:
@@ -753,7 +778,9 @@ static void sdo_list_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 			"A SettingList is read-only");		
 		break;
 	default:
-		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 	}
 }
 /* }}} */
@@ -765,6 +792,7 @@ static void sdo_list_write_dimension(zval *object, zval *offset, zval *z_value T
 	long			  index = -1;
 	sdo_list_object	 *my_object;
 	sdo_write_type	  write_type;
+	char			 *class_name, *space;
 
 	if (Z_TYPE_P(z_value) == IS_NULL) {
 		/* TODO: fix this when the C++ lib supports a NULL property  */
@@ -776,8 +804,10 @@ static void sdo_list_write_dimension(zval *object, zval *offset, zval *z_value T
 	if (offset == 0 || Z_TYPE_P(offset) == IS_NULL) {
 		write_type = TYPE_APPEND;
 	} else {
-		if (Z_TYPE_P(offset) != IS_LONG) {		
-			php_error(E_ERROR, "%s:%i: invalid dimension type %i", CLASS_NAME, __LINE__, Z_TYPE_P(offset));
+		if (Z_TYPE_P(offset) != IS_LONG) {	
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, Z_TYPE_P(offset));	
 			return;
 		}
 		index = Z_LVAL_P(offset);
@@ -785,10 +815,6 @@ static void sdo_list_write_dimension(zval *object, zval *offset, zval *z_value T
 	}
 	
 	my_object = sdo_list_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_list_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	switch (my_object->list_type) {
 	case TYPE_DataObjectList:
@@ -803,7 +829,9 @@ static void sdo_list_write_dimension(zval *object, zval *offset, zval *z_value T
 			"A SettingList is read-only");
 		break;
 	default:
-		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 	}
 
 }
@@ -819,13 +847,12 @@ static HashTable *sdo_list_get_properties(zval *object TSRMLS_DC)
 	HashTable		*properties;
 	int				 entries;
 	zval			*tmp;
+	zval			 z_holder;
+	char			*space, *class_name;
 	
 	my_object = sdo_list_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_list_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return 0;
-	}
-	ALLOC_HASHTABLE(properties);
+
+	array_init(&z_holder);
 
 	try {
 		switch (my_object->list_type) {
@@ -839,11 +866,11 @@ static HashTable *sdo_list_get_properties(zval *object TSRMLS_DC)
 			entries = my_object->slp->size();
 			break;
 		default:
-			php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 			return 0;
 		}
-
-		zend_hash_init(properties, entries, NULL, NULL, 0);
 		
 		for (long index = 0; index < entries; index++) {
 			
@@ -858,11 +885,12 @@ static HashTable *sdo_list_get_properties(zval *object TSRMLS_DC)
 				tmp = sdo_das_settinglist_read_value(my_object, index TSRMLS_CC);
 				break;
 			}
-			zend_hash_next_index_insert(properties, &tmp, sizeof (zval *), NULL);
+			add_next_index_zval(&z_holder, tmp);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
+	properties = Z_ARRVAL(z_holder);
 	return properties;
 }
 /* }}} */
@@ -876,18 +904,18 @@ static int sdo_list_cast_object(zval *readobj, zval *writeobj, int type, int sho
 	zval			 free_obj;
 	int				 rc = SUCCESS;
 	int				 entries;
+	char		    *class_name, *space;
 	
 	if (should_free) {
 		free_obj = *writeobj;
 	}
 	
 	my_object = sdo_list_get_instance(readobj TSRMLS_CC);
-	if (my_object == (sdo_list_object *)NULL) {
-		ZVAL_NULL(writeobj);
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		rc = FAILURE;
-	} else if (my_object->list_type > TYPE_SettingList) {
-		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+
+	if (my_object->list_type > TYPE_SettingList) {
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 		ZVAL_NULL(writeobj);
 		rc = FAILURE;
 	} else {		
@@ -917,7 +945,7 @@ static int sdo_list_cast_object(zval *readobj, zval *writeobj, int type, int sho
 			case TYPE_DataObjectList:
 				{
 					DataObjectList& dol = *my_object->dolp;
-					if (my_object->typep->isDataType()) {
+					if (dol.getType().isDataType()) {
 						print_buf << " {";
 						for (int i = 0; i < entries; i++) {
 							if (i > 0) print_buf << "; ";
@@ -988,6 +1016,7 @@ static int sdo_list_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 	DataObjectList	*dol1, *dol2;
 	int				 entries;
 	zval			 result;
+	char			*class_name, *space;
 	 	 
 	INIT_PZVAL(&result);
 	
@@ -1002,7 +1031,9 @@ static int sdo_list_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 	case TYPE_DataObjectList:
 		break;
 	default:
-		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object1->list_type);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object1->list_type);	
 		return FAILURE;
 	}
 	
@@ -1035,7 +1066,14 @@ static int sdo_list_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 
 /* {{{ sdo_list_get_iterator
  */
+#if (PHP_MAJOR_VERSION < 6) 
 zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) {
+#else
+zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) {
+	if (by_ref) {
+		php_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+#endif
 
 	sdo_list_iterator *iterator = (sdo_list_iterator *)emalloc(sizeof(sdo_list_iterator));
 	object->refcount++;
@@ -1062,6 +1100,7 @@ static int sdo_list_iterator_valid (zend_object_iterator *iter TSRMLS_DC)
 {
 	int valid;
 	long count;
+	char *class_name, *space;
 	
 	sdo_list_iterator *iterator = (sdo_list_iterator *)iter;
 	zval *z_list_object = (zval *)iterator->zoi.data;
@@ -1079,7 +1118,9 @@ static int sdo_list_iterator_valid (zend_object_iterator *iter TSRMLS_DC)
 			count = my_object->slp->size();
 			break;
 		default:
-			php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 		}	
 		valid = (iterator->index >= 0 && iterator->index < count) ? SUCCESS : FAILURE;
 	} catch (SDORuntimeException e) {
@@ -1106,6 +1147,8 @@ static int sdo_list_iterator_current_key (zend_object_iterator *iter,
  */
 static void sdo_list_iterator_current_data (zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {	
+	char *class_name, *space;
+
 	sdo_list_iterator *iterator = (sdo_list_iterator *)iter;
 	zval *z_list_object = (zval *)iterator->zoi.data;
 	sdo_list_object *my_object = (sdo_list_object *)sdo_list_get_instance(z_list_object TSRMLS_CC);	
@@ -1122,7 +1165,9 @@ static void sdo_list_iterator_current_data (zend_object_iterator *iter, zval ***
 			iterator->value = sdo_das_settinglist_read_value(my_object, iterator->index TSRMLS_CC);
 			break;
 		default:
-			php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 			return;
 		}
 	} catch (SDORuntimeException e) {
@@ -1156,12 +1201,10 @@ static void sdo_list_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
 int sdo_list_count_elements(zval *object, long *count TSRMLS_DC) 
 {
 	sdo_list_object *my_object;
+	char *class_name, *space;
 	
 	my_object = sdo_list_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_list_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return 0;
-	}
+
 	try {
 		switch (my_object->list_type) {
 		case TYPE_ChangedDataObjectList:
@@ -1174,7 +1217,9 @@ int sdo_list_count_elements(zval *object, long *count TSRMLS_DC)
 			*count = my_object->slp->size();
 			break;
 		default:
-			php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
@@ -1223,7 +1268,11 @@ void sdo_list_minit(zend_class_entry *tmp_ce TSRMLS_DC)
  */
 PHP_METHOD(SDO_List, __construct)
 {
-	php_error(E_ERROR, "%s:%i: private constructor was called", CLASS_NAME, __LINE__);
+	char *class_name, *space;
+	class_name = get_active_class_name(&space TSRMLS_CC);
+
+	php_error(E_ERROR, "%s%s%s(): internal error - private constructor was called", 
+		class_name, space, get_active_function_name(TSRMLS_C));
 }
 /* }}} */
 
@@ -1247,6 +1296,7 @@ PHP_METHOD(SDO_List, insert)
 	long			  index = -1;
 	sdo_list_object	 *my_object;
 	sdo_write_type	  write_type;
+	char			 *class_name, *space;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|z", &z_value, &z_index) == FAILURE) {
 		return;
@@ -1262,10 +1312,6 @@ PHP_METHOD(SDO_List, insert)
 	}
 
 	my_object = sdo_list_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_list_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 
 	switch (my_object->list_type) {
 	case TYPE_DataObjectList:
@@ -1280,7 +1326,9 @@ PHP_METHOD(SDO_List, insert)
 			"A SettingList is read-only");		
 		break;
 	default:
-		php_error(E_ERROR, "%s:%i: unexpected list type %i", CLASS_NAME, __LINE__, my_object->list_type);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);	
 	}
 
 }

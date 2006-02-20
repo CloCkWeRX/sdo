@@ -95,10 +95,13 @@ static zend_object_value sdo_model_type_object_create(zend_class_entry *ce TSRML
 void sdo_model_type_new(zval *me, const Type *typep TSRMLS_DC)
 {	
 	sdo_model_type_object *my_object;
+	char *class_name, *space;
 
 	Z_TYPE_P(me) = IS_OBJECT;	
 	if (object_init_ex(me, sdo_model_typeimpl_class_entry) == FAILURE) {
-		php_error(E_ERROR, "%s:%i: object_init failed", CLASS_NAME, __LINE__);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		ZVAL_NULL(me);
 		return;
 	}
@@ -138,6 +141,9 @@ static int sdo_model_type_compare_objects(zval *object1, zval *object2 TSRMLS_DC
 */
 void sdo_model_type_summary_string (ostringstream& print_buf, const Type *typep TSRMLS_DC) 
 {	
+	if (typep->isAbstractType()) {
+		print_buf << "<abstract> ";
+	}
 	if (typep->isOpenType()) {
 		print_buf << "<open> ";
 	}
@@ -199,21 +205,16 @@ static int sdo_model_type_cast_object(zval *readobj, zval *writeobj, int type, i
 	}
 	
 	my_object = sdo_model_type_get_instance(readobj TSRMLS_CC);
-	if (my_object == (sdo_model_type_object *)NULL) {
+	
+	try {		
+		sdo_model_type_string (print_buf, my_object->typep, "\n" TSRMLS_CC);
+		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);						
+	} catch (SDORuntimeException e) {
 		ZVAL_NULL(writeobj);
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		rc = FAILURE;
-	} else {		
-		try {		
-			sdo_model_type_string (print_buf, my_object->typep, "\n" TSRMLS_CC);
-			string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
-			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);						
-		} catch (SDORuntimeException e) {
-			ZVAL_NULL(writeobj);
-			sdo_throw_runtimeexception(&e TSRMLS_CC);
-			rc = FAILURE;
-		}
-	}	
+	}
 	
 	switch(type) {
 	case IS_STRING:
@@ -267,7 +268,11 @@ void sdo_model_type_minit(zend_class_entry *tmp_ce TSRMLS_DC)
  */
 PHP_METHOD(SDO_Model_TypeImpl, __construct)
 {
-	php_error(E_ERROR, "%s:%i: private constructor was called", CLASS_NAME, __LINE__);
+	char *class_name, *space;
+	class_name = get_active_class_name(&space TSRMLS_CC);
+
+	php_error(E_ERROR, "%s%s%s(): internal error - private constructor was called", 
+		class_name, space, get_active_function_name(TSRMLS_C));
 }
 /* }}} */
 
@@ -314,8 +319,8 @@ PHP_METHOD(SDO_Model_TypeImpl, isInstance)
 {
 	sdo_model_type_object	*my_object;
 	zval					*z_do;
-	sdo_do_object			*target;
 	int						 argc;
+	char					*class_name, *space;
 		
 	if ((argc = ZEND_NUM_ARGS()) != 1) {
 		WRONG_PARAM_COUNT;
@@ -326,19 +331,29 @@ PHP_METHOD(SDO_Model_TypeImpl, isInstance)
 	}
 
 	my_object = sdo_model_type_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_model_type_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	} 
 
-	target = (sdo_do_object *)zend_object_store_get_object(z_do TSRMLS_CC);
-	if (target == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+	DataObjectPtr dop = sdo_do_get(z_do TSRMLS_CC);
+	if (!dop) {
+		class_name = get_active_class_name (&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject not found in store", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		return;
 	} 
 
 	try {
-		RETVAL_BOOL(target->dop->getType().equals(*my_object->typep));
+		const Type& my_type = *my_object->typep;
+		const Type *target_type = &dop->getType();
+		RETVAL_FALSE;
+		
+		/* walk up the target object's type hierarchy */
+		while (target_type) {
+			if (my_type.equals(*target_type)) {
+				RETURN_TRUE;
+			} else {
+				target_type = target_type->getBaseType();
+			}
+		}
+		
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
@@ -466,6 +481,25 @@ PHP_METHOD(SDO_Model_TypeImpl, isOpenType)
 	my_object = sdo_model_type_get_instance(getThis() TSRMLS_CC);
 	try {
 		RETVAL_BOOL(my_object->typep->isOpenType());
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ SDO_Model_TypeImpl::isAbstractType
+ */
+PHP_METHOD(SDO_Model_TypeImpl, isAbstractType) 
+{
+	sdo_model_type_object	*my_object;
+		
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	my_object = sdo_model_type_get_instance(getThis() TSRMLS_CC);
+	try {
+		RETVAL_BOOL(my_object->typep->isAbstractType());
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}

@@ -43,12 +43,35 @@
 //           . "The SDO_Model_ReflectionDataObject gives the programmer access to " 
 //           . "the type and structure information in a data object's model. "
 //           . "This can help with debugging, or be used in dynamic user interface generation.",
-       'notes' => "This release adds support for open types. These are types which " 
-             . "can have additional properties added to a runtime instance, for example "
-             . "to support an XML <any/> element.\n"
-             . "Also various bug fixes. ",
+//       'notes' => "This release adds support for open types. These are types which " 
+//             . "can have additional properties added to a runtime instance, for example "
+//             . "to support an XML <any/> element.\n"
+//             . "Also various bug fixes. ",
+
+'notes' => 
+"The following changes have been made between 0.7.1 and this release.\n"
+. "The changes which are visible at the programming interface are:\n"
+. "The interface to the XML Data Access Service has been revised:\n"
+. "The names of the methods to load and save documents to improve consistency with other packages.\n" 
+. "A new method, createDocument(), has been added to enable creation of a document from scratch.\n"
+. "The saveDataObjectToFile()/String() methods have been replaced by saveFile()String() methods on the Document object.\n"
+. "Some getters and setters on the Document have been fixed or removed.\n"
+. "The XML Data Access Service has added support for the following XML Schema:\n"
+. "Open types: support for <any> element and <anyAttribute>\n"
+. "Type inheritance: both simple and complex types can be derived by restriction or extension\n"
+. "Abstract types: the use of abstract types in the schema is supported\n"
+. "The XML DAS now supports printing its SDO type and property model using print or echo.\n"
+. "The XML DAS can now produce formatted Document (see optional formatting argument on saveFile() and saveString())\n"
+. "The getType() method on a DataObject has been replaced with getTypeName() and getTypeNamespaceURI() methods.\n" 
+. "\n"
+. "Other changes in this release:\n"
+. "The memory management in the sdo and sdo_das_xml extensions has been overhauled to squeeze out any memory leaks\n"
+. "Exception messages from the extension have been improved so that they never refer to the underlying C/C++ code\n"
+. "PropertyNotSetException has been improved so that it replicates the way arrays and objects behave as closely as possible\n"
+. "The parsing that the XML DAS performs on both XML Schema and instance documents has been improved so that problems are picked up and reported earlier.\n"
+ ,
        'simpleoutput' => true,
-       'version' => '0.7.1',
+       'version' => '0.9.0',
        'baseinstalldir' => 'SDO',
        'state' => 'beta',
        'license' => 'Apache 2.0',

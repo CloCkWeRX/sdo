@@ -92,10 +92,13 @@ static zend_object_value sdo_das_setting_object_create(zend_class_entry *ce TSRM
 void sdo_das_setting_new(zval *me, Setting *setting TSRMLS_DC)
 {	
 	sdo_das_setting_object *my_object;
+	char *class_name, *space;
 
 	Z_TYPE_P(me) = IS_OBJECT;	
 	if (object_init_ex(me, sdo_das_setting_class_entry) == FAILURE) {
-		php_error(E_ERROR, "%s:%i: object_init failed", CLASS_NAME, __LINE__);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		return;
 	}
 
@@ -114,8 +117,8 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 	char		 char_value; 
 	wchar_t		 wchar_value;
 	DataObjectPtr doh_value;
-	zval		*doh_value_zval;
 	zval		*return_value;
+	char		*class_name, *space;
 	
 	MAKE_STD_ZVAL(return_value);
 	try {
@@ -125,7 +128,9 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 			const Property& property = setting->getProperty();
 			switch(property.getTypeEnum()) {
 			case Type::OtherTypes:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::BigDecimalType:
 			case Type::BigIntegerType:
@@ -147,7 +152,9 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 			case Type::CharacterType:
 				wchar_value = setting->getCharacterValue();
 				if (wchar_value > INT_MAX) {
-					php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_WARNING, "%s%s%s(): wide character data lost for '%s'", 
+						class_name, space, get_active_function_name(TSRMLS_C), property.getName());
 				}
 				char_value = setting->getByteValue();
 				RETVAL_STRINGL(&char_value, 1, 1);
@@ -181,18 +188,23 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 					/* An old value may legitimately be null */
 					RETVAL_NULL();
 				} else {
-					doh_value_zval = (zval *)doh_value->getUserData();
-					RETVAL_ZVAL(doh_value_zval, 1, 0);
+					sdo_do_new(return_value, doh_value TSRMLS_CC);
 				}
 				break;
 			case Type::ChangeSummaryType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::TextType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			default:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 					property.getType().getName(), property.getName());
 			}
 		}
@@ -211,31 +223,27 @@ static HashTable *sdo_das_setting_get_properties(zval *object TSRMLS_DC)
 	HashTable				*properties;
 	zval					*tmp;
 	Setting					*setting;
+	zval					 z_holder;
+	const char				*property_name;
 	
-	ALLOC_HASHTABLE(properties);
+	array_init(&z_holder);
 	
 	my_object = sdo_das_setting_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_das_setting_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-	} else {		 
-		try {
-			setting = my_object->setting;			
-			const char *propertyName = setting->getProperty().getName();
-			
-			zend_hash_init(properties, 1, NULL, NULL, 0);
-			
-			/* TODO if the setting is for a list element, we should 
-			* probably include the list index as part of the key
-			*/
-			
-			tmp = sdo_das_setting_read_value(my_object TSRMLS_CC);
-			
-			zend_hash_update(properties, (char *)propertyName, 1 + strlen(propertyName),
-				&tmp, sizeof(zval *), NULL);
-		} catch (SDORuntimeException e) {
-			sdo_throw_runtimeexception(&e TSRMLS_CC);
-		}
+	try {
+		setting = my_object->setting;			
+		property_name = setting->getProperty().getName();
+		
+		/* TODO if the setting is for a list element, we should 
+		* probably include the list index as part of the key
+		*/
+		
+		tmp = sdo_das_setting_read_value(my_object TSRMLS_CC);
+		
+		add_assoc_zval (&z_holder, (char *)property_name, tmp);
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
+	properties = Z_ARRVAL(z_holder);
 	return properties;
 }
 /* }}} */
@@ -255,42 +263,37 @@ static int sdo_das_setting_cast_object(zval *readobj, zval *writeobj, int type, 
 	}
 	
 	my_object = sdo_das_setting_get_instance(readobj TSRMLS_CC);
-	if (my_object == (sdo_das_setting_object *)NULL) {
-		ZVAL_NULL(writeobj);
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		rc = FAILURE;
-	} else {		
-		setting = my_object->setting;
-		try {			
-			const Property& property = setting->getProperty();
-			
-			print_buf << "object(" << CLASS_NAME << 
-				")#" << readobj->value.obj.handle;
-						
-			if (property.isMany()) {
-				print_buf << '[' << setting->getIndex() << ']';
-			}
-			
-			if (setting->isSet() && property.getType().isDataType()) {
-				print_buf << "=>";
-				if (setting->isNull()) {
-					print_buf << "NULL";
-				} else {
-					print_buf << '\"' << setting->getCStringValue() << '\"';
-				}				
-			}
-			
-			print_buf << '}';
-			
-			string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
-			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
-			
-		} catch (SDORuntimeException e) {
-			ZVAL_NULL(writeobj);
-			sdo_throw_runtimeexception(&e TSRMLS_CC);
-			rc = FAILURE;
+	
+	setting = my_object->setting;
+	try {			
+		const Property& property = setting->getProperty();
+		
+		print_buf << "object(" << CLASS_NAME << 
+			")#" << readobj->value.obj.handle;
+		
+		if (property.isMany()) {
+			print_buf << '[' << setting->getIndex() << ']';
 		}
-	}	
+		
+		if (setting->isSet() && property.getType().isDataType()) {
+			print_buf << "=>";
+			if (setting->isNull()) {
+				print_buf << "NULL";
+			} else {
+				print_buf << '\"' << setting->getCStringValue() << '\"';
+			}				
+		}
+		
+		print_buf << '}';
+		
+		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+		
+	} catch (SDORuntimeException e) {
+		ZVAL_NULL(writeobj);
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+		rc = FAILURE;
+	}
 	
 	switch(type) {
 	case IS_STRING:
@@ -344,10 +347,6 @@ PHP_METHOD(SDO_DAS_Setting, getPropertyIndex)
 	}
 
 	my_object = sdo_das_setting_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_setting_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		const Property& property = my_object->setting->getProperty();
@@ -371,10 +370,6 @@ PHP_METHOD(SDO_DAS_Setting, getPropertyName)
 	}
 
 	my_object = sdo_das_setting_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_setting_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		RETVAL_STRING((char *)my_object->setting->getProperty().getName(), 1);
@@ -398,10 +393,6 @@ PHP_METHOD(SDO_DAS_Setting, getValue)
 	}
 
 	my_object = sdo_das_setting_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_setting_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 
 	value = sdo_das_setting_read_value(my_object TSRMLS_CC);
 	RETVAL_ZVAL(value, 1, 0);
@@ -421,10 +412,6 @@ PHP_METHOD(SDO_DAS_Setting, getListIndex)
 	}
 
 	my_object = sdo_das_setting_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_setting_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		if (my_object->setting->getProperty().isMany()) {
@@ -451,10 +438,6 @@ PHP_METHOD(SDO_DAS_Setting, isSet)
 	}
 
 	my_object = sdo_das_setting_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_setting_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		RETVAL_BOOL(my_object->setting->isSet());

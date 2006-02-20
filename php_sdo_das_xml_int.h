@@ -15,7 +15,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
+| Author: Anantoju V Srinivas(Srini), Matthew Peters, Caroline Maynard |
 +----------------------------------------------------------------------+
 
 */
@@ -43,38 +43,33 @@ using namespace sdo;
 
 /***************** Dependencies between files within XML_DAS ********/
 /*	 The following four are called from das_xml.cpp's MINIT, and will be found in SDO_DAS_XML., SDO_DAS_XML_Document., and xmldas_utils.cpp	*/
-void initialize_sdo_das_xml_class(TSRMLS_D);
-void initialize_sdo_das_xml_document_class(TSRMLS_D);
-void initialize_sdo_das_xml_parserexception_class(TSRMLS_D);
-void initialize_sdo_das_xml_fileexception_class(TSRMLS_D);
+void sdo_das_xml_minit(TSRMLS_D);
+void sdo_das_xml_document_minit(TSRMLS_D);
+void sdo_das_xml_parserexception_minit(TSRMLS_D);
+void sdo_das_xml_fileexception_minit(TSRMLS_D);
 
 /* 	 The following three are defined in xmldas_utils.cpp - they logically belong in a xmldas_utils.h file	*/
-void sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
-void sdo_das_xml_throw_fileexception(char* filename TSRMLS_DC);
-void sdo_das_xml_throw_parserexception(char* filename TSRMLS_DC);
+zval *sdo_das_xml_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
+zval *sdo_das_xml_throw_fileexception(char* filename TSRMLS_DC);
+zval *sdo_das_xml_throw_parserexception(char* filename TSRMLS_DC);
+
+extern PHP_SDO_DAS_XML_API zend_class_entry *sdo_das_xml_class_entry;
+extern PHP_SDO_DAS_XML_API zend_class_entry *sdo_das_xml_document_class_entry;
 
 /******************* Our data types ***********************************/
 /* SDO_DAS_XML */
 typedef struct {
-    zend_object z_obj;
-    XMLHelperPtr xmlHelper;
-    XSDHelperPtr xsdHelper;
-    SDOXMLString targetNamespaceURI;
-    zval *php_das_df;
-    DataFactoryPtr dataFactory;  // Hydra dF
+    zend_object    zo;
+    XMLHelperPtr   xmlHelperPtr;
+    XSDHelperPtr   xsdHelperPtr;
+	zval           z_df;
 } xmldas_object;
 
 /* SDO_DAS_XML_Document */
 typedef struct {
-    zend_object z_obj;
-    XMLDocumentPtr xdoch;
+    zend_object    zo;
+    XMLDocumentPtr xmlDocumentPtr;
 } xmldocument_object;
-
-/* SDO_DAS_DataFactory */
-typedef struct {
-    zend_object zo;
-    DataFactoryPtr dfp;
-} sdo_das_df_object;
 
 #endif /*_PHP_SDO_DEFS_H*/
 

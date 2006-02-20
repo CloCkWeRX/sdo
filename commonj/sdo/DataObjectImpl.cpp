@@ -1228,9 +1228,26 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     d->setNull();
                 }
                 else {
-                    const Property& p = d->getProperty(prop);
+                    const PropertyImpl* p = d->getPropertyImpl(prop);
+                    if (p == 0)
+                    {
+                        if(d->getType().isOpenType())
+                        {
+                            string msg("Cannot set unassigned open property to null:");
+                            msg += prop;
+                            SDO_THROW_EXCEPTION("setNull", SDOUnsupportedOperationException,
+                            msg.c_str());
+                        }
+                        else
+                        {
+                            string msg("Property Not Found:");
+                            msg += prop;
+                            SDO_THROW_EXCEPTION("setNull", SDOPropertyNotFoundException,
+                            msg.c_str());
+                        }
+                    }
                     delete prop;
-                    d->setNull(p);
+                    d->setNull((Property&)*p);
                     return;
                 }
             }
@@ -1397,6 +1414,18 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
         return (Property&)*pi;
     }
+
+    /**
+     * See if the property currently exists
+     */
+
+    bool DataObjectImpl::hasProperty(const char* name)
+    {
+        PropertyImpl* pi = getPropertyImpl(name);
+        if (pi == 0) return false;
+        return true;
+    }
+
 
     PropertyImpl* DataObjectImpl::getPropertyImpl(unsigned int index)
     {
@@ -2351,8 +2380,11 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                         char *c1 = strchr(c,']');
                         if (c1 != 0)*c1 = 0;
                         unsigned int i = atoi(++c);
-                        DataObjectList& li = d->getList(p);
-                        li.remove(i);
+                        if (i > 0){
+                            i--;
+                            DataObjectList& li = d->getList(p);
+                            li.remove(i);
+                        }
                         delete prop;
                         return;
                     }

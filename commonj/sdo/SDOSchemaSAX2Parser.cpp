@@ -70,6 +70,8 @@ namespace commonj
                 {
                     bInSchema = true;
                     // Handle namespace definitions
+
+
                     schemaInfo.getSchemaNamespaces().merge(namespaces);
                     
                     // Handle attributes
@@ -80,7 +82,8 @@ namespace commonj
                             schemaInfo.setTargetNamespaceURI(attributes[i].getValue());
                         }                        
                     }
-                    
+
+
                     currentType.uri = schemaInfo.getTargetNamespaceURI();
                     currentType.name = "RootType";
                     currentType.localname="RootType";
@@ -138,6 +141,14 @@ namespace commonj
                     startGroup(localname, prefix, URI, namespaces, attributes);
                 } // end Group handling
                 
+                else if (localname.equalsIgnoreCase("group") 
+                      || localname.equalsIgnoreCase("attributeGroup"))
+                {
+                    if (setter)
+                    {
+                        setter->setError("Schema contains group or attributeGroup which are not yet implemented");
+                    }
+                }
                 ///////////////////////////////////////////////////////////////////////
                 // Handle simpleType
                 // These become new types
@@ -785,7 +796,7 @@ namespace commonj
         }
         
         // ============================================================================
-        // setType
+        // setType 
         // ============================================================================
         void SDOSchemaSAX2Parser::setType(
             PropertyDefinition& property,
@@ -943,6 +954,14 @@ namespace commonj
             if (qname.getURI().equalsIgnoreCase("http://www.w3.org/2001/XMLSchema"))
             {
                 uri = Type::SDOTypeNamespaceURI;
+                if (qname.getLocalName().equalsIgnoreCase("ID"))
+                {
+                    name = "String";
+                }
+                if (qname.getLocalName().equalsIgnoreCase("NCName"))
+                {
+                    name = "String";
+                }
                 if (qname.getLocalName().equalsIgnoreCase("string"))
                 {
                     name = "String";

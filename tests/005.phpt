@@ -1,12 +1,14 @@
 --TEST--
 SDO_DAS_XML load test
+--INI--
+display_errors=off
 --SKIPIF--
 <?php if (!extension_loaded("sdo")) print "skip"; ?>
 --FILE--
 <?php 
     $dirname = dirname($_SERVER['SCRIPT_FILENAME']);
     $xmldas = SDO_DAS_XML::create("${dirname}/company.xsd");
-    $xdoc = $xmldas->loadFromFile("${dirname}/company.xml");
+    $xdoc = $xmldas->loadFile("${dirname}/company.xml");
     $do = $xdoc->getRootDataObject();
     print_r($do);
 ?>

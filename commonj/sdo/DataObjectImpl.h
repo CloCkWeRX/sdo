@@ -389,6 +389,11 @@ class DataObjectImpl : public DataObject
     virtual DataObjectPtr createDataObject(const Property& property);
 
 
+    /**
+     * See if the property currently exists
+     */
+
+    virtual bool hasProperty(const char* name);
 
 
     virtual void detach();
@@ -552,7 +557,7 @@ private:
     virtual bool remove(DataObjectImpl* indol);
     virtual bool isSet(const Property& prop, unsigned int propertyIndex);
 
-
+   
     virtual DataObjectImpl* getDataObjectImpl(const char* path); 
     virtual DataObjectImpl* getDataObjectImpl(unsigned int propertyIndex); 
     virtual DataObjectImpl* getDataObjectImpl(const Property& property); 

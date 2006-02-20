@@ -92,35 +92,35 @@ namespace commonj
                 ///////////////////////////////////////////////////////////////////////
                 // save - Serializes the datagraph to the XML file
                 ///////////////////////////////////////////////////////////////////////
-                XMLDAS_API virtual void    save(DataGraphPtr doc, const char* xmlFile) = 0;                
-                XMLDAS_API virtual void    save(XMLDocumentPtr doc, const char* xmlFile) = 0;                
+                XMLDAS_API virtual void    save(DataGraphPtr doc, const char* xmlFile, int indent  = -1) = 0;                
+                XMLDAS_API virtual void    save(XMLDocumentPtr doc, const char* xmlFile, int indent  = -1) = 0;                
                 XMLDAS_API virtual void save(
                     DataObjectPtr dataObject,
                     const char* rootElementURI,
                     const char* rootElementName,
-                    const char* xmlFile) = 0;
+                    const char* xmlFile, int indent  = -1) = 0;
                 
                 
                 ///////////////////////////////////////////////////////////////////////
                 // save - Serializes the datagraph to a stream
                 ///////////////////////////////////////////////////////////////////////
-                XMLDAS_API virtual void save(DataGraphPtr doc, std::ostream& outXml) = 0;
-                XMLDAS_API virtual void save(XMLDocumentPtr doc, std::ostream& outXml) = 0;
+                XMLDAS_API virtual void save(DataGraphPtr doc, std::ostream& outXml, int indent  = -1) = 0;
+                XMLDAS_API virtual void save(XMLDocumentPtr doc, std::ostream& outXml, int indent  = -1) = 0;
                 XMLDAS_API virtual void save(
                     DataObjectPtr dataObject,
                     const char* rootElementURI,
                     const char* rootElementName,
-                    std::ostream& outXml) = 0;
+                    std::ostream& outXml, int indent  = -1) = 0;
                 
                 ///////////////////////////////////////////////////////////////////////
                 // save - Serializes the datagraph to a string
                 ///////////////////////////////////////////////////////////////////////
-                XMLDAS_API virtual char* save(DataGraphPtr doc) = 0;
-                XMLDAS_API virtual char* save(XMLDocumentPtr doc) = 0;
+                XMLDAS_API virtual char* save(DataGraphPtr doc, int indent  = -1) = 0;
+                XMLDAS_API virtual char* save(XMLDocumentPtr doc, int indent  = -1) = 0;
                 XMLDAS_API virtual char* save(
                     DataObjectPtr dataObject,
                     const char* rootElementURI,
-                    const char* rootElementName) = 0;
+                    const char* rootElementName, int indent  = -1) = 0;
                 
                 ///////////////////////////////////////////////////////////////////////
                 // createDocument 

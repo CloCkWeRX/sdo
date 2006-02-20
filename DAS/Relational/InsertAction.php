@@ -159,11 +159,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 
 	private function storeThisObjectsPrimaryKey($dbh)
 	{
-		if (gettype(PDO_FETCH_ASSOC) == 'string') {
-			include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
-		} else {
-			include_once "SDO/DAS/Relational/PDOConstants.underscore.inc.php";
-		}
+		include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
 
 		$type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
 		$pk_property_name = $this->object_model->getPropertyRepresentingPrimaryKeyFromType($type);

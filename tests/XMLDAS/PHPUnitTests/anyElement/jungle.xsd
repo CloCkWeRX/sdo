@@ -1,0 +1,13 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+  
+  <element name="jungle">
+    <complexType>
+      <sequence>
+        <any minOccurs="0" maxOccurs="unbounded"/>
+      </sequence>
+    </complexType>
+  </element>
+  
+</schema>
+
+

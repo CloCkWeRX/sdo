@@ -140,9 +140,27 @@ public:
     
     virtual DataObjectPtr  remove (unsigned int index);
 
+    virtual void checkFactory(DataObjectPtr dob);
     virtual void checkType(const Type& listType, const Type& objectType);
     virtual void setType(const char* uri, const char* name);    
 
+   /*  getType returns type
+     *
+     * Returns the type.
+     * May throw SDOTYpeNotFoundException for unset open types
+     */
+
+
+   virtual const Type& getType();
+
+    /*  getTypeEnum returns an enumerator for the type
+     *
+     * Returns an enumerator for the type for easy switching on basic types.
+     * The enumerator is part of the Type class
+     * May throw SDOTypeNotFoundException for open types
+     */
+
+    virtual const Type::Types getTypeEnum();
 
 
 private: 

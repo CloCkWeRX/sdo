@@ -147,8 +147,8 @@ namespace sdo{
     
     PropertyImpl::~PropertyImpl()
     {
-        if (name != 0) delete name;
-        if (defvalue != 0) delete defvalue;
+        if (name != 0) delete (char*)name;
+        if (defvalue != 0) delete (char*)defvalue;
         if (stringdef != 0) delete stringdef;
         for (int i = 0; i < aliases.size();i++)
          {

@@ -145,7 +145,7 @@ class SDO_DAS_Relational {
 		$dbh->commit();
 		return $root;
 	}
-	
+
 	/**
 	 * Given an SQL query in the form of a prepared PDO statement and a value list, execute it, 
 	 * normalise the result set into a data graph and return it.
@@ -160,13 +160,9 @@ class SDO_DAS_Relational {
 		$dbh->commit();
 		return $root;
 	}
-	
+
 	public function normaliseResultSet($pdo_stmt, $column_specifier) {
-		if (gettype(PDO_FETCH_ASSOC) == 'string') {
-			include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
-		} else {
-			include_once "SDO/DAS/Relational/PDOConstants.underscore.inc.php";			
-		}
+		include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
 		if ($column_specifier == null) {
 			$all_rows = $pdo_stmt->fetchAll(SDO_DAS_Relational_PDO_FETCH_ASSOC);
 		} else {
@@ -243,7 +239,7 @@ class SDO_DAS_Relational {
 				throw new SDO_DAS_Relational_Exception('The result set from ExecuteQuery contained a column with name ' . $col . ' but there is no table with a column with this name.');
 				case 1:
 				foreach ($table_names_with_this_column as $table_name => $property_name) // only one entry
-					$parsed_row[$table_name][$property_name] = $value;
+				$parsed_row[$table_name][$property_name] = $value;
 				break;
 				default:
 				throw new SDO_DAS_Relational_Exception('The result set from ExecuteQuery contained a column with name ' . $col . ' but there is more than one table with a column with this name. You need to pass a column specifier to resolve the ambiguity.');
@@ -332,11 +328,11 @@ class SDO_DAS_Relational {
 			if ($setting->isSet()) {
 				$original_value = $setting->getValue();
 				echo ", which had original value ";
-	  			ob_start();
-	  			var_dump($original_value);
-  				$content = ob_get_contents();
-  				ob_end_clean();
-  				echo "$content\n";
+				ob_start();
+				var_dump($original_value);
+				$content = ob_get_contents();
+				ob_end_clean();
+				echo "$content\n";
 			} else {
 				echo ", which was originally not set\n";
 			}
@@ -383,8 +379,8 @@ class SDO_DAS_Relational {
 
 	private static function isRoot($do)
 	{
-		$reflection_do = new SDO_Model_ReflectionDataObject($do);
-		$type = $reflection_do->getType();
+		$rdo = new SDO_Model_ReflectionDataObject($do);
+		$type = $rdo->getType();
 		return ($type->namespaceURI == SDO_DAS_Relational::DAS_NAMESPACE && $type->name == SDO_DAS_Relational::DAS_ROOT_TYPE);
 	}
 
@@ -392,7 +388,7 @@ class SDO_DAS_Relational {
 	{
 		return $df->create(SDO_DAS_Relational::DAS_NAMESPACE, SDO_DAS_Relational::DAS_ROOT_TYPE);
 	}
-	
+
 	public function getObjectModel() {
 		return $this->object_model;
 	}

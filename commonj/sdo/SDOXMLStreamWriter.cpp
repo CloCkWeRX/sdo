@@ -37,9 +37,9 @@ namespace commonj
         {    
         }
         
-        int SDOXMLStreamWriter::write(XMLDocumentPtr doc)
+        int SDOXMLStreamWriter::write(XMLDocumentPtr doc, int indent)
         {
-            int rc = SDOXMLBufferWriter::write(doc);
+            int rc = SDOXMLBufferWriter::write(doc, indent);
 
             // Now stream the buffer
             outXmlStream << getBuffer();

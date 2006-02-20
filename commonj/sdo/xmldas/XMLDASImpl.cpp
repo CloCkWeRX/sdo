@@ -205,78 +205,78 @@ namespace commonj
                 return load(str);
             }
             
-            void XMLDASImpl::save(DataGraphPtr doc, const char* xmlFile)
+            void XMLDASImpl::save(DataGraphPtr doc, const char* xmlFile, int indent)
             {
                 DataObjectPtr xd = graphToDataObject(doc);
                 // write the datagraph tag
                 // write the model
                 // write the dataobjects
-                xmlHelper->save(xd, 0,0, xmlFile);
+                xmlHelper->save(xd, 0,0, xmlFile, indent);
                 // end the tag
             }
 
-            void XMLDASImpl::save(XMLDocumentPtr doc, const char* xmlFile)
+            void XMLDASImpl::save(XMLDocumentPtr doc, const char* xmlFile, int indent)
             {
-                xmlHelper->save(doc, xmlFile);
+                xmlHelper->save(doc, xmlFile, indent);
             }
             
             void XMLDASImpl::save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
                 const char* rootElementName,
-                const char* xmlFile)
+                const char* xmlFile, int indent)
             {
-                xmlHelper->save(dataObject,rootElementURI, rootElementName, xmlFile);
+                xmlHelper->save(dataObject,rootElementURI, rootElementName, xmlFile, indent);
             }
             
             
             // Serializes the datagraph to a stream
-            void XMLDASImpl::save(DataGraphPtr doc, ostream& outXml)
+            void XMLDASImpl::save(DataGraphPtr doc, ostream& outXml, int indent)
             {
                 DataObjectPtr xd = graphToDataObject(doc);
                 // write the datagraph tag
                 // write the model
                 // write the dataobjects
-                xmlHelper->save(xd, 0,0,outXml);    
+                xmlHelper->save(xd, 0,0,outXml, indent);    
                 // end the tag
             }
 
-            void XMLDASImpl::save(XMLDocumentPtr doc, ostream& outXml)
+            void XMLDASImpl::save(XMLDocumentPtr doc, ostream& outXml, int indent)
             {
-                xmlHelper->save(doc, outXml);    
+                xmlHelper->save(doc, outXml, indent);    
             }
             
             void XMLDASImpl::save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
                 const char* rootElementName,
-                std::ostream& outXml)
+                std::ostream& outXml, int indent)
             {
-                xmlHelper->save(dataObject, rootElementURI, rootElementName, outXml);
+                xmlHelper->save(dataObject, rootElementURI, rootElementName, outXml, indent);
             }
             
             // Serializes the datagraph to a string
-            char* XMLDASImpl::save(DataGraphPtr doc)
+            char* XMLDASImpl::save(DataGraphPtr doc, int indent)
             {
                 DataObjectPtr xd = graphToDataObject(doc);
                 // write the datagraph tag
                 // write the model
                 // write the dataobjects
-                return xmlHelper->save(xd,0,0);
+                return xmlHelper->save(xd,0,0, indent);
                 // end the tag
             }
 
-            char* XMLDASImpl::save(XMLDocumentPtr doc)
+            char* XMLDASImpl::save(XMLDocumentPtr doc, int indent)
             {
-                return xmlHelper->save(doc);
+                return xmlHelper->save(doc, indent);
             }
             
             char* XMLDASImpl::save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
-                const char* rootElementName)
+                const char* rootElementName, int indent)
             {
-                return xmlHelper->save(dataObject, rootElementURI, rootElementName);
+                return xmlHelper->save(dataObject, rootElementURI, rootElementName, indent);
             }
 
             

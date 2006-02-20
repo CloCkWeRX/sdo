@@ -775,22 +775,31 @@ namespace commonj
                         
                         // NOTE: always creating DO doesn't cater for DataType as top element
 
-                        newDO = dataFactory->create(typeURI, typeName);
-
-                        // set the property setting if the root is an extended primitive
                         const Type& tp = dataFactory->getType(typeURI,typeName);
-                        // get the type definition, and see if its an extended primitive.
-
-                        XSDTypeInfo* typeInfo = (XSDTypeInfo*)
-                            ((DASType*)&tp)->getDASValue("XMLDAS::TypeInfo");
-                        if (typeInfo)
+                        if (tp.isDataType())
                         {
-                            const TypeDefinition& typeDefinition = typeInfo->getTypeDefinition();
-                            if (typeDefinition.isExtendedPrimitive)
+                            newDO = dataFactory->create(tns, "RootType");
+                            currentPropertySetting = PropertySetting(newDO, localname,
+                            bToBeNull);
+                        }
+                        else
+                        {
+
+                            newDO = dataFactory->create(typeURI, typeName);
+
+                            // get the type definition, and see if its an extended primitive.
+
+                            XSDTypeInfo* typeInfo = (XSDTypeInfo*)
+                              ((DASType*)&tp)->getDASValue("XMLDAS::TypeInfo");
+                            if (typeInfo)
                             {
-                                // The name of this element is the name of a property on the current DO
-                                currentPropertySetting = PropertySetting(newDO, localname,
-                                bToBeNull);
+                                const TypeDefinition& typeDefinition = typeInfo->getTypeDefinition();
+                                if (typeDefinition.isExtendedPrimitive)
+                                {
+                                    // The name of this element is the name of a property on the current DO
+                                    currentPropertySetting = PropertySetting(newDO, localname,
+                                    bToBeNull);
+                                }
                             }
                         }
                         
@@ -833,7 +842,17 @@ namespace commonj
                                 ignoreTag.uri = URI;
                                 ignoreTag.prefix = prefix;
                                 ignoreTag.tagCount = 0;
-                            }
+                                if (setter != 0)
+                                {
+                                    char *msg = new char[strlen((const char*)localname) + 32];
+                                    if (msg) {
+                                        sprintf(msg,"Parser found unknown element %s",
+                                            (const char*)localname);
+                                        setter->setError( msg );
+                                        delete msg;
+                                    }
+                                }
+                             }
                             LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit5");
                             return;
                         }
@@ -904,6 +923,16 @@ namespace commonj
                             ignoreTag.uri = URI;
                             ignoreTag.prefix = prefix;
                             ignoreTag.tagCount = 0;
+                            if (setter != 0)
+                            {
+                                char *msg = new char[strlen((const char*)localname) + 32];
+                                if (msg) {
+                                    sprintf(msg,"Parser found unknown element %s",
+                                    (const char*)localname);
+                                    setter->setError( msg );
+                                    delete msg;
+                                }
+                            }
                             LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit6");
                             return;
                         }
@@ -922,6 +951,16 @@ namespace commonj
                     ignoreTag.uri = URI;
                     ignoreTag.prefix = prefix;
                     ignoreTag.tagCount = 0;
+                    if (setter != 0)
+                    {
+                        char *msg = new char[strlen((const char*)localname) + 32];
+                        if (msg) {
+                            sprintf(msg,"Parser found unknown element %s",
+                            (const char*)localname);
+                            setter->setError( msg );
+                            delete msg;
+                        }
+                    }
                     LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit7");
                     return;
                 }
@@ -942,6 +981,17 @@ namespace commonj
                     ignoreTag.uri = URI;
                     ignoreTag.prefix = prefix;
                     ignoreTag.tagCount = 0;
+                    if (setter != 0)
+                    {
+                        char *msg = new char[strlen((const char*)localname) + 32];
+                        if (msg)
+                        {
+                            sprintf(msg,"Parser found unknown element %s",
+                                 (const char*)localname);
+                            setter->setError( msg );
+                            delete msg;
+                        }
+                    }
                     LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit8");
                     return;
                 }

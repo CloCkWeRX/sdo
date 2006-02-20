@@ -1,0 +1,24 @@
+<schema xmlns= "http://www.w3.org/2001/XMLSchema">
+
+   <complexType name="snakeType">
+     <sequence>
+       <element name= "name" type="string"/>
+       <element name= "length" type="positiveInteger" />
+     </sequence>
+   </complexType>
+
+   <complexType name="bearType">
+     <sequence>
+       <element name= "name" type="string"/>
+       <element name= "weight" type="positiveInteger" />
+     </sequence>
+   </complexType>
+
+   <complexType name="pantherType">
+     <sequence>
+       <element name= "name" type="string"/>
+       <element name= "colour" type="string" />
+     </sequence>
+   </complexType>
+
+</schema>

@@ -38,9 +38,9 @@ namespace commonj
         }
         
         int SDOXSDStreamWriter::write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
-            const propertyMap& openprops)
+            const propertyMap& openprops, int indent)
         {
-            int rc = SDOXSDBufferWriter::write(types, targetNamespaceURI, openprops);
+            int rc = SDOXSDBufferWriter::write(types, targetNamespaceURI, openprops, indent);
 
             // Now stream the buffer
             outXmlStream << getBuffer();

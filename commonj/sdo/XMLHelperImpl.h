@@ -63,7 +63,11 @@ namespace commonj
              * Returns a pointer to the root data object
              */
 
-            virtual XMLDocumentPtr loadFile(
+           virtual XMLDocumentPtr createDocument(
+               const char* elementname= 0,
+               const char* rootElementURI=0);
+
+           virtual XMLDocumentPtr loadFile(
                 const char* xmlFile,
                 const char* targetNamespaceURI = 0);
             virtual XMLDocumentPtr load(
@@ -83,34 +87,37 @@ namespace commonj
              * save - Serializes the datagraph to the XML file
              */
 
-            void save(XMLDocumentPtr doc, const char* xmlFile);
+            void save(XMLDocumentPtr doc, const char* xmlFile, int indent = -1);
             void save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
                 const char* rootElementName,
-                const char* xmlFile);
+                const char* xmlFile, int indent = -1);
 
             /**  save saves the graph to XML
              *
              * save - Serializes the datagraph to a stream
              */
 
-            void save(XMLDocumentPtr doc, std::ostream& outXml);
+            void save(XMLDocumentPtr doc, std::ostream& outXml,
+                int indent = -1);
             void save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
                 const char* rootElementName,
-                std::ostream& outXml);
+                std::ostream& outXml,
+                int indent = -1);
 
             /**  save saves the graph to XML
              *
              * save - Serializes the datagraph to a string
              */
-            char* save(XMLDocumentPtr doc);
+            char* save(XMLDocumentPtr doc,int indent = -1);
             char* save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
-                const char* rootElementName);
+                const char* rootElementName,
+                int indent = -1);
                             
         private:
             int     parse(const char* source);

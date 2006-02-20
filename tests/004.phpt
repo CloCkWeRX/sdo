@@ -1,5 +1,7 @@
 --TEST--
 Check for sdo_das_xml presence
+--INI--
+display_errors=off
 --SKIPIF--
 <?php if (!extension_loaded("sdo_das_xml")) print "skip"; ?>
 --FILE--

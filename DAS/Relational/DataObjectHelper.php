@@ -54,11 +54,11 @@ class SDO_DAS_Relational_DataObjectHelper
 	{
 		$type = self::getApplicationType($data_object);
 		$pk_property_name = $object_model->getPropertyRepresentingPrimaryKeyFromType($type);
-		if (!isset($data_object[$pk_property_name])) {
-			return null;
-		} else {
+		if (isset($data_object[$pk_property_name])) {
 			$pk = $data_object[$pk_property_name];
 			return $pk;
+		} else {
+			return null;
 		}
 	}
 

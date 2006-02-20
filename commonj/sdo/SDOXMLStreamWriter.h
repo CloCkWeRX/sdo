@@ -42,7 +42,7 @@ namespace commonj
             SDOXMLStreamWriter(std::ostream& outXML, DataFactoryPtr dataFactory = NULL);                
             virtual ~SDOXMLStreamWriter();
             
-            int write(XMLDocumentPtr doc);
+            int write(XMLDocumentPtr doc, int indent = -1);
         private:
             std::ostream& outXmlStream;
             

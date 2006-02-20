@@ -72,6 +72,7 @@ PHP_SDO_API zend_class_entry *sdo_typenotfoundexception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_invalidconversionexception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_indexoutofboundsexception_class_entry;
 PHP_SDO_API zend_class_entry *sdo_unsupportedoperationexception_class_entry;
+PHP_SDO_API zend_class_entry *sdo_cppexception_class_entry;
 /* }}} */
 
 /* {{{ single SDO_DataObject parameter */
@@ -102,12 +103,12 @@ static ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject_createdataobject, 0)
 ZEND_END_ARG_INFO();
 
 function_entry sdo_dataobject_methods[] = {
-	ZEND_ABSTRACT_ME(SDO_DataObject, getType, 0)
+	ZEND_ABSTRACT_ME(SDO_DataObject, getTypeName, 0)
+	ZEND_ABSTRACT_ME(SDO_DataObject, getTypeNamespaceURI, 0)
 	ZEND_ABSTRACT_ME(SDO_DataObject, getSequence, 0)
 	ZEND_ABSTRACT_ME(SDO_DataObject, createDataObject, arginfo_sdo_dataobject_createdataobject)
 	ZEND_ABSTRACT_ME(SDO_DataObject, clear, 0)
 	ZEND_ABSTRACT_ME(SDO_DataObject, getContainer, 0)
-	ZEND_ABSTRACT_ME(SDO_DataObject, getContainmentPropertyName, 0)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -130,8 +131,6 @@ ZEND_END_ARG_INFO();
 
 function_entry sdo_sequence_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_Sequence, getProperty, arginfo_sdo_sequence_getproperty)
-	ZEND_ABSTRACT_ME(SDO_Sequence, getPropertyIndex, arginfo_sdo_sequence_getproperty)
-	ZEND_ABSTRACT_ME(SDO_Sequence, getPropertyName, arginfo_sdo_sequence_getproperty)
 	ZEND_ABSTRACT_ME(SDO_Sequence, move, arginfo_sdo_sequence_move)
 	ZEND_ABSTRACT_ME(SDO_Sequence, insert, arginfo_sdo_sequence_insert)
 	ZEND_ABSTRACT_ME(SDO_Sequence, count, 0)
@@ -155,7 +154,7 @@ function_entry sdo_list_methods[] = {
 
 /* {{{ SDO_DataFactory methods */
 static ZEND_BEGIN_ARG_INFO(arginfo_sdo_datafactory_create, 0)
-    ZEND_ARG_INFO(0, namespace_uri)
+    ZEND_ARG_INFO(0, type_namespace_uri)
     ZEND_ARG_INFO(0, type_name)
 ZEND_END_ARG_INFO();
 
@@ -174,16 +173,16 @@ function_entry sdo_das_dataobject_methods[] = {
 
 /* {{{ SDO_DAS_DataFactory methods */
 static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addType, 0, ZEND_RETURN_VALUE, 2)
-    ZEND_ARG_INFO(0, namespace_uri)
+    ZEND_ARG_INFO(0, type_namespace_uri)
     ZEND_ARG_INFO(0, type_name)
     ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
 static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addPropertyToType, 0, ZEND_RETURN_VALUE, 5)
-    ZEND_ARG_INFO(0, parent_namespace_uri)
+    ZEND_ARG_INFO(0, parent_type_namespace_uri)
     ZEND_ARG_INFO(0, parent_type_name)
     ZEND_ARG_INFO(0, property_name)
-    ZEND_ARG_INFO(0, namespace_uri)
+    ZEND_ARG_INFO(0, type_namespace_uri)
     ZEND_ARG_INFO(0, type_name)
     ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
@@ -236,12 +235,12 @@ function_entry sdo_dataobjectimpl_methods[] = {
 	ZEND_ME(SDO_DataObjectImpl, __set, arginfo___set, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DataObjectImpl, count, 0, ZEND_ACC_PUBLIC)
 	/* inherited from SDO_DataObject ... */
-	ZEND_ME(SDO_DataObjectImpl, getType, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_DataObjectImpl, getTypeName, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_DataObjectImpl, getTypeNamespaceURI, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DataObjectImpl, getSequence, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DataObjectImpl, createDataObject, arginfo_sdo_dataobject_createdataobject, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DataObjectImpl, clear, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DataObjectImpl, getContainer, 0, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_DataObjectImpl, getContainmentPropertyName, 0, ZEND_ACC_PUBLIC)
 	/* inherited from SDO_DAS_DataObject ... */
 	ZEND_ME(SDO_DataObjectImpl, getChangeSummary, 0, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -251,8 +250,6 @@ function_entry sdo_dataobjectimpl_methods[] = {
 /* {{{ SDO_SequenceImpl methods */
 function_entry sdo_sequenceimpl_methods[] = {
 	ZEND_ME(SDO_SequenceImpl, getProperty, arginfo_sdo_sequence_getproperty, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_SequenceImpl, getPropertyIndex, arginfo_sdo_sequence_getproperty, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_SequenceImpl, getPropertyName, arginfo_sdo_sequence_getproperty, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, move, arginfo_sdo_sequence_move, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, insert, arginfo_sdo_sequence_insert, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, count, 0, ZEND_ACC_PUBLIC)
@@ -274,6 +271,7 @@ function_entry sdo_model_type_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_Model_Type, isDataType, 0)
 	ZEND_ABSTRACT_ME(SDO_Model_Type, isSequencedType, 0)
 	ZEND_ABSTRACT_ME(SDO_Model_Type, isOpenType, 0)
+	ZEND_ABSTRACT_ME(SDO_Model_Type, isAbstractType, 0)
 	ZEND_ABSTRACT_ME(SDO_Model_Type, getBaseType, 0)
 	{NULL, NULL, NULL}
 };
@@ -288,6 +286,7 @@ function_entry sdo_model_typeimpl_methods[] = {
 	ZEND_ME(SDO_Model_TypeImpl, isDataType, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_Model_TypeImpl, isSequencedType, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_Model_TypeImpl, isOpenType, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_Model_TypeImpl, isAbstractType, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_Model_TypeImpl, getBaseType, 0, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -338,17 +337,29 @@ function_entry sdo_model_reflectiondataobject_methods[] = {
 };
 /* }}} */
 
-/* {{{ SDO_Exception methods
- * These are used for all SDO exceptions, none of them have any methods other than inherited ones
- */
+/* {{{ SDO_Exception methods */
 function_entry sdo_exception_methods[] = {
+	ZEND_ME(SDO_Exception, getCause, 0, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
 
-/* {{{ sdo_get_exception_methods
+/* {{{ SDO_CPPException methods */
+function_entry sdo_cppexception_methods[] = {
+	ZEND_ME(SDO_CPPException, getClass, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_CPPException, getFile, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_CPPException, getLine, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_CPPException, getFunction, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_CPPException, getMessage, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_CPPException, getSeverity, 0, ZEND_ACC_PUBLIC)
+	ZEND_ME(SDO_CPPException, __toString, 0, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ sdo_exception_get_methods
  */
-PHP_SDO_API function_entry *sdo_get_exception_methods()
+PHP_SDO_API function_entry *sdo_exception_get_methods()
 {
     return sdo_exception_methods;
 }
@@ -483,14 +494,7 @@ PHP_MINIT_FUNCTION(sdo)
 
 	/* class SDO_Exception extends Exception */
     INIT_CLASS_ENTRY(ce, "SDO_Exception", sdo_exception_methods);
-    sdo_exception_class_entry = zend_register_internal_class_ex(
-        &ce, 
-#if (PHP_MAJOR_VERSION < 6) 
-		zend_exception_get_default(), 
-#else  
-		zend_exception_get_default(TSRMLS_C),
-#endif
-		NULL TSRMLS_CC);
+	sdo_exception_minit(&ce TSRMLS_CC);
 
 	/* class SDO_PropertyNotFoundException extends SDO_Exception */
     INIT_CLASS_ENTRY(ce, "SDO_PropertyNotFoundException", sdo_exception_methods);
@@ -522,6 +526,9 @@ PHP_MINIT_FUNCTION(sdo)
     sdo_unsupportedoperationexception_class_entry = zend_register_internal_class_ex(
         &ce, sdo_exception_class_entry, NULL TSRMLS_CC);
 
+	/* class SDO_CPPException */
+    INIT_CLASS_ENTRY(ce, "SDO_CPPException", sdo_cppexception_methods);
+	sdo_cppexception_minit(&ce TSRMLS_CC);
    return SUCCESS;
 
 }

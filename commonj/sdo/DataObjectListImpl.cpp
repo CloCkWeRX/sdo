@@ -164,9 +164,38 @@ DATAOBJECT_VECTOR DataObjectListImpl::getVec() const
 }
 
 
+
+const Type& DataObjectListImpl::getType()
+{
+    if (typeUnset)
+    {
+        string msg("The list property is open, and the type of the contents has not bee determined yet.");
+        SDO_THROW_EXCEPTION("Get Type", SDOTypeNotFoundException,
+            msg.c_str());
+    }
+    return theFactory->getType(typeURI, typeName);
+}
+
+
+const Type::Types DataObjectListImpl::getTypeEnum()
+{
+    if (typeUnset)
+    {
+        return Type::UndefinedOpenPropertyType;
+
+    }
+    return theFactory->getType(typeURI, typeName).getTypeEnum();
+}
+
+
 void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
 {
     if (typeUnset)setType(d->getType().getURI(),d->getType().getName());
+
+    checkFactory(d);
+
+    checkType(theFactory->getType(typeURI,typeName),
+                d->getType());
 
     if (container != 0)
     {
@@ -240,40 +269,67 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
 
 }
 
+  void DataObjectListImpl::checkFactory(DataObjectPtr dob)
+    {
+        
+        DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dob;
+
+        if (d->getDataFactory() == theFactory) return;
+        
+        string msg("Insertion from incompatible factory ");
+        const Type& t = d->getType();
+        msg += t.getURI();
+        msg += "#";
+        msg += t.getName();
+        msg += " into list ";
+        msg += typeURI;
+        msg += "#";
+        msg += typeName;
+        SDO_THROW_EXCEPTION("checkFactory", SDOInvalidConversionException,
+            msg.c_str());
+    }
+
+
 void DataObjectListImpl::checkType(const Type& listType, const Type& objectType)
     {
         if (listType.equals(objectType)) return;
 
         const TypeImpl* ti = ((DataFactoryImpl*)theFactory)->findTypeImpl
             (objectType.getURI(),objectType.getName());
-        
-        do  
+        if (ti != 0)
         {
-            ti  = (const TypeImpl*)ti->getBaseType();
-            if (ti == 0) break;
-            if (listType.equals(*ti)) return;
-        } while (ti != 0);
-
-        // allow types of any substitutes
-        if (container != 0)
-        {
-            PropertyImpl* pi = 
-                container->getPropertyImpl(pindex);
-            if (pi != 0)
+            do  
             {
-                unsigned int subcount = pi->getSubstitutionCount();
-                for (int i=0;i<subcount;i++)
+                ti  = (const TypeImpl*)ti->getBaseType();
+                if (ti == 0) break;
+                if (listType.equals(*ti)) return;
+            } while (ti != 0);
+
+            // allow types of any substitutes
+            if (container != 0)
+            {
+                PropertyImpl* pi = 
+                    container->getPropertyImpl(pindex);
+                if (pi != 0)
                 {
-                    const Type* tsub = pi->getSubstitutionType(i);
-                    if (tsub != 0 && tsub->equals(objectType)) return;
+                    unsigned int subcount = pi->getSubstitutionCount();
+                    for (int i=0;i<subcount;i++)
+                    {
+                        const Type* tsub = pi->getSubstitutionType(i);
+                        if (tsub != 0 && tsub->equals(objectType)) return;
+                    }
                 }
             }
         }
 
         // no match..
         string msg("Insertion of object of incompatible type ");
+        msg += objectType.getURI();
+        msg += "#";
         msg += objectType.getName();
-        msg += " into property of type ";
+        msg += " into list of type ";
+        msg += listType.getURI();
+        msg += "#";
         msg += listType.getName();
         SDO_THROW_EXCEPTION("TypeCheck", SDOInvalidConversionException,
             msg.c_str());
@@ -332,6 +388,7 @@ void DataObjectListImpl::append (DataObjectPtr d)
         }
     }
 
+    checkFactory(d);
 
     checkType(theFactory->getType(typeURI,typeName),
                 d->getType());
@@ -939,6 +996,15 @@ void DataObjectListImpl::setCString(unsigned int index, char* d)
 
 void DataObjectListImpl::setDataObject(unsigned int index, DataObjectPtr dob) 
 {
+
+    if (dob != 0)
+    {
+        checkFactory(dob);
+
+        checkType(theFactory->getType(typeURI,typeName),
+                dob->getType());
+    }
+
     validateIndex(index);
     if (container != 0)
     {

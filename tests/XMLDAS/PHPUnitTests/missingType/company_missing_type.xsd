@@ -1,0 +1,20 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  xmlns:sdo="commonj.sdo"
+  xmlns:sdoxml="commonj.sdo/xml"
+  xmlns:company="companyNS"
+  targetNamespace="companyNS">
+  <element name="company" type="company:CompanyType"/>
+  <complexType name="CompanyType">
+    <sequence>
+      <element name="departments" type="company:DepartmentType" maxOccurs="unbounded"/>
+    </sequence>
+    <attribute name="name" type="xsd:string"/>
+    <attribute name="employeeOfTheMonth" type="IDREF" 
+               sdoxml:propertyType="company:EmployeeType"/> 
+  </complexType>
+  <complexType name="EmployeeType">
+    <attribute name="name" type="xsd:string"/>
+    <attribute name="SN" type="xsd:ID"/>
+    <attribute name="manager" type="xsd:boolean"/>
+  </complexType>
+</schema>

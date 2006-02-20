@@ -92,10 +92,13 @@ static zend_object_value sdo_das_changesummary_object_create(zend_class_entry *c
 void sdo_das_changesummary_new(zval *me, ChangeSummaryPtr change_summary TSRMLS_DC)
 {	
 	sdo_das_changesummary_object *my_object;
+	char *class_name, *space;
 	
 	Z_TYPE_P(me) = IS_OBJECT;
 	if (object_init_ex(me, sdo_das_changesummary_class_entry) == FAILURE) {
-		php_error(E_ERROR, "%s:%i object_init failed", CLASS_NAME, __LINE__);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate object", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		return;
 	}
 	
@@ -129,10 +132,6 @@ PHP_METHOD(SDO_DAS_ChangeSummary, beginLogging)
 	}
 	
 	my_object = sdo_das_changesummary_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_changesummary_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		my_object->change_summary->beginLogging();
@@ -155,10 +154,6 @@ PHP_METHOD(SDO_DAS_ChangeSummary, endLogging)
 	}
 	
 	my_object = sdo_das_changesummary_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_changesummary_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		my_object->change_summary->endLogging();
@@ -181,10 +176,6 @@ PHP_METHOD(SDO_DAS_ChangeSummary, isLogging)
 	}
 	
 	my_object = sdo_das_changesummary_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_changesummary_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		RETVAL_BOOL(my_object->change_summary->isLogging());
@@ -201,29 +192,26 @@ PHP_METHOD(SDO_DAS_ChangeSummary, isLogging)
 PHP_METHOD(SDO_DAS_ChangeSummary, getOldValues)
 {
 	sdo_das_changesummary_object	*my_object;
-	sdo_do_object				*my_dataobject;
 	zval							*z_dataobject;
 	DataObjectPtr					 dop;
 	ChangeSummaryPtr				 change_summary;
+	char							*class_name, *space;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, 
 		"O", &z_dataobject, sdo_dataobjectimpl_class_entry) == FAILURE) 
 		return;	
 	
 	my_object = sdo_das_changesummary_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_changesummary_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	change_summary = my_object->change_summary;
 	
 	/* get the supplied data object */
-	my_dataobject = (sdo_do_object *)zend_object_store_get_object(z_dataobject TSRMLS_CC);
-	if (my_dataobject == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+	dop = sdo_do_get (z_dataobject TSRMLS_CC);
+	if (!dop) {
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject not found in store", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		RETVAL_NULL();
 	}
-	dop = my_dataobject->dop;
 	
 	try {
 		SettingList& sl = my_object->change_summary->getOldValues(dop);
@@ -252,10 +240,6 @@ PHP_METHOD(SDO_DAS_ChangeSummary, getChangedDataObjects)
 	}
 	
 	my_object = sdo_das_changesummary_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_changesummary_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {
 		const ChangedDataObjectList& cdol = my_object->change_summary->getChangedDataObjects();
@@ -278,30 +262,27 @@ PHP_METHOD(SDO_DAS_ChangeSummary, getChangedDataObjects)
 PHP_METHOD(SDO_DAS_ChangeSummary, getChangeType)
 {
 	sdo_das_changesummary_object *my_object;
-	sdo_do_object			 *my_dataobject;
 	zval						 *z_dataobject;
 	DataObjectPtr				  dop;
 	ChangeSummaryPtr			  change_summary;
 	long						  change_type = CS_NONE;
+	char						 *class_name, *space;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, 
 		"O", &z_dataobject, sdo_dataobjectimpl_class_entry) == FAILURE) 
 		return;	
 	
 	my_object = sdo_das_changesummary_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_changesummary_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	change_summary = my_object->change_summary;
 	
 	/* get the supplied data object */
-	my_dataobject = (sdo_do_object *)zend_object_store_get_object(z_dataobject TSRMLS_CC);
-	if (my_dataobject == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+	dop = sdo_do_get (z_dataobject TSRMLS_CC);
+	if (!dop) {
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject not found in store", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		RETVAL_NULL();
 	}
-	dop = my_dataobject->dop;
 	
 	try {
 	/* this order is important: for example isDeleted and isModified may both return true,
@@ -328,31 +309,27 @@ PHP_METHOD(SDO_DAS_ChangeSummary, getChangeType)
 PHP_METHOD(SDO_DAS_ChangeSummary, getOldContainer)
 {
 	sdo_das_changesummary_object *my_object;
-	sdo_do_object	*my_dataobject;
 	zval				*z_dataobject;
 	DataObjectPtr		 dop, container_dop;
 	ChangeSummaryPtr	 change_summary;
 	long				 change_type = 0;
-	zval				*container_zval;
+	char				*class_name, *space;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, 
 		"O", &z_dataobject, sdo_dataobjectimpl_class_entry) == FAILURE) 
 		return;	
 	
 	my_object = sdo_das_changesummary_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_das_changesummary_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	change_summary = my_object->change_summary;
 	
 	/* get the supplied data object */
-	my_dataobject = (sdo_do_object *)zend_object_store_get_object(z_dataobject TSRMLS_CC);
-	if (my_dataobject == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+	dop = sdo_do_get(z_dataobject TSRMLS_CC);
+	if (!dop) {
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject not found in store", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		RETVAL_NULL();
 	}
-	dop = my_dataobject->dop;
 	
 	try {
 		container_dop = change_summary->getOldContainer(dop);
@@ -360,13 +337,7 @@ PHP_METHOD(SDO_DAS_ChangeSummary, getOldContainer)
 		if (!container_dop) {
 			RETVAL_NULL();
 		} else {
-			container_zval = (zval *)container_dop->getUserData();
-			if (container_zval == (zval *)SDO_USER_DATA_EMPTY) {
-				php_error(E_ERROR, "%s:%i: container is not in object store", CLASS_NAME, __LINE__);
-				RETVAL_NULL();
-			} else {
-				RETVAL_ZVAL(container_zval, 1, 0);
-			}
+			sdo_do_new(return_value, container_dop TSRMLS_CC);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);

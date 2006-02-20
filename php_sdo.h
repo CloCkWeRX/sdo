@@ -50,8 +50,21 @@ PHP_MINFO_FUNCTION(sdo);
 PHP_METHOD(SDO_PropertyAccess, __get);
 PHP_METHOD(SDO_PropertyAccess, __set);
 
+/* {{{ proto string SDO_DataObject::getTypeName()
+Return the name of the type for this SDO_DataObject.
+A convenience method corresponding to 
+SDO_Model_ReflectionDataObject::getType().getName()
+*/
+PHP_METHOD(SDO_DataObject, getTypeName); 
+/* }}} */
 
-PHP_METHOD(SDO_DataObject, getType); /* deprecated */
+/* {{{ proto string SDO_DataObject::getTypeNamespaceURI()
+Return the namespace URI of the type for this SDO_DataObject.
+A convenience method corresponding to 
+SDO_Model_ReflectionDataObject::getType().getNamespaceURI()
+*/
+PHP_METHOD(SDO_DataObject, getTypeNamespaceURI);
+/* }}} */
 
 /* {{{ proto SDO_Sequence SDO_DataObject::getSequence()
 Return the SDO_Sequence for this SDO_DataObject.  Accessing the SDO_DataObject
@@ -91,8 +104,6 @@ if this is a root SDO_DataObject.
 PHP_METHOD(SDO_DataObject, getContainer);
 /* }}} */
 
-PHP_METHOD(SDO_DataObject, getContainmentPropertyName); /* deprecated */
-
 /* {{{ proto SDO_Model_Property SDO_Sequence::getProperty(integer sequence_index)
 Return the property for the specified sequence index.
 
@@ -104,9 +115,6 @@ Throws SDO_IndexOutOfBoundsException.
 */
 PHP_METHOD(SDO_Sequence, getProperty);
 /* }}} */
-
-PHP_METHOD(SDO_Sequence, getPropertyIndex); /*deprecated */
-PHP_METHOD(SDO_Sequence, getPropertyName); /* deprecated */
 
 /* {{{ proto void SDO_Sequence::move(integer toIndex, integer fromIndex)
 Modify the position of the item in the sequence, without altering the value of the property in the SDO_DataObject.
@@ -121,7 +129,7 @@ Throws SDO_IndexOutOfBoundsException.
 PHP_METHOD(SDO_Sequence, move);
 /* }}} */
 
-/* {{{ proto void SDO_Sequnece::insert(mixed value [, integer sequenceIndex, mixed propertyIdentifier])
+/* {{{ proto void SDO_Sequence::insert(mixed value [, integer sequence_index, mixed property_identifier])
 Insert a new element at a specified position in the sequence.  All subsequent sequence items are moved up.
 
 The new value to be inserted.  This can be either a primitive or an SDO_DataObject
@@ -155,20 +163,20 @@ PHP_METHOD(SDO_List, insert);
 
 PHP_METHOD(SDO_List, count);
 
-/* {{{ proto void SDO_DataFactory::create(string namespaceURI, string typeName)
-Create an SDO_DataObject of the type specified by typeName with the given namespace URI.
+/* {{{ proto void SDO_DataFactory::create(string type_namespace_uri, string type_name)
+Create an SDO_DataObject of the type specified by type_name with the given namespace URI.
 
 For example, the following creates a new SDO_DataObject of type
 'CompanyType' where that type belongs to the namespace 'CompanyNS'
     $df->create('CompanyNS', 'CompanyType');
 
-The namespace of the type
+The namespace URI of the type
 
 The name of the type
 
 Returns the newly created SDO_DataObject
 
-Throws SDO_TypeNotFoundException if the namespaceURI and typeName do not correspond to a type known to this factory
+Throws SDO_TypeNotFoundException if the namespace URI and type name do not correspond to a type known to this factory
    */
 PHP_METHOD(SDO_DataFactory, create);
 /* }}} */
@@ -186,7 +194,7 @@ Return: SDO_DataFactory (an SDO_DataFactory)
 PHP_METHOD(SDO_DAS_DataFactory, getDataFactory);
 /* }}} */
 
-/* {{{ proto void SDO_DAS_DataFactory::addType(string namespaceURI, string typeName [, array options])
+/* {{{ proto void SDO_DAS_DataFactory::addType(string type_namespace_uri, string type_name [, array options])
 Add a new type to the SDO_DAS_DataFactory, defined by its namespace and type
 name.
 
@@ -206,21 +214,21 @@ $df->addType('CompanyNS', 'CompanyType');
 PHP_METHOD(SDO_DAS_DataFactory, addType);
 /* }}} */
 
-/* {{{ proto void SDO_DAS_DataFactory::addPropertyToType(string parentNamespaceURI, string parentTypeName, string propertyName, string propertyNamespaceURI, string propertyTypeName [, array options])
+/* {{{ proto void SDO_DAS_DataFactory::addPropertyToType(string parent_type_namespace_uri, string parent_type_name, string property_name, string type_namespace_uri, string type_name [, array options])
 Add a property to a type.  The type must already be known to the
 SDO_DAS_DataFactory (i.e. have been added using addType()).  The property
 becomes a property of the type.  This is how the graph model for the
 structure of an SDO_DataObject is built.
 
-The namespaceURI for the parent type
+The namespace URI for the parent type
 
-The typeName for the parent type
+The type name for the parent type
 
 The name of by which the property will be known
 
-The namespaceURI for the type of the property
+The namespace URI for the type of the property
 
-The typeName for the type of the property
+The type name for the type of the property
 
 Optional associative array of optional arguments for the new property.
 Valid keys are:
@@ -231,8 +239,8 @@ This value only relates to properties which are data object types)
 "default" to specifiy a default value for the property. "Default" is a mixed type argument, and omitting a default means the 
 property does not have one.
 "opposite" to specify the property at the other end of a bi-directional relationship. Opposite  is an array of three values 
-required to identify the opposite property. The first two are namespaceURI and type name and identify the type which contains
-the opposite property, the thirs value is the property name of the opposite property.
+required to identify the opposite property. The first two are namespace URI and type name and identify the type which contains
+the opposite property, the third value is the property name of the opposite property.
 
 Example: to add a 'name' property to a Person type:
 $df->addPropertyToType('PersonNS', 'PersonType',
@@ -280,7 +288,7 @@ Returns an SDO_List of SDO_DataObjects
 PHP_METHOD(SDO_DAS_ChangeSummary, getChangedDataObjects);
 /* }}} */
 
-/* {{{ proto integer SDO_DAS_ChangeSummary::getChangeType(SDO_DataObject dataObject)
+/* {{{ proto integer SDO_DAS_ChangeSummary::getChangeType(SDO_DataObject data_object)
 Get the type of change which has been made to the supplied SDO_DataObject.
 
 The SDO_DataObject which has been changed
@@ -292,7 +300,7 @@ SDO_DAS_ChangeSummary::ADDITION, SDO_DAS_ChangeSummary::DELETION.
 PHP_METHOD(SDO_DAS_ChangeSummary, getChangeType);
 /* }}} */
 
-/* {{{ proto SDO_List SDO_DAS_ChangeSummary::getOldValues(SDO_DataObject dataObject)
+/* {{{ proto SDO_List SDO_DAS_ChangeSummary::getOldValues(SDO_DataObject data_object)
 Get a list of the old values for a given changed SDO_DataObject.
 
 The data object which has been changed.
@@ -302,7 +310,7 @@ Returns a list of SDO_DAS_Settings describing the old values for the changed pro
 PHP_METHOD(SDO_DAS_ChangeSummary, getOldValues);
 /* }}} */
 
-/* {{{ proto SDO_DataObject SDO_DAS_ChangeSummary::getOldContainer(SDO_DataObject dataObject)
+/* {{{ proto SDO_DataObject SDO_DAS_ChangeSummary::getOldContainer(SDO_DataObject data_object)
 Get the old container (SDO_DataObject) for a deleted SDO_DataObject.
 
 The SDO_DataObject which has been deleted.
@@ -365,7 +373,7 @@ Return the namespace URI of the type.
 PHP_METHOD(SDO_Model_Type, getNamespaceURI);
 /* }}} */
 
-/* {{{ proto boolean SDO_Model_Type::isInstance(SDO_DataObject dataObject)
+/* {{{ proto boolean SDO_Model_Type::isInstance(SDO_DataObject data_object)
 Returns true if the object is an instance of the type.
 
 The SDO_DataObject to test.
@@ -402,10 +410,18 @@ PHP_METHOD(SDO_Model_Type, isSequencedType);
 /* }}} */
 
 /* {{{ proto boolean SDO_Model_Type::isOpenType()
-Returns true if this type corresponds to a an SDO_DataObject which allows 
+Returns true if this type corresponds to an SDO_DataObject which allows 
 open content, that is, aditional properties to be added to an instance.
 */
 PHP_METHOD(SDO_Model_Type, isOpenType);
+/* }}} */
+
+/* {{{ proto boolean SDO_Model_Type::isAbstractType()
+Returns true if this type is abstract, that is, no SDO_DataObject
+of this type can be instantiated, though other types may inherit
+from it.
+*/
+PHP_METHOD(SDO_Model_Type, isAbstractType);
 /* }}} */
 
 /* {{{ proto SDO_Model_Type SDO_Model_Type::getBaseType()
@@ -509,13 +525,63 @@ or NULL if it is a root SDO_DataObject.
 PHP_METHOD(SDO_Model_ReflectionDataObject, getContainmentProperty);
 /* }}} */
 
+
+/* {{{ proto SDO_Exception::getCause()
+Returns the cause of this exception or NULL if the cause is nonexistent or unknown.
+*/
+PHP_METHOD(SDO_Exception, getCause);
+/* }}} */
+
+/* {{{ proto SDO_CPPException::getClass()
+Returns the name of the C++ exception class .
+*/
+PHP_METHOD(SDO_CPPException, getClass);
+/* }}} */
+
+/* {{{ proto SDO_CPPException::getFile()
+Returns the C++ file where the error occurred.
+*/
+PHP_METHOD(SDO_CPPException, getFile);
+/* }}} */
+
+/* {{{ proto SDO_CPPException::getLine()
+Returns the C++ line number where the error occurred.
+*/
+PHP_METHOD(SDO_CPPException, getLine);
+/* }}} */
+
+/* {{{ proto SDO_CPPException::getFunction()
+Returns the name of the C++ function where the error occurred.
+*/
+PHP_METHOD(SDO_CPPException, getFunction);
+/* }}} */
+
+/* {{{ proto SDO_CPPException::getMessage()
+Returns the detailed error text from the C++ exception.
+*/
+PHP_METHOD(SDO_CPPException, getMessage);
+/* }}} */
+
+/* {{{ proto SDO_CPPException::getSeverity()
+Returns the severity level from the C++ exception.
+*/
+PHP_METHOD(SDO_CPPException, getSeverity);
+/* }}} */
+
+/* {{{ proto string SDO_CPPException::__toString()
+Return a string representation of the object.
+*/
+PHP_METHOD(SDO_CPPException, __toString);
+/* }}} */
+
 /* {{{ Implementation methods */
 PHP_METHOD(SDO_DAS_DataFactoryImpl, create);
 PHP_METHOD(SDO_DAS_DataFactoryImpl, addType);
 PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType);
 
 PHP_METHOD(SDO_DataObjectImpl, __construct);
-PHP_METHOD(SDO_DataObjectImpl, getType);
+PHP_METHOD(SDO_DataObjectImpl, getTypeName);
+PHP_METHOD(SDO_DataObjectImpl, getTypeNamespaceURI);
 PHP_METHOD(SDO_DataObjectImpl, getSequence);
 PHP_METHOD(SDO_DataObjectImpl, createDataObject);
 PHP_METHOD(SDO_DataObjectImpl, clear);
@@ -542,6 +608,7 @@ PHP_METHOD(SDO_Model_TypeImpl, getProperty);
 PHP_METHOD(SDO_Model_TypeImpl, isDataType);
 PHP_METHOD(SDO_Model_TypeImpl, isSequencedType);
 PHP_METHOD(SDO_Model_TypeImpl, isOpenType);
+PHP_METHOD(SDO_Model_TypeImpl, isAbstractType);
 PHP_METHOD(SDO_Model_TypeImpl, getBaseType);
 
 PHP_METHOD(SDO_Model_PropertyImpl, __construct);

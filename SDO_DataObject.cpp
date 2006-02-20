@@ -36,6 +36,16 @@ static char rcs_id[] = "$Id$";
 
 #define CLASS_NAME "SDO_DataObject"
 
+/** {{{ sdo_do_object
+ * The internal structure for an SDO_DataObjectImpl
+ * This extends the standard zend_object
+ */
+typedef struct {
+	zend_object		 zo;			/* The standard zend_object */
+	DataObjectPtr    dop;			/* The C++ DataObject */
+} sdo_do_object;
+/* }}} */
+
 /* {{{ sdo_do_iterator
  * The iterator data for this class - extends the standard zend_object_iterator
  */
@@ -63,16 +73,27 @@ static sdo_do_object *sdo_do_get_instance(zval *me TSRMLS_DC)
  */
 static void sdo_do_object_free_storage(void *object TSRMLS_DC)
 {
-	sdo_do_object *my_object;
+	sdo_do_object	*my_object;
+	char			*space;
+	char			*class_name;
 
 	my_object = (sdo_do_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
 	FREE_HASHTABLE(my_object->zo.properties);
 
 	/* just release the reference, and the reference counting will kick in */
-	/*TODO assigning NULL triggers an error in the C++ library at shutdown.
-	 *my_object->dop = NULL;
-	 */
+	if (my_object->dop) {
+		try {
+			my_object->dop->setUserData((void *)SDO_USER_DATA_EMPTY);
+
+			/* causes an Access Violation :-( */
+			//my_object->dop = NULL;
+		} catch (SDORuntimeException e) {
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_WARNING, "%s%s%s(): internal error - caught exception freeing DataObject",
+				class_name, space, get_active_function_name(TSRMLS_C));
+		}
+	}
 	efree(object);
 }
 /* }}} */
@@ -96,6 +117,69 @@ static zend_object_value sdo_do_object_create(zend_class_entry *ce TSRMLS_DC)
 	retval.handlers = &sdo_do_object_handlers;
 
 	return retval;
+}
+/* }}} */
+
+/* {{{ sdo_do_get
+ * utility function to get C++ DataObject from zval
+ */
+DataObjectPtr sdo_do_get(zval *me TSRMLS_DC)
+{	
+	sdo_do_object *my_object;
+
+	my_object = (sdo_do_object *)zend_object_store_get_object(me TSRMLS_CC);
+	if (my_object)
+	    return my_object->dop;
+	else
+		return NULL;
+}
+/* }}} */
+
+/* {{{ sdo_do_new
+ * Find the PHP object corresponding to the CPP object, or create one.
+ * The DataObject has no public constructor, this is in effect its factory method.
+ */
+void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC)
+{	
+	sdo_do_object *my_object;
+	char *class_name, *space;
+	
+	int object_handle = (int)dop->getUserData();
+	
+	Z_TYPE_P(me) = IS_OBJECT;
+	/* If the object is already known to php, its user data will contain
+	 * the value of the object handle.
+	 */
+	if (object_handle == SDO_USER_DATA_EMPTY) {	
+		if (object_init_ex(me, sdo_dataobjectimpl_class_entry) == FAILURE) {
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object", 
+				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
+			return;
+		}
+		
+		my_object = (sdo_do_object *)zend_object_store_get_object(me TSRMLS_CC);
+		my_object->dop = dop;
+		/* add a back pointer to the C++ object */
+		try {
+			dop->setUserData ((void *)me->value.obj.handle);
+		} catch (SDORuntimeException e) {
+			sdo_throw_runtimeexception(&e TSRMLS_CC);	
+		}
+	} else {
+		me->value.obj.handle = object_handle; 
+		me->value.obj.handlers = &sdo_do_object_handlers;
+		me->value.obj.handlers->add_ref(me TSRMLS_CC);
+
+		/* Sanity check */
+		my_object = (sdo_do_object *)sdo_do_get_instance(me TSRMLS_CC);
+		if (!my_object) {
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject #%d not found in store", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, object_handle);
+			return;
+		}
+	}
 }
 /* }}} */
 
@@ -131,12 +215,9 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 	sdo_do_object	 *my_object = (sdo_do_object *)NULL;
 	DataObjectPtr	  dop;
 	int				  return_value = 0; 
+	char			 *class_name, *space;
 
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return 0;
-	}
 	
 	dop = my_object->dop;
 	
@@ -162,7 +243,9 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 			} else {
 				switch (propertyp->getTypeEnum()) {		
 				case Type::OtherTypes:
-					php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+						class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 					return_value = 0;
 					break;
 				case Type::BigDecimalType:
@@ -196,15 +279,21 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 					/* since the property is set, the data object cannot be 'empty' */
 					break;
 				case Type::ChangeSummaryType:
-					php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+						class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 					return_value = 0;
 					break;
 				case Type::TextType:
-					php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+						class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 					return_value = 0;
 					break;
 				default:
-					php_error(E_ERROR, "%s:%i: unexpected type %s for property '%s'", CLASS_NAME, __LINE__, 
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'", 
+						class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 						propertyp->getType().getName(), xpath);
 					return_value = 0;
 				}
@@ -224,7 +313,9 @@ static zval *sdo_do_read_list(sdo_do_object *sdo, const char *xpath, const Prope
 {
 	zval			*return_value;
 
-	MAKE_STD_ZVAL(return_value);
+	ALLOC_INIT_ZVAL(return_value);
+	return_value->refcount = 0;
+
 	try {
 		DataObjectList& list_value = sdo->dop->getList(xpath);
 		if (&list_value == NULL) {
@@ -251,51 +342,48 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 	char			 char_value; 
 	wchar_t			 wchar_value;
 	DataObjectPtr	 doh_value;
-	zval			*doh_value_zval;
 	zval			*return_value;
+	char			*class_name, *space;
 	
+	ALLOC_INIT_ZVAL(return_value);
+	return_value->refcount = 0;
 
-	MAKE_STD_ZVAL(return_value);
 	try {
 		if (propertyp->isMany()) {
-		   /* If the property is many-valued and the list is uninitialized, 
-		    * all bets are off. The C++ library does not catch this 
-			* consistently, so ...
-			*/
+	   /* If the property is many-valued and the list is uninitialized, 
+		* all bets are off. The C++ library does not catch this 
+		* consistently, so ...
+		*/
 			if (! dop->isSet(xpath)) {
 				zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry, 
 					0 TSRMLS_CC, 
-					"Cannot read list at index \"%s\" because the list is empty", 
+					"Cannot read list at index '%s' because the list is empty", 
 					(char *)xpath);
-				RETVAL_NULL();
 				return return_value;
 			}
 		} else {
-		   /* 
-		    * If the property is single-valued, we should just leave it to the 
-		    * C++ library to decide whether the property is set, but currently 
-			* it fails to detect this error, so we shall catch it here instead.
-			* To be honest, there is no justification in the spec for 
-			* restricting this to DataObject types, but it just doesn't seem 
-			* right in the PHP world to throw an exception when a primitive 
-			* happens to be unset.
-			*/
-			if (propertyp->isReference() && !dop->isValid(xpath)) {
+	   /* 
+		* If the property is single-valued, we should just leave it to the 
+		* C++ library to decide whether the property is set, but currently 
+		* it fails to detect this error, so we shall catch it here instead.
+		*/
+			if (!dop->isValid(xpath)) {
 				zend_throw_exception_ex(sdo_propertynotsetexception_class_entry,  
 					0 TSRMLS_CC, 
-					"Cannot read property \"%s\" because it is not set", 
-					(char *)xpath);
-				RETVAL_NULL();
+					"Cannot read property '%s' because it is not set", 
+					propertyp->getName());
 				return return_value;
 			}
 		}
-
+		
 		if (dop->isNull(xpath)) {
 			RETVAL_NULL();
 		} else {		
 			switch(propertyp->getTypeEnum()) {
 			case Type::OtherTypes:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes' for '%s'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__, propertyp->getName());
 				break;
 			case Type::BigDecimalType:
 			case Type::BigIntegerType:
@@ -317,7 +405,9 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 			case Type::CharacterType:
 				wchar_value = dop->getCharacter(xpath);
 				if (wchar_value > INT_MAX) {
-					php_error(E_WARNING, "%s:%i: wide character data lost", CLASS_NAME, __LINE__);
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_WARNING, "%s%s%s(): wide character data lost for '%s'", 
+						class_name, space, get_active_function_name(TSRMLS_C), propertyp->getName());
 				}
 				char_value = dop->getByte(xpath);
 				RETVAL_STRINGL(&char_value, 1, 1);
@@ -348,33 +438,36 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 			case Type::DataObjectType:
 				doh_value = dop->getDataObject(xpath);
 				if (!doh_value) {
-					php_error(E_WARNING, "%s:%i: read a NULL DataObject for property '%s'", CLASS_NAME, __LINE__, 
-						propertyp->getName());
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					php_error(E_WARNING, "%s%s%s(): read a NULL DataObject for property '%s'", 
+						class_name, space, get_active_function_name(TSRMLS_C), propertyp->getName());
 					RETVAL_NULL();
 				} else {
-					doh_value_zval = (zval *)doh_value->getUserData();
-					if (doh_value_zval == (zval *)SDO_USER_DATA_EMPTY) {
-						php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-						RETVAL_NULL();
-					}
-					RETVAL_ZVAL(doh_value_zval, 1, 0);
+					sdo_do_new(return_value, doh_value TSRMLS_CC);
 				}
 				break;
 			case Type::ChangeSummaryType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::TextType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			default:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
-					propertyp->getType().getName(), xpath);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
+					propertyp->getType().getName(), propertyp->getName());
 			}
 		}
 		return return_value;
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		RETVAL_NULL();
+		efree(return_value);
+		return_value = 0;
 	}
 	return return_value;
 }
@@ -392,14 +485,7 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 	zval			 *return_value;
 
 
-	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		MAKE_STD_ZVAL(return_value);
-		RETVAL_NULL();
-		return return_value;
-	}
-	
+	my_object = sdo_do_get_instance(object TSRMLS_CC);	
 	dop = my_object->dop;
 	
 	try {	
@@ -443,10 +529,6 @@ static void sdo_do_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 	sdo_do_object	*my_object;	
 	
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_do_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	try {	
 		if (sdo_parse_offset_param(
@@ -471,15 +553,10 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 	sdo_do_object		*my_object, *value_object;
 	DataObjectPtr		 dop;
 	zval				 temp_zval;
-	bool				 is_open;
 	Type::Types          type_enum;
+	char				*class_name, *space;
 
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
-
 	dop = my_object->dop;
 
 	try {	
@@ -516,8 +593,9 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 			zval_copy_ctor(&temp_zval);
 			
 			switch(type_enum) {
-			case Type::OtherTypes:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'OtherTypes'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::BigDecimalType:
 			case Type::BigIntegerType:
@@ -574,23 +652,38 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 				dop->setCString(xpath, Z_STRVAL(temp_zval));
 				break;
 			case Type::DataObjectType:
-				convert_to_object(&temp_zval);
-				if (!instanceof_function(Z_OBJCE(temp_zval), sdo_dataobjectimpl_class_entry TSRMLS_CC)) {
-					php_error(E_ERROR, "%s:%i: cannot cast %s to %s", CLASS_NAME, __LINE__, 
-						Z_OBJCE(temp_zval)->name, sdo_dataobjectimpl_class_entry->name);
+				if (Z_TYPE_P(z_propertyValue) != IS_OBJECT) {
+					class_name = get_active_class_name(&space TSRMLS_CC);
+					sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0,0 TSRMLS_CC,
+						"%s%s%s(): cannot cast %s to %s for '%s'",
+						class_name, space, get_active_function_name(TSRMLS_C), 
+						zend_zval_type_name(z_propertyValue), CLASS_NAME, xpath);
+				} else if (!instanceof_function(Z_OBJCE_P(z_propertyValue), sdo_dataobjectimpl_class_entry TSRMLS_CC)) {
+					class_name = get_active_class_name(&space TSRMLS_CC);					
+					sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0,0 TSRMLS_CC,
+						"%s%s%s(): cannot cast %s to %s for '%s'", 
+						class_name, space, get_active_function_name(TSRMLS_C), 
+						Z_OBJCE_P(z_propertyValue)->name, 
+						sdo_dataobjectimpl_class_entry->name, xpath);
 				} else {
-					value_object = (sdo_do_object *)zend_object_store_get_object(&temp_zval TSRMLS_CC);
+					value_object = (sdo_do_object *)zend_object_store_get_object(z_propertyValue TSRMLS_CC);
 					dop->setDataObject(xpath, value_object->dop);
 				}
 				break;
 			case Type::ChangeSummaryType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'ChangeSummaryType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::TextType:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type 'TextType'", CLASS_NAME, __LINE__);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			default:
-				php_error(E_ERROR, "%s:%i: unexpected DataObject type '%s' for property '%s'", CLASS_NAME, __LINE__, 
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'", 
+					class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 					(property_p ? property_p->getType().getName() : ""), xpath);
 			}
 			zval_dtor(&temp_zval);
@@ -608,49 +701,48 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 static HashTable *sdo_do_get_properties(zval *object TSRMLS_DC)
 { 
 	sdo_do_object	*my_object;
-	HashTable			*properties;
+	HashTable		*properties;
 	int				 entries;
-	zval				*tmp;
+	zval			*tmp;
+
+	zval			 z_holder;
 	
-	ALLOC_HASHTABLE(properties);
+	array_init(&z_holder);
 	
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-	} else {		 
-		try {
-			PropertyList pl = my_object->dop->getInstanceProperties();
-			entries = pl.size();
-			zend_hash_init(properties, entries, NULL, NULL, 0);
-			for (long index = 0; index < entries; index++) {
-				/* It's safe to use the property directly here, it cannot be an xpath */
-				const Property& property = pl[index];
-				const char *propertyName = property.getName();
-				
-				/* Usually we check isMany() before isSet(), because we should not return NULL just because
-				* the List is empty. But for get_properties the return values are readonly, so it's
-				*	safer and clearer to omit empty lists.
-				*/
-				if (my_object->dop->isSet(property)) { 
-					if (property.isMany()) {
-						long count = 0;
-						tmp = sdo_do_read_list(my_object, propertyName, &property TSRMLS_CC);
-						sdo_list_count_elements (tmp, &count TSRMLS_CC);
-						if (count == 0)
-							continue;
-					} else {
-						tmp = sdo_do_read_value(my_object, propertyName, &property TSRMLS_CC);
-					}
+	
+	try {
+		PropertyList pl = my_object->dop->getInstanceProperties();
+		entries = pl.size();
+		for (long index = 0; index < entries; index++) {
+			/* It's safe to use the property directly here, it cannot be an xpath */
+			const Property& property = pl[index];
+			const char *propertyName = property.getName();
+			
+			/* Usually we check isMany() before isSet(), because we should not return NULL just because
+			* the List is empty. But for get_properties the return values are readonly, so it's
+			*	safer and clearer to omit empty lists.
+			*/
+			if (my_object->dop->isSet(property)) { 
+				if (property.isMany()) {
+					long count = 0;
+					tmp = sdo_do_read_list(my_object, propertyName, &property TSRMLS_CC);
+					sdo_list_count_elements (tmp, &count TSRMLS_CC);
+					if (count == 0)
+						continue;
 				} else {
-					continue;
+					tmp = sdo_do_read_value(my_object, propertyName, &property TSRMLS_CC);
 				}
-				zend_hash_update(properties, (char *)propertyName, 1 + strlen(propertyName),
-					&tmp, sizeof(zval *), NULL);
+			} else {
+				continue;
 			}
-		} catch (SDORuntimeException e) {
-			sdo_throw_runtimeexception(&e TSRMLS_CC);
+			add_assoc_zval(&z_holder, (char *)propertyName, tmp);
 		}
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
+	
+	properties = Z_ARRVAL(z_holder);
 	return properties;
 }
 /* }}} */
@@ -742,55 +834,49 @@ static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int shoul
 	}
 	
 	my_object = sdo_do_get_instance(readobj TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		ZVAL_NULL(writeobj);
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		rc = FAILURE;
-	} else {
+	
+	try {
+		const Type& type = my_object->dop->getType();
+		PropertyList pl = my_object->dop->getInstanceProperties();
 		
-		try {
-			const Type& type = my_object->dop->getType();
-			PropertyList pl = my_object->dop->getInstanceProperties();
+		print_buf << "object(" << CLASS_NAME << ")#" <<
+			readobj->value.obj.handle << " (" << pl.size() << ") {";
+		
+		for (unsigned int i = 0; i < pl.size(); i++) {
+			const Property& prop = pl[i];
 			
-			print_buf << "object(" << CLASS_NAME << ")#" <<
-				readobj->value.obj.handle << " (" << pl.size() << ") {";
-			
-			for (unsigned int i = 0; i < pl.size(); i++) {
-				const Property& prop = pl[i];
-				
-				if (i > 0) {
-					print_buf << "; ";
-				}
-				
-				print_buf << prop.getName();
-				
-				/* We'll try to print the value for single-valued primitives only.
-				* Multi-valued properties just get a dimension.
-				*/
-				if (prop.isMany()) {
-					print_buf << '[' << my_object->dop->getList(prop).size() << ']';
-					
-				} else if (my_object->dop->isSet(i) && prop.getType().isDataType()) {
-					print_buf << "=>";
-					if (my_object->dop->isNull(i)) {
-						print_buf << "NULL";
-					} else {
-						print_buf << '\"' << my_object->dop->getCString(i) << '\"';
-					}
-					
-				}
+			if (i > 0) {
+				print_buf << "; ";
 			}
 			
-			print_buf << '}';
-			string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
-			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+			print_buf << prop.getName();
 			
-		} catch (SDORuntimeException e) {
-			ZVAL_NULL(writeobj);
-			sdo_throw_runtimeexception(&e TSRMLS_CC);
-			rc = FAILURE;
+			/* We'll try to print the value for single-valued primitives only.
+			* Multi-valued properties just get a dimension.
+			*/
+			if (prop.isMany()) {
+				print_buf << '[' << my_object->dop->getList(prop).size() << ']';
+				
+			} else if (my_object->dop->isSet(i) && prop.getType().isDataType()) {
+				print_buf << "=>";
+				if (my_object->dop->isNull(i)) {
+					print_buf << "NULL";
+				} else {
+					print_buf << '\"' << my_object->dop->getCString(i) << '\"';
+				}
+				
+			}
 		}
-	}	
+		
+		print_buf << '}';
+		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+		
+	} catch (SDORuntimeException e) {
+		ZVAL_NULL(writeobj);
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+		rc = FAILURE;
+	}
 	
 	switch(type) {
 	case IS_STRING:
@@ -823,11 +909,6 @@ static int sdo_do_count_elements(zval *object, long *count TSRMLS_DC)
 	sdo_do_object *my_object;
 	
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		*count = 0;
-		return FAILURE;
-	}
 	
 	try {
 		*count = my_object->dop->getInstanceProperties().size();
@@ -839,11 +920,37 @@ static int sdo_do_count_elements(zval *object, long *count TSRMLS_DC)
 }
 /* }}} */
 
-static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC);
+/* {{{ sdo_do_iterator_rewind
+ */
+static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
+{
+	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
+	zval *z_do_object = (zval *)iterator->zoi.data;
+	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
+
+	try {
+		PropertyList pl = my_object->dop->getInstanceProperties();
+		for (iterator->index = 0; 
+		    iterator->index < pl.size() && ! my_object->dop->isValid(iterator->index);
+		    iterator->index++);
+		iterator->valid = (iterator->index < pl.size());
+	} catch (SDORuntimeException e) {
+		iterator->valid = false;
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	}
+}
+/* }}} */
 
 /* {{{ sdo_do_get_iterator
  */
+#if (PHP_MAJOR_VERSION < 6) 
 zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) {
+#else
+zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) {
+	if (by_ref) {
+		php_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+#endif
 
 	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(object TSRMLS_CC);
 	sdo_do_iterator *iterator = (sdo_do_iterator *)emalloc(sizeof(sdo_do_iterator));
@@ -963,27 +1070,6 @@ static void sdo_do_iterator_move_forward (zend_object_iterator *iter TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ sdo_do_iterator_rewind
- */
-static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
-{
-	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
-	zval *z_do_object = (zval *)iterator->zoi.data;
-	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
-
-	try {
-		PropertyList pl = my_object->dop->getInstanceProperties();
-		for (iterator->index = 0; 
-		    iterator->index < pl.size() && ! my_object->dop->isValid(iterator->index);
-		    iterator->index++);
-		iterator->valid = (iterator->index < pl.size());
-	} catch (SDORuntimeException e) {
-		iterator->valid = false;
-		sdo_throw_runtimeexception(&e TSRMLS_CC);
-	}
-}
-/* }}} */
-
 /* {{{ sdo_do_serialize
  * Both the model and the graph are serialized to a buffer.
  */
@@ -997,18 +1083,14 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
 	xmldas::XMLDAS		*xmldasp;
 	
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return FAILURE;
-	}
 
 	try {
 		xmldasp = sdo_get_XMLDAS();
 		/* create an XML representation of the model */
 		serialized_model = xmldasp->generateSchema(my_object->dop);
 		model_length = strlen(serialized_model);
-		/* serialize the data graph */
-		serialized_graph = xmldasp->save(my_object->dop, 0, 0);
+		/* serialize the data graph to an unformatted string */
+		serialized_graph = xmldasp->save(my_object->dop, 0, 0, -1);
 		graph_length = strlen(serialized_graph);
 		
 		/*
@@ -1030,41 +1112,6 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
 }
 /* }}} */
 
-/* {{{ sdo_do_populate_graph
- * walk the data graph creating a php wrapper for each data object.
- * Return the zval for the root object.
- */
-static zval *sdo_do_populate_graph (DataObjectPtr dop TSRMLS_DC)
-{
-	zval *z_new_do;
-	
-   /* We may have previously encountered this DataObject, perhaps as a non-containment reference.
-	* If so, don't create a duplicate PHP object.
-	*/
-	z_new_do = (zval *)dop->getUserData();
-	if (z_new_do == (zval *)SDO_USER_DATA_EMPTY) {
-		
-		MAKE_STD_ZVAL(z_new_do);
-		sdo_do_new(z_new_do, dop TSRMLS_CC);
-		
-		PropertyList pl = dop->getInstanceProperties();
-		for (int i = 0; i < pl.size(); i++) {
-			if (dop->isSet(pl[i])) {
-				if (pl[i].isMany()) {
-					DataObjectList& dol = dop->getList(pl[i]);
-					for (int j = 0; j < dol.size(); j++) {
-						sdo_do_populate_graph(dol[j] TSRMLS_CC);
-					}
-				} else if (pl[i].getType().isDataObjectType()) {
-					sdo_do_populate_graph(dop->getDataObject(pl[i]) TSRMLS_CC);
-				}
-			}
-		}
-	}
-	return z_new_do;
-}
-/* }}} */
-
 /* {{{ sdo_do_unserialize
  * Recreate the graph and underlying model from a buffer.
  */
@@ -1073,7 +1120,6 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 	char				*serialized_model;
 	char				*serialized_graph;
 	zval				*factory_zval;
-	zval				*root_object_zval;
 	xmldas::XMLDAS		*xmldasp;
 
 	/*
@@ -1094,10 +1140,10 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 		/* Load the graph */
 		DataObjectPtr root_dop = xmldasp->load(serialized_graph)->getRootDataObject();
 		
-		/* Walk the graph creating its PHP representation */
-		root_object_zval = sdo_do_populate_graph(root_dop TSRMLS_CC);
-		**object = *root_object_zval;
-		zval_copy_ctor(*object);
+		/* Create a PHP object fot the root. Other nodes will be created 
+		 * lazily as required.
+		 */
+        sdo_do_new(*object, root_dop TSRMLS_CC);
 		
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
@@ -1105,30 +1151,6 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 	}
 
 	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ sdo_do_new 
- * The DataObject has no public constructor, this is in effect its factory method.
- */
-void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC)
-{	
-	sdo_do_object *my_object;
-	
-	Z_TYPE_P(me) = IS_OBJECT;	
-	if (object_init_ex(me, sdo_dataobjectimpl_class_entry) == FAILURE) {
-		php_error(E_ERROR, "%s:%i: object_init failed", CLASS_NAME, __LINE__);
-		return;
-	}
-	
-	my_object = (sdo_do_object *)zend_object_store_get_object(me TSRMLS_CC);
-	my_object->dop = dop;
-	/* add a back pointer to the C++ object */
-	try {
-		dop->setUserData ((void *)me);
-	} catch (SDORuntimeException e) {
-		sdo_throw_runtimeexception(&e TSRMLS_CC);	
-	}
 }
 /* }}} */
 
@@ -1175,7 +1197,11 @@ void sdo_do_minit(zend_class_entry *tmp_ce TSRMLS_DC)
  */
 PHP_METHOD(SDO_DataObjectImpl, __construct)
 {
-	php_error(E_ERROR, "%s:%i: private constructor was called", CLASS_NAME, __LINE__);
+	char *class_name, *space;
+	class_name = get_active_class_name(&space TSRMLS_CC);
+
+	php_error(E_ERROR, "%s%s%s(): internal error - private constructor was called", 
+		class_name, space, get_active_function_name(TSRMLS_C));
 }
 /* }}} */
 
@@ -1185,49 +1211,17 @@ PHP_METHOD(SDO_DataObjectImpl, getContainer)
 {
 	sdo_do_object		*my_object;
 	DataObjectPtr		 container_dop;
-	zval				*container_zval;
 	
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		RETURN_NULL();
-	} 
 	
 	try {
 		container_dop = my_object->dop->getContainer();		
 		if (!container_dop) {
 			RETVAL_NULL();
 		} else {
-			container_zval = (zval *)container_dop->getUserData();
-			RETVAL_ZVAL(container_zval, 1, 0);
+			sdo_do_new(return_value, container_dop TSRMLS_CC);
 		}
 	} catch (SDORuntimeException e){
-		sdo_throw_runtimeexception(&e TSRMLS_CC);
-	}
-}
-/* }}} */
-
-/* {{{ SDO_DataObjectImpl::getContainmentPropertyName
- */
-PHP_METHOD(SDO_DataObjectImpl, getContainmentPropertyName)
-{
-	sdo_do_object *my_object;
-
-	php_error(E_WARNING, 
-		"SDO_DataObject::getContainmentPropertyName() is deprecated, and will be removed in the next release. Use SDO_Model_ReflectionDataObject::getContainmentProperty()");		
-	
-	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		RETURN_NULL();
-	}
-	
-	try {
-		RETVAL_STRING((char *)my_object->dop->getContainmentProperty().getName(), 1);
-	} catch (SDOPropertyNotFoundException e) {
-		/* In this case the C++ API means we must catch an exception on the normal path */
-		RETVAL_NULL();
-	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
 }
@@ -1240,40 +1234,41 @@ PHP_METHOD(SDO_DataObjectImpl, clear)
 	sdo_do_object	*my_object;
 	
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_do_object *) NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-	} else {
-		try {
-			my_object->dop->clear();
-		} catch (SDORuntimeException e){
-			sdo_throw_runtimeexception(&e TSRMLS_CC);
-		}
+	
+	try {
+		my_object->dop->clear();
+	} catch (SDORuntimeException e){
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
 }
 /* }}} */
 
-/* {{{ SDO_DataObjectImpl::getType
+/* {{{ SDO_DataObjectImpl::getTypeName
  */
-PHP_METHOD(SDO_DataObjectImpl, getType)
+PHP_METHOD(SDO_DataObjectImpl, getTypeName)
 {
 	sdo_do_object *my_object;
-	
-	php_error(E_WARNING, 
-		"SDO_DataObject::getType() is deprecated, and will be removed in the next release. Use SDO_Model_ReflectionDataObject::getType()");
-		
+			
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		RETURN_NULL();
-	}
 	
 	try {
-		const Type& type = my_object->dop->getType();
-		
-		/* return the type as a PHP array */
-		array_init(return_value);
-		add_next_index_string(return_value, (char *)type.getURI(), 1);	
-		add_next_index_string(return_value, (char *)type.getName(), 1);
+		RETVAL_STRING((char *)my_object->dop->getType().getName(), 1);
+	} catch (SDORuntimeException e) {
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ SDO_DataObjectImpl::getTypeURI
+ */
+PHP_METHOD(SDO_DataObjectImpl, getTypeNamespaceURI)
+{
+	sdo_do_object *my_object;
+			
+	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
+	
+	try {
+		RETVAL_STRING((char *)my_object->dop->getType().getURI(), 1);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
@@ -1288,16 +1283,11 @@ PHP_METHOD(SDO_DataObjectImpl, createDataObject)
 	const char			*xpath;
 	sdo_do_object		*my_object;
 	DataObjectPtr		 dop, new_dop;
-	zval				*z_new_do;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_property) == FAILURE) 
 		return;
 
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		return;
-	}
 	
 	dop = my_object->dop;	
 	
@@ -1314,9 +1304,7 @@ PHP_METHOD(SDO_DataObjectImpl, createDataObject)
 	}
 	
 	/* We have a good data object, so set up its PHP incarnation */
-	MAKE_STD_ZVAL(z_new_do);
-	sdo_do_new(z_new_do, new_dop TSRMLS_CC);
-	RETVAL_ZVAL(z_new_do, 1, 0);
+	sdo_do_new(return_value, new_dop TSRMLS_CC);
 }
 /* }}} */
 
@@ -1332,11 +1320,6 @@ PHP_METHOD(SDO_DataObjectImpl, getSequence)
 	}
 
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		RETURN_NULL();
-	}
-
 	dop = my_object->dop;	
 	
 	try {
@@ -1345,7 +1328,7 @@ PHP_METHOD(SDO_DataObjectImpl, getSequence)
 			RETVAL_NULL();
 		} else {			
 			/* Create the PHP wrapper */
-			sdo_sequence_new (return_value, seqp, dop TSRMLS_CC);
+			sdo_sequence_new (return_value, seqp TSRMLS_CC);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
@@ -1365,10 +1348,6 @@ PHP_METHOD(SDO_DataObjectImpl, getChangeSummary)
 	}
 
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	if (my_object == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		RETURN_NULL();
-	}
 	
 	dop = my_object->dop;	
 	

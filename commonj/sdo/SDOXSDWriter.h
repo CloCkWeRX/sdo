@@ -48,7 +48,7 @@ namespace commonj
             virtual ~SDOXSDWriter();
 
             int write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
-                const propertyMap& openprops);
+                const propertyMap& openprops, int indent = -1);
 
         protected:
             void setWriter(xmlTextWriterPtr textWriter);

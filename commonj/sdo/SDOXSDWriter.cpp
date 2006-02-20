@@ -159,7 +159,7 @@ namespace commonj
         ////////////////////////////////////////
 
         int SDOXSDWriter::write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
-                                const propertyMap& openprops)
+                                const propertyMap& openprops, int indent)
         {
             int i;
             if (writer == NULL)
@@ -170,7 +170,23 @@ namespace commonj
             
             int rc = 0;
             
-            
+            if (indent >= 0)
+            {
+                xmlTextWriterSetIndent(writer, 1);
+                if (indent > 0)
+                {
+                    char * chars = new char[indent+1];
+                    for (int i=0;i<indent;i++)chars[i] = ' ';
+                    chars[indent] = 0;
+                    xmlTextWriterSetIndentString(writer, SDOXMLString(chars));
+                    delete chars;
+                }
+                else
+                {
+                    xmlTextWriterSetIndentString(writer, SDOXMLString(""));
+                }
+            }
+           
             // --------------------------------------------------------------
             // Write the <schema> definition including namespace information
             // --------------------------------------------------------------

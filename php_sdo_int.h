@@ -44,15 +44,6 @@ using namespace commonj::sdo;
 
 #define SDO_TOSTRING_MAX 1024
 
-/**
- * The internal structure for an SDO_DataObjectImpl
- * This extends the standard zend_object
- */
-typedef struct {
-	zend_object		 zo;			/* The standard zend_object */
-	DataObjectPtr    dop;			/* The C++ DataObject */
-} sdo_do_object;
-
 enum sdo_changesummary_type {
 	CS_NONE = 0,
 	CS_MODIFICATION = 1,
@@ -94,12 +85,15 @@ extern PHP_SDO_API zend_class_entry *sdo_propertynotfoundexception_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_invalidconversionexception_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_indexoutofboundsexception_class_entry;
 extern PHP_SDO_API zend_class_entry *sdo_unsupportedoperationexception_class_entry;
+extern PHP_SDO_API zend_class_entry *sdo_cppexception_class_entry;
 
 extern PHP_SDO_API void sdo_das_df_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_das_df_new(zval *me, DataFactoryPtr dfp TSRMLS_DC);
+extern PHP_SDO_API DataFactoryPtr sdo_das_df_get(zval *me TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_do_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC);
+extern PHP_SDO_API DataObjectPtr sdo_do_get(zval *me TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_list_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_dataobjectlist_new(zval *me, const Type& typeh, DataObjectList *listh TSRMLS_DC);
@@ -114,7 +108,7 @@ extern PHP_SDO_API void sdo_das_setting_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_das_setting_new(zval *me, Setting *setting TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_sequence_minit(zend_class_entry *tmp TSRMLS_DC);
-extern PHP_SDO_API void sdo_sequence_new(zval *me, SequencePtr seqp, DataObjectPtr dop TSRMLS_DC);
+extern PHP_SDO_API void sdo_sequence_new(zval *me, SequencePtr seqp TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_model_type_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_model_type_new(zval *me, const Type *typep TSRMLS_DC);
@@ -127,17 +121,18 @@ extern PHP_SDO_API void sdo_model_property_string (ostringstream& print_buf, con
 
 extern PHP_SDO_API void sdo_model_rdo_minit(zend_class_entry *tmp TSRMLS_DC);
 
-extern PHP_SDO_API void sdo_throw_propertytnotfoundexception(SDOPropertyNotFoundException *e TSRMLS_DC);
-extern PHP_SDO_API void sdo_throw_typenotfoundexception(SDOTypeNotFoundException *e TSRMLS_DC);
-extern PHP_SDO_API void sdo_throw_unsupportedoperationexception(SDOUnsupportedOperationException *e TSRMLS_DC);
-extern PHP_SDO_API void sdo_throw_invalidconversionexception(SDOInvalidConversionException *e TSRMLS_DC);
-extern PHP_SDO_API void sdo_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
+extern PHP_SDO_API zval *sdo_throw_exception(zend_class_entry *ce, const char *message, long code, zval *z_cause TSRMLS_DC);
+extern PHP_SDO_API zval *sdo_throw_exception_ex(zend_class_entry *ce, long code, zval *z_cause TSRMLS_DC, char *format, ...);
+extern PHP_SDO_API void sdo_exception_minit(zend_class_entry *tmp TSRMLS_DC);
+extern PHP_SDO_API void sdo_exception_new(zval *me, zend_class_entry *ce, const char *message, long code, zval *cause TSRMLS_DC);
+extern PHP_SDO_API function_entry *sdo_exception_get_methods();
+extern PHP_SDO_API zval *sdo_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
+extern PHP_SDO_API void sdo_cppexception_minit(zend_class_entry *tmp TSRMLS_DC);
+extern PHP_SDO_API void sdo_cppexception_new(zval *me, SDORuntimeException *cpp_exception TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_make_long_class_constant(zend_class_entry *ce, char *name, long value);
 
 extern PHP_SDO_API xmldas::XMLDAS *sdo_get_XMLDAS();
-
-extern PHP_SDO_API function_entry *sdo_get_exception_methods();
 
 extern PHP_SDO_API int sdo_parse_offset_param(DataObjectPtr dop, zval *z_offset, 
 	const Property **return_property, const char **return_xpath, int property_required, int quiet TSRMLS_DC);

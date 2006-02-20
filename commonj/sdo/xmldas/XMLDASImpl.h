@@ -86,30 +86,30 @@ namespace commonj
 
                 // save
                 // Serializes the datagraph to the XML file
-                void save(DataGraphPtr doc, const char* xmlFile);
-                void save(XMLDocumentPtr doc, const char* xmlFile);
+                void save(DataGraphPtr doc, const char* xmlFile, int indent  = -1);
+                void save(XMLDocumentPtr doc, const char* xmlFile, int indent  = -1);
                 void save(
                     DataObjectPtr dataObject,
                     const char* rootElementURI,
                     const char* rootElementName,
-                    const char* xmlFile);
+                    const char* xmlFile, int indent  = -1);
 
                 // Serializes the datagraph to a stream
-                void save(DataGraphPtr doc, std::ostream& outXml);
-                void save(XMLDocumentPtr doc, std::ostream& outXml);
+                void save(DataGraphPtr doc, std::ostream& outXml, int indent  = -1);
+                void save(XMLDocumentPtr doc, std::ostream& outXml, int indent  = -1);
                 void save(
                     DataObjectPtr dataObject,
                     const char* rootElementURI,
                     const char* rootElementName,
-                    std::ostream& outXml);
+                    std::ostream& outXml, int indent  = -1);
 
                 // Serializes the datagraph to a string
-                char* save(DataGraphPtr doc);
-                char* save(XMLDocumentPtr doc);
+                char* save(DataGraphPtr doc, int indent  = -1);
+                char* save(XMLDocumentPtr doc, int indent  = -1);
                 char* save(
                     DataObjectPtr dataObject,
                     const char* rootElementURI,
-                    const char* rootElementName);
+                    const char* rootElementName, int indent  = -1);
                 
                 
                 // getDataFactory

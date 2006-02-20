@@ -73,6 +73,7 @@ public:
     DataObjectType,
     ChangeSummaryType,
     TextType,
+    UndefinedOpenPropertyType,
     num_types
    };
 

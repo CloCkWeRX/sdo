@@ -168,6 +168,10 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 	public function testDataObject() {
 		$this->company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
 
+        // check the type
+        $this->assertEquals(COMPANY_TYPE, $this->company->getTypeName(), 'getTypeName() failed.');
+        $this->assertEquals(COMPANY_NS, $this->company->getTypeNamespaceURI(), 'getTypeNamespaceURI() failed.');
+        
 		// Test array operator and setting a property
 		$this->company[0] = 'Acme';
 		$this->assertEquals('Acme', $this->company[0], 'Property set/get through [] failed.');
@@ -565,7 +569,6 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->assertEquals(SDO_DAS_ChangeSummary::NONE, $ct, 'Change type set but no changes have been made.');
 
 		// make some changes
-		$oldSN = $simon->SN;
 		$simon->SN = '061130';
 
 		$david = $department->createDataObject('employees');
@@ -1156,21 +1159,15 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$all_props = $do_type->getProperties();
 		$this->assertEquals(count($all_props), count($this->company), 
 		    'Different number of properties in reflected data object');
-		
-		$iters = 0;		
-		foreach ($all_props as $do_property) {
-		    $do = $this->company[$do_property->name];				
-		    $iters ++;
-		}
-		$this->assertEquals(count($all_props), $iters, 
-		    'SDO_Model_ReflectionDataObject iteration test failed - incorrect number of interations.');
-		$this->assertTrue($iters > 0, 
-		    'SDO_Model_ReflectionDataObject iteration test failed - zero iterations performed.');
 		    
 		/* Create a dataobject using a SDO_Model_Property */
 		$department_property = $do_type->getProperty('departments');
 		$department2 = $this->company->createDataObject($department_property);
 		$department2->name = 'IT';
+		$this->assertEquals($department_property->getType()->getName(), $department2->getTypeName(), 
+		    'type name is different from reflected type name');
+		$this->assertEquals($department_property->getType()->getNamespaceURI(), $department2->getTypeNamespaceURI(), 
+		    'type namespace URI is different from reflected type namespace URI');
 		$this->assertEquals($department2->getContainer(), $this->company, 
 		    'getContainer() test failed for object created using reflected property');
 	}
@@ -1261,24 +1258,24 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		/* first add an existing property */
 		$seq->insert('Sequence name=>');
 		$seq->insert('OpenSeqName', NULL, 'name');
-		$this->assertEquals($open->name, 'OpenSeqName', 'sequence and property access not equal;');
+		$this->assertEquals('OpenSeqName', $open->name, 'sequence and property access not equal;');
 
 // FAILED: can't yet set open type through sequence interface
 //		/* now add an unknown property to the open type */
 //		$seq->insert(' stringA=>');
 //		$seq->insert('StringValue', NULL, 'stringA');
-//		$this->assertEquals($open->stringA, 'StringValue', 'sequence and property access for open type not equal;');
+//		$this->assertEquals('StringValue', $open->stringA, 'sequence and property access for open type not equal;');
 //	    
 //		$seq->insert(' numberA=>');
 //		$seq->insert(42, NULL, 'numberA');
-//		$this->assertEquals($open->numberA, 42, 'sequence and property access for open type not equal;');
+//		$this->assertEquals(42, $open->numberA, 'sequence and property access for open type not equal;');
 //
 //		/* add an unknown data object property */
   		$employee = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
 //		$seq->insert($employee, NULL, 'object');
 //		$index = $seq->count() - 1;
 		$employee->name = 'Alien';
-//		$this->assertEquals($seq[$index]->name, 'Alien', 'sequence and property access for open type not equal;');
+//		$this->assertEquals('Alien', $seq[$index]->name, 'sequence and property access for open type not equal;');
 
 /* bypass the above problem by pre-initializing the open types through the DataObject interface.
  * Then we can test setting them through the sequence 
@@ -1289,15 +1286,60 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		$seq->insert(' numberB=>');
 		$seq->insert(42, NULL, 'numberB');
-		$this->assertEquals($open->numberB, 42, 'sequence and property access for open type not equal;');
+		$this->assertEquals(42, $open->numberB, 'sequence and property access for open type not equal;');
 
 		$seq->insert(' stringB=>');
 		$seq->insert('StringValue', NULL, 'stringB');
-		$this->assertEquals($open->stringB, 'StringValue', 'sequence and property access for open type not equal;');
+		$this->assertEquals('StringValue', $open->stringB, 'sequence and property access for open type not equal;');
 
 		$seq->insert(' object=>');
 		$seq->insert($employee, NULL, 'object');
-		$this->assertEquals($open->object->name, 'Alien', 'sequence and property access for open type not equal;');
+		$this->assertEquals('Alien', $open->object->name, 'sequence and property access for open type not equal;');
+    }
+    
+    public function testDerivedType() {
+        $this->dmsDf->addType(COMPANY_NS, 'DerivedStringType', array('basetype'=>array(SDO_TYPE_NAMESPACE_URI, 'String')));
+        $this->dmsDf->addType(COMPANY_NS, 'BaseObjectType', array('abstract'=>true)); 
+        $this->dmsDf->addType(COMPANY_NS, 'DerivedObjectType', array('basetype'=>array(COMPANY_NS, 'BaseObjectType')));
+        $this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'derivedString', COMPANY_NS, 'DerivedStringType');
+        $this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'derivedObject', COMPANY_NS, 'DerivedObjectType');
+        $this->dmsDf->addPropertyToType(COMPANY_NS, COMPANY_TYPE, 'abstractObject', COMPANY_NS, 'BaseObjectType');
+		
+		$company = $this->dmsDf->create(COMPANY_NS, COMPANY_TYPE);
+		$company->name = "ACME Corp";
+		$company->derivedString = 'Special string';
+		
+		$do = $this->dmsDf->create(COMPANY_NS, 'DerivedObjectType');
+		try {
+		    $this->dmsDf->create(COMPANY_NS, 'BaseObjectType');
+			$this->assertTrue(false, 'Succeeded in instantiating an abstract type.');
+		} catch (SDO_UnsupportedOperationException $e) {
+		} catch (SDO_Exception $e) {
+		    $this->assertTrue(false, 'Incorrect exception thrown from creating an object of an abstract type:'.$e->getMessage());
+		}
+		
+		/* It's OK to assign an object of a derived type to a property of an abstract type */
+		$company->abstractObject = $do;
+		
+		$rcompany = new SDO_Model_ReflectionDataObject($company);
+		$special_type = $rcompany->getType()->getProperty('derivedString')->getType();
+		$base_type = $special_type->getBaseType();
+		$this->assertEquals(SDO_TYPE_NAMESPACE_URI, $base_type->getNamespaceURI(), 'incorrect namespaceURI for base type');
+		$this->assertEquals('String', $base_type->getName(), 'incorrect name for base type');
+		$this->assertTrue($base_type->isDataType(), 'incorrect data type for base type');
+		
+		$rdo = new SDO_Model_ReflectionDataObject($do);
+		$derived_type = $rdo->getType();
+		$this->assertFalse($derived_type->isAbstractType(), 'non-abstract type passes isAbstractType()');
+		$this->assertTrue($derived_type->isInstance($do), 'object of derived type fails DerivedType::isInstance()');
+		
+		$base_type = $derived_type->getBaseType();
+		$this->assertEquals(COMPANY_NS, $base_type->getNamespaceURI(), 'incorrect namespaceURI for base type');
+		$this->assertEquals('BaseObjectType', $base_type->getName(), 'incorrect name for base type');
+		$this->assertFalse($base_type->isDataType(), 'incorrect data type for base type');
+		$this->assertTrue($base_type->isAbstractType(), 'abstract type fails isAbstractType()');
+		$this->assertTrue($base_type->isInstance($do), 'object of derived type fails BaseType::isInstance()');
+		
     }
 }
 

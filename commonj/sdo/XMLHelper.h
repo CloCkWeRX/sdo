@@ -45,7 +45,11 @@ namespace commonj
              * Returns a pointer to the root data object
              */
 
-            SDO_API virtual XMLDocumentPtr loadFile(
+           SDO_API virtual XMLDocumentPtr createDocument(
+               const char* elementname = 0,
+               const char* rootElementURI=0) = 0;
+
+           SDO_API virtual XMLDocumentPtr loadFile(
                 const char* xmlFile,
                 const char* targetNamespaceURI=0) = 0;
             SDO_API virtual XMLDocumentPtr load(
@@ -60,12 +64,14 @@ namespace commonj
              * save - Serializes the datagraph to the XML file
              */
 
-            SDO_API virtual void    save(XMLDocumentPtr doc, const char* xmlFile) = 0;                
+            SDO_API virtual void    save(XMLDocumentPtr doc, const char* xmlFile,
+                int indent = -1) = 0;                
             SDO_API virtual void save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
                 const char* rootElementName,
-                const char* xmlFile) = 0;
+                const char* xmlFile,
+                int indent = -1) = 0;
             
             
             /**  save saves the graph to XML
@@ -73,23 +79,26 @@ namespace commonj
              * save - Serializes the datagraph to the XML stream
              */
 
-            SDO_API virtual void save(XMLDocumentPtr doc, std::ostream& outXml) = 0;
+            SDO_API virtual void save(XMLDocumentPtr doc, std::ostream& outXml,
+                int indent = -1) = 0;
             SDO_API virtual void save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
                 const char* rootElementName,
-                std::ostream& outXml) = 0;
+                std::ostream& outXml,
+                int indent = -1) = 0;
             
             /**  save saves the graph to XML
              *
              * save - Serializes the datagraph to a string
              */
 
-            SDO_API virtual char* save(XMLDocumentPtr doc) = 0;
+            SDO_API virtual char* save(XMLDocumentPtr doc, int indent = -1) = 0;
             SDO_API virtual char* save(
                 DataObjectPtr dataObject,
                 const char* rootElementURI,
-                const char* rootElementName) = 0;
+                const char* rootElementName,
+                int indent = -1) = 0;
             
             /**  createDocument creates an XMLDocument
              *

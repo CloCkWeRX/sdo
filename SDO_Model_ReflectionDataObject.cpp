@@ -104,52 +104,47 @@ static int sdo_model_rdo_cast_object(zval *readobj, zval *writeobj, int type, in
 	}
 	
 	my_object = sdo_model_rdo_get_instance(readobj TSRMLS_CC);
-	if (my_object == (sdo_model_rdo_object *)NULL) {
-		ZVAL_NULL(writeobj);
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
-		rc = FAILURE;
-	} else {		
-		try {			
-			const Type& type = my_object->dop->getType();
-			PropertyList pl = my_object->dop->getInstanceProperties();
-
-			print_buf << indent << "object(" << CLASS_NAME << ")#" <<
-				readobj->value.obj.handle << " {";
-			print_buf << indent << "  - ";
-			if (my_object->dop->getContainer()) {
-				print_buf << 
-					"Instance of {" << my_object->dop->getContainmentProperty().getName() << "}";
-			} else {
-				print_buf << "ROOT OBJECT";
-			}
-
-			print_buf << indent << "  - Type ";
-			sdo_model_type_summary_string (print_buf, &type TSRMLS_CC);
-			
-			print_buf << indent << "  - Instance Properties";
-			print_buf << "[" << pl.size() <<"]";
-			
-			if (pl.size() > 0) {
-				print_buf << " {";
-				for (int i = 0; i < pl.size(); i++) {
-					sdo_model_property_string (print_buf, &pl[i], "\n    " TSRMLS_CC);
-				}
-				print_buf << indent << "    }";
-			} else {
-				print_buf <<";";
-			}
-
-			print_buf << indent << "}";
-
-			string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
-			ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
-				
-		} catch (SDORuntimeException e) {
-			ZVAL_NULL(writeobj);
-			sdo_throw_runtimeexception(&e TSRMLS_CC);
-			rc = FAILURE;
+	
+	try {			
+		const Type& type = my_object->dop->getType();
+		PropertyList pl = my_object->dop->getInstanceProperties();
+		
+		print_buf << indent << "object(" << CLASS_NAME << ")#" <<
+			readobj->value.obj.handle << " {";
+		print_buf << indent << "  - ";
+		if (my_object->dop->getContainer()) {
+			print_buf << 
+				"Instance of {" << my_object->dop->getContainmentProperty().getName() << "}";
+		} else {
+			print_buf << "ROOT OBJECT";
 		}
-	}	
+		
+		print_buf << indent << "  - Type ";
+		sdo_model_type_summary_string (print_buf, &type TSRMLS_CC);
+		
+		print_buf << indent << "  - Instance Properties";
+		print_buf << "[" << pl.size() <<"]";
+		
+		if (pl.size() > 0) {
+			print_buf << " {";
+			for (int i = 0; i < pl.size(); i++) {
+				sdo_model_property_string (print_buf, &pl[i], "\n    " TSRMLS_CC);
+			}
+			print_buf << indent << "    }";
+		} else {
+			print_buf <<";";
+		}
+		
+		print_buf << indent << "}";
+		
+		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+		
+	} catch (SDORuntimeException e) {
+		ZVAL_NULL(writeobj);
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+		rc = FAILURE;
+	}
 	
 	switch(type) {
 	case IS_STRING:
@@ -180,10 +175,13 @@ static int sdo_model_rdo_cast_object(zval *readobj, zval *writeobj, int type, in
 void sdo_model_rdo_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 {
 	zend_class_entry **reflector_ce_ptr;
+	char *class_name, *space;
 	tmp_ce->create_object = sdo_model_rdo_object_create;
 	
-	if (zend_hash_find(CG(class_table), "reflector", sizeof("reflector"), (void **)&reflector_ce_ptr) == FAILURE) {
-		php_error(E_ERROR, "%s:%i: can't find class entry for Reflector", CLASS_NAME, __LINE__);
+	if (zend_hash_find(CG(class_table), "reflector", sizeof("reflector"), (void **)&reflector_ce_ptr) == FAILURE) {		
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - could not find Reflector class", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		return;
 	}
 	
@@ -205,8 +203,8 @@ PHP_METHOD(SDO_Model_ReflectionDataObject, __construct)
 {
 	int argc;
 	zval *z_do;
-	sdo_do_object *target;
 	sdo_model_rdo_object *my_object;
+	char *class_name, *space;
 	
 	if ((argc = ZEND_NUM_ARGS()) != 1) {
 		WRONG_PARAM_COUNT;
@@ -218,13 +216,15 @@ PHP_METHOD(SDO_Model_ReflectionDataObject, __construct)
 
 	my_object = sdo_model_rdo_get_instance(getThis() TSRMLS_CC);
 
-	target = (sdo_do_object *)zend_object_store_get_object(z_do TSRMLS_CC);
-	if (target == (sdo_do_object *)NULL) {
-		php_error(E_ERROR, "%s:%i: object is not in object store", CLASS_NAME, __LINE__);
+	DataObjectPtr dop = sdo_do_get(z_do TSRMLS_CC);
+	if (!dop) {
+		class_name = get_active_class_name (&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject not found in store", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		RETURN_NULL();
 	} 
 
-	my_object->dop = target->dop;
+	my_object->dop = dop;
 }
 /* }}} */
 
@@ -242,18 +242,23 @@ PHP_METHOD(SDO_Model_ReflectionDataObject, export)
 {	
 	zend_class_entry *reflection_ce;
 	zend_function	 *reflection_export_zf;
+	char			 *class_name, *space;
 
 	/* Just call up to Reflection::export */
 	reflection_ce = zend_fetch_class ("Reflection", strlen("Reflection"), 
 		ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-	if (!reflection_ce) {
-		php_error(E_ERROR, "%s:%i: Could not find Reflection class", CLASS_NAME, __LINE__);
+	if (!reflection_ce) {	
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - could not find Reflection class", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		return;
 	}
 
 	reflection_export_zf = zend_std_get_static_method(reflection_ce, "export", strlen("export") TSRMLS_CC);
-	if (!reflection_export_zf) {
-		php_error(E_ERROR, "%s:%i: Could not call Reflection::export method", CLASS_NAME, __LINE__);
+	if (!reflection_export_zf) {	
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - could not call Reflection::export method", 
+			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 		return;
 	}
 

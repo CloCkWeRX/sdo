@@ -67,6 +67,12 @@ class Sequence : public RefCountingObject
     SDO_API virtual const Property& getProperty(unsigned int index) = 0;
 
     /**
+     * Return the data object associated with this sequence
+     */
+
+    SDO_API virtual const DataObjectPtr getDataObject() = 0;
+
+    /**
      *
      * The element of that property if it was many valued. Zero if the 
      * property was single valued.

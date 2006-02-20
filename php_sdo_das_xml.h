@@ -15,7 +15,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini), Matthew Peters                  |
+| Author: Anantoju V Srinivas(Srini), Matthew Peters, Caroline Maynard |
 +----------------------------------------------------------------------+
 
 */
@@ -31,6 +31,18 @@
 
 #define SDO_DAS_XML_VERSION "0.7.1"
 
+#ifdef PHP_WIN32
+#    if defined (SDO_DAS_XML_EXPORTS)
+#        define PHP_SDO_DAS_XML_API __declspec(dllexport)
+#    elif defined(COMPILE_DL_SDO_DAS_XML)
+#        define PHP_SDO_DAS_XML_API __declspec(dllimport)
+#    else
+#        define PHP_SDO_DAS_XML_API
+#    endif
+#else
+#define PHP_SDO_DAS_XML_API
+#endif
+
 PHP_MINIT_FUNCTION(sdo_das_xml);
 PHP_MINFO_FUNCTION(sdo_das_xml);
 
@@ -38,32 +50,21 @@ PHP_MINFO_FUNCTION(sdo_das_xml);
 PHP_METHOD(SDO_DAS_XML, __construct);
 PHP_METHOD(SDO_DAS_XML, create);
 PHP_METHOD(SDO_DAS_XML, addTypes);
-PHP_METHOD(SDO_DAS_XML, loadFromFile);
-PHP_METHOD(SDO_DAS_XML, loadFromString);
+PHP_METHOD(SDO_DAS_XML, loadFile);
+PHP_METHOD(SDO_DAS_XML, loadString);
+PHP_METHOD(SDO_DAS_XML, saveFile);
+PHP_METHOD(SDO_DAS_XML, saveString);
+PHP_METHOD(SDO_DAS_XML, createDocument);
 PHP_METHOD(SDO_DAS_XML, createDataObject);
-PHP_METHOD(SDO_DAS_XML, saveDocumentToString);
-PHP_METHOD(SDO_DAS_XML, saveDocumentToFile);
-PHP_METHOD(SDO_DAS_XML, saveDataObjectToString);
-PHP_METHOD(SDO_DAS_XML, saveDataObjectToFile);
-PHP_METHOD(SDO_DAS_XML, getTypes);
 PHP_METHOD(SDO_DAS_XML, __toString);
-
-//PHP_METHOD(SDO_DAS_XML, getProperty);
 
 /* SDO_DAS_XML_Document Class methods declarations */
 PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject);
 PHP_METHOD(SDO_DAS_XML_Document, getRootElementURI);
 PHP_METHOD(SDO_DAS_XML_Document, getRootElementName);
-PHP_METHOD(SDO_DAS_XML_Document, getEncoding);
-PHP_METHOD(SDO_DAS_XML_Document, setEncoding);
-PHP_METHOD(SDO_DAS_XML_Document, getXMLDeclaration);
 PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration);
-PHP_METHOD(SDO_DAS_XML_Document, getXMLVersion);
 PHP_METHOD(SDO_DAS_XML_Document, setXMLVersion);
-PHP_METHOD(SDO_DAS_XML_Document, getSchemaLocation);
-PHP_METHOD(SDO_DAS_XML_Document, setSchemaLocation);
-PHP_METHOD(SDO_DAS_XML_Document, getNoNamespaceSchemaLocation);
-PHP_METHOD(SDO_DAS_XML_Document, setNoNamespaceSchemaLocation);
+PHP_METHOD(SDO_DAS_XML_Document, setEncoding);
 
 #endif	/* PHP_SDO_DAS_XML_H */
 
