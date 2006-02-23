@@ -321,7 +321,7 @@ PHP_METHOD(SDO_DAS_ChangeSummary, getOldContainer);
 /* }}} */
 
 
-/* {{{ proto int SDO_DAS_Setting::getPropertyIndex()
+/* {{{ proto integer SDO_DAS_Setting::getPropertyIndex()
 Get the property index for the changed property.
 
 Returns the property index for the changed property.
@@ -494,11 +494,11 @@ Return a string representation of the object.
 PHP_METHOD(SDO_Model_ReflectionDataObject, __toString);
 /* }}} */
 
-/* {{{ proto static mixed SDO_Model_ReflectionDataObject::export(SDO_Model_ReflectionDataObject rdo [, bool return])
+/* {{{ proto mixed SDO_Model_ReflectionDataObject::export(SDO_Model_ReflectionDataObject rdo [, bool return])
 Exports an SDO_Model_ReflectionDataObject. 
 Returns the output if TRUE is specified for return, printing it otherwise.
 */
-PHP_METHOD(SDO_Model_ReflectionDataObject,export);
+PHP_METHOD(SDO_Model_ReflectionDataObject, export);
 /* }}} */
 
 /* {{{ proto SDO_Model_Type SDO_Model_ReflectionDataObject::getType()
@@ -526,43 +526,43 @@ PHP_METHOD(SDO_Model_ReflectionDataObject, getContainmentProperty);
 /* }}} */
 
 
-/* {{{ proto SDO_Exception::getCause()
+/* {{{ proto mixed SDO_Exception::getCause()
 Returns the cause of this exception or NULL if the cause is nonexistent or unknown.
 */
 PHP_METHOD(SDO_Exception, getCause);
 /* }}} */
 
-/* {{{ proto SDO_CPPException::getClass()
+/* {{{ proto string SDO_CPPException::getClass()
 Returns the name of the C++ exception class .
 */
 PHP_METHOD(SDO_CPPException, getClass);
 /* }}} */
 
-/* {{{ proto SDO_CPPException::getFile()
+/* {{{ proto string SDO_CPPException::getFile()
 Returns the C++ file where the error occurred.
 */
 PHP_METHOD(SDO_CPPException, getFile);
 /* }}} */
 
-/* {{{ proto SDO_CPPException::getLine()
+/* {{{ proto string SDO_CPPException::getLine()
 Returns the C++ line number where the error occurred.
 */
 PHP_METHOD(SDO_CPPException, getLine);
 /* }}} */
 
-/* {{{ proto SDO_CPPException::getFunction()
+/* {{{ proto string SDO_CPPException::getFunction()
 Returns the name of the C++ function where the error occurred.
 */
 PHP_METHOD(SDO_CPPException, getFunction);
 /* }}} */
 
-/* {{{ proto SDO_CPPException::getMessage()
+/* {{{ proto string SDO_CPPException::getMessage()
 Returns the detailed error text from the C++ exception.
 */
 PHP_METHOD(SDO_CPPException, getMessage);
 /* }}} */
 
-/* {{{ proto SDO_CPPException::getSeverity()
+/* {{{ proto integer SDO_CPPException::getSeverity()
 Returns the severity level from the C++ exception.
 */
 PHP_METHOD(SDO_CPPException, getSeverity);
