@@ -239,7 +239,7 @@ PHP_METHOD(SDO_DAS_XML, create)
 				} 
 				print_buf << ":\n";
 				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
-					print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix);
+					print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix) << endl;
 				}
 				string print_string = print_buf.str();
 				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);

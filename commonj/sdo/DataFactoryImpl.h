@@ -120,12 +120,14 @@ public:
 
 
     virtual void setBaseType( const Type& type,
-                              const Type& base);
+                              const Type& base,
+                              bool isRestriction = false);
 
     virtual void setBaseType( const char* typeuri,
                               const char* typenam,
                               const char* baseuri,
-                              const char* basename);
+                              const char* basename,
+                              bool isRestriction = false);
 
     virtual const Type& getType(const char* uri, const char* inTypeName) const;
 
@@ -357,11 +359,15 @@ public:
     virtual const TypeImpl& getTypeImpl(const char* uri, const char* inTypeName) const;
     virtual const char* getRootElementName() const;
     virtual void setRootElementName(const char* ren);
+    virtual bool isCompatible(DataFactory* df);
+    virtual bool compareTypes(const TypeImpl* t1, const Type& t2);
 
 
 private:
     typedef map<string, TypeImpl*> TYPES_MAP;
     TYPES_MAP    types;
+
+    std::vector<DataFactory*> compatibleFactories;
 
     char * rootElementName;
 

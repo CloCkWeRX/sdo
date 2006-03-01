@@ -298,7 +298,8 @@ namespace commonj
                             ty.uri,
                             ty.name,
                             ty.parentTypeUri,
-                            ty.parentTypeName);
+                            ty.parentTypeName,
+                            ty.isRestriction);
                     }        
                     catch (SDORuntimeException& e)
                     {

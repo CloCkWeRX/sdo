@@ -1066,15 +1066,8 @@ static int sdo_list_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 
 /* {{{ sdo_list_get_iterator
  */
-#if (PHP_MAJOR_VERSION < 6) 
-zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) {
-#else
-zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) {
-	if (by_ref) {
-		php_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-	}
-#endif
-
+zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) 
+{
 	sdo_list_iterator *iterator = (sdo_list_iterator *)emalloc(sizeof(sdo_list_iterator));
 	object->refcount++;
 	iterator->zoi.data = (void *)object;

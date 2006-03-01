@@ -53,6 +53,7 @@ namespace commonj
 
             SDOXMLString parentTypeUri;
             SDOXMLString parentTypeName;
+            bool isRestriction;
 
             SDOXMLString IDPropertyName;
 

@@ -943,15 +943,8 @@ static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
 
 /* {{{ sdo_do_get_iterator
  */
-#if (PHP_MAJOR_VERSION < 6) 
-zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) {
-#else
-zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) {
-	if (by_ref) {
-		php_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-	}
-#endif
-
+zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) 
+{
 	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(object TSRMLS_CC);
 	sdo_do_iterator *iterator = (sdo_do_iterator *)emalloc(sizeof(sdo_do_iterator));
 	object->refcount++;
@@ -1298,13 +1291,10 @@ PHP_METHOD(SDO_DataObjectImpl, createDataObject)
 
 		new_dop = dop->createDataObject(xpath);
 
+		sdo_do_new(return_value, new_dop TSRMLS_CC);		
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		return;
 	}
-	
-	/* We have a good data object, so set up its PHP incarnation */
-	sdo_do_new(return_value, new_dop TSRMLS_CC);
 }
 /* }}} */
 

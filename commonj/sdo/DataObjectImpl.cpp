@@ -2078,12 +2078,70 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
     }
 
+    void DataObjectImpl::transferChildren(DataObject* d, DataFactory* f)
+    {
+        PropertyList& pl = d->getInstanceProperties();
+        for (int i=0;i<pl.size();i++)
+        {
+            if (pl[i].getType().isDataType())
+            {
+                 continue;
+            }
+            if (!d->isSet(pl[i]) || d->isNull(pl[i]))
+            {
+                continue;
+            }
+            if (pl[i].isMany())
+            {
+                DataObjectList& dl = d->getList(pl[i]);
+                for (int j=0;j<dl.size();j++)
+                {
+                    
+                    DataObject* d2 = dl[j];
+                    if (d2) {
+                        ((DataObjectImpl*)d2)->setDataFactory(f);
+                        transferChildren(d2,f);
+                    }
+                }
+            }
+            else
+            {
+                DataObject* d3 = d->getDataObject(pl[i]);
+                if (d3)
+                { 
+                    ((DataObjectImpl*)d3)->setDataFactory(f);
+                    transferChildren(d3,f);
+                }
+            }
+        }
+    }
+
+
+
     void DataObjectImpl::checkFactory(DataObjectPtr dob)
     {
         
         DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dob;
 
         if (d->getDataFactory() == getDataFactory()) return;
+
+        // Temporary alteration to test the feasibility and
+        // problems associated with allowing data object 'migration'
+        // lets move this one and all its children to the factory of the
+        // new parent if the factories are compatible.
+        
+        DataFactoryImpl* f = (DataFactoryImpl*)getDataFactory();
+
+        if ((d->getContainer() == 0) && 
+            (f->isCompatible(d->getDataFactory())))
+        {
+            d->setDataFactory(getDataFactory());
+            transferChildren(d,getDataFactory());
+            return;
+        }
+
+
+        // This is the default position....
         
         string msg("Insertion from incompatible factory ");
         const Type& t = d->getType();

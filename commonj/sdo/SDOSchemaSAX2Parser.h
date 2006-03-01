@@ -75,6 +75,8 @@ namespace commonj
 
             const char* currentFile;
             bool bInSchema; // only parse when within a schema
+            bool bInvalidElement; // where element content is not valid
+            bool bInInvalidContent; // actually inside invalid content.
 
         
             virtual void startInclude(

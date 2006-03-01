@@ -653,15 +653,8 @@ static int sdo_sequence_cast_object(zval *readobj, zval *writeobj, int type, int
 
 /* {{{ sdo_sequence_get_iterator
  */
-#if (PHP_MAJOR_VERSION < 6) 
-zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) {
-#else
-zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) {
-	if (by_ref) {
-		php_error(E_ERROR, "An iterator cannot be used with foreach by reference");
-	}
-#endif
-
+zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+{
 	sdo_seq_iterator *iterator = (sdo_seq_iterator *)emalloc(sizeof(sdo_seq_iterator));
 	object->refcount++;
 	iterator->zoi.data = (void *)object;

@@ -170,7 +170,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootElementURI)
         RETVAL_STRING((char *)xmldocument->xmlDocumentPtr->getRootElementURI(), 1);
     } catch (SDORuntimeException e) {
         sdo_das_xml_throw_runtimeexception(&e TSRMLS_CC);
-        RETURN_NULL();
+        RETVAL_NULL();
     }
 
 }

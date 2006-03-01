@@ -43,7 +43,7 @@ class DASType : public Type, public DASValues
     
     virtual void setOpen(bool set) = 0;
     virtual void setSequenced( bool set) = 0;
-    virtual void setBaseType( const Type* type) = 0;
+    virtual void setBaseType( const Type* type, bool isRestriction=false) = 0;
 
  
 

@@ -26,7 +26,7 @@
 * SDORDASTestSuite.php contains all the SDORDAS tests
 *
 * Two ways to run it:
-*    Command line with phpunit --testdox-text SDORDAS.txt SDORDASTestSuite
+*    Command line with phpunit --testdox-text SDORDAS.txt SDO_DAS_Relational_TestSuite TestSuite.php
 *    Under ZDE with ZDERunner.php
 *
 ************************************************************************************************************/

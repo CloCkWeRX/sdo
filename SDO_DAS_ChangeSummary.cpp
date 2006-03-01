@@ -341,7 +341,6 @@ PHP_METHOD(SDO_DAS_ChangeSummary, getOldContainer)
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		return;
 	}
 	
 	return;

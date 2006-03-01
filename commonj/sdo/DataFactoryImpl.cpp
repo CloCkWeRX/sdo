@@ -608,9 +608,10 @@ const Type& DataFactoryImpl::getType(const char* uri, const char* inTypeName) co
 // ===================================================================
 
 void DataFactoryImpl::setBaseType( const Type& type,
-                  const Type& base) 
+                  const Type& base, bool isRestriction) 
 {
-    setBaseType(type.getURI(),type.getName(),base.getURI(), base.getName());
+    setBaseType(type.getURI(),type.getName(),base.getURI(), base.getName(),
+        isRestriction);
 }
 
 // ===================================================================
@@ -620,7 +621,8 @@ void DataFactoryImpl::setBaseType( const Type& type,
 void DataFactoryImpl::setBaseType( const char* typeuri,
                   const char* typenam,
                   const char* baseuri,
-                     const char* basename)
+                     const char* basename,
+                     bool isRestriction )
 {
     const TypeImpl* base = findTypeImpl(baseuri, basename);
     if (base == 0)
@@ -649,7 +651,7 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
         SDOTypeNotFoundException, msg.c_str());
     }
 
-    (typeIter->second)->setBaseType(base);
+    (typeIter->second)->setBaseType(base, isRestriction);
 }
 
 
@@ -1231,6 +1233,51 @@ DASValue* DataFactoryImpl::getDASValue(
     return NULL;    
 }
 
+
+bool DataFactoryImpl::compareTypes(const TypeImpl* t1, const Type& t2)
+{
+    PropertyList& pl = t2.getProperties();
+    for (int i=0;i<pl.size();i++)
+    {
+        PropertyImpl* p = t1->getPropertyImpl(i);
+        if (p == 0) return false;
+        if (p->isMany() != pl[i].isMany()) return false;
+        if (p->isContainment() != pl[i].isContainment()) return false;
+        if (strcmp(   p->getType().getURI(),
+                   pl[i].getType().getURI())) return false;
+        if (strcmp(   p->getType().getName(),
+                   pl[i].getType().getName())) return false;
+    }
+    return true;
+
+}
+bool DataFactoryImpl::isCompatible(DataFactory* df)
+{
+    //for (int i=0;i<compatibleFactories.size();i++)
+    //{
+    //   if (compatibleFactories[i] == df)return true;
+    //}
+    
+    TypeList& tl = df->getTypes();
+    for (int j=0;j<tl.size();j++)
+    {
+        const TypeImpl* t = findTypeImpl(tl[j].getURI(),
+                                        tl[j].getName());
+ 
+        if (t == 0) return false;
+        if (!compareTypes(t,tl[j]))return false;
+    }
+    // the factories are compatible for a copy in this
+    // direction.
+    // This is commented out for now - it would give a 
+    // big improvement if the same two factories are used
+    //for many copies, but we would have to overcome the problem
+    // that factory pointers are just pointers, so a factory might have
+    // been deallocated and re-allocated at the same address with different
+    // contents....
+    //compatibleFactories.push_back(df);
+    return true;
+}
 
 };
 };

@@ -147,12 +147,11 @@ PHP_METHOD(SDO_DAS_DataFactory, getDataFactory)
 	
 	try {
 		dfp = DataFactory::getDataFactory();
+		sdo_das_df_new (return_value, dfp TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		return;
 	}
 	
-	sdo_das_df_new (return_value, dfp TSRMLS_CC);
 }
 /* }}} */
 
@@ -175,13 +174,10 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, create)
 	my_object = sdo_das_df_get_instance(getThis() TSRMLS_CC);
 	try {
 		dop = my_object->dfp->create(type_uri, type_name);
+		sdo_do_new(return_value, dop TSRMLS_CC);		
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		return;
 	}
-
-	/* We have a good data object, so set up its PHP incarnation */
-	sdo_do_new(return_value, dop TSRMLS_CC);
 }
 /* }}} */
 

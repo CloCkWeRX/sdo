@@ -142,13 +142,15 @@ class DataFactory : public RefCountingObject
 
         virtual SDO_API void setBaseType( 
             const Type& type,
-            const Type& base) = 0;
+            const Type& base,
+            bool isRestriction = false) = 0;
         
         virtual SDO_API void setBaseType( 
             const char* typeuri,
             const char* typenam,
             const char* baseuri,
-            const char* basename) = 0;
+            const char* basename,
+            bool isRestriction = false) = 0;
 
         /**
          *  DataFactory::setAlias sets an alternative name

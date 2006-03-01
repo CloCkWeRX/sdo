@@ -269,13 +269,31 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
 
 }
 
+
+
   void DataObjectListImpl::checkFactory(DataObjectPtr dob)
     {
         
         DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dob;
 
         if (d->getDataFactory() == theFactory) return;
-        
+
+        // temporary experiment with allowing data objects
+        // to move from factory to factory if the type is 
+        // nominally present, and the type systems match
+
+        DataFactoryImpl* f = (DataFactoryImpl*)theFactory;
+
+        if ((d->getContainer() == 0) && 
+            (f->isCompatible(d->getDataFactory())))
+        {
+            d->setDataFactory(theFactory);
+            // we will also need to transfer any children - assuming they
+            // are ok in the new factory!!
+            d->transferChildren(d,theFactory);
+            return;
+        }
+
         string msg("Insertion from incompatible factory ");
         const Type& t = d->getType();
         msg += t.getURI();

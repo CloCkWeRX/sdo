@@ -27,13 +27,13 @@
   </maintainers>
  <release>
   <version>0.9.0</version>
-  <date>2006-02-19</date>
+  <date>2006-02-20</date>
   <license>Apache 2.0</license>
   <state>beta</state>
   <notes>The following changes have been made between 0.7.1 and this release:
-I) The changes which are visible at the programming interface are:
+A) The changes which are visible at the programming interface are:
  1) The interface to the XML Data Access Service has been revised:
-   a) The names of the methods to load and save documents have chanmged to improve consistency with other packages.
+   a) The names of the methods to load and save documents have changed to improve consistency with other packages.
    b) A new method, createDocument(), has been added to enable creation of a document from scratch.
    c) The saveDataObjectToFile()/String() methods have been replaced by saveFile() and saveString() methods on the XML DAS object.
    d) Some getters and setters on the Document have been fixed or removed.
@@ -45,7 +45,7 @@ I) The changes which are visible at the programming interface are:
   3) The XML DAS can now produce formatted Document (see optional formatting argument on saveFile() and saveString())
   4) The getType() method on a DataObject has been replaced with getTypeName() and getTypeNamespaceURI() methods.
 
-II) Other changes in this release:
+B) Other changes in this release:
  1) The memory management in the sdo and sdo_das_xml extensions has been overhauled to squeeze out any memory leaks
  2) Exception messages from the extension have been improved so that they never refer to the underlying C/C++ code
  3) PropertyNotSetException has been improved so that it replicates the way arrays and objects behave as closely as possible
@@ -466,13 +466,13 @@ Also various bug fixes.
    </release>
    <release>
     <version>0.9.0</version>
-    <date>2006-02-19</date>
+    <date>2006-02-20</date>
     <license>Apache 2.0</license>
     <state>beta</state>
     <notes>The following changes have been made between 0.7.1 and this release:
-I) The changes which are visible at the programming interface are:
+A) The changes which are visible at the programming interface are:
  1) The interface to the XML Data Access Service has been revised:
-   a) The names of the methods to load and save documents have chanmged to improve consistency with other packages.
+   a) The names of the methods to load and save documents have changed to improve consistency with other packages.
    b) A new method, createDocument(), has been added to enable creation of a document from scratch.
    c) The saveDataObjectToFile()/String() methods have been replaced by saveFile() and saveString() methods on the XML DAS object.
    d) Some getters and setters on the Document have been fixed or removed.
@@ -484,7 +484,7 @@ I) The changes which are visible at the programming interface are:
   3) The XML DAS can now produce formatted Document (see optional formatting argument on saveFile() and saveString())
   4) The getType() method on a DataObject has been replaced with getTypeName() and getTypeNamespaceURI() methods.
 
-II) Other changes in this release:
+B) Other changes in this release:
  1) The memory management in the sdo and sdo_das_xml extensions has been overhauled to squeeze out any memory leaks
  2) Exception messages from the extension have been improved so that they never refer to the underlying C/C++ code
  3) PropertyNotSetException has been improved so that it replicates the way arrays and objects behave as closely as possible
