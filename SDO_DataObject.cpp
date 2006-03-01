@@ -593,6 +593,7 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 			zval_copy_ctor(&temp_zval);
 			
 			switch(type_enum) {
+			case Type::OtherTypes:
 				class_name = get_active_class_name(&space TSRMLS_CC);
 				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
