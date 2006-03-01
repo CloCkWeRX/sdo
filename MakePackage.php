@@ -48,32 +48,34 @@
 //             . "to support an XML <any/> element.\n"
 //             . "Also various bug fixes. ",
 
-'notes' => 
-"The following changes have been made between 0.7.1 and this release:\n"
-. "A) The changes which are visible at the programming interface are:\n"
-. " 1) The interface to the XML Data Access Service has been revised:\n"
-. "   a) The names of the methods to load and save documents have changed to improve consistency with other packages.\n" 
-. "   b) A new method, createDocument(), has been added to enable creation of a document from scratch.\n"
-. "   c) The saveDataObjectToFile()/String() methods have been replaced by saveFile() and saveString() methods on the XML DAS object.\n"
-. "   d) Some getters and setters on the Document have been fixed or removed.\n"
-. "   e) The XML Data Access Service has added support for the following XML Schema:\n"
-. "    - Open types: support for <any> element and <anyAttribute>\n"
-. "    - Type inheritance: both simple and complex types can be derived by restriction or extension\n"
-. "    - Abstract types: the use of abstract types in the schema is supported\n"
-. "  2) The XML DAS now supports printing its SDO type and property model using print or echo.\n"
-. "  3) The XML DAS can now produce formatted Document (see optional formatting argument on saveFile() and saveString())\n"
-. "  4) The getType() method on a DataObject has been replaced with getTypeName() and getTypeNamespaceURI() methods.\n" 
-. "\n"
-. "B) Other changes in this release:\n"
-. " 1) The memory management in the sdo and sdo_das_xml extensions has been overhauled to squeeze out any memory leaks\n"
-. " 2) Exception messages from the extension have been improved so that they never refer to the underlying C/C++ code\n"
-. " 3) PropertyNotSetException has been improved so that it replicates the way arrays and objects behave as closely as possible\n"
-. " 4) The parsing that the XML DAS performs on both XML Schema and instance documents has been improved so that problems are picked up and reported earlier.\n"
- ,
+//'notes' => 
+//"The following changes have been made between 0.7.1 and this release:\n"
+//. "A) The changes which are visible at the programming interface are:\n"
+//. " 1) The interface to the XML Data Access Service has been revised:\n"
+//. "   a) The names of the methods to load and save documents have changed to improve consistency with other packages.\n" 
+//. "   b) A new method, createDocument(), has been added to enable creation of a document from scratch.\n"
+//. "   c) The saveDataObjectToFile()/String() methods have been replaced by saveFile() and saveString() methods on the XML DAS object.\n"
+//. "   d) Some getters and setters on the Document have been fixed or removed.\n"
+//. "   e) The XML Data Access Service has added support for the following XML Schema:\n"
+//. "    - Open types: support for <any> element and <anyAttribute>\n"
+//. "    - Type inheritance: both simple and complex types can be derived by restriction or extension\n"
+//. "    - Abstract types: the use of abstract types in the schema is supported\n"
+//. "  2) The XML DAS now supports printing its SDO type and property model using print or echo.\n"
+//. "  3) The XML DAS can now produce formatted Document (see optional formatting argument on saveFile() and saveString())\n"
+//. "  4) The getType() method on a DataObject has been replaced with getTypeName() and getTypeNamespaceURI() methods.\n" 
+//. "\n"
+//. "B) Other changes in this release:\n"
+//. " 1) The memory management in the sdo and sdo_das_xml extensions has been overhauled to squeeze out any memory leaks\n"
+//. " 2) Exception messages from the extension have been improved so that they never refer to the underlying C/C++ code\n"
+//. " 3) PropertyNotSetException has been improved so that it replicates the way arrays and objects behave as closely as possible\n"
+//. " 4) The parsing that the XML DAS performs on both XML Schema and instance documents has been improved so that problems are picked up and reported earlier.\n"
+// ,
+       'notes' => "First stable release.\n" 
+. "Minor improvements and fixes over 0.9.0.",
        'simpleoutput' => true,
-       'version' => '0.9.0',
+       'version' => '1.0.0',
        'baseinstalldir' => 'SDO',
-       'state' => 'beta',
+       'state' => 'stable',
        'license' => 'Apache 2.0',
        'packagedirectory' => dirname(__FILE__),
        'roles' => array('*.php' => 'php', '*.cpp' => 'src'),
