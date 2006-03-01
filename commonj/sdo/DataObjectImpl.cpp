@@ -2080,7 +2080,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     void DataObjectImpl::transferChildren(DataObject* d, DataFactory* f)
     {
-        PropertyList& pl = d->getInstanceProperties();
+        PropertyList pl = d->getInstanceProperties();
         for (int i=0;i<pl.size();i++)
         {
             if (pl[i].getType().isDataType())

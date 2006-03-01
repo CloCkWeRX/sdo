@@ -1236,7 +1236,7 @@ DASValue* DataFactoryImpl::getDASValue(
 
 bool DataFactoryImpl::compareTypes(const TypeImpl* t1, const Type& t2)
 {
-    PropertyList& pl = t2.getProperties();
+    PropertyList pl = t2.getProperties();
     for (int i=0;i<pl.size();i++)
     {
         PropertyImpl* p = t1->getPropertyImpl(i);
@@ -1258,7 +1258,7 @@ bool DataFactoryImpl::isCompatible(DataFactory* df)
     //   if (compatibleFactories[i] == df)return true;
     //}
     
-    TypeList& tl = df->getTypes();
+    TypeList tl = df->getTypes();
     for (int j=0;j<tl.size();j++)
     {
         const TypeImpl* t = findTypeImpl(tl[j].getURI(),
