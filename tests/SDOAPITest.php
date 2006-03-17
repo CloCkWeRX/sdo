@@ -68,7 +68,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 
 		// Create the types
 		$this->dmsDf->addType(ROOT_NS, ROOT_TYPE);
-		$this->dmsDf->addType(COMPANY_NS, COMPANY_TYPE, array('sequenced'=>'true'));
+		$this->dmsDf->addType(COMPANY_NS, COMPANY_TYPE, array('sequenced'=>true));
 		$this->dmsDf->addType(COMPANY_NS, DEPARTMENT_TYPE);
 		$this->dmsDf->addType(COMPANY_NS, EMPLOYEE_TYPE);
 
@@ -439,6 +439,7 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->assertEquals($acme->name, $it_parent->name, 'Container test 2b failed;');
 		$this->assertEquals($shoe, $sue_parent, 'Container test 2c failed;');
 		$this->assertEquals($it, $ron_parent, 'Container test 2d failed;');
+		$this->assertEquals($it, $acme->employeeOfTheMonth->getContainer(), 'Container test 2e failed;');
 	}
 
 	public function testList() {
@@ -1155,6 +1156,10 @@ class SDOAPITest extends PHPUnit2_Framework_TestCase {
 		$this->assertTrue($do_property->isMany(), 'Unexpected value for SDO_Model_Property->isMany()');
 		$this->assertTrue($do_property->isContainment(), 'Unexpected value for SDO_Model_Property->isContainment()');
 		$this->assertNull($do_property->getOpposite(), 'Unexpected value for SDO_Model_Property->getOpposite()');
+		
+		$eotm_property = $do_type->getProperty('employeeOfTheMonth');
+		$this->assertFalse($eotm_property->isMany(), 'Unexpected value for SDO_Model_Property->isMany()');
+		$this->assertFalse($eotm_property->isContainment(), 'Unexpected value for SDO_Model_Property->isContainment()');
 		
 		$all_props = $do_type->getProperties();
 		$this->assertEquals(count($all_props), count($this->company), 

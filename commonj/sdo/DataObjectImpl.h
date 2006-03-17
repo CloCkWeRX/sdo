@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+ *  Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@
 
 namespace commonj{
 namespace sdo{
-    
+
 class DataGraph;
-class DataObjectImpl; 
+class DataObjectImpl;
 class DataObjectListImpl;
 class DataFactory;
 
@@ -70,32 +70,32 @@ public:
 typedef std::list< rdo > PropertyValueMap;
 
 
- /**  
+ /**
   *  DataObjectImpl implements the abstract class DataObject.
   *
-  * A data object is a representation of some structured data. 
+  * A data object is a representation of some structured data.
   * it is the fundamental component in the SDO (Service Data Objects) package.
-  * Data objects support reflection, path-based accesss, convenience creation 
+  * Data objects support reflection, path-based accesss, convenience creation
   * and deletion methods,and the ability to be part of a data graph.
-  * Each data object holds its data as a series of properties. 
-  * Properties can be accessed by name, property index, or using the property 
-  * meta object itself. 
-  * A data object can also contain references to other data objects, through 
+  * Each data object holds its data as a series of properties.
+  * Properties can be accessed by name, property index, or using the property
+  * meta object itself.
+  * A data object can also contain references to other data objects, through
   * reference-type properties.
-  * A data object has a series of convenience accessors for its properties. 
-  * These methods either use a path (String), a property index, 
+  * A data object has a series of convenience accessors for its properties.
+  * These methods either use a path (String), a property index,
   * or the property's meta object itself, to identify the property.
   * Some examples of the path-based accessors are as follows:
   * DataObjectPtr company = ...;
-  * company->getString("name");                   
+  * company->getString("name");
   * company->setString("name", "acme");
-  * company->getString("department.0/name")       
+  * company->getString("department.0/name")
   *                                        .n  indexes from 0.
   * company->getString("department[1]/name")      [] indexes from 1.
   * company->getDataObject("department[number=123]")  returns the department where number=123
   * company->getDataObject("..")                      returns the containing data object
   * company->getDataObject("/")                       returns the root containing data object
-  * There are specific accessors for the primitive types and commonly used 
+  * There are specific accessors for the primitive types and commonly used
   * data types like String.
   */
 
@@ -124,25 +124,25 @@ class DataObjectImpl : public DataObject
 
     /**  getPropertyIndex gets the unique index of a property
      *
-     * A property of a data object has a unique index associated with it. 
-     * This method gets a property index for this object from the property, 
-     * or throw SDOPropertyNotFoundException if the property is not part 
+     * A property of a data object has a unique index associated with it.
+     * This method gets a property index for this object from the property,
+     * or throw SDOPropertyNotFoundException if the property is not part
      * of this data object.
      */
 
     virtual unsigned int getPropertyIndex(const Property& p);
-    
+
     /**
      * These are just like getType().getProperty(), but may return
      * values other than the property list for open types.
      */
 
     virtual const Property& getProperty(unsigned int index);
-    
+
     virtual const Property& getProperty(const char* prop);
-    
+
     virtual PropertyImpl* getPropertyImpl(const char* prop);
-    
+
     virtual PropertyImpl* getPropertyImpl(unsigned int index);
 
    /**  getInstanceProperties gets the props of the current object.
@@ -152,14 +152,14 @@ class DataObjectImpl : public DataObject
      * and any properties where isSet(property) is true.
      * For example, properties resulting from the use of
      * open or mixed XML content are present if allowed by the Type.
-     * The list does not contain duplicates. 
+     * The list does not contain duplicates.
      * The order of the properties in the list begins with getType().getProperties()
      * and the order of the remaining properties is determined by the implementation.
-     * The same list will be returned unless the DataObject is updated so that 
+     * The same list will be returned unless the DataObject is updated so that
      * the contents of the list change
      * Returns the list of Properties currently used in this DataObject.
      */
-    
+
     virtual PropertyList getInstanceProperties();
 
      /**  getContainer get the containing object
@@ -177,15 +177,15 @@ class DataObjectImpl : public DataObject
      */
 
     virtual const Property& getContainmentProperty();
-    
+
     /**  getType  returns the data object's type.
      *
      * getType returns the data object's type.
      * The type defines the properties available for reflective access.
      */
-    
+
     virtual const Type& getType();
-    
+
     virtual const Type::Types getTypeEnum();
 
 
@@ -193,17 +193,17 @@ class DataObjectImpl : public DataObject
     ///////////////////////////////////////////////////////////////////////////
     // get/set
     ///////////////////////////////////////////////////////////////////////////
-    
-    
+
+
     /**  getDataObject returns a data object by path, index or property
      *
-     * Returns the value of a property of either this object or an object 
+     * Returns the value of a property of either this object or an object
      * reachable from it, as identified by the specified path.
      */
 
-    virtual DataObjectPtr getDataObject(const char* path); 
-    virtual DataObjectPtr getDataObject(unsigned int propertyIndex); 
-    virtual DataObjectPtr getDataObject(const Property& property); 
+    virtual DataObjectPtr getDataObject(const char* path);
+    virtual DataObjectPtr getDataObject(unsigned int propertyIndex);
+    virtual DataObjectPtr getDataObject(const Property& property);
 
     /**  setDataObject sets a value by path, index or property
      *
@@ -211,21 +211,21 @@ class DataObjectImpl : public DataObject
      * as identified by the specified path,
      * to the specified value.
      */
-    
-    virtual void setDataObject(const char* path, DataObjectPtr value); 
-    virtual void setDataObject(unsigned int propertyIndex, DataObjectPtr value); 
-    virtual void setDataObject(const Property& property, DataObjectPtr value); 
+
+    virtual void setDataObject(const char* path, DataObjectPtr value);
+    virtual void setDataObject(unsigned int propertyIndex, DataObjectPtr value);
+    virtual void setDataObject(const Property& property, DataObjectPtr value);
 
     /**  getBoolean returns a boolean by path, index or property
      *
-     * Returns the value of a property of either this object or an object 
+     * Returns the value of a property of either this object or an object
      * reachable from it, as identified by the specified path.
      */
 
     virtual bool getBoolean(const char* path);
     virtual bool getBoolean(unsigned int propindex);
     virtual bool getBoolean(const Property& p);
-    
+
     virtual void setBoolean(const char* path, bool b);
     virtual void setBoolean(unsigned int propindex, bool b);
     virtual void setBoolean(const Property& p, bool b);
@@ -233,7 +233,7 @@ class DataObjectImpl : public DataObject
     virtual char getByte(const char* path);
     virtual char getByte(unsigned int propindex);
     virtual char getByte(const Property& p);
-    
+
     virtual void setByte(const char* path, char c);
     virtual void setByte(unsigned int propindex, char c);
     virtual void setByte(const Property& p, char c);
@@ -241,7 +241,7 @@ class DataObjectImpl : public DataObject
     virtual wchar_t getCharacter(const char* path);
     virtual wchar_t getCharacter(unsigned int propindex);
     virtual wchar_t getCharacter(const Property& p);
-    
+
     virtual void setCharacter(const char* path, wchar_t c);
     virtual void setCharacter(unsigned int propindex, wchar_t c);
     virtual void setCharacter(const Property& p, wchar_t c);
@@ -254,7 +254,7 @@ class DataObjectImpl : public DataObject
     virtual unsigned int getBytes(const char* path, char* buf, unsigned int max) ;
     virtual unsigned int getBytes(unsigned int propindex, char* buf, unsigned int max) ;
     virtual unsigned int getBytes(const Property& p, char* buf, unsigned int max) ;
-    
+
     virtual void setBytes(const char* path, const char* c, unsigned int len) ;
     virtual void setBytes(unsigned int propindex, const char* c,unsigned int len) ;
     virtual void setBytes(const Property& p, const char* c,unsigned int len) ;
@@ -262,7 +262,7 @@ class DataObjectImpl : public DataObject
     virtual unsigned int getString(const char* path, wchar_t* buf, unsigned int max) ;
     virtual unsigned int getString(unsigned int propindex,wchar_t* buf, unsigned int max) ;
     virtual unsigned int getString(const Property& p,wchar_t* buf, unsigned int max) ;
-    
+
     virtual void setString(const char* path, const wchar_t* c,unsigned int len) ;
     virtual void setString(unsigned int propindex, const wchar_t* c,unsigned int len) ;
     virtual void setString(const Property& p, const wchar_t* c,unsigned int len) ;
@@ -270,7 +270,7 @@ class DataObjectImpl : public DataObject
     virtual const SDODate getDate(const char* path);
     virtual const SDODate getDate(unsigned int propindex);
     virtual const SDODate getDate(const Property& p);
-    
+
     virtual void setDate(const char* path, const SDODate d);
     virtual void setDate(unsigned int propindex, const SDODate d);
     virtual void setDate(const Property& p, const SDODate d);
@@ -278,7 +278,7 @@ class DataObjectImpl : public DataObject
     virtual long double getDouble(const char* path);
     virtual long double getDouble(unsigned int propindex);
     virtual long double getDouble(const Property& p);
-    
+
     virtual void setDouble(const char* path, long double d);
     virtual void setDouble(unsigned int propindex, long double d);
     virtual void setDouble(const Property& p, long double d);
@@ -286,7 +286,7 @@ class DataObjectImpl : public DataObject
     virtual float getFloat(const char* path);
     virtual float getFloat(unsigned int propindex);
     virtual float getFloat(const Property& p);
-    
+
     virtual void setFloat(const char* path, float f);
     virtual void setFloat(unsigned int propindex, float f);
     virtual void setFloat(const Property& p, float f);
@@ -294,7 +294,7 @@ class DataObjectImpl : public DataObject
     virtual long getInteger(const char* path);
     virtual long getInteger(unsigned int propindex);
     virtual long getInteger(const Property& p);
-    
+
     virtual void setInteger(const char* path, long i);
     virtual void setInteger(unsigned int propindex, long i);
     virtual void setInteger(const Property& p, long i);
@@ -302,7 +302,7 @@ class DataObjectImpl : public DataObject
     virtual /*long long*/ int64_t getLong(const char* path);
     virtual /*long long*/ int64_t getLong(unsigned int propindex);
     virtual /*long long*/ int64_t getLong(const Property& p);
-    
+
     virtual void setLong(const char* path, /*long long*/ int64_t l);
     virtual void setLong(unsigned int propindex, /*long long*/ int64_t l);
     virtual void setLong(const Property& p, /*long long*/ int64_t l);
@@ -310,7 +310,7 @@ class DataObjectImpl : public DataObject
     virtual short getShort(const char* path);
     virtual short getShort(unsigned int propindex);
     virtual short getShort(const Property& p);
-    
+
     virtual void setShort(const char* path, short s);
     virtual void setShort(unsigned int propindex, short s);
     virtual void setShort(const Property& p, short s);
@@ -318,11 +318,11 @@ class DataObjectImpl : public DataObject
      virtual const char* getCString(const char* path);
     virtual const char* getCString(unsigned int propertyIndex);
     virtual const char* getCString(const Property& prop);
-    
+
     virtual void setCString(const char* path, const char* value);
     virtual void setCString(unsigned int propertyIndex, const char* value);
     virtual void setCString (const Property& prop, const char* value);
-    
+
     /**  setNull sets a data object value to null.
      *
      * A DataObjectType or DataType value may be set or unset. If it is set, then
@@ -335,11 +335,11 @@ class DataObjectImpl : public DataObject
     virtual void setNull(const char* path);
     virtual void setNull(unsigned int propertyIndex);
     virtual void setNull(const Property& prop);
-    
+
     virtual bool isNull(const char* path);
     virtual bool isNull(unsigned int propertyIndex);
     virtual bool isNull(const Property& prop);
-    
+
     virtual bool isSet(const char* path);
     virtual bool isSet(unsigned int propertyIndex);
     virtual bool isSet(const Property& property);
@@ -359,7 +359,7 @@ class DataObjectImpl : public DataObject
 
     /**  getSequence returns the sequence for a data object
      *
-     * Returns the value of a Sequence property identified by 
+     * Returns the value of a Sequence property identified by
      * the specified path. See Sequence.
      */
 
@@ -370,20 +370,20 @@ class DataObjectImpl : public DataObject
     virtual SequencePtr getSequence(const Property& property);
 
 
-    ///////////////////////////////////////////////////////////////////////////    
-    // Creation of dataobjects 
+    ///////////////////////////////////////////////////////////////////////////
+    // Creation of dataobjects
     ///////////////////////////////////////////////////////////////////////////
 
     /**  createDataObject creates a data object value
      *
-     * Returns a new data object contained by this object using the 
+     * Returns a new data object contained by this object using the
      * specified property,which must be a containment property.
      * The type of the created object is the declared type
      * of the specified property.
      * If the property is many valued, this method adds an element to the
      * list, otherwise it sets the value, removing any old value.
      */
-    
+
     virtual DataObjectPtr createDataObject(const char* propertyName);
     virtual DataObjectPtr createDataObject(unsigned int propertyIndex);
     virtual DataObjectPtr createDataObject(const Property& property);
@@ -425,13 +425,13 @@ class DataObjectImpl : public DataObject
     ///////////////////////////////////////////////////////////////////////////
     // Change Summary
     ///////////////////////////////////////////////////////////////////////////
-    
+
     /**  getChangeSummary get the applicable change summary
      *
      * This method gets the applicable change summary for a data object.
      * The summary is not necessarily attached to the data object, it may be
      * the summary for a parent data object. No object with a summary attached
-     * may be a child of another object with a summary attached. 
+     * may be a child of another object with a summary attached.
      * See the ChangeSummary API for details of using the change sumamry.
      */
 
@@ -484,7 +484,7 @@ class DataObjectImpl : public DataObject
     virtual void setReference(DataObject* dob, const Property& prop);
     virtual void unsetReference(DataObject* dob, const Property& prop);
     virtual void clearReferences();
-    
+
     // user data support
     virtual void setUserData(const char* path,void* value);
     virtual void setUserData(unsigned int propertyIndex, void* value);
@@ -503,8 +503,8 @@ class DataObjectImpl : public DataObject
 
     // The data factory can be used to create new data objects within
     // the Type system of this data object
-    // 
-      
+    //
+
     SDO_API DataFactory* getDataFactory();
 
 
@@ -518,13 +518,13 @@ class DataObjectImpl : public DataObject
     virtual void   setInstancePropertyType(unsigned int index,
                                             const Type* t);
 
-    /** 
+    /**
      * defineProperty is used by open type support.
      * This method and its siblings define a new property on an
      * open type when a setting is requested.
      */
 
-    virtual const PropertyImpl* defineProperty(const char* propname, 
+    virtual const PropertyImpl* defineProperty(const char* propname,
                  const Type& t);
 
     virtual const PropertyImpl* defineBoolean(const char* propname);
@@ -552,20 +552,20 @@ class DataObjectImpl : public DataObject
 private:
 
     virtual void validateIndex(unsigned int index);
-    virtual void checkFactory(DataObjectPtr dob);
+    virtual void checkFactory(DataObjectPtr dob, unsigned int proeprtyIndex);
     virtual void checkType(    const Property& prop,
                     const Type& objectType);
-     
+
     virtual bool remove(DataObjectImpl* indol);
     virtual bool isSet(const Property& prop, unsigned int propertyIndex);
 
-   
-    virtual DataObjectImpl* getDataObjectImpl(const char* path); 
-    virtual DataObjectImpl* getDataObjectImpl(unsigned int propertyIndex); 
-    virtual DataObjectImpl* getDataObjectImpl(const Property& property); 
+
+    virtual DataObjectImpl* getDataObjectImpl(const char* path);
+    virtual DataObjectImpl* getDataObjectImpl(unsigned int propertyIndex);
+    virtual DataObjectImpl* getDataObjectImpl(const Property& property);
 
     virtual DataObjectPtr
-        createDataObject(const Property& property, 
+        createDataObject(const Property& property,
         const char* namespaceURI,
         const char* typeName);
 
@@ -577,25 +577,25 @@ private:
 
     // Does not keep a reference counted pointer to the container.
     DataObjectImpl* container;
- 
+
     // remove the value from the data object.
     void deleteValue();
 
 
     PropertyValueMap PropertyValues;
-    
+
     const TypeImpl& ObjectType;
 
     DataObjectListImpl* listValue;
-    
+
     // Holds the value , reallocated as necessary for strings
-    void* value;  
+    void* value;
 
     // In the case of a bytes/string - this holds the length;
     unsigned int valuelength;
-                         
+
     // holds the value as a string - if requested.
-    char* asStringBuffer; 
+    char* asStringBuffer;
 
     // holds the Xpath to this object if requested.
     std::string asXPathBuffer;
@@ -603,7 +603,7 @@ private:
     // The data object holds a counted reference to the data factory.
     DataFactoryPtr factory;
 
- 
+
     // Support for open types
     int openBase;
     std::list<PropertyImpl> openProperties;
@@ -661,9 +661,9 @@ private:
     REFERENCE_LIST refs;
 
 
-  
+
 };
 };
 };
- 
+
 #endif //_DATAOBJECTIMPL_H_

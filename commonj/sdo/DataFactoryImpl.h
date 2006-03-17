@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+ *  Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ namespace sdo{
 
 typedef map<string, PropertyImpl> propertyMap;
 
-/**  
+/**
  *    DataFactoryImpl implements the abstract class DataFactory.
  *    DataFactoryImpl holds metadata and creates DataObjects.
  *
@@ -55,64 +55,64 @@ public:
     DataFactoryImpl& operator=(const DataFactoryImpl& inmdg);
 
     virtual void addType(const char* uri, const char* inTypeName,
-        bool isSeqenced = false, 
+        bool isSeqenced = false,
         bool isOpen = false,
         bool isAbstract = false,
         bool isDataType = false);
 
 
-    virtual void addPropertyToType(const char* uri, 
+    virtual void addPropertyToType(const char* uri,
                                    const char* inTypeName,
                                    const char* propname,
-                                   const char* propTypeUri, 
+                                   const char* propTypeUri,
                                    const char* propTypeName,
                                    bool isMany = false);
 
 
-    virtual void addPropertyToType(const char* uri, 
+    virtual void addPropertyToType(const char* uri,
                                    const char* inTypeName,
                                    const char* propname,
                                    const Type& propType,
                                    bool isMany = false);
 
-    virtual void addPropertyToType(const Type& type, 
+    virtual void addPropertyToType(const Type& type,
                                    const char* propname,
                                    const Type& propType,
                                    bool isMany = false);
-    
-    virtual void addPropertyToType(const Type& type, 
+
+    virtual void addPropertyToType(const Type& type,
                                    const char* propname,
-                                   const char* propTypeUri, 
+                                   const char* propTypeUri,
                                    const char* propTypeName,
                                    bool isMany = false);
 
-    virtual void addPropertyToType(const char* uri, 
+    virtual void addPropertyToType(const char* uri,
                                    const char* inTypeName,
                                    const char* propname,
-                                   const char* propTypeUri, 
+                                   const char* propTypeUri,
                                    const char* propTypeName,
                                    bool     isMany ,
                                    bool  isReadOnly,
                                    bool  isContainment);
 
-    virtual void addPropertyToType(const char* uri, 
+    virtual void addPropertyToType(const char* uri,
                                    const char* inTypeName,
                                    const char* propname,
                                    const Type& propType,
                                    bool  isMany,
                                    bool  isReadOnly,
                                    bool  isContainment);
-    
-    virtual void addPropertyToType(const Type& type, 
+
+    virtual void addPropertyToType(const Type& type,
                                    const char* propname,
                                    const Type& propType,
                                    bool  isMany,
                                    bool  isReadOnly,
                                    bool  isContainment);
 
-    virtual void addPropertyToType(const Type& type, 
+    virtual void addPropertyToType(const Type& type,
                                    const char* propname,
-                                   const char* propTypeUri, 
+                                   const char* propTypeUri,
                                    const char* propTypeName,
                                    bool  isMany,
                                    bool  isReadOnly,
@@ -141,8 +141,8 @@ public:
                                   const char* typenam,
                                   const char* alias) ;
 
-    virtual void setAlias(const char* typeuri, 
-                                  const char* typname, 
+    virtual void setAlias(const char* typeuri,
+                                  const char* typname,
                                   const char* propname,
                                   const char* alias) ;
 
@@ -153,13 +153,13 @@ public:
 
 
     virtual void setPropertySubstitute(
-            const char* uri, 
+            const char* uri,
             const char* inTypeName,
             const char* propname,
             const char* subname,
-            const char* subTypeUri, 
+            const char* subTypeUri,
             const char* subTypeName);
-        
+
 
     virtual void setPropertySubstitute(
             const Type& containertype,
@@ -169,142 +169,142 @@ public:
 
     ////////////////////////////////////////////////////////
     virtual void setDefault(
-        const Type& t, 
-        const char* propname, 
+        const Type& t,
+        const char* propname,
         bool b ) ;
 
     virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        char c) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        wchar_t c) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        char* c) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        short s) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        long l) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        int64_t i) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        float f) ;
-
-    virtual void setDefault(
-        const Type& t, 
+        const Type& t,
         const char* propname ,
-        long double d) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        const SDODate d) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        const wchar_t* c, 
-        unsigned int len) ;
-
-    virtual void setDefault(
-        const Type& t, 
-        const char* propname , 
-        const char* c, 
-        unsigned int len) ;
-
-    virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname, 
-        bool b ) ;
-
-    virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
         char c) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
+        const Type& t,
+        const char* propname ,
         wchar_t c) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
+        const Type& t,
         const char* propname ,
         char* c) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
+        const Type& t,
+        const char* propname ,
         short s) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
+        const Type& t,
+        const char* propname ,
         long l) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
+        const Type& t,
         const char* propname ,
         int64_t i) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
+        const Type& t,
+        const char* propname ,
         float f) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
+        const Type& t,
+        const char* propname ,
         long double d) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
+        const Type& t,
+        const char* propname ,
         const SDODate d) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
-        const wchar_t* c, 
+        const Type& t,
+        const char* propname ,
+        const wchar_t* c,
         unsigned int len) ;
 
     virtual void setDefault(
-        const char* typuri, 
-        const char* typnam, 
-        const char* propname , 
-        const char* c, 
+        const Type& t,
+        const char* propname ,
+        const char* c,
         unsigned int len) ;
 
-    virtual void setDASValue( 
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname,
+        bool b ) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        char c) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        wchar_t c) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        char* c) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        short s) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        long l) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        int64_t i) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        float f) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        long double d) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        const SDODate d) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        const wchar_t* c,
+        unsigned int len) ;
+
+    virtual void setDefault(
+        const char* typuri,
+        const char* typnam,
+        const char* propname ,
+        const char* c,
+        unsigned int len) ;
+
+    virtual void setDASValue(
             const Type& type,
                 const char* name,
                 DASValue* value);
@@ -321,23 +321,23 @@ public:
 
     virtual DASValue* getDASValue(
                 const char* typeuri,
-                const char* typenam, 
+                const char* typenam,
                 const char* name) const;
 
-    virtual void setDASValue( 
+    virtual void setDASValue(
                 const Type& type,
                 const char* propertyName,
                 const char* name,
                 DASValue* value);
 
-    virtual void setDASValue( 
+    virtual void setDASValue(
                 const char* typeuri,
                 const char* typenam,
                 const char* propertyName,
                 const char* name,
                 DASValue* value);
 
-    virtual DASValue* getDASValue( 
+    virtual DASValue* getDASValue(
                 const Type& type,
                 const char* propertyName,
                 const char* name) const;
@@ -345,7 +345,7 @@ public:
     virtual DASValue* getDASValue(
                 const char* typeuri,
                 const char* typenam,
-                const char* propertyName, 
+                const char* propertyName,
                 const char* name) const;
 
     virtual    void resolve();
@@ -359,9 +359,11 @@ public:
     virtual const TypeImpl& getTypeImpl(const char* uri, const char* inTypeName) const;
     virtual const char* getRootElementName() const;
     virtual void setRootElementName(const char* ren);
-    virtual bool isCompatible(DataFactory* df);
+    virtual bool checkType(const Type& t);
+    virtual bool isCompatible(DataFactory* df, DataObject* d);
     virtual bool compareTypes(const TypeImpl* t1, const Type& t2);
 
+    virtual bool generateInterface(const char* fileroot);
 
 private:
     typedef map<string, TypeImpl*> TYPES_MAP;
@@ -377,13 +379,13 @@ private:
     // work properly.
 
     bool isResolved;
-    
+
     bool recursiveCheck(TypeImpl* cs, TypeImpl* t);
     bool checkForValidChangeSummary(TypeImpl* t);
 
     typedef vector<TypeImpl*> TYPES_VECTOR;
     TYPES_VECTOR cstypes;
-    
+
     char*        getFullTypeName(const char* uri, const char* inTypeName) const;
     char*        getAliasTypeName(const char* uri, const char* inTypeName) const;
 

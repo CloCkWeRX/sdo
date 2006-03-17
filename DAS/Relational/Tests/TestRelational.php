@@ -1,7 +1,7 @@
 <?php
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                                  |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -38,6 +38,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 	public function testConstructor_ThrowsExceptionIfNoDatabaseMetadata() {
 		$database_metadata = null;
 		$exception_thrown = false;
+		$msg = null;
 		try {
 			$das = new SDO_DAS_Relational ($database_metadata);
 		} catch (SDO_DAS_Relational_Exception $e) {
@@ -57,6 +58,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		$database_metadata = array($company_table_metadata);
 
 		$exception_thrown = false;
+		$msg = null;
 		try {
 			$das = new SDO_DAS_Relational($database_metadata);
 		} catch (SDO_DAS_Relational_Exception $e) {
@@ -105,6 +107,7 @@ class TestRelational extends PHPUnit2_Framework_TestCase
 		$database_metadata = array($company_table_metadata, $department_table_metadata);
 
 		$exception_thrown = false;
+		$msg = null;
 		try {
 			$das = new SDO_DAS_Relational($database_metadata,'company',null);
 		} catch (SDO_DAS_Relational_Exception $e) {

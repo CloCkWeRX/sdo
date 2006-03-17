@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+ *  Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@
 namespace commonj{
 namespace sdo {
 
-/** 
+/**
  * DataObjectListImpl implements DataObjectList.
  * List for retrieving many valued property values.
  *
  * DataObjectList provides an API for getting and setting values in
- * many valued properties. The list deals with both DataType and 
+ * many valued properties. The list deals with both DataType and
  * DataObjectType properties.
  */
 DataObjectListImpl::DataObjectListImpl(DATAOBJECT_VECTOR p) : plist (p)
@@ -81,7 +81,7 @@ DataObjectListImpl::DataObjectListImpl()
     isReference = false;
 }
 
-DataObjectListImpl::DataObjectListImpl(DataFactory* df, 
+DataObjectListImpl::DataObjectListImpl(DataFactory* df,
                                        DataObjectImpl* cont,
                                        unsigned int inpindex,
                                        const char* intypeURI,
@@ -213,8 +213,8 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
             msg.c_str());
         }
     }
-    if (strcmp(typeURI,d->getType().getURI()) 
-        || 
+    if (strcmp(typeURI,d->getType().getURI())
+        ||
         strcmp(typeName,d->getType().getName()))
     {
         string msg("Insertion of object of the wrong type to a list:");
@@ -230,7 +230,7 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
     }
 
     DataObject* dob = d; // unwrap the data object ready for a downcasting hack.
-    DataObjectImpl* con  = ((DataObjectImpl*)dob)->getContainerImpl();  
+    DataObjectImpl* con  = ((DataObjectImpl*)dob)->getContainerImpl();
     if (!isReference)
     {
         if (con != 0)
@@ -246,7 +246,7 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
                     msg.c_str());
             }
         }
-        else 
+        else
         {
             ((DataObjectImpl*)dob)->setContainer(container);
             ((DataObjectImpl*)dob)->setApplicableChangeSummary();
@@ -258,7 +258,7 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
 
     plist.insert(plist.begin()+index, RefCountingPointer<DataObjectImpl>((DataObjectImpl*)dob));
 
-    if (container != 0) 
+    if (container != 0)
     {
         if (container->getType().isSequencedType())
         {
@@ -273,19 +273,37 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
 
   void DataObjectListImpl::checkFactory(DataObjectPtr dob)
     {
-        
+
         DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dob;
 
         if (d->getDataFactory() == theFactory) return;
 
         // temporary experiment with allowing data objects
-        // to move from factory to factory if the type is 
+        // to move from factory to factory if the type is
         // nominally present, and the type systems match
 
         DataFactoryImpl* f = (DataFactoryImpl*)theFactory;
 
-        if ((d->getContainer() == 0) && 
-            (f->isCompatible(d->getDataFactory())))
+
+        if (d->getContainer() != 0)
+        {
+           string msg("Insertion of object into list from another factory is only allowed if the parent is null: ");
+
+            const Type& t = d->getType();
+            msg += t.getURI();
+            msg += "#";
+            msg += t.getName();
+            msg += " into property  ";
+            msg += container->getProperty(pindex).getName();
+            msg += " of type ";
+            msg += typeURI;
+            msg += "#";
+            msg += typeName;
+            SDO_THROW_EXCEPTION("checkFactory", SDOInvalidConversionException,
+            msg.c_str());
+        }
+
+        if (f->isCompatible(d->getDataFactory(),d))
         {
             d->setDataFactory(theFactory);
             // we will also need to transfer any children - assuming they
@@ -294,17 +312,21 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
             return;
         }
 
-        string msg("Insertion from incompatible factory ");
+        string msg("Insertion into list fromm incompatible factory:");
+
         const Type& t = d->getType();
         msg += t.getURI();
         msg += "#";
         msg += t.getName();
-        msg += " into list ";
+        msg += " into property  ";
+        msg += container->getProperty(pindex).getName();
+        msg += " of type ";
         msg += typeURI;
         msg += "#";
         msg += typeName;
         SDO_THROW_EXCEPTION("checkFactory", SDOInvalidConversionException,
             msg.c_str());
+
     }
 
 
@@ -316,7 +338,7 @@ void DataObjectListImpl::checkType(const Type& listType, const Type& objectType)
             (objectType.getURI(),objectType.getName());
         if (ti != 0)
         {
-            do  
+            do
             {
                 ti  = (const TypeImpl*)ti->getBaseType();
                 if (ti == 0) break;
@@ -326,7 +348,7 @@ void DataObjectListImpl::checkType(const Type& listType, const Type& objectType)
             // allow types of any substitutes
             if (container != 0)
             {
-                PropertyImpl* pi = 
+                PropertyImpl* pi =
                     container->getPropertyImpl(pindex);
                 if (pi != 0)
                 {
@@ -354,7 +376,7 @@ void DataObjectListImpl::checkType(const Type& listType, const Type& objectType)
     }
 
 
-void DataObjectListImpl::setType(const char* uri, const char* name)    
+void DataObjectListImpl::setType(const char* uri, const char* name)
 {
     // need to check for an opentype list which has not been set up yet
     if (name == 0) return;
@@ -369,12 +391,12 @@ void DataObjectListImpl::setType(const char* uri, const char* name)
     typeName = new char[strlen(name)+1];
     strcpy(typeName, name);
     delete typeURI;
-    if (uri == 0) 
+    if (uri == 0)
     {
         typeURI = new char[1];
         typeURI[0] = 0;
     }
-    else 
+    else
     {
         typeURI = new char[strlen(uri)+1];
         strcpy(typeURI, uri);
@@ -412,8 +434,8 @@ void DataObjectListImpl::append (DataObjectPtr d)
                 d->getType());
 
     DataObject* dob = d; // unwrap the data object ready for a downcasting hack.
-    DataObjectImpl* con  = ((DataObjectImpl*)dob)->getContainerImpl();  
-    
+    DataObjectImpl* con  = ((DataObjectImpl*)dob)->getContainerImpl();
+
     if (!isReference)
     {
         if (con != 0)
@@ -429,7 +451,7 @@ void DataObjectListImpl::append (DataObjectPtr d)
                     msg.c_str());
             }
         }
-        else 
+        else
         {
             ((DataObjectImpl*)dob)->setContainer(container);
             ((DataObjectImpl*)dob)->setApplicableChangeSummary();
@@ -455,7 +477,7 @@ void DataObjectListImpl::append (DataObjectPtr d)
 void DataObjectListImpl::insert (unsigned int index, bool d)
 {
     if (theFactory == 0) return;
-    
+
     if (typeUnset)setType(Type::SDOTypeNamespaceURI, "Boolean");
 
     RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
@@ -464,12 +486,12 @@ void DataObjectListImpl::insert (unsigned int index, bool d)
     insert(index, dol);
 }
 
-void DataObjectListImpl::append (bool d) 
+void DataObjectListImpl::append (bool d)
 {
     if (theFactory == 0) return;
 
     if (typeUnset)setType(Type::SDOTypeNamespaceURI, "Boolean");
-    
+
     RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
     DataObject* dob = dol;
     ((DataObjectImpl*)dob)->setBoolean(d);
@@ -754,9 +776,9 @@ RefCountingPointer<DataObject> DataObjectListImpl::remove(unsigned int index)
         container->logChange(pindex);
     }
     RefCountingPointer<DataObject> d = (*this)[index];
-    
+
     // log deletion only if the list is of data objects.
-    if (theFactory != 0) 
+    if (theFactory != 0)
     {
         const Type& t = theFactory->getType(typeURI,typeName);
         const Property& p = container->getProperty(pindex);
@@ -842,14 +864,14 @@ int64_t     DataObjectListImpl::getLong(unsigned int index) const
     DataObject* dob = d;
     return ((DataObjectImpl*)dob)->getLong();
 }
-float       DataObjectListImpl::getFloat(unsigned int index) const 
+float       DataObjectListImpl::getFloat(unsigned int index) const
 {
     validateIndex(index);
-    RefCountingPointer<DataObject> d = ((*this)[index]); 
+    RefCountingPointer<DataObject> d = ((*this)[index]);
     DataObject* dob = d;
     return ((DataObjectImpl*)dob)->getFloat();
 }
-long double DataObjectListImpl::getDouble(unsigned int index) const 
+long double DataObjectListImpl::getDouble(unsigned int index) const
 {
     validateIndex(index);
     RefCountingPointer<DataObject> d = ((*this)[index]);
@@ -877,7 +899,7 @@ DataObjectPtr DataObjectListImpl::getDataObject(unsigned int index) const
     return (*this)[index];
 }
 
-void DataObjectListImpl::setBoolean(unsigned int index, bool d) 
+void DataObjectListImpl::setBoolean(unsigned int index, bool d)
 {
     validateIndex(index);
     if (container != 0)
@@ -888,7 +910,7 @@ void DataObjectListImpl::setBoolean(unsigned int index, bool d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setBoolean(d);
 }
-void DataObjectListImpl::setByte(unsigned int index, char d) 
+void DataObjectListImpl::setByte(unsigned int index, char d)
 {
     validateIndex(index);
     if (container != 0)
@@ -899,7 +921,7 @@ void DataObjectListImpl::setByte(unsigned int index, char d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setByte(d);
 }
-void DataObjectListImpl::setCharacter(unsigned int index, wchar_t d) 
+void DataObjectListImpl::setCharacter(unsigned int index, wchar_t d)
 {
     validateIndex(index);
     if (container != 0)
@@ -911,7 +933,7 @@ void DataObjectListImpl::setCharacter(unsigned int index, wchar_t d)
     ((DataObjectImpl*)dob)->setCharacter(d);
 }
 
-void DataObjectListImpl::setString(unsigned int index, const wchar_t* d, unsigned int len) 
+void DataObjectListImpl::setString(unsigned int index, const wchar_t* d, unsigned int len)
 {
     validateIndex(index);
     if (container != 0)
@@ -922,7 +944,7 @@ void DataObjectListImpl::setString(unsigned int index, const wchar_t* d, unsigne
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setString(d, len);
 }
-void DataObjectListImpl::setBytes(unsigned int index, const char* d, unsigned int len) 
+void DataObjectListImpl::setBytes(unsigned int index, const char* d, unsigned int len)
 {
     validateIndex(index);
     if (container != 0)
@@ -934,7 +956,7 @@ void DataObjectListImpl::setBytes(unsigned int index, const char* d, unsigned in
     ((DataObjectImpl*)dob)->setBytes(d, len);
 }
 
-void DataObjectListImpl::setShort(unsigned int index, short d) 
+void DataObjectListImpl::setShort(unsigned int index, short d)
 {
     validateIndex(index);
     if (container != 0)
@@ -945,7 +967,7 @@ void DataObjectListImpl::setShort(unsigned int index, short d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setShort(d);
 }
-void DataObjectListImpl::setInteger(unsigned int index, long d) 
+void DataObjectListImpl::setInteger(unsigned int index, long d)
 {
     validateIndex(index);
     if (container != 0)
@@ -956,7 +978,7 @@ void DataObjectListImpl::setInteger(unsigned int index, long d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setInteger(d);
 }
-void DataObjectListImpl::setLong(unsigned int index, int64_t d) 
+void DataObjectListImpl::setLong(unsigned int index, int64_t d)
 {
     validateIndex(index);
     if (container != 0)
@@ -967,7 +989,7 @@ void DataObjectListImpl::setLong(unsigned int index, int64_t d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setLong(d);
 }
-void DataObjectListImpl::setFloat(unsigned int index, float d) 
+void DataObjectListImpl::setFloat(unsigned int index, float d)
 {
     validateIndex(index);
     if (container != 0)
@@ -978,7 +1000,7 @@ void DataObjectListImpl::setFloat(unsigned int index, float d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setFloat(d);
 }
-void DataObjectListImpl::setDouble(unsigned int index, long double d) 
+void DataObjectListImpl::setDouble(unsigned int index, long double d)
 {
     validateIndex(index);
     if (container != 0)
@@ -989,7 +1011,7 @@ void DataObjectListImpl::setDouble(unsigned int index, long double d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setDouble(d);
 }
-void DataObjectListImpl::setDate(unsigned int index, const SDODate d) 
+void DataObjectListImpl::setDate(unsigned int index, const SDODate d)
 {
     validateIndex(index);
     if (container != 0)
@@ -1000,7 +1022,7 @@ void DataObjectListImpl::setDate(unsigned int index, const SDODate d)
     DataObject* dob = dd;
     ((DataObjectImpl*)dob)->setDate(d);
 }
-void DataObjectListImpl::setCString(unsigned int index, char* d) 
+void DataObjectListImpl::setCString(unsigned int index, char* d)
 {
     validateIndex(index);
     if (container != 0)
@@ -1012,7 +1034,7 @@ void DataObjectListImpl::setCString(unsigned int index, char* d)
     ((DataObjectImpl*)dob)->setCString(d);
 }
 
-void DataObjectListImpl::setDataObject(unsigned int index, DataObjectPtr dob) 
+void DataObjectListImpl::setDataObject(unsigned int index, DataObjectPtr dob)
 {
 
     if (dob != 0)

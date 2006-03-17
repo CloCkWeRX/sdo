@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -29,7 +29,7 @@
 #include "TSRM.h"
 #endif
 
-#define SDO_DAS_XML_VERSION "0.9.0"
+#define SDO_DAS_XML_VERSION "1.0.1"
 
 #ifdef PHP_WIN32
 #    if defined (SDO_DAS_XML_EXPORTS)

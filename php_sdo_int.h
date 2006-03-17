@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -35,7 +35,7 @@
 
 using namespace commonj::sdo;
 
-#define SDO_VERSION "0.9.0"
+#define SDO_VERSION "1.0.1"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
@@ -134,7 +134,7 @@ extern PHP_SDO_API void sdo_make_long_class_constant(zend_class_entry *ce, char 
 
 extern PHP_SDO_API xmldas::XMLDAS *sdo_get_XMLDAS();
 
-extern PHP_SDO_API int sdo_parse_offset_param(DataObjectPtr dop, zval *z_offset, 
+extern PHP_SDO_API int sdo_parse_offset_param(DataObjectPtr dop, zval *z_offset,
 	const Property **return_property, const char **return_xpath, int property_required, int quiet TSRMLS_DC);
 extern PHP_SDO_API Type::Types sdo_map_zval_type (zval *z_value);
 

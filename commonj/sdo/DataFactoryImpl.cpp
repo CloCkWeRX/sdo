@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
+ *  Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ DataFactoryImpl::~DataFactoryImpl()
     TYPES_MAP::iterator typeIter;
     for (typeIter = types.begin() ; typeIter != types.end() ; ++typeIter)
     {
-        if (strncmp((typeIter->first).c_str(),"ALIAS::", 7)) 
+        if (strncmp((typeIter->first).c_str(),"ALIAS::", 7))
         {
             delete typeIter->second;
         }
@@ -99,7 +99,7 @@ DataFactoryImpl::~DataFactoryImpl()
 }
 
 // ===================================================================
-// get the root element name 
+// get the root element name
 // ===================================================================
 const char* DataFactoryImpl::getRootElementName() const
 {
@@ -107,7 +107,7 @@ const char* DataFactoryImpl::getRootElementName() const
 }
 
 // ===================================================================
-// set the root element name 
+// set the root element name
 // ===================================================================
 void DataFactoryImpl::setRootElementName(const char* ren)
 {
@@ -116,7 +116,7 @@ void DataFactoryImpl::setRootElementName(const char* ren)
         delete rootElementName;
         rootElementName = 0;
     }
-    if (ren != 0 && (strlen(ren) != 0)) 
+    if (ren != 0 && (strlen(ren) != 0))
     {
         rootElementName = new char[strlen(ren) +1];
         strcpy(rootElementName, ren);
@@ -171,7 +171,7 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
 
         // re-find the type we just added.
         fullTypeName = getFullTypeName(
-                (typeIter->second)->getURI(), 
+                (typeIter->second)->getURI(),
                 (typeIter->second)->getName());
         typeIter2 = types.find(fullTypeName);
         if (fullTypeName)delete fullTypeName;
@@ -187,7 +187,7 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
             }
         }
 
-        
+
         // Now add all the properties
         PropertyList props = typeIter->second->getProperties();
         for (int i=0; i < props.size(); i++)
@@ -200,14 +200,14 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
             addPropertyToType((typeIter->second)->getURI(),
                               (typeIter->second)->getName(),
                               props[i].getName(),
-                              propType.getURI(), 
+                              propType.getURI(),
                               propType.getName(),
                               props[i].isMany(),
                               props[i].isReadOnly(),
                               props[i].isContainment());
 
             // copy the aliases if there are any.
-            if (props[i].getAliasCount() > 0) 
+            if (props[i].getAliasCount() > 0)
             {
 
                 PropertyImpl* p = (typeIter2->second)->
@@ -229,7 +229,7 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
 // ===================================================================
 // addType - adds a new Type if it does not already exist
 // ===================================================================
-void DataFactoryImpl::addType(const char* uri, const char* inTypeName, 
+void DataFactoryImpl::addType(const char* uri, const char* inTypeName,
                                 bool isSeq,
                                 bool isOp,
                                 bool isAbs,
@@ -247,8 +247,8 @@ void DataFactoryImpl::addType(const char* uri, const char* inTypeName,
         SDOIllegalArgumentException, " Type has empty name");
     }
 
-    
-    if (findType(uri, inTypeName) == 0) 
+
+    if (findType(uri, inTypeName) == 0)
     {
         char* fullTypeName = getFullTypeName(uri, inTypeName);
         types[fullTypeName] = new TypeImpl(uri, inTypeName, isSeq, isOp, isAbs, isData);
@@ -272,7 +272,7 @@ bool DataFactoryImpl::recursiveCheck(TypeImpl* cs, TypeImpl* t)
     }
 
     PropertyList pl = cs->getProperties();
-    
+
     for (int i=0 ; i < pl.size() ; i++ )
     {
         if (recursiveCheck((TypeImpl*)&(pl[i].getType()), t)) return true;
@@ -295,9 +295,9 @@ bool DataFactoryImpl::checkForValidChangeSummary(TypeImpl* t)
     }
 
     if (cstypes.size() > 0) {
-        for (int i = 0 ;i < cstypes.size(); i++) 
+        for (int i = 0 ;i < cstypes.size(); i++)
         {
-            if (recursiveCheck(cstypes[i], t)) 
+            if (recursiveCheck(cstypes[i], t))
             {
                 return false;
 
@@ -311,8 +311,8 @@ bool DataFactoryImpl::checkForValidChangeSummary(TypeImpl* t)
 // ===================================================================
 // addPropertyToType - adds a Property to an existing Type
 // ===================================================================
-void DataFactoryImpl::addPropertyToType(const char* uri, 
-                                      const char* inTypeName, 
+void DataFactoryImpl::addPropertyToType(const char* uri,
+                                      const char* inTypeName,
                                       const char* propname,
                                       const char* propTypeUri,
                                       const char* propTypeName,
@@ -324,18 +324,18 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
     if (fullPropTypeName)delete fullPropTypeName;
     if (typeIter != types.end())
     {
-        addPropertyToType(uri,inTypeName, 
+        addPropertyToType(uri,inTypeName,
                                   propname,
                                   propTypeUri,
                                   propTypeName,
-                                  many, 
+                                  many,
                                   false,
                                   !(typeIter->second)->isDataType());
     }
 }
 
-void DataFactoryImpl::addPropertyToType(const char* uri, 
-                                      const char* inTypeName, 
+void DataFactoryImpl::addPropertyToType(const char* uri,
+                                      const char* inTypeName,
                                       const char* propname,
                                       const char* propTypeUri,
                                       const char* propTypeName,
@@ -377,7 +377,7 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
     fullTypeName = getFullTypeName(propTypeUri, propTypeName);
     typeIter2 = types.find(fullTypeName);
     if (fullTypeName)delete fullTypeName;
-    
+
     if (typeIter2 == types.end())
     {
         string msg("Type not found: ");
@@ -387,16 +387,16 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
         SDO_THROW_EXCEPTION("addPropertyToType",
         SDOTypeNotFoundException, msg.c_str());
     }
-    
+
     // Check if its a ChangeSummary
     if (propTypeUri != 0 && !strcmp(propTypeUri,Type::SDOTypeNamespaceURI) &&
         !strcmp(propTypeName,"ChangeSummary") )
     {
-        if (checkForValidChangeSummary(typeIter->second)) 
+        if (checkForValidChangeSummary(typeIter->second))
         {
             // The change summary is allowable if we got to here - force the right params.
             // we will not use this property - its just for compatibility.
-            // we have to use getChangeSummary to get the change summary, 
+            // we have to use getChangeSummary to get the change summary,
             // and isChangeSummaryType to see if this is a type which may have
             // a change summary.
             (typeIter->second)->addChangeSummary();
@@ -406,7 +406,7 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
         }
         return;
     }
-    
+
 
     if ((typeIter->second)->isDataType())
     {
@@ -435,14 +435,14 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
 // addPropertyToType - adds a Property to an existing Type
 // ===================================================================
 
-void DataFactoryImpl::addPropertyToType(const char* uri, 
-                                      const char* inTypeName, 
+void DataFactoryImpl::addPropertyToType(const char* uri,
+                                      const char* inTypeName,
                                       const char* propname,
                                       const Type& tprop,
                                       bool    many)
 {
-    addPropertyToType(uri, 
-                    inTypeName, 
+    addPropertyToType(uri,
+                    inTypeName,
                     propname,
                     tprop,
                     many,
@@ -451,15 +451,15 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
 }
 
 
-void DataFactoryImpl::addPropertyToType(const char* uri, 
-                                      const char* inTypeName, 
+void DataFactoryImpl::addPropertyToType(const char* uri,
+                                      const char* inTypeName,
                                       const char* propname,
                                       const Type& tprop,
                                       bool    many,
                                       bool    rdonly,
                                       bool cont)
 {
-    addPropertyToType(uri, 
+    addPropertyToType(uri,
                       inTypeName,
                       propname,
                       tprop.getURI(),
@@ -542,7 +542,7 @@ void DataFactoryImpl::addPropertyToType(const Type& tp,
 char* DataFactoryImpl::getFullTypeName(const char* uri, const char* inTypeName) const
 {
     char* c;
-    if (uri != 0 && inTypeName != 0) 
+    if (uri != 0 && inTypeName != 0)
     {
         c = new char[strlen(uri) + strlen(inTypeName) + 2];
         sprintf(c,"%s#%s",uri,inTypeName);
@@ -565,7 +565,7 @@ char* DataFactoryImpl::getFullTypeName(const char* uri, const char* inTypeName) 
 char* DataFactoryImpl::getAliasTypeName(const char* uri, const char* inTypeName) const
 {
     char* c;
-    if (uri != 0 && inTypeName != 0) 
+    if (uri != 0 && inTypeName != 0)
     {
         c = new char[strlen(uri) + strlen(inTypeName) + 9];
         sprintf(c,"ALIAS::%s#%s",uri,inTypeName);
@@ -599,7 +599,7 @@ const Type& DataFactoryImpl::getType(const char* uri, const char* inTypeName) co
         SDO_THROW_EXCEPTION("getType" ,
         SDOTypeNotFoundException, msg.c_str());
     }
-    
+
     return *type;
 }
 
@@ -608,7 +608,7 @@ const Type& DataFactoryImpl::getType(const char* uri, const char* inTypeName) co
 // ===================================================================
 
 void DataFactoryImpl::setBaseType( const Type& type,
-                  const Type& base, bool isRestriction) 
+                  const Type& base, bool isRestriction)
 {
     setBaseType(type.getURI(),type.getName(),base.getURI(), base.getName(),
         isRestriction);
@@ -640,7 +640,7 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     char* fullTypeName = getFullTypeName(typeuri, typenam);
     typeIter = types.find(fullTypeName);
     if (fullTypeName)delete fullTypeName;
-    
+
     if(typeIter == types.end())
     {
         string msg("Type not found :");
@@ -660,11 +660,11 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 // ===================================================================
 
     void DataFactoryImpl::setPropertySubstitute(
-            const char* uri, 
+            const char* uri,
             const char* inTypeName,
             const char* propname,
             const char* subname,
-            const char* subTypeUri, 
+            const char* subTypeUri,
             const char* subTypeName)
     {
         const TypeImpl* cont = findTypeImpl(uri, inTypeName);
@@ -683,7 +683,7 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
         if (pi != 0)pi->setSubstitution(this,subname,tsub);
     }
 
-    
+
 
     void DataFactoryImpl::setPropertySubstitute(
             const Type& containertype,
@@ -703,82 +703,82 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 // ===================================================================
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname, bool b ) 
+        const Type& t, const char* propname, bool b )
     {
         setDefault(t.getURI(), t.getName(), propname, b);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , char c) 
-        
+        const Type& t, const char* propname , char c)
+
     {
         setDefault(t.getURI(), t.getName(), propname, c);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , wchar_t c) 
+        const Type& t, const char* propname , wchar_t c)
     {
         setDefault(t.getURI(), t.getName(), propname, c);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , char* c) 
+        const Type& t, const char* propname , char* c)
     {
         setDefault(t.getURI(), t.getName(), propname, c);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , short s) 
+        const Type& t, const char* propname , short s)
     {
         setDefault(t.getURI(), t.getName(), propname, s);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , long l) 
+        const Type& t, const char* propname , long l)
     {
         setDefault(t.getURI(), t.getName(), propname, l);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , int64_t i) 
+        const Type& t, const char* propname , int64_t i)
     {
         setDefault(t.getURI(), t.getName(), propname, i);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , float f) 
+        const Type& t, const char* propname , float f)
     {
         setDefault(t.getURI(), t.getName(), propname, f);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , long double d) 
+        const Type& t, const char* propname , long double d)
     {
         setDefault(t.getURI(), t.getName(), propname, d);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , const SDODate d) 
+        const Type& t, const char* propname , const SDODate d)
     {
         setDefault(t.getURI(), t.getName(), propname, d);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , const wchar_t* c, unsigned int len) 
+        const Type& t, const char* propname , const wchar_t* c, unsigned int len)
     {
         setDefault(t.getURI(), t.getName(), propname, c, len);
     }
 
     void DataFactoryImpl::setDefault(
-        const Type& t, const char* propname , const char* c, unsigned int len) 
+        const Type& t, const char* propname , const char* c, unsigned int len)
     {
         setDefault(t.getURI(), t.getName(), propname, c, len);
     }
 
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname, bool b ) 
+        const char* typuri, const char* typnam,
+        const char* propname, bool b )
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -786,8 +786,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , char c) 
+        const char* typuri, const char* typnam,
+        const char* propname , char c)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -795,8 +795,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , wchar_t c) 
+        const char* typuri, const char* typnam,
+        const char* propname , wchar_t c)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -804,8 +804,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , char* c) 
+        const char* typuri, const char* typnam,
+        const char* propname , char* c)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -813,8 +813,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , short s) 
+        const char* typuri, const char* typnam,
+        const char* propname , short s)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -822,8 +822,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , long l) 
+        const char* typuri, const char* typnam,
+        const char* propname , long l)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -831,8 +831,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , int64_t i) 
+        const char* typuri, const char* typnam,
+        const char* propname , int64_t i)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -840,8 +840,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , float f) 
+        const char* typuri, const char* typnam,
+        const char* propname , float f)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -849,8 +849,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , long double d) 
+        const char* typuri, const char* typnam,
+        const char* propname , long double d)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -858,8 +858,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , const SDODate d) 
+        const char* typuri, const char* typnam,
+        const char* propname , const SDODate d)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -867,8 +867,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , const wchar_t* c, unsigned int len) 
+        const char* typuri, const char* typnam,
+        const char* propname , const wchar_t* c, unsigned int len)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -876,8 +876,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setDefault(
-        const char* typuri, const char* typnam, 
-        const char* propname , const char* c, unsigned int len) 
+        const char* typuri, const char* typnam,
+        const char* propname , const char* c, unsigned int len)
     {
         const TypeImpl* ti = findTypeImpl(typuri,typnam);
         PropertyImpl* pi = ti->getPropertyImpl(propname);
@@ -885,10 +885,10 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
     }
 
     void DataFactoryImpl::setOpposite(
-        const Type& typ, 
-        const char* propnam, 
+        const Type& typ,
+        const char* propnam,
         const Type& opptyp,
-        const char* opppropnam) 
+        const char* opppropnam)
     {
         SDO_THROW_EXCEPTION("setOpposite" ,
         SDOUnsupportedOperationException, " Not implemented");
@@ -910,7 +910,7 @@ const TypeImpl& DataFactoryImpl::getTypeImpl(const char* uri, const char* inType
         SDO_THROW_EXCEPTION("getTypeImpl" ,
         SDOTypeNotFoundException, msg.c_str());
     }
-    
+
     return *type;
 }
 
@@ -977,13 +977,13 @@ void DataFactoryImpl::setAlias(const char* typeuri,
 // setAlias - sets a new alias for this type
 // ===================================================================
 
-void DataFactoryImpl::setAlias(const char* typeuri, 
-                              const char* typenam, 
+void DataFactoryImpl::setAlias(const char* typeuri,
+                              const char* typenam,
                               const char* propname,
                               const char* alias)
 {
     const TypeImpl&  t = getTypeImpl(typeuri, typenam);
-    PropertyImpl* p  = t.getPropertyImpl(propname); 
+    PropertyImpl* p  = t.getPropertyImpl(propname);
     if (p != 0)p->setAlias(alias);
 
 }
@@ -995,7 +995,7 @@ void DataFactoryImpl::setAlias(const char* typeuri,
 TypeList DataFactoryImpl::getTypes() const
 {
     TYPES_MAP::const_iterator typeIter;
-    
+
 
     std::vector<const Type*> typeVector;
 
@@ -1019,11 +1019,11 @@ TypeList DataFactoryImpl::getTypes() const
 
 void DataFactoryImpl::resolve()
 {
-    if (isResolved) return; 
+    if (isResolved) return;
 
     TYPES_MAP::iterator typeIter;
     for (typeIter = types.begin() ; typeIter != types.end();
-    ++typeIter) 
+    ++typeIter)
     {
         (typeIter->second)->initCompoundProperties();
         (typeIter->second)->validateChangeSummary();
@@ -1039,7 +1039,7 @@ void DataFactoryImpl::resolve()
 // ===================================================================
 
 
-RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const char* typeName) 
+RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const char* typeName)
 {
 
     if (!isResolved)
@@ -1082,7 +1082,7 @@ RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const ch
 
 // ===================================================================
 // The openProperties map is a list of the curently present open
-// properties as used by this factory. It will cause the 
+// properties as used by this factory. It will cause the
 // open properties to be written out as attributes and elements
 // of the root data object when a graph is serialized.
 // ===================================================================
@@ -1104,7 +1104,7 @@ RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const ch
 
     void DataFactoryImpl::removeOpenProperty(const char* name)
     {
-        propertyMap::iterator i = 
+        propertyMap::iterator i =
             openProperties.find(name);
         if (i != openProperties.end())
         {
@@ -1119,7 +1119,7 @@ RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const ch
 //  to the type hierarchy are allowed.
 // ===================================================================
 
-RefCountingPointer<DataObject>    DataFactoryImpl::create(const Type& type) 
+RefCountingPointer<DataObject>    DataFactoryImpl::create(const Type& type)
 {
     return create( type.getURI(), type.getName());
 }
@@ -1129,7 +1129,7 @@ RefCountingPointer<DataObject>    DataFactoryImpl::create(const Type& type)
 //  setDASValue - Set a value on a Type
 // ===================================================================
 void DataFactoryImpl::setDASValue(const Type& type,
-                                        const char* name, 
+                                        const char* name,
                                         DASValue* value)
 {
     setDASValue(type.getURI(), type.getName(), name, value);
@@ -1137,8 +1137,8 @@ void DataFactoryImpl::setDASValue(const Type& type,
 
 
 void DataFactoryImpl::setDASValue(const char* typeuri,
-                                        const char* typenam, 
-                                        const char* name, 
+                                        const char* typenam,
+                                        const char* name,
                                         DASValue* value)
 {
     TypeImpl* type = (TypeImpl*)findTypeImpl(typeuri, typenam);
@@ -1168,13 +1168,13 @@ DASValue* DataFactoryImpl::getDASValue(const char* typeuri,
         return type->getDASValue(name);
     }
 
-    return NULL;    
+    return NULL;
 }
 
 // ===================================================================
 //  setDASValue - Set a value on a Property
 // ===================================================================
-void DataFactoryImpl::setDASValue( 
+void DataFactoryImpl::setDASValue(
                 const Type& type,
                 const char* propertyName,
                 const char* name,
@@ -1184,7 +1184,7 @@ void DataFactoryImpl::setDASValue(
 }
 
 
-void DataFactoryImpl::setDASValue( 
+void DataFactoryImpl::setDASValue(
                 const char* typeuri,
                 const char* typenam,
                 const char* propertyName,
@@ -1202,7 +1202,7 @@ void DataFactoryImpl::setDASValue(
 // ===================================================================
 //  getDASValue - retrieve a value from a Property
 // ===================================================================
-DASValue* DataFactoryImpl::getDASValue( 
+DASValue* DataFactoryImpl::getDASValue(
                 const Type& type,
                 const char* propertyName,
                 const char* name) const
@@ -1213,7 +1213,7 @@ DASValue* DataFactoryImpl::getDASValue(
 DASValue* DataFactoryImpl::getDASValue(
                 const char* typeuri,
                 const char* typenam,
-                const char* propertyName, 
+                const char* propertyName,
                 const char* name) const
 {
     const TypeImpl* type = findTypeImpl(typeuri, typenam);
@@ -1230,7 +1230,7 @@ DASValue* DataFactoryImpl::getDASValue(
         }
     }
 
-    return NULL;    
+    return NULL;
 }
 
 
@@ -1251,33 +1251,420 @@ bool DataFactoryImpl::compareTypes(const TypeImpl* t1, const Type& t2)
     return true;
 
 }
-bool DataFactoryImpl::isCompatible(DataFactory* df)
+
+
+bool DataFactoryImpl::checkType(const Type& t)
 {
-    //for (int i=0;i<compatibleFactories.size();i++)
-    //{
-    //   if (compatibleFactories[i] == df)return true;
-    //}
-    
-    TypeList tl = df->getTypes();
-    for (int j=0;j<tl.size();j++)
+    const TypeImpl* t2 = findTypeImpl(t.getURI(),
+                                     t.getName());
+
+    if (t2 == 0) return false;
+
+    if (!compareTypes(t2,t)) return false;
+
+    PropertyList pl = t.getProperties();
+    for (int i=0;i<pl.size();i++)
     {
-        const TypeImpl* t = findTypeImpl(tl[j].getURI(),
-                                        tl[j].getName());
- 
-        if (t == 0) return false;
-        if (!compareTypes(t,tl[j]))return false;
+        if (pl[i].getType().isDataObjectType())
+        {
+            if (!checkType(pl[i].getType())) return false;
+        }
     }
-    // the factories are compatible for a copy in this
-    // direction.
-    // This is commented out for now - it would give a 
-    // big improvement if the same two factories are used
-    //for many copies, but we would have to overcome the problem
-    // that factory pointers are just pointers, so a factory might have
-    // been deallocated and re-allocated at the same address with different
-    // contents....
-    //compatibleFactories.push_back(df);
     return true;
 }
+
+
+// only checks the tree dirctly descended from this object if the
+// object is specified, otherwise validates the whole factory
+
+bool DataFactoryImpl::isCompatible(DataFactory* df, DataObject* d)
+{
+    if (d == 0)
+    {
+        TypeList tl = df->getTypes();
+        for (int j=0;j<tl.size();j++)
+        {
+            const TypeImpl* t = findTypeImpl(tl[j].getURI(),
+                                        tl[j].getName());
+
+            if (t == 0) return false;
+            if (!compareTypes(t,tl[j]))return false;
+        }
+        return true;
+    }
+    else
+    {
+        return checkType(d->getType());
+    }
+}
+
+bool DataFactoryImpl::generateInterface(const char* fileroot)
+{
+
+    FILE* header;
+    FILE* body;
+
+    if ((fileroot == 0) || (strlen(fileroot) == 0)) return false;
+
+    char *headername = new char[strlen(fileroot) + 5];
+    char *bodyname   = new char[strlen(fileroot) + 5];
+    strcpy(headername,fileroot);
+    strcpy(bodyname,fileroot);
+    strcat(headername,".h");
+    strcat(bodyname,".cpp");
+
+    // here we should check the files - and if they are present with
+    // contents we should read them, and merge the new generated code
+    // I think the way to do that is to allow sections in between comment
+    // pairs in three locations:
+    // a) outside any method in the CPP file.
+    // b) in the header file anywhere.
+    // c) inside method definitions in cpp, either before, or after the
+    // entire generated contents.
+    //
+    //
+
+    header = fopen(headername,"w+");
+    if (header == 0) return false;
+
+    body = fopen(bodyname,"w+");
+    if (body == 0) return false;
+
+
+    fprintf(header,"/*******************************************\n");
+    fprintf(header," * Generated Typesafe Interface Header     *\n");
+    fprintf(header," *******************************************/\n");
+    fprintf(header,"#include \"commonj/sdo/DataObject.h\"\n");
+    fprintf(header,"#include \"commonj/sdo/SDODate.h\"\n");
+    fprintf(header,"using namespace commonj::sdo;\n");
+
+    fprintf(body,"/*******************************************\n");
+    fprintf(body," * Generated Typesafe Interface Body       *\n");
+    fprintf(body," *******************************************/\n");
+    fprintf(body,"#include \"%s\"\n",headername);
+    fprintf(body,"using namespace commonj::sdo;\n");
+
+    delete headername;
+    delete bodyname;
+
+    try {
+
+    int nscount;
+
+    TypeList& tl = getTypes();
+
+    // forward declarations and smart pointers
+    for (int i=0;i<tl.size();i++)
+    {
+        nscount = 0;
+
+        if (!strcmp(tl[i].getURI(),"commonj.sdo")) continue;
+
+        const char *uri = tl[i].getURI();
+        char *c = strchr(uri,'.');
+
+        if (c == 0)
+        {
+            fprintf(header,"namespace %s{\n",uri);
+            nscount = 1;
+        }
+        else
+        {
+            char* buf = new char[strlen(uri) + 1];
+            strcpy(buf, uri);
+            c = buf;
+            char* c1;
+            do {
+                c1 = strchr(c,'.');
+                if (c1) *c1 = 0;
+                fprintf(header,"namespace %s{\n", c);
+                nscount++;
+                if (c1) c = c1+1;
+             } while (c1 != 0);
+             delete buf;
+        }
+
+
+        fprintf(header,"class %s;\n",tl[i].getName());
+        fprintf(header,"typedef RefCountingPointer<%s> %sPtr;\n",
+            tl[i].getName(), tl[i].getName());
+
+        for (int i=0;i<nscount;i++)
+        {
+            fprintf(header,"}\n");
+        }
+    }
+
+
+    for (i=0;i<tl.size();i++)
+    {
+        nscount = 0;
+
+        if (!strcmp(tl[i].getURI(),"commonj.sdo")) continue;
+        const char *uri = tl[i].getURI();
+        char *c = strchr(uri,'.');
+
+        if (c == 0)
+        {
+            fprintf(header,"namespace %s{\n",uri);
+            fprintf(body,  "namespace %s{\n",uri);
+            nscount = 1;
+        }
+        else
+        {
+            char* buf = new char[strlen(uri) + 1];
+            strcpy(buf, uri);
+            c = buf;
+            char* c1;
+            do {
+                c1 = strchr(c,'.');
+                if (c1) *c1 = 0;
+                fprintf(header,"namespace %s{\n", c);
+                fprintf(body,  "namespace %s{\n", c);
+                nscount++;
+                if (c1) c = c1+1;
+             } while (c1 != 0);
+             delete buf;
+        }
+
+
+
+        fprintf(header,"class %s :public DataObject {\n", tl[i].getName());
+        fprintf(header,"public:\n");
+
+        PropertyList& pl = tl[i].getProperties();
+        for (int j=0;j<pl.size();j++)
+        {
+            if (pl[j].isMany())
+            {
+
+                fprintf(header,"DataObjectList& get%s();\n",pl[j].getName());
+                fprintf(body,  "DataObjectList& %s::get%s\n{\n",
+                                        tl[i].getName(),pl[j].getName());
+                fprintf(body,  "return getList(\"%s\");\n",pl[j].getName());
+                fprintf(body,  "}\n\n");
+
+
+            }
+            else
+            {
+                if (pl[j].getType().isDataType())
+                {
+                    switch (pl[j].getTypeEnum())
+                    {
+                    case Type::BooleanType:
+
+                        fprintf(header,"bool get%s();\n",pl[j].getName());
+                        fprintf(body,  "bool %s::get%s\n(){\n",
+                            tl[i].getName(), pl[j].getName());
+                        fprintf(body,  "return getBoolean(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(bool b);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(bool b)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setBoolean(\"%s\",b);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::ByteType:
+
+                        fprintf(header,"char get%s();\n",pl[j].getName());
+                        fprintf(body,  "char %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getByte(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(char c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(char c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setByte(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::BytesType:
+
+                        fprintf(header,"unsigned int get%s(char *buf, unsigned int len);\n",pl[j].getName());
+                        fprintf(body,  "unsigned int %s::get%s(char *buf, unsigned int len)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getBytes(\"%s\", buf,len);\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(char *buf,unsigned int len);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(char *buf, unsigned int len)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setBytes(\"%s\", buf,len);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::CharacterType:
+
+                        fprintf(header,"wchar_t get%s();\n",pl[j].getName());
+                        fprintf(body,  "wchar_t %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getCharacter(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(wchar_t c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(wchar_t c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setCharacter(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::DateType:
+
+                        fprintf(header,"SDODate get%s();\n",pl[j].getName());
+                        fprintf(body,  "SDODate %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getDate(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(const SDODate c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(const SDODate c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setDate(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::DoubleType:
+
+                        fprintf(header,"long double get%s();\n",pl[j].getName());
+                        fprintf(body,  "long double %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getDouble(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(long double c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(long double c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setDouble(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::FloatType:
+
+                        fprintf(header,"float get%s();\n",pl[j].getName());
+                        fprintf(body,  "float %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getFloat(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(float c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(float c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setFloat(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::IntegerType:
+
+                        fprintf(header,"long get%s();\n",pl[j].getName());
+                        fprintf(body,  "long %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getInteger(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(long c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(long c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setInteger(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::LongType:
+
+                        fprintf(header,"int64_t get%s();\n",pl[j].getName());
+                        fprintf(body,  "int64_t %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getLong(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(int64_t c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(int64_t c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setLong(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::ShortType:
+
+                        fprintf(header,"short get%s();\n",pl[j].getName());
+                        fprintf(body,  "short %s::get%s\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getShort(\"%s\");\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(short c);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(short c)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setShort(\"%s\",c);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    case Type::StringType:
+                    case Type::UriType:
+
+                        fprintf(header,"unsigned int get%s(wchar_t *buf, unsigned int len);\n",pl[j].getName());
+                        fprintf(body,  "unsigned int %s::get%s(wchar_t *buf, unsigned int len)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "return getString(\"%s\", buf,len);\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+                        fprintf(header,"void set%s(wchar_t *buf,unsigned int len);\n",pl[j].getName());
+                        fprintf(body,  "void %s::set%s(wchar_t *buf, unsigned int len)\n{\n",tl[i].getName(),
+                            pl[j].getName());
+                        fprintf(body,  "setString(\"%s\", buf,len);\nreturn;\n",pl[j].getName());
+                        fprintf(body,  "}\n\n");
+
+                    break;
+
+                    default:
+                       fprintf(header,"// unknown primitive:%s\n",pl[j].getName());
+                    break;
+                    }
+                }
+                else
+                {
+                    fprintf(header,"%sPtr get%s();\n",pl[j].getType().getName(),
+                                                    pl[j].getName());
+
+                    fprintf(body,  "%sPtr %s::get%s()\n{\n",
+                                                        pl[j].getType().getName(),
+                                                        tl[i].getName(),
+                                                        pl[j].getName());
+                    fprintf(body,  "DataObjectPtr dob = getDataObject(\"%s\");\n",pl[j].getName());
+                    fprintf(body, "DataObject* d = (DataObject*)dob;\n");
+                    fprintf(body,  "return (%s*)d;\n", pl[j].getType().getName());
+                    fprintf(body,  "}\n\n");
+                    fprintf(header,"void set%s(%sPtr dob);\n",pl[j].getName(), pl[j].getType().getName());
+                    fprintf(body,  "void %s::set%s(%sPtr dob)\n{\n",
+                                tl[i].getName(),pl[j].getName(),pl[j].getType().getName());
+                    fprintf(body,  "%s* ptr = dob;\nsetDataObject(\"%s\", (DataObjectPtr)ptr);\nreturn;\n",
+                        pl[j].getType().getName(),pl[j].getName());
+                    fprintf(body,  "}\n\n");
+
+                }
+            }
+
+        } // for
+        fprintf(header,"};\n");
+        for (int i=0;i<nscount;i++)
+        {
+            fprintf(header,"}\n");
+            fprintf(body,"}\n");
+        }
+    }
+    fclose (header);
+    fclose (body);
+    }
+    catch (SDORuntimeException e)
+    {
+        cout << "Exception in code Generation" << endl;
+        cout << e << endl;
+    }
+    return true;
+}
+
 
 };
 };
