@@ -1351,10 +1351,11 @@ bool DataFactoryImpl::generateInterface(const char* fileroot)
 
     int nscount;
 
-    TypeList& tl = getTypes();
+    TypeList tl = getTypes();
 
     // forward declarations and smart pointers
-    for (int i=0;i<tl.size();i++)
+    int i;
+    for (i=0;i<tl.size();i++)
     {
         nscount = 0;
 
@@ -1432,7 +1433,7 @@ bool DataFactoryImpl::generateInterface(const char* fileroot)
         fprintf(header,"class %s :public DataObject {\n", tl[i].getName());
         fprintf(header,"public:\n");
 
-        PropertyList& pl = tl[i].getProperties();
+        PropertyList pl = tl[i].getProperties();
         for (int j=0;j<pl.size();j++)
         {
             if (pl[j].isMany())
