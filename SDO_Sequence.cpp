@@ -1,22 +1,22 @@
-/* 
+/*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  | 
+| (c) Copyright IBM Corporation 2005, 2006                             |
 | All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+ 
-|                                                                      | 
-| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
-| may not use this file except in compliance with the License. You may | 
-| obtain a copy of the License at                                      | 
++----------------------------------------------------------------------+
+|                                                                      |
+| Licensed under the Apache License, Version 2.0 (the "License"); you  |
+| may not use this file except in compliance with the License. You may |
+| obtain a copy of the License at                                      |
 | http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      | 
-| Unless required by applicable law or agreed to in writing, software  | 
-| distributed under the License is distributed on an "AS IS" BASIS,    | 
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
-| implied. See the License for the specific language governing         | 
-| permissions and limitations under the License.                       | 
-+----------------------------------------------------------------------+ 
-| Author: Caroline Maynard                                             | 
-+----------------------------------------------------------------------+ 
+|                                                                      |
+| Unless required by applicable law or agreed to in writing, software  |
+| distributed under the License is distributed on an "AS IS" BASIS,    |
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+| implied. See the License for the specific language governing         |
+| permissions and limitations under the License.                       |
++----------------------------------------------------------------------+
+| Author: Caroline Maynard                                             |
++----------------------------------------------------------------------+
 
 */
 static char rcs_id[] = "$Id$";
@@ -58,7 +58,7 @@ static zend_object_iterator_funcs sdo_sequence_iterator_funcs;
 
 /* {{{ sdo_sequence_get_instance
  */
-static sdo_seq_object *sdo_sequence_get_instance(zval *me TSRMLS_DC) 
+static sdo_seq_object *sdo_sequence_get_instance(zval *me TSRMLS_DC)
 {
 	return (sdo_seq_object *)zend_object_store_get_object(me TSRMLS_CC);
 }
@@ -70,16 +70,16 @@ static int sdo_sequence_valid(sdo_seq_object *my_object, long sequence_index, in
 {
 	int	return_value = 0;
 	char *class_name, *space;
-		
+
 	try {
 		Sequence& seq = *my_object->seqp;
 		return_value = (sequence_index >= 0 && sequence_index < seq.size());
-		
+
 		if (return_value && check_empty) {
 			switch(seq.getTypeEnum(sequence_index)) {
 			case Type::OtherTypes:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				return_value = 0;
 				break;
@@ -109,19 +109,19 @@ static int sdo_sequence_valid(sdo_seq_object *my_object, long sequence_index, in
 			case Type::UriType:
 				/* TODO is this the buffer length or the string length ??? */
 				return_value = (seq.getLength(sequence_index) > 0);
-				break;	
+				break;
 			case Type::DataObjectType:
 				return_value = (!seq.getDataObjectValue(sequence_index));
 				break;
 			case Type::ChangeSummaryType:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				return_value = 0;
 				break;
 			default:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i for sequence index %i", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i for sequence index %i",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 					seq.getTypeEnum(sequence_index), sequence_index);
 				return_value = 0;
@@ -130,7 +130,7 @@ static int sdo_sequence_valid(sdo_seq_object *my_object, long sequence_index, in
 	} catch (SDORuntimeException e) {
 		return_value = 0;
 	}
-	
+
 	return return_value;
 }
 /* }}} */
@@ -141,20 +141,21 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 {
 	uint		 bytes_len;
 	char		*bytes_value;
-	char		 char_value; 
+	char		 char_value;
 	wchar_t		 wchar_value;
 	DataObjectPtr doh_value;
 	zval		*return_value;
 	char		*class_name, *space;
 
-	MAKE_STD_ZVAL(return_value);
+	ALLOC_INIT_ZVAL(return_value);
+	return_value->refcount = 0;
 
 	try {
 		Sequence& seq = *my_object->seqp;
 		switch(seq.getTypeEnum(sequence_index)) {
 		case Type::OtherTypes:
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 			break;
 		case Type::BigDecimalType:
@@ -178,7 +179,7 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 			wchar_value = seq.getCharacterValue(sequence_index);
 			if (wchar_value > INT_MAX) {
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_WARNING, "%s%s%s(): wide character data lost for sequence index %i", 
+				php_error(E_WARNING, "%s%s%s(): wide character data lost for sequence index %i",
 					class_name, space, get_active_function_name(TSRMLS_C), sequence_index);
 			}
 			char_value = seq.getByteValue(sequence_index);
@@ -207,12 +208,12 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 		case Type::UriType:
 		case Type::TextType:
 			RETVAL_STRING((char *)seq.getCStringValue(sequence_index), 1);
-			break;		
+			break;
 		case Type::DataObjectType:
 			doh_value = seq.getDataObjectValue(sequence_index);
 			if (!doh_value) {
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_WARNING, "%s%s%s(): read a NULL DataObject for sequence index %i", 
+				php_error(E_WARNING, "%s%s%s(): read a NULL DataObject for sequence index %i",
 					class_name, space, get_active_function_name(TSRMLS_C), sequence_index);
 				RETVAL_NULL();
 			} else {
@@ -221,12 +222,12 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 			break;
 		case Type::ChangeSummaryType:
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 			break;
 		default:
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i for sequence index %i", 
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i for sequence index %i",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 				seq.getTypeEnum(sequence_index), sequence_index);
 		}
@@ -234,7 +235,7 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		RETVAL_NULL();
 	}
-	
+
 	return return_value;
 }
 /* }}} */
@@ -242,33 +243,33 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 /* {{{ sdo_sequence_write_value
  */
 static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, long sequence_index, Type::Types type_enum, zval *z_value, sdo_write_type write_type TSRMLS_DC)
-{	
+{
 	zval temp_zval;
 	char *class_name, *space;
-	
-	try {	
+
+	try {
 		Sequence& seq = *my_object->seqp;
-		
+
 		/* bounds check for OVERWRITE and INSERT */
 		if (write_type != TYPE_APPEND && (sequence_index < 0 || sequence_index >= seq.size())) {
-			zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry, 0 TSRMLS_CC, 
+			zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry, 0 TSRMLS_CC,
 				"index %i out of range [0..%i]", sequence_index, seq.size() - 1);
 			return;
 		}
 
 		/*
 		 * Since we may have to coerce the type, we make a local copy of the zval, so that the
-		 * original is unaffected. 
-		 * 
+		 * original is unaffected.
+		 *
 		 * TODO This could be optimized to only copy if we do actually change the type.
-		 */ 
+		 */
 		temp_zval = *z_value;
-		zval_copy_ctor(&temp_zval);		
+		zval_copy_ctor(&temp_zval);
 
 		switch (type_enum) {
 		case Type::OtherTypes:
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 			break;
 		case Type::BigDecimalType:
@@ -287,7 +288,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.addBoolean(xpath, ZEND_TRUTH(Z_BVAL(temp_zval)));
 			else if (write_type == TYPE_INSERT)
 				seq.addBoolean(sequence_index, xpath, ZEND_TRUTH(Z_BVAL(temp_zval)));
-			else 
+			else
 				seq.setBooleanValue(sequence_index, ZEND_TRUTH(Z_BVAL(temp_zval)));
 			break;
 		case Type::ByteType:
@@ -308,7 +309,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 			else
 				seq.setBytesValue(sequence_index, Z_STRVAL(temp_zval), Z_STRLEN(temp_zval));
 			break;
-		case Type::CharacterType: 
+		case Type::CharacterType:
 			convert_to_string(&temp_zval);
 			if (write_type == TYPE_APPEND)
 				seq.addCharacter(xpath, (char)Z_STRVAL(temp_zval)[0]);
@@ -323,7 +324,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.addDate(xpath, (SDODate)Z_LVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
 				seq.addDate(sequence_index, xpath, (SDODate)Z_LVAL(temp_zval));
-			else 
+			else
 				seq.setDateValue(sequence_index, (SDODate)Z_LVAL(temp_zval));
 			break;
 		case Type::DoubleType:
@@ -332,7 +333,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.addDouble(xpath, (long double)Z_DVAL(temp_zval));
 			else  if (write_type == TYPE_INSERT)
 				seq.addDouble(sequence_index, xpath, (long double)Z_DVAL(temp_zval));
-			else 
+			else
 				seq.setDoubleValue(sequence_index, (long double)Z_DVAL(temp_zval));
 			break;
 		case Type::FloatType:
@@ -341,7 +342,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.addFloat(xpath, (float)Z_DVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
 				seq.addFloat(sequence_index, xpath, (float)Z_DVAL(temp_zval));
-			else 
+			else
 				seq.setFloatValue(sequence_index, (float)Z_DVAL(temp_zval));
 			break;
 		case Type::IntegerType:
@@ -350,7 +351,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.addInteger(xpath, (int)Z_LVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
 				seq.addInteger(sequence_index, xpath, (int)Z_LVAL(temp_zval));
-			else 
+			else
 				seq.setIntegerValue(sequence_index, (int)Z_LVAL(temp_zval));
 			break;
 		case Type::LongType:
@@ -359,15 +360,15 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 					seq.addLong(xpath, Z_LVAL(temp_zval));
 				else if (write_type == TYPE_INSERT)
 					seq.addLong(sequence_index, xpath, Z_LVAL(temp_zval));
-				else 
+				else
 					seq.setLongValue(sequence_index, Z_LVAL(temp_zval));
-			} else {					
+			} else {
 				convert_to_string(&temp_zval);
 				if (write_type == TYPE_APPEND)
 					seq.addCString(xpath, Z_STRVAL(temp_zval));
 				else if (write_type == TYPE_INSERT)
 					seq.addCString(sequence_index, xpath, Z_STRVAL(temp_zval));
-				else 
+				else
 					seq.setCStringValue(sequence_index, Z_STRVAL(temp_zval));
 			}
 			break;
@@ -377,7 +378,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.addShort(xpath, (short)Z_LVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
 				seq.addShort(sequence_index, xpath, (short)Z_LVAL(temp_zval));
-			else 
+			else
 				seq.setShortValue(sequence_index, (short)Z_LVAL(temp_zval));
 			break;
 		case Type::StringType:
@@ -387,14 +388,14 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.addCString(xpath, Z_STRVAL(temp_zval));
 			else if (write_type == TYPE_INSERT)
 				seq.addCString(sequence_index, xpath, Z_STRVAL(temp_zval));
-			else 
+			else
 				seq.setCStringValue(sequence_index, Z_STRVAL(temp_zval));
 			break;
 		case Type::DataObjectType:
 			convert_to_object(&temp_zval);
 			if (!instanceof_function(Z_OBJCE(temp_zval), sdo_dataobjectimpl_class_entry TSRMLS_CC)) {
 				zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC,
-					"Class %s is not an instance of %s", 
+					"Class %s is not an instance of %s",
 					Z_OBJCE(temp_zval)->name, sdo_dataobjectimpl_class_entry->name);
 			} else {
 				DataObjectPtr dop = sdo_do_get(&temp_zval TSRMLS_CC);
@@ -410,7 +411,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 			break;
 		case Type::ChangeSummaryType:
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 			break;
 		case Type::TextType:
@@ -425,7 +426,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 			break;
 		default:
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i", 
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, type_enum);
 		}
 		zval_dtor(&temp_zval);
@@ -443,18 +444,18 @@ static int sdo_sequence_has_dimension(zval *object, zval *offset, int check_empt
 	long			  sequence_index;
 	int				  return_value = 0;
 	sdo_seq_object *my_object;
-		
+
 	convert_to_long_ex(&offset);
 	sequence_index = Z_LVAL_P(offset);
-	
+
 	my_object = sdo_sequence_get_instance(object TSRMLS_CC);
-	
+
 	try {
 		return_value = sdo_sequence_valid(my_object, sequence_index, check_empty TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 	return return_value;
 }
 /* }}} */
@@ -466,47 +467,47 @@ static zval *sdo_sequence_read_dimension(zval *object, zval *offset, int type TS
 	sdo_seq_object	*my_object;
 	long			 sequence_index;
 	zval			*return_value;
-	
+
 	convert_to_long_ex(&offset);
 	sequence_index = Z_LVAL_P(offset);
-	
+
 	my_object = (sdo_seq_object *)zend_object_store_get_object(object TSRMLS_CC);
-	
+
 	try {
 		return_value = sdo_sequence_read_value(my_object, sequence_index TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 	return return_value;
 }
 /* }}} */
 
 /* {{{ sdo_sequence_write_dimension
  */
-static void sdo_sequence_write_dimension(zval *object, zval *offset, zval *z_value TSRMLS_DC) 
-{		
+static void sdo_sequence_write_dimension(zval *object, zval *offset, zval *z_value TSRMLS_DC)
+{
 	long			 sequence_index = -1;
 	sdo_seq_object	*my_object;
 	sdo_write_type	 write_type;
 	Type::Types		 type_enum;
 	const char		*xpath = NULL;
-		
+
 	if (Z_TYPE_P(z_value) == IS_NULL) {
 		/* TODO: fix this when the C++ lib supports a NULL property  */
-		zend_throw_exception(sdo_invalidconversionexception_class_entry, 
+		zend_throw_exception(sdo_invalidconversionexception_class_entry,
 			"can't assign NULL to SDO_Sequence value", 0 TSRMLS_CC);
 		return;
 	}
 
 	my_object = sdo_sequence_get_instance(object TSRMLS_CC);
 
-	try {		
+	try {
 		if (offset == 0 || Z_TYPE_P(offset) == IS_NULL) {
 			write_type = TYPE_APPEND;
 			type_enum = Type::TextType;
 		} else {
-			write_type = TYPE_OVERWRITE;		
+			write_type = TYPE_OVERWRITE;
 			convert_to_long_ex(&offset);
 			sequence_index = Z_LVAL_P(offset);
 			type_enum = my_object->seqp->getTypeEnum(sequence_index);
@@ -519,34 +520,34 @@ static void sdo_sequence_write_dimension(zval *object, zval *offset, zval *z_val
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 }
 /* }}} */
 
 /* {{{ sdo_sequence_unset_dimension
  */
-static void sdo_sequence_unset_dimension(zval *object, zval *offset TSRMLS_DC) 
+static void sdo_sequence_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 {
 	long				 sequence_index;
 	sdo_seq_object	*my_object;
-		
+
 	convert_to_long_ex(&offset);
 	sequence_index = Z_LVAL_P(offset);
-	
+
 	my_object = sdo_sequence_get_instance(object TSRMLS_CC);
-	
-	try {	
+
+	try {
 		if (sequence_index < 0 || sequence_index >= my_object->seqp->size()) {
-			zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry, 0 TSRMLS_CC, 
+			zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry, 0 TSRMLS_CC,
 				"index %i out of range [0..%i]", sequence_index, my_object->seqp->size() - 1);
-		} else {		
+		} else {
 			my_object->seqp->remove(sequence_index);
 		}
-		
+
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 }
 /* }}} */
 
@@ -557,49 +558,48 @@ static void sdo_sequence_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 static HashTable *sdo_sequence_get_properties(zval *object TSRMLS_DC)
 {
 	sdo_seq_object	*my_object;
-	HashTable		*properties;
 	int				 entries;
 	zval			*tmp;
-	zval			 z_holder;
 
 	my_object = sdo_sequence_get_instance(object TSRMLS_CC);
-
-	array_init(&z_holder);
+	zend_hash_clean(my_object->zo.properties);
 
 	try {
 		entries = my_object->seqp->size();
 
 		for (long index = 0; index < entries; index++) {
 			tmp = sdo_sequence_read_value(my_object, index TSRMLS_CC);
-			add_next_index_zval(&z_holder, tmp);
+			zval_add_ref(&tmp);
+			zend_hash_next_index_insert(my_object->zo.properties,
+				&tmp, sizeof(zval *), NULL);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	properties = Z_ARRVAL(z_holder);
-	return properties;
+
+	return my_object->zo.properties;
 }
 /* }}} */
 
 /* {{{ sdo_sequence_cast_object
-*/ 
-static int sdo_sequence_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+*/
+static int sdo_sequence_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 	sdo_seq_object	*my_object;
 	ostringstream	 print_buf;
 	zval			 free_obj;
 	int				 rc = SUCCESS;
-	
+
 	if (should_free) {
 		free_obj = *writeobj;
 	}
-	
+
 	my_object = sdo_sequence_get_instance(readobj TSRMLS_CC);
 	Sequence& seq = *my_object->seqp;
-	try {			
+	try {
 		print_buf << "object(" << CLASS_NAME << ")#" <<
 			readobj->value.obj.handle << " (" << seq.size() << ") {";
-		
+
 		for (unsigned int i = 0; i < seq.size(); i++) {
 			if (i > 0) print_buf << "; ";
 			if (seq.isText(i)) {
@@ -612,21 +612,21 @@ static int sdo_sequence_cast_object(zval *readobj, zval *writeobj, int type, int
 				}
 				if (property.getType().isDataType()) {
 					print_buf << "=>\"" << seq.getCStringValue(i) << '\"';
-				} 
+				}
 			}
 		}
-		
+
 		print_buf << '}';
-		
+
 		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
-		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
-		
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);
+
 	} catch (SDORuntimeException e) {
 		ZVAL_NULL(writeobj);
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		rc = FAILURE;
 	}
-	
+
 	switch(type) {
 	case IS_STRING:
 		convert_to_string(writeobj);
@@ -643,7 +643,7 @@ static int sdo_sequence_cast_object(zval *readobj, zval *writeobj, int type, int
 	default:
 		rc = FAILURE;
 	}
-	
+
 	if (should_free) {
 		zval_dtor(&free_obj);
 	}
@@ -679,24 +679,24 @@ static void sdo_sequence_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 static int sdo_sequence_iterator_valid (zend_object_iterator *iter TSRMLS_DC)
 {
 	int valid;
-	
+
 	sdo_seq_iterator *iterator = (sdo_seq_iterator *)iter;
 	zval *z_seq_object = (zval *)iterator->zoi.data;
 	sdo_seq_object *my_object = (sdo_seq_object *)sdo_sequence_get_instance(z_seq_object TSRMLS_CC);
-	
+
 	try {
 		valid = (iterator->index >= 0 && iterator->index < my_object->seqp->size()) ? SUCCESS : FAILURE;
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 	return valid;
 }
 /* }}} */
 
 /* {{{ sdo_sequence_iterator_current_key
  */
-static int sdo_sequence_iterator_current_key (zend_object_iterator *iter, 
+static int sdo_sequence_iterator_current_key (zend_object_iterator *iter,
 		char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	sdo_seq_iterator *iterator = (sdo_seq_iterator *)iter;
@@ -709,17 +709,17 @@ static int sdo_sequence_iterator_current_key (zend_object_iterator *iter,
 /* {{{ sdo_sequence_iterator_current_data
  */
 static void sdo_sequence_iterator_current_data (zend_object_iterator *iter, zval ***data TSRMLS_DC)
-{	
+{
 	sdo_seq_iterator *iterator = (sdo_seq_iterator *)iter;
 	zval *z_seq_object = (zval *)iterator->zoi.data;
-	sdo_seq_object *my_object = (sdo_seq_object *)sdo_sequence_get_instance(z_seq_object TSRMLS_CC);	
-	
+	sdo_seq_object *my_object = (sdo_seq_object *)sdo_sequence_get_instance(z_seq_object TSRMLS_CC);
+
 	try {
 		iterator->value = sdo_sequence_read_value(my_object, iterator->index TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 	*data = &iterator->value;
 }
 /* }}} */
@@ -754,7 +754,7 @@ static int sdo_sequence_count_elements (zval *me, long *count TSRMLS_DC)
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -799,14 +799,14 @@ static zend_object_value sdo_sequence_object_create(zend_class_entry *ce TSRMLS_
 /* {{{ sdo_sequence_new
  */
 void sdo_sequence_new(zval *me, SequencePtr seqp TSRMLS_DC)
-{	
+{
 	sdo_seq_object *my_object;
 	char *class_name, *space;
 
-	Z_TYPE_P(me) = IS_OBJECT;	
+	Z_TYPE_P(me) = IS_OBJECT;
 	if (object_init_ex(me, sdo_sequenceimpl_class_entry) == FAILURE) {
 		class_name = get_active_class_name(&space TSRMLS_CC);
-		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object", 
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		ZVAL_NULL(me);
 		return;
@@ -822,7 +822,7 @@ void sdo_sequence_new(zval *me, SequencePtr seqp TSRMLS_DC)
 void sdo_sequence_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 {
 	tmp_ce->create_object = sdo_sequence_object_create;
-	
+
 	sdo_sequenceimpl_class_entry = zend_register_internal_class(tmp_ce TSRMLS_CC);
 	sdo_sequenceimpl_class_entry->get_iterator = sdo_sequence_get_iterator;
 	zend_class_implements(sdo_sequenceimpl_class_entry TSRMLS_CC, 1, sdo_sequence_class_entry);
@@ -835,7 +835,7 @@ void sdo_sequence_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_sequence_object_handlers.unset_dimension = sdo_sequence_unset_dimension;
 	sdo_sequence_object_handlers.get_properties = sdo_sequence_get_properties;
 	/*TODO There's a signature change for cast_object in PHP6. */
-#if (PHP_MAJOR_VERSION < 6) 
+#if (PHP_MAJOR_VERSION < 6)
 	sdo_sequence_object_handlers.cast_object = sdo_sequence_cast_object;
 #endif
 	sdo_sequence_object_handlers.count_elements = sdo_sequence_count_elements;
@@ -852,7 +852,7 @@ void sdo_sequence_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 
 /* {{{ SDO_SequenceImpl::getProperty
  */
-PHP_METHOD(SDO_SequenceImpl, getProperty) 
+PHP_METHOD(SDO_SequenceImpl, getProperty)
 {
 	sdo_seq_object *my_object;
 	long			sequence_index;
@@ -866,8 +866,8 @@ PHP_METHOD(SDO_SequenceImpl, getProperty)
 		if (my_object->seqp->isText(sequence_index)) {
 			RETVAL_NULL();
 		} else {
-			property_p = &my_object->seqp->getProperty(sequence_index);	
-			sdo_model_property_new(return_value, property_p TSRMLS_CC);	
+			property_p = &my_object->seqp->getProperty(sequence_index);
+			sdo_model_property_new(return_value, property_p TSRMLS_CC);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
@@ -877,7 +877,7 @@ PHP_METHOD(SDO_SequenceImpl, getProperty)
 
 /* {{{ SDO_SequenceImpl::move
  */
-PHP_METHOD(SDO_SequenceImpl, move) 
+PHP_METHOD(SDO_SequenceImpl, move)
 {
 	sdo_seq_object *my_object;
 	long			toIndex, fromIndex;
@@ -896,7 +896,7 @@ PHP_METHOD(SDO_SequenceImpl, move)
 
 /* {{{ SDO_SequenceImpl::insert
  */
-PHP_METHOD(SDO_SequenceImpl, insert) 
+PHP_METHOD(SDO_SequenceImpl, insert)
 {
 	sdo_seq_object *my_object;
 	zval			*z_value;
@@ -907,9 +907,9 @@ PHP_METHOD(SDO_SequenceImpl, insert)
 	sdo_write_type	 write_type;
 	Type::Types		 type_enum;
 	const char		*xpath;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|zz", 
-		&z_value, &z_sequence_index, &z_property) == FAILURE) 
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|zz",
+		&z_value, &z_sequence_index, &z_property) == FAILURE)
 		return;
 
 	if (z_sequence_index && Z_TYPE_P(z_sequence_index) != IS_NULL) {
@@ -920,7 +920,7 @@ PHP_METHOD(SDO_SequenceImpl, insert)
 		write_type = TYPE_APPEND;
 		sequence_index = -1;
 	}
-	
+
 	my_object = sdo_sequence_get_instance(getThis() TSRMLS_CC);
 
 	try {
@@ -929,10 +929,10 @@ PHP_METHOD(SDO_SequenceImpl, insert)
 			type_enum = Type::TextType;
 			xpath = NULL;
 		} else {
-			if (sdo_parse_offset_param (my_object->seqp->getDataObject(), 
+			if (sdo_parse_offset_param (my_object->seqp->getDataObject(),
 				z_property, &property_p, &xpath, 0, 0 TSRMLS_CC) == FAILURE)
 				return;
-			
+
 			if (property_p == NULL) {
 				/* open type, so we'll derive the sdo type from the php type */
 				type_enum = sdo_map_zval_type(z_value);
@@ -941,9 +941,9 @@ PHP_METHOD(SDO_SequenceImpl, insert)
 				type_enum = property_p->getTypeEnum();
 			}
 		}
-		
+
 		sdo_sequence_write_value(my_object, (char *)xpath, sequence_index, type_enum, z_value, write_type TSRMLS_CC);
-		
+
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
@@ -952,10 +952,10 @@ PHP_METHOD(SDO_SequenceImpl, insert)
 
 /* {{{ SDO_SequenceImpl::count
  */
-PHP_METHOD(SDO_SequenceImpl, count) 
+PHP_METHOD(SDO_SequenceImpl, count)
 {
 	long count = 0;
-	
+
 	sdo_sequence_count_elements(getThis(), &count TSRMLS_CC);
 	RETVAL_LONG(count);
 }

@@ -1,22 +1,22 @@
-/* 
+/*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  | 
+| (c) Copyright IBM Corporation 2005, 2006.                                  |
 | All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+ 
-|                                                                      | 
-| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
-| may not use this file except in compliance with the License. You may | 
-| obtain a copy of the License at                                      | 
++----------------------------------------------------------------------+
+|                                                                      |
+| Licensed under the Apache License, Version 2.0 (the "License"); you  |
+| may not use this file except in compliance with the License. You may |
+| obtain a copy of the License at                                      |
 | http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      | 
-| Unless required by applicable law or agreed to in writing, software  | 
-| distributed under the License is distributed on an "AS IS" BASIS,    | 
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
-| implied. See the License for the specific language governing         | 
-| permissions and limitations under the License.                       | 
-+----------------------------------------------------------------------+ 
-| Author: Caroline Maynard                                             | 
-+----------------------------------------------------------------------+ 
+|                                                                      |
+| Unless required by applicable law or agreed to in writing, software  |
+| distributed under the License is distributed on an "AS IS" BASIS,    |
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+| implied. See the License for the specific language governing         |
+| permissions and limitations under the License.                       |
++----------------------------------------------------------------------+
+| Author: Caroline Maynard                                             |
++----------------------------------------------------------------------+
 
 */
 static char rcs_id[] = "$Id$";
@@ -63,7 +63,7 @@ static zend_object_iterator_funcs sdo_do_iterator_funcs;
 
 /* {{{ sdo_do_get_instance
  */
-static sdo_do_object *sdo_do_get_instance(zval *me TSRMLS_DC) 
+static sdo_do_object *sdo_do_get_instance(zval *me TSRMLS_DC)
 {
 	return (sdo_do_object *)zend_object_store_get_object(me TSRMLS_CC);
 }
@@ -124,7 +124,7 @@ static zend_object_value sdo_do_object_create(zend_class_entry *ce TSRMLS_DC)
  * utility function to get C++ DataObject from zval
  */
 DataObjectPtr sdo_do_get(zval *me TSRMLS_DC)
-{	
+{
 	sdo_do_object *my_object;
 
 	my_object = (sdo_do_object *)zend_object_store_get_object(me TSRMLS_CC);
@@ -140,34 +140,34 @@ DataObjectPtr sdo_do_get(zval *me TSRMLS_DC)
  * The DataObject has no public constructor, this is in effect its factory method.
  */
 void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC)
-{	
+{
 	sdo_do_object *my_object;
 	char *class_name, *space;
-	
+
 	int object_handle = (int)dop->getUserData();
-	
+
 	Z_TYPE_P(me) = IS_OBJECT;
 	/* If the object is already known to php, its user data will contain
 	 * the value of the object handle.
 	 */
-	if (object_handle == SDO_USER_DATA_EMPTY) {	
+	if (object_handle == SDO_USER_DATA_EMPTY) {
 		if (object_init_ex(me, sdo_dataobjectimpl_class_entry) == FAILURE) {
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object", 
+			php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 			return;
 		}
-		
+
 		my_object = (sdo_do_object *)zend_object_store_get_object(me TSRMLS_CC);
 		my_object->dop = dop;
 		/* add a back pointer to the C++ object */
 		try {
 			dop->setUserData ((void *)me->value.obj.handle);
 		} catch (SDORuntimeException e) {
-			sdo_throw_runtimeexception(&e TSRMLS_CC);	
+			sdo_throw_runtimeexception(&e TSRMLS_CC);
 		}
 	} else {
-		me->value.obj.handle = object_handle; 
+		me->value.obj.handle = object_handle;
 		me->value.obj.handlers = &sdo_do_object_handlers;
 		me->value.obj.handlers->add_ref(me TSRMLS_CC);
 
@@ -175,7 +175,7 @@ void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC)
 		my_object = (sdo_do_object *)sdo_do_get_instance(me TSRMLS_CC);
 		if (!my_object) {
 		class_name = get_active_class_name(&space TSRMLS_CC);
-		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject #%d not found in store", 
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DataObject #%d not found in store",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, object_handle);
 			return;
 		}
@@ -194,14 +194,14 @@ static zend_object_value sdo_do_clone_obj(zval *object TSRMLS_DC)
     MAKE_STD_ZVAL(z_new);
 
 	my_old_object = sdo_do_get_instance(object TSRMLS_CC);
-	
+
 	try {
-		new_dop = CopyHelper::copy(my_old_object->dop);	    
+		new_dop = CopyHelper::copy(my_old_object->dop);
 		sdo_do_new(z_new, new_dop TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 	return z_new->value.obj;
 }
 /* }}} */
@@ -214,37 +214,37 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 	const Property	 *propertyp;
 	sdo_do_object	 *my_object = (sdo_do_object *)NULL;
 	DataObjectPtr	  dop;
-	int				  return_value = 0; 
+	int				  return_value = 0;
 	char			 *class_name, *space;
 
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	
+
 	dop = my_object->dop;
-	
+
 	try {
 		if (sdo_parse_offset_param(dop, offset, &propertyp, &xpath, 1, 1 TSRMLS_CC)
 			== FAILURE) {
 			return 0;
 		}
 
-		/* Note: although we now have a reference to the Property, 
-		 * if the offset was an xpath, then it may not be a property of the 
-		 * DataObject instance. So we don't use the Property as a parameter 
-		 * to the DataObject methods, since this can only work if the xpath 
+		/* Note: although we now have a reference to the Property,
+		 * if the offset was an xpath, then it may not be a property of the
+		 * DataObject instance. So we don't use the Property as a parameter
+		 * to the DataObject methods, since this can only work if the xpath
 		 * is a simple property name, otherwise an exception will be thrown.
 		 */
 		return_value = dop->isSet(xpath);
-		
+
 		if (return_value && check_empty) {
 			/* check_empty says we should additionally test if the value is equivalent to 0 */
-			
+
 			if (dop->isNull(xpath)) {
 				return_value = 0;
 			} else {
-				switch (propertyp->getTypeEnum()) {		
+				switch (propertyp->getTypeEnum()) {
 				case Type::OtherTypes:
 					class_name = get_active_class_name(&space TSRMLS_CC);
-					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'",
 						class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 					return_value = 0;
 					break;
@@ -274,25 +274,25 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 				case Type::UriType:
 					/* TODO is this the buffer length or the string length ??? */
 					return_value = (dop->getLength(xpath) > 0);
-					break;		
+					break;
 				case Type::DataObjectType:
 					/* since the property is set, the data object cannot be 'empty' */
 					break;
 				case Type::ChangeSummaryType:
 					class_name = get_active_class_name(&space TSRMLS_CC);
-					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'",
 						class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 					return_value = 0;
 					break;
 				case Type::TextType:
 					class_name = get_active_class_name(&space TSRMLS_CC);
-					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'",
 						class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 					return_value = 0;
 					break;
 				default:
 					class_name = get_active_class_name(&space TSRMLS_CC);
-					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'", 
+					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'",
 						class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 						propertyp->getType().getName(), xpath);
 					return_value = 0;
@@ -302,7 +302,7 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 	} catch(SDORuntimeException e) {
 		return_value = 0;
 	}
-	
+
 	return return_value;
 }
 /* }}} */
@@ -339,50 +339,50 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 	DataObjectPtr	 dop = sdo->dop;
 	uint			 bytes_len;
 	char			*bytes_value;
-	char			 char_value; 
+	char			 char_value;
 	wchar_t			 wchar_value;
 	DataObjectPtr	 doh_value;
 	zval			*return_value;
 	char			*class_name, *space;
-	
+
 	ALLOC_INIT_ZVAL(return_value);
 	return_value->refcount = 0;
 
 	try {
 		if (propertyp->isMany()) {
-	   /* If the property is many-valued and the list is uninitialized, 
-		* all bets are off. The C++ library does not catch this 
+	   /* If the property is many-valued and the list is uninitialized,
+		* all bets are off. The C++ library does not catch this
 		* consistently, so ...
 		*/
 			if (! dop->isSet(xpath)) {
-				zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry, 
-					0 TSRMLS_CC, 
-					"Cannot read list at index '%s' because the list is empty", 
+				zend_throw_exception_ex(sdo_indexoutofboundsexception_class_entry,
+					0 TSRMLS_CC,
+					"Cannot read list at index '%s' because the list is empty",
 					(char *)xpath);
 				return return_value;
 			}
 		} else {
-	   /* 
-		* If the property is single-valued, we should just leave it to the 
-		* C++ library to decide whether the property is set, but currently 
+	   /*
+		* If the property is single-valued, we should just leave it to the
+		* C++ library to decide whether the property is set, but currently
 		* it fails to detect this error, so we shall catch it here instead.
 		*/
 			if (!dop->isValid(xpath)) {
-				zend_throw_exception_ex(sdo_propertynotsetexception_class_entry,  
-					0 TSRMLS_CC, 
-					"Cannot read property '%s' because it is not set", 
+				zend_throw_exception_ex(sdo_propertynotsetexception_class_entry,
+					0 TSRMLS_CC,
+					"Cannot read property '%s' because it is not set",
 					propertyp->getName());
 				return return_value;
 			}
 		}
-		
+
 		if (dop->isNull(xpath)) {
 			RETVAL_NULL();
-		} else {		
+		} else {
 			switch(propertyp->getTypeEnum()) {
 			case Type::OtherTypes:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes' for '%s'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes' for '%s'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__, propertyp->getName());
 				break;
 			case Type::BigDecimalType:
@@ -406,7 +406,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 				wchar_value = dop->getCharacter(xpath);
 				if (wchar_value > INT_MAX) {
 					class_name = get_active_class_name(&space TSRMLS_CC);
-					php_error(E_WARNING, "%s%s%s(): wide character data lost for '%s'", 
+					php_error(E_WARNING, "%s%s%s(): wide character data lost for '%s'",
 						class_name, space, get_active_function_name(TSRMLS_C), propertyp->getName());
 				}
 				char_value = dop->getByte(xpath);
@@ -434,12 +434,12 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 			case Type::StringType:
 			case Type::UriType:
 				RETVAL_STRING((char *)dop->getCString(xpath), 1);
-				break;		
+				break;
 			case Type::DataObjectType:
 				doh_value = dop->getDataObject(xpath);
 				if (!doh_value) {
 					class_name = get_active_class_name(&space TSRMLS_CC);
-					php_error(E_WARNING, "%s%s%s(): read a NULL DataObject for property '%s'", 
+					php_error(E_WARNING, "%s%s%s(): read a NULL DataObject for property '%s'",
 						class_name, space, get_active_function_name(TSRMLS_C), propertyp->getName());
 					RETVAL_NULL();
 				} else {
@@ -448,17 +448,17 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 				break;
 			case Type::ChangeSummaryType:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::TextType:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			default:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 					propertyp->getType().getName(), propertyp->getName());
 			}
@@ -485,10 +485,10 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 	zval			 *return_value;
 
 
-	my_object = sdo_do_get_instance(object TSRMLS_CC);	
+	my_object = sdo_do_get_instance(object TSRMLS_CC);
 	dop = my_object->dop;
-	
-	try {	
+
+	try {
 		if (sdo_parse_offset_param(
 			dop, offset, &propertyp, &xpath, 1, 0 TSRMLS_CC) == FAILURE) {
 			MAKE_STD_ZVAL(return_value);
@@ -496,26 +496,29 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 			return return_value;
 		}
 
-		/* Note: although we now have a reference to the Property, 
-		 * if the offset was an xpath, then it may not be a property of the 
-		 * DataObject instance. So we don't use the Property as a parameter 
-		 * to the DataObject methods, since this can only work if the xpath 
+		/* Note: although we now have a reference to the Property,
+		 * if the offset was an xpath, then it may not be a property of the
+		 * DataObject instance. So we don't use the Property as a parameter
+		 * to the DataObject methods, since this can only work if the xpath
 		 * is a simple property name, otherwise an exception will be thrown.
 		 */
 
 	   /*
-		* We need to discover whether the xpath should result in returning the list itself, or 
+		* We need to discover whether the xpath should result in returning the list itself, or
 		* a list element, hence the XpathHelper test
 		*/
 		if (propertyp->isMany() && ! XpathHelper::isIndexed(xpath)) {
 			return_value = sdo_do_read_list (my_object, xpath, propertyp TSRMLS_CC);
 		} else {
 			return_value = sdo_do_read_value(my_object, xpath, propertyp TSRMLS_CC);
-		} 
+		}
 	} catch(SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		MAKE_STD_ZVAL(return_value);
-		RETVAL_NULL();
+		/* I have to return a real zval at this point, to avoid an access violation.
+		 * But if the return value is not unused, this zval leaks.
+		 */
+		ALLOC_INIT_ZVAL(return_value);
+		return_value->refcount = 0;
 	}
 	return return_value;
 }
@@ -524,18 +527,18 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 /* {{{ sdo_do_unset_dimension
  */
 static void sdo_do_unset_dimension(zval *object, zval *offset TSRMLS_DC)
-{	
+{
 	const char		*xpath;
-	sdo_do_object	*my_object;	
-	
+	sdo_do_object	*my_object;
+
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	
-	try {	
+
+	try {
 		if (sdo_parse_offset_param(
 			my_object->dop, offset, NULL, &xpath, 1, 0 TSRMLS_CC) == FAILURE) {
 			return;
 		}
-		
+
 		my_object->dop->unset(xpath);
 
 	} catch(SDORuntimeException e) {
@@ -547,7 +550,7 @@ static void sdo_do_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 /* {{{ sdo_do_write_dimension
  */
 static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyValue TSRMLS_DC)
-{	
+{
 	const char			*xpath;
 	const Property		*property_p;
 	sdo_do_object		*my_object, *value_object;
@@ -559,7 +562,7 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
 	dop = my_object->dop;
 
-	try {	
+	try {
 		if (sdo_parse_offset_param(
 			dop, offset, &property_p, &xpath, ! dop->getType().isOpenType(), 0 TSRMLS_CC) == FAILURE) {
 			return;
@@ -571,31 +574,31 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 		} else {
 			/* known type, so we'll coerce the php type to the sdo type */
 			type_enum = property_p->getTypeEnum();
-		} 
-		
-	   /* Note: although we now have a reference to the Property, 
-		* if the offset was an xpath, then it may not be a property of the 
-		* DataObject instance. So we don't use the Property as a parameter 
-		* to the DataObject methods, since this can only work if the xpath 
+		}
+
+	   /* Note: although we now have a reference to the Property,
+		* if the offset was an xpath, then it may not be a property of the
+		* DataObject instance. So we don't use the Property as a parameter
+		* to the DataObject methods, since this can only work if the xpath
 		* is a simple property name, otherwise an exception will be thrown.
 		*/
-		
+
 		if (Z_TYPE_P(z_propertyValue) == IS_NULL) {
 			dop->setNull(xpath);
 		} else {
 		   /*
 		    * Since we may have to coerce the type, we make a local copy of the zval, so that the
-		    * original is unaffected. 
-		    * 
+		    * original is unaffected.
+		    *
 		    * TODO This could be optimized to only copy if we do actually change the type.
-			*/ 
+			*/
 			temp_zval = *z_propertyValue;
 			zval_copy_ctor(&temp_zval);
-			
+
 			switch(type_enum) {
 			case Type::OtherTypes:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::BigDecimalType:
@@ -615,7 +618,7 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 				convert_to_string(&temp_zval);
 				dop->setBytes(xpath, Z_STRVAL(temp_zval), Z_STRLEN(temp_zval));
 				break;
-			case Type::CharacterType: 
+			case Type::CharacterType:
 				convert_to_string(&temp_zval);
 				dop->setCharacter(xpath, (char)(Z_STRVAL(temp_zval)[0]));
 				break;
@@ -638,7 +641,7 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 			case Type::LongType:
 				if (Z_TYPE(temp_zval) == IS_LONG) {
 					dop->setLong(xpath, Z_LVAL(temp_zval));
-				} else {					
+				} else {
 					convert_to_string(&temp_zval);
 					dop->setCString(xpath, Z_STRVAL(temp_zval));
 				}
@@ -657,14 +660,14 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 					class_name = get_active_class_name(&space TSRMLS_CC);
 					sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0,0 TSRMLS_CC,
 						"%s%s%s(): cannot cast %s to %s for '%s'",
-						class_name, space, get_active_function_name(TSRMLS_C), 
+						class_name, space, get_active_function_name(TSRMLS_C),
 						zend_zval_type_name(z_propertyValue), CLASS_NAME, xpath);
 				} else if (!instanceof_function(Z_OBJCE_P(z_propertyValue), sdo_dataobjectimpl_class_entry TSRMLS_CC)) {
-					class_name = get_active_class_name(&space TSRMLS_CC);					
+					class_name = get_active_class_name(&space TSRMLS_CC);
 					sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0,0 TSRMLS_CC,
-						"%s%s%s(): cannot cast %s to %s for '%s'", 
-						class_name, space, get_active_function_name(TSRMLS_C), 
-						Z_OBJCE_P(z_propertyValue)->name, 
+						"%s%s%s(): cannot cast %s to %s for '%s'",
+						class_name, space, get_active_function_name(TSRMLS_C),
+						Z_OBJCE_P(z_propertyValue)->name,
 						sdo_dataobjectimpl_class_entry->name, xpath);
 				} else {
 					value_object = (sdo_do_object *)zend_object_store_get_object(z_propertyValue TSRMLS_CC);
@@ -673,17 +676,17 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 				break;
 			case Type::ChangeSummaryType:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			case Type::TextType:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
 			default:
 				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'", 
+				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 					(property_p ? property_p->getType().getName() : ""), xpath);
 			}
@@ -700,51 +703,49 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
  * Returns an array of name=>value pairs for the properties of the data object
  */
 static HashTable *sdo_do_get_properties(zval *object TSRMLS_DC)
-{ 
+{
 	sdo_do_object	*my_object;
-	HashTable		*properties;
 	int				 entries;
 	zval			*tmp;
 
-	zval			 z_holder;
-	
-	array_init(&z_holder);
-	
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	
+	zend_hash_clean(my_object->zo.properties);
+
 	try {
 		PropertyList pl = my_object->dop->getInstanceProperties();
 		entries = pl.size();
 		for (long index = 0; index < entries; index++) {
 			/* It's safe to use the property directly here, it cannot be an xpath */
 			const Property& property = pl[index];
-			const char *propertyName = property.getName();
-			
+			const char *property_name = property.getName();
+
 			/* Usually we check isMany() before isSet(), because we should not return NULL just because
 			* the List is empty. But for get_properties the return values are readonly, so it's
 			*	safer and clearer to omit empty lists.
 			*/
-			if (my_object->dop->isSet(property)) { 
+			if (my_object->dop->isSet(property)) {
 				if (property.isMany()) {
 					long count = 0;
-					tmp = sdo_do_read_list(my_object, propertyName, &property TSRMLS_CC);
+					tmp = sdo_do_read_list(my_object, property_name, &property TSRMLS_CC);
 					sdo_list_count_elements (tmp, &count TSRMLS_CC);
 					if (count == 0)
 						continue;
 				} else {
-					tmp = sdo_do_read_value(my_object, propertyName, &property TSRMLS_CC);
+					tmp = sdo_do_read_value(my_object, property_name, &property TSRMLS_CC);
 				}
 			} else {
 				continue;
 			}
-			add_assoc_zval(&z_holder, (char *)propertyName, tmp);
+			
+			zval_add_ref(&tmp);
+			zend_hash_add(my_object->zo.properties, (char *)property_name, 1 + strlen(property_name), 
+				&tmp, sizeof(zval *), NULL);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
-	properties = Z_ARRVAL(z_holder);
-	return properties;
+
+	return my_object->zo.properties;
 }
 /* }}} */
 
@@ -752,7 +753,7 @@ static HashTable *sdo_do_get_properties(zval *object TSRMLS_DC)
  * gets called as a consequence of an == comparison
  * we do a deep compare of property names, types, and values
  */
-static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC) 
+static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 {
 	sdo_do_object	*my_object1, *my_object2;
 	DataObjectPtr		 dop1, dop2;
@@ -761,18 +762,18 @@ static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 	const char			*propertyName;
 	zval				 offset;
 	zval				 result;
-	
+
 	INIT_PZVAL(&offset);
 	INIT_PZVAL(&result);
-	
+
 	my_object1 = sdo_do_get_instance(object1 TSRMLS_CC);
 	my_object2 = sdo_do_get_instance(object2 TSRMLS_CC);
 	dop1 = my_object1->dop;
 	dop2 = my_object2->dop;
-	
+
 	if (dop1 == dop2)
 		return SUCCESS;
-	
+
 	try {
 		pl = dop1->getInstanceProperties();
 		entries = pl.size();
@@ -797,7 +798,7 @@ static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 				*/
 				(prop1.getType().isDataObjectType() && (prop1.isContainment() != prop2.isContainment())) ||
 				(prop1.isReadOnly() != prop2.isReadOnly()))
-				
+
 				return FAILURE;
 			}
 			/* OK we can consider the properties equal */
@@ -822,42 +823,42 @@ static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 /* }}} */
 
 /* {{{ sdo_do_cast_object
-*/ 
-static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+*/
+static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 	sdo_do_object *my_object;
 	ostringstream print_buf;
 	zval free_obj;
 	int rc = SUCCESS;
-	
+
 	if (should_free) {
 		free_obj = *writeobj;
 	}
-	
+
 	my_object = sdo_do_get_instance(readobj TSRMLS_CC);
-	
+
 	try {
 		const Type& type = my_object->dop->getType();
 		PropertyList pl = my_object->dop->getInstanceProperties();
-		
+
 		print_buf << "object(" << CLASS_NAME << ")#" <<
 			readobj->value.obj.handle << " (" << pl.size() << ") {";
-		
+
 		for (unsigned int i = 0; i < pl.size(); i++) {
 			const Property& prop = pl[i];
-			
+
 			if (i > 0) {
 				print_buf << "; ";
 			}
-			
+
 			print_buf << prop.getName();
-			
+
 			/* We'll try to print the value for single-valued primitives only.
 			* Multi-valued properties just get a dimension.
 			*/
 			if (prop.isMany()) {
 				print_buf << '[' << my_object->dop->getList(prop).size() << ']';
-				
+
 			} else if (my_object->dop->isSet(i) && prop.getType().isDataType()) {
 				print_buf << "=>";
 				if (my_object->dop->isNull(i)) {
@@ -865,20 +866,20 @@ static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int shoul
 				} else {
 					print_buf << '\"' << my_object->dop->getCString(i) << '\"';
 				}
-				
+
 			}
 		}
-		
+
 		print_buf << '}';
 		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
-		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
-		
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);
+
 	} catch (SDORuntimeException e) {
 		ZVAL_NULL(writeobj);
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		rc = FAILURE;
 	}
-	
+
 	switch(type) {
 	case IS_STRING:
 		convert_to_string(writeobj);
@@ -895,7 +896,7 @@ static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int shoul
 	default:
 		rc = FAILURE;
 	}
-	
+
 	if (should_free) {
 		zval_dtor(&free_obj);
 	}
@@ -904,13 +905,13 @@ static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int shoul
 /* }}} */
 
 /* {{{ sdo_do_count_elements
- */ 
-static int sdo_do_count_elements(zval *object, long *count TSRMLS_DC) 
+ */
+static int sdo_do_count_elements(zval *object, long *count TSRMLS_DC)
 {
 	sdo_do_object *my_object;
-	
+
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
-	
+
 	try {
 		*count = my_object->dop->getInstanceProperties().size();
 	} catch (SDORuntimeException e) {
@@ -931,7 +932,7 @@ static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
 
 	try {
 		PropertyList pl = my_object->dop->getInstanceProperties();
-		for (iterator->index = 0; 
+		for (iterator->index = 0;
 		    iterator->index < pl.size() && ! my_object->dop->isValid(iterator->index);
 		    iterator->index++);
 		iterator->valid = (iterator->index < pl.size());
@@ -944,7 +945,7 @@ static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
 
 /* {{{ sdo_do_get_iterator
  */
-zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC) 
+zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(object TSRMLS_CC);
 	sdo_do_iterator *iterator = (sdo_do_iterator *)emalloc(sizeof(sdo_do_iterator));
@@ -956,7 +957,7 @@ zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSR
 	/* TODO
 	 * I'd like to store a reference to the C++ PropertyList in the iterator object at this point.
 	 * But I'm seeing nasty memory corruption problems, so instead I'm reading out the list
-	 * with getInstanceProperties() each time it's needed. This could lead to the iterator state 
+	 * with getInstanceProperties() each time it's needed. This could lead to the iterator state
 	 * becoming inconsistent if the DataObject's properties are modified during the iteration.
 	 */
 
@@ -976,29 +977,29 @@ static void sdo_do_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 /* {{{ sdo_do_iterator_valid
  */
 static int sdo_do_iterator_valid (zend_object_iterator *iter TSRMLS_DC)
-{	
+{
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
-	
+
 	return (iterator->valid) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
 /* {{{ sdo_do_iterator_current_key
  */
-static int sdo_do_iterator_current_key (zend_object_iterator *iter, 
+static int sdo_do_iterator_current_key (zend_object_iterator *iter,
 										char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
 	zval *z_do_object = (zval *)iterator->zoi.data;
 	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
-	
+
 	if (!iterator->valid)
 		return HASH_KEY_NON_EXISTANT;
 
 	try {
 		const Property& property = my_object->dop->getInstanceProperties()[iterator->index];
 		const char *key = property.getName();
-		*str_key_len = 1 + strlen(key);	
+		*str_key_len = 1 + strlen(key);
 		*str_key = (char *)emalloc(1 + *str_key_len);
 		strcpy(*str_key, key);
 		return HASH_KEY_IS_STRING;
@@ -1013,18 +1014,18 @@ static int sdo_do_iterator_current_key (zend_object_iterator *iter,
 /* {{{ sdo_do_iterator_current_data
  */
 static void sdo_do_iterator_current_data (zend_object_iterator *iter, zval ***data TSRMLS_DC)
-{	
+{
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
 	zval *z_do_object = (zval *)iterator->zoi.data;
-	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);	
-	
+	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
+
 	try {
 		/* It's safe to use the property directly here, it cannot be an xpath */
 		const Property& property = my_object->dop->getInstanceProperties()[iterator->index];
 		if (property.isMany()) {
 			iterator->value = sdo_do_read_list(my_object,  property.getName(), &property TSRMLS_CC);
 		/* either it is set or it has a default value */
-		} else if (my_object->dop->isValid(property)) { 
+		} else if (my_object->dop->isValid(property)) {
 			iterator->value = sdo_do_read_value(my_object, property.getName(), &property TSRMLS_CC);
 		} else {
 			MAKE_STD_ZVAL(iterator->value);
@@ -1035,7 +1036,7 @@ static void sdo_do_iterator_current_data (zend_object_iterator *iter, zval ***da
 		iterator->valid = false;
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
-	
+
 }
 /* }}} */
 
@@ -1044,17 +1045,17 @@ static void sdo_do_iterator_current_data (zend_object_iterator *iter, zval ***da
 static void sdo_do_iterator_move_forward (zend_object_iterator *iter TSRMLS_DC)
 {
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
-	
+
 	if (iterator->valid) {
 		zval *z_do_object = (zval *)iterator->zoi.data;
 		sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(z_do_object TSRMLS_CC);
-		
+
 		try {
 			PropertyList pl = my_object->dop->getInstanceProperties();
-			for (iterator->index++; 
+			for (iterator->index++;
 			iterator->index < pl.size() && ! my_object->dop->isValid(iterator->index);
 			iterator->index++);
-			if (iterator->index >= pl.size()) 
+			if (iterator->index >= pl.size())
 				iterator->valid = false;
 		} catch (SDORuntimeException e) {
 			iterator->valid = false;
@@ -1068,14 +1069,14 @@ static void sdo_do_iterator_move_forward (zend_object_iterator *iter TSRMLS_DC)
  * Both the model and the graph are serialized to a buffer.
  */
 static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *buf_len_p, zend_serialize_data *data TSRMLS_DC)
-{	
+{
 	sdo_do_object		*my_object;
 	char				*serialized_model;
 	char				*serialized_graph;
 	unsigned long		 model_length;
 	unsigned long		 graph_length;
 	xmldas::XMLDAS		*xmldasp;
-	
+
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
 
 	try {
@@ -1086,7 +1087,7 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
 		/* serialize the data graph to an unformatted string */
 		serialized_graph = xmldasp->save(my_object->dop, 0, 0, -1);
 		graph_length = strlen(serialized_graph);
-		
+
 		/*
 		 * The serialized buffer contains the schema followed by the data graph
 		 * These are both null-terminated strings.
@@ -1122,7 +1123,7 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 	serialized_model = (char *)&buffer[0];
 	serialized_graph = (char *)&buffer[1 + strlen(serialized_model)];
 
-	try {  
+	try {
 		/* the XMLDAS contains the new DataFactory, so do not use a cached XMLDAS */
 		xmldasp = xmldas::XMLDAS::create();
 		/* Load the model from the serialized data */
@@ -1133,12 +1134,12 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 
 		/* Load the graph */
 		DataObjectPtr root_dop = xmldasp->load(serialized_graph)->getRootDataObject();
-		
-		/* Create a PHP object fot the root. Other nodes will be created 
+
+		/* Create a PHP object fot the root. Other nodes will be created
 		 * lazily as required.
 		 */
         sdo_do_new(*object, root_dop TSRMLS_CC);
-		
+
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		return FAILURE;
@@ -1170,9 +1171,9 @@ void sdo_do_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_do_object_handlers.unset_dimension = sdo_do_unset_dimension;
 	sdo_do_object_handlers.unset_property = sdo_do_unset_dimension;
 	sdo_do_object_handlers.get_properties = sdo_do_get_properties;
-	sdo_do_object_handlers.compare_objects = sdo_do_compare_objects;	
+	sdo_do_object_handlers.compare_objects = sdo_do_compare_objects;
 	/*TODO There's a signature change for cast_object in PHP6. */
-#if (PHP_MAJOR_VERSION < 6) 
+#if (PHP_MAJOR_VERSION < 6)
 	sdo_do_object_handlers.cast_object = sdo_do_cast_object;
 #endif
 	sdo_do_object_handlers.count_elements = sdo_do_count_elements;
@@ -1194,7 +1195,7 @@ PHP_METHOD(SDO_DataObjectImpl, __construct)
 	char *class_name, *space;
 	class_name = get_active_class_name(&space TSRMLS_CC);
 
-	php_error(E_ERROR, "%s%s%s(): internal error - private constructor was called", 
+	php_error(E_ERROR, "%s%s%s(): internal error - private constructor was called",
 		class_name, space, get_active_function_name(TSRMLS_C));
 }
 /* }}} */
@@ -1205,11 +1206,11 @@ PHP_METHOD(SDO_DataObjectImpl, getContainer)
 {
 	sdo_do_object		*my_object;
 	DataObjectPtr		 container_dop;
-	
+
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	
+
 	try {
-		container_dop = my_object->dop->getContainer();		
+		container_dop = my_object->dop->getContainer();
 		if (!container_dop) {
 			RETVAL_NULL();
 		} else {
@@ -1226,9 +1227,9 @@ PHP_METHOD(SDO_DataObjectImpl, getContainer)
 PHP_METHOD(SDO_DataObjectImpl, clear)
 {
 	sdo_do_object	*my_object;
-	
+
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	
+
 	try {
 		my_object->dop->clear();
 	} catch (SDORuntimeException e){
@@ -1242,9 +1243,9 @@ PHP_METHOD(SDO_DataObjectImpl, clear)
 PHP_METHOD(SDO_DataObjectImpl, getTypeName)
 {
 	sdo_do_object *my_object;
-			
+
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	
+
 	try {
 		RETVAL_STRING((char *)my_object->dop->getType().getName(), 1);
 	} catch (SDORuntimeException e) {
@@ -1258,9 +1259,9 @@ PHP_METHOD(SDO_DataObjectImpl, getTypeName)
 PHP_METHOD(SDO_DataObjectImpl, getTypeNamespaceURI)
 {
 	sdo_do_object *my_object;
-			
+
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	
+
 	try {
 		RETVAL_STRING((char *)my_object->dop->getType().getURI(), 1);
 	} catch (SDORuntimeException e) {
@@ -1272,27 +1273,27 @@ PHP_METHOD(SDO_DataObjectImpl, getTypeNamespaceURI)
 /* {{{ SDO_DataObjectImpl::createDataObject
  */
 PHP_METHOD(SDO_DataObjectImpl, createDataObject)
-{	
+{
 	zval				*z_property;
 	const char			*xpath;
 	sdo_do_object		*my_object;
 	DataObjectPtr		 dop, new_dop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_property) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_property) == FAILURE)
 		return;
 
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	
-	dop = my_object->dop;	
-	
-	try {	
+
+	dop = my_object->dop;
+
+	try {
 		if (sdo_parse_offset_param(dop, z_property, NULL, &xpath, ! dop->getType().isOpenType(), 0 TSRMLS_CC) == FAILURE) {
 			return;
 		}
 
 		new_dop = dop->createDataObject(xpath);
 
-		sdo_do_new(return_value, new_dop TSRMLS_CC);		
+		sdo_do_new(return_value, new_dop TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
@@ -1311,13 +1312,13 @@ PHP_METHOD(SDO_DataObjectImpl, getSequence)
 	}
 
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	dop = my_object->dop;	
-	
+	dop = my_object->dop;
+
 	try {
 		SequencePtr seqp = dop->getSequence();
 		if (!seqp) {
 			RETVAL_NULL();
-		} else {			
+		} else {
 			/* Create the PHP wrapper */
 			sdo_sequence_new (return_value, seqp TSRMLS_CC);
 		}
@@ -1330,7 +1331,7 @@ PHP_METHOD(SDO_DataObjectImpl, getSequence)
 /* {{{ SDO_DataObjectImpl::getChangeSummary
  */
 PHP_METHOD(SDO_DataObjectImpl, getChangeSummary)
-{	
+{
 	sdo_do_object	*my_object;
 	DataObjectPtr		 dop;
 
@@ -1339,14 +1340,14 @@ PHP_METHOD(SDO_DataObjectImpl, getChangeSummary)
 	}
 
 	my_object = sdo_do_get_instance(getThis() TSRMLS_CC);
-	
-	dop = my_object->dop;	
-	
+
+	dop = my_object->dop;
+
 	try {
 		ChangeSummaryPtr change_summary = dop->getChangeSummary();
 		if (change_summary == NULL)  {
 			RETVAL_NULL();
-		} else {			
+		} else {
 			/* Create the PHP wrapper */
 			sdo_das_changesummary_new (return_value, change_summary TSRMLS_CC);
 		}
@@ -1361,7 +1362,7 @@ PHP_METHOD(SDO_DataObjectImpl, getChangeSummary)
 PHP_METHOD(SDO_DataObjectImpl, __get)
 {
 	zval *index, *value;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &index) == FAILURE) {
 		return;
 	}
@@ -1375,7 +1376,7 @@ PHP_METHOD(SDO_DataObjectImpl, __get)
 PHP_METHOD(SDO_DataObjectImpl, __set)
 {
 	zval *index, *value;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &index, &value) == FAILURE) {
 		return;
 	}
@@ -1388,7 +1389,7 @@ PHP_METHOD(SDO_DataObjectImpl, __set)
 PHP_METHOD(SDO_DataObjectImpl, count)
 {
 	long count = 0;
-	
+
 	sdo_do_count_elements(getThis(), &count TSRMLS_CC);
 	RETVAL_LONG(count);
 }
