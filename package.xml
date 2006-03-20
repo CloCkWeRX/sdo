@@ -26,13 +26,18 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.0.0</version>
-  <date>2006-03-01</date>
+  <version>1.0.1</version>
+  <date>2006-03-20</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>First stable release.
-Minor improvements and fixes over 0.9.0.
+  <notes>Minor increments and fixes over 1.0.0:
+- allow data objects to be copied between data factories
+- remove memory leaks in _get_properties methods
+- remove memory leak reading value from Seqence
   </notes>
+  <deps>
+   <dep type="php" rel="ge" version="5.1.0" optional="no"/>
+  </deps>
   <filelist>
    <dir name="/" baseinstalldir="SDO">
     <dir name="commonj">
@@ -280,6 +285,7 @@ Minor improvements and fixes over 0.9.0.
        <file role="test" name="Example3.php"/>
        <file role="test" name="Example4.php"/>
        <file role="test" name="Example5.php"/>
+       <file role="test" name="Example6.php"/>
        <file role="test" name="jungle.xsd"/>
        <file role="test" name="letter.xml"/>
        <file role="test" name="letter.xsd"/>
@@ -292,11 +298,6 @@ Minor improvements and fixes over 0.9.0.
         <file role="test" name="animalTypes.xsd"/>
         <file role="test" name="jungle.xsd"/>
        </dir> <!-- /tests/XMLDAS/PHPUnitTests/anyElement -->
-       <dir name="derivation">
-        <file role="test" name="abstract.xsd"/>
-        <file role="test" name="extension.xsd"/>
-        <file role="test" name="restriction.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/derivation -->
        <dir name="extendedComplexType">
         <file role="test" name="person.xml"/>
         <file role="test" name="person.xsd"/>
@@ -313,23 +314,11 @@ Minor improvements and fixes over 0.9.0.
         <file role="test" name="parse_errors.xsd"/>
        </dir> <!-- /tests/XMLDAS/PHPUnitTests/parseErrors -->
        <dir name="restrictedComplexType">
-        <file role="test" name="load.php"/>
         <file role="test" name="name.xml"/>
         <file role="test" name="name.xsd"/>
        </dir> <!-- /tests/XMLDAS/PHPUnitTests/restrictedComplexType -->
-       <file role="test" name="animalTypes.xsd"/>
        <file role="test" name="company.xml"/>
        <file role="test" name="company.xsd"/>
-       <file role="test" name="company_missing_type.xsd"/>
-       <file role="test" name="company_noxmldecl.xml"/>
-       <file role="test" name="company_with_nillable_SN.xml"/>
-       <file role="test" name="company_with_nillable_SN.xsd"/>
-       <file role="test" name="contractor_only.xsd"/>
-       <file role="test" name="menagerie.xml"/>
-       <file role="test" name="menagerie.xsd"/>
-       <file role="test" name="open_company.xsd"/>
-       <file role="test" name="parse_errors.xml"/>
-       <file role="test" name="parse_errors.xsd"/>
        <file role="test" name="XMLDASTest.php"/>
       </dir> <!-- /tests/XMLDAS/PHPUnitTests -->
      </dir> <!-- /tests/XMLDAS -->
@@ -479,6 +468,17 @@ B) Other changes in this release:
     <state>stable</state>
     <notes>First stable release.
 Minor improvements and fixes over 0.9.0.
+    </notes>
+   </release>
+   <release>
+    <version>1.0.1</version>
+    <date>2006-03-20</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>Minor increments and fixes over 1.0.0:
+- allow data objects to be copied between data factories
+- remove memory leaks in _get_properties methods
+- remove memory leak reading value from Seqence
     </notes>
    </release>
  </changelog>

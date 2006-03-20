@@ -72,9 +72,9 @@
 //'notes' => "First stable release.\n" 
 //. "Minor improvements and fixes over 0.9.0.",
        'notes' => "Minor increments and fixes over 1.0.0:\n"
-. "- allow data objects to be copied between data factories\n",
+. "- allow data objects to be copied between data factories\n"
 . "- remove memory leaks in _get_properties methods\n"
-. "- remove memory leak reading value from Seqence\n" 
+. "- remove memory leak reading value from Seqence\n", 
        'simpleoutput' => true,
        'version' => '1.0.1',
        'baseinstalldir' => 'SDO',
@@ -117,6 +117,8 @@
                         // wildcards
            '*.la',
            '*.lo',
+           '*~',
+           '*.orig',
            'sdo*tgz'
          ),
                 
