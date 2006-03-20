@@ -47,7 +47,6 @@
 //             . "can have additional properties added to a runtime instance, for example "
 //             . "to support an XML <any/> element.\n"
 //             . "Also various bug fixes. ",
-
 //'notes' => 
 //"The following changes have been made between 0.7.1 and this release:\n"
 //. "A) The changes which are visible at the programming interface are:\n"
@@ -70,10 +69,14 @@
 //. " 3) PropertyNotSetException has been improved so that it replicates the way arrays and objects behave as closely as possible\n"
 //. " 4) The parsing that the XML DAS performs on both XML Schema and instance documents has been improved so that problems are picked up and reported earlier.\n"
 // ,
-       'notes' => "First stable release.\n" 
-. "Minor improvements and fixes over 0.9.0.",
+//'notes' => "First stable release.\n" 
+//. "Minor improvements and fixes over 0.9.0.",
+       'notes' => "Minor increments and fixes over 1.0.0:\n"
+. "- allow data objects to be copied between data factories\n",
+. "- remove memory leaks in _get_properties methods\n"
+. "- remove memory leak reading value from Seqence\n" 
        'simpleoutput' => true,
-       'version' => '1.0.0',
+       'version' => '1.0.1',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
@@ -117,13 +120,19 @@
            'sdo*tgz'
          ),
                 
-     'dir_roles' => array('/' => 'src','tests'=> 'test', 'DAS' => 'php'),
+     'dir_roles' => array(
+         '/' => 'src',
+         'tests' => 'test', 
+         'DAS' => 'php'),
        'filelistgenerator' => 'file' // generate from cvs, use file for directory
         )
      );
 	$packagexml->addMaintainer('gcc','lead','Graham Charters','charters@uk.ibm.com');
 	$packagexml->addMaintainer('cem','lead','Caroline Maynard','caroline.maynard@uk.ibm.com');
 	$packagexml->addMaintainer('mfp','lead','Matthew Peters','matthew_peters@uk.ibm.com');
+	
+	$packagexml->addDependency('php', '5.1.0', 'ge', 'php');
+	
     if (PEAR::isError($e)) {
         echo $e->getMessage();
         die();
