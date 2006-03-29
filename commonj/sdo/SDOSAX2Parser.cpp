@@ -1065,8 +1065,12 @@ namespace commonj
                             setNull((const char*)currentPropertySetting.name);
 
                 }
-                else if (!currentPropertySetting.value.isNull())
+                else 
                 {
+					if (currentPropertySetting.value.isNull())
+					{
+						currentPropertySetting.value = SDOXMLString("");
+					}
                     try
                     {
                         const Type& tp = currentPropertySetting.dataObject->getType();
