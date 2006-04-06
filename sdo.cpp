@@ -93,7 +93,8 @@ ZEND_END_ARG_INFO();
 
 function_entry sdo_propertyaccess_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_PropertyAccess, __get, arginfo___get)
-	ZEND_ABSTRACT_ME(SDO_ProperytAccess, __set, arginfo___set)
+	ZEND_ABSTRACT_ME(SDO_PropertyAccess, __set, arginfo___set)
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
