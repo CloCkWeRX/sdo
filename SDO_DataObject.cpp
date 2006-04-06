@@ -144,7 +144,7 @@ void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC)
 	sdo_do_object *my_object;
 	char *class_name, *space;
 
-	int object_handle = (int)dop->getUserData();
+	long object_handle = (long)dop->getUserData();
 
 	Z_TYPE_P(me) = IS_OBJECT;
 	/* If the object is already known to php, its user data will contain
