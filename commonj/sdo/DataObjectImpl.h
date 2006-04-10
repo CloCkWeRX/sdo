@@ -552,7 +552,7 @@ class DataObjectImpl : public DataObject
 private:
 
     virtual void validateIndex(unsigned int index);
-    virtual void checkFactory(DataObjectPtr dob, unsigned int proeprtyIndex);
+    virtual void checkFactory(DataObjectPtr dob, unsigned int propertyIndex);
     virtual void checkType(    const Property& prop,
                     const Type& objectType);
 

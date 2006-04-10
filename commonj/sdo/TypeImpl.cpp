@@ -860,12 +860,20 @@ namespace sdo{
 
     unsigned int TypeImpl::convert(void** value,const char c) const
     {
+#if __WORDSIZE ==64
+        return convert(value,(int64_t)c);
+#else
         return convert(value,(long)c);
+#endif
     }
 
     unsigned int TypeImpl::convert(void** value,const wchar_t c) const
     {
+#if __WORDSIZE ==64
+        return convert(value,(int64_t)c);
+#else
         return convert(value,(long)c);
+#endif
     }
 
     // This is set CString...
@@ -1198,7 +1206,11 @@ namespace sdo{
     
     unsigned int TypeImpl::convert(void** value,const short s) const
     {
+#if __WORDSIZE ==64
+        return convert(value,(int64_t)s);
+#else
         return convert(value,(long)s);
+#endif
     }
 
 /*    unsigned int TypeImpl::convert(void** value,const int i) const
@@ -1219,10 +1231,15 @@ namespace sdo{
             break;
             }
         default:
+#if __WORDSIZE ==64
+            return convert(value, (int64_t)(i.getTime()));
+#else
             return convert(value, (long)(i.getTime()));
+#endif
         }
     }
 
+#if __WORDSIZE != 64
     // setInteger
     unsigned int TypeImpl::convert(void** value,const long i) const
     {
@@ -1313,6 +1330,7 @@ namespace sdo{
             }
         }
     }
+#endif
 
     // setLongLong
 
@@ -1772,7 +1790,7 @@ namespace sdo{
                 int k;
                 char *tmpbuf = new char[50];
                 wchar_t *tmpw = (wchar_t*)outval;
-                sprintf(tmpbuf,"%.3e",*(long double*)value);
+                sprintf(tmpbuf,"%.3Le",*(long double*)value);
                 for (k=0;k<strlen(tmpbuf);k++)
                 {
                     *(tmpw++) = (wchar_t)(tmpbuf[k]);
@@ -1946,7 +1964,7 @@ namespace sdo{
         case DoubleType:
                 if (value == 0) return 0;
                 if (max < MAX_DOUBLE_SIZE) return 0;
-                sprintf(outval,"%.3e",*(long double*)value);
+                sprintf(outval,"%.3Le",*(long double*)value);
                 return strlen(outval);
 
         case FloatType:
@@ -2038,7 +2056,7 @@ namespace sdo{
                 (*asstringbuf)[0] = 0;
                 return *asstringbuf;
             }
-            sprintf(*asstringbuf,"%.3e",*(long double*)value);
+            sprintf(*asstringbuf,"%.3Le",*(long double*)value);
             return *asstringbuf;
 
         case FloatType:

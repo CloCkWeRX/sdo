@@ -363,7 +363,7 @@ namespace sdo {
  * A macro for the setting of primitive values in a data object by path
  */
 
-#define setPrimitiveFromPath(primval,setval)\
+#define setPrimitiveFromPath(primval,setval,platval)\
     void DataObjectImpl::set ##primval (const char* path, setval value)\
     {\
         DataObjectImpl *d;\
@@ -398,7 +398,7 @@ namespace sdo {
                             doi->set ## primval (value);\
                         }\
                         else {\
-                            dol.append(value);\
+                            dol.append(( platval) value);\
                         }\
                     }\
                     else {\
@@ -698,15 +698,19 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     getPrimitiveFromPath(Date,const SDODate,0);
 
 
-    setPrimitiveFromPath(Boolean,bool);
-    setPrimitiveFromPath(Byte,char);
-    setPrimitiveFromPath(Character,wchar_t);
-    setPrimitiveFromPath(Short,short);
-    setPrimitiveFromPath(Integer,long);
-    setPrimitiveFromPath(Long,int64_t);
-    setPrimitiveFromPath(Float,float);
-    setPrimitiveFromPath(Double,long double);
-    setPrimitiveFromPath(Date,const SDODate);
+    setPrimitiveFromPath(Boolean,bool, bool);
+    setPrimitiveFromPath(Byte,char, char);
+    setPrimitiveFromPath(Character,wchar_t, wchar_t);
+    setPrimitiveFromPath(Short,short, short);
+#if __WORDSIZE ==64
+    setPrimitiveFromPath(Integer,long, int64_t);
+#else
+    setPrimitiveFromPath(Integer,long, long);
+#endif
+    setPrimitiveFromPath(Long,int64_t, int64_t);
+    setPrimitiveFromPath(Float,float, float);
+    setPrimitiveFromPath(Double,long double, long double);
+    setPrimitiveFromPath(Date,const SDODate, const SDODate);
 
 
     getPrimitiveFromProperty(Boolean,bool);
@@ -3124,7 +3128,11 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     void DataObjectImpl::setInteger(long invalue)
     {
+#if __WORDSIZE ==64
+        valuelength = getTypeImpl().convert(&value,(int64_t)invalue);
+#else
         valuelength = getTypeImpl().convert(&value,invalue);
+#endif
         return;
     }
 

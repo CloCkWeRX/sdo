@@ -116,9 +116,15 @@ namespace sdo{
             case Type::CharacterType:
                 to.append(from.getCharacter(i));
                 break;
+#if __WORDSIZE ==64
+            case Type::IntegerType: 
+                to.append((int64_t)(from.getInteger(i)));
+                break;
+#else
             case Type::IntegerType: 
                 to.append(from.getInteger(i));
                 break;
+#endif
             case Type::ShortType:
                 to.append(from.getShort(i));
                 break;

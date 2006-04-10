@@ -499,7 +499,11 @@ namespace sdo{
     void PropertyImpl::setDefaultInteger( const long i    )
     {
         bDefaulted=true;
+#if __WORDSIZE ==64
+        defvaluelength = getTypeImpl()->convert(&defvalue,(int64_t)i); 
+#else
         defvaluelength = getTypeImpl()->convert(&defvalue,i); 
+#endif
     }
     void PropertyImpl::setDefaultLong(const int64_t l)
     {
