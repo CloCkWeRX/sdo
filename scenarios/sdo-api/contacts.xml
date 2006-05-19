@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<contact xsi:type="contact" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <shortname>shifty</shortname>
+  <fullname>The Right Hon. Elias Shifty, Esq</fullname>
+  <address>
+    <addressline1>Left Luggage Office</addressline1>
+    <addressline2>Victoria Station</addressline2>
+    <city>London</city>
+    <state>Metropolitan Borough of London</state>
+    <zip>WC1A 1AA</zip>
+    <telephone>Whitehall 1212</telephone>
+  </address>
+</contact>

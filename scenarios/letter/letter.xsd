@@ -1,0 +1,13 @@
+<schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  xmlns:letter="http://letterSchema"
+  targetNamespace="http://letterSchema">
+  <element name="letters" type="letter:FormLetter"/>
+  <complexType name="FormLetter" mixed="true">
+    <sequence>
+      <element name="date" minOccurs="0" type="string"/>
+      <element name="firstName" minOccurs="0" type="string"/>
+      <element name="lastName" minOccurs="0" type="string"/>
+    </sequence>
+  </complexType>
+</schema>

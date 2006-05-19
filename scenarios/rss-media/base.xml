@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<rss 
+  xsi:type="rss" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  version="2.0">
+<channel>
+<title>My half-baked feed - RSS/PHP edition</title>
+<description>Comment from Yours Truly</description>
+<copyright>All mine!</copyright>
+<language>en-gb</language>
+<webMaster>mfp</webMaster>
+</channel>
+</rss> 

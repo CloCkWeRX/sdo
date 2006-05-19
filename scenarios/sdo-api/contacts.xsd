@@ -1,0 +1,25 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema">
+  
+  <element name="contact">
+    <complexType>
+      <sequence>
+        <element name="shortname" type="string"/>
+        <element name="fullname" type="string"/>
+        <element name="address" maxOccurs="unbounded">
+          <complexType>
+            <sequence>
+              <element name="id" type="ID"/>
+              <element name="addressline1" type="string"/>
+              <element name="addressline2" type="string"/>
+              <element name="city" type="string"/>
+              <element name="state" type="string"/>
+              <element name="zip" type="string"/>
+              <element name="telephone" type="string"/>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+  
+</schema>

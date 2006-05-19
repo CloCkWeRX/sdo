@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema version="1.1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="blog">
+     <xs:complexType>
+       <xs:sequence>
+         <xs:element name="item" maxOccurs="unbounded">
+           <xs:complexType>
+             <xs:sequence>
+               <xs:element name="title" type="xs:string"/>
+               <xs:element name="description" type="xs:string"/>
+               <xs:element name="date" type="xs:string"/>
+               <xs:element name="guid" type="xs:string"/>
+               <xs:element name="from_ip" type="xs:string"/>
+               <xs:element name="enclosure" type="xs:string" minOccurs="0"/>
+             </xs:sequence>
+           </xs:complexType>
+         </xs:element>
+       </xs:sequence>
+     </xs:complexType>
+   </xs:element>
+ </xs:schema>
+
