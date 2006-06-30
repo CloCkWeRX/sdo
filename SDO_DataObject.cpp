@@ -824,8 +824,14 @@ static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 
 /* {{{ sdo_do_cast_object
 */
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+{
+	int should_free = 0;
+#else
 static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
+#endif
 	sdo_do_object *my_object;
 	ostringstream print_buf;
 	zval free_obj;
@@ -945,8 +951,22 @@ static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
 
 /* {{{ sdo_do_get_iterator
  */
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+{	
+	char *class_name, *space;
+	class_name = get_active_class_name(&space TSRMLS_CC);
+
+	if (by_ref) {	
+		php_error(E_ERROR, "%s%s%s(): an iterator cannot be used with foreach by reference",
+		class_name, space, get_active_function_name(TSRMLS_C));
+	}
+
+#else
 zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
+#endif
+
 	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(object TSRMLS_CC);
 	sdo_do_iterator *iterator = (sdo_do_iterator *)emalloc(sizeof(sdo_do_iterator));
 	object->refcount++;
@@ -1075,17 +1095,19 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
 	char				*serialized_graph;
 	unsigned long		 model_length;
 	unsigned long		 graph_length;
-	xmldas::XMLDAS		*xmldasp;
 
 	my_object = sdo_do_get_instance(object TSRMLS_CC);
 
 	try {
-		xmldasp = sdo_get_XMLDAS();
+        DataFactoryPtr dfp = ((DataObjectImpl*)(DataObject*)my_object->dop)->getDataFactory();
+        XSDHelperPtr xsdhp = HelperProvider::getXSDHelper(dfp);
+  		XMLHelperPtr xmlhp = HelperProvider::getXMLHelper(dfp);
 		/* create an XML representation of the model */
-		serialized_model = xmldasp->generateSchema(my_object->dop);
+		serialized_model = xsdhp->generate(dfp->getTypes());
 		model_length = strlen(serialized_model);
+
 		/* serialize the data graph to an unformatted string */
-		serialized_graph = xmldasp->save(my_object->dop, 0, 0, -1);
+		serialized_graph = xmlhp->save(my_object->dop, (const char*)0, (const char *)0, -1);
 		graph_length = strlen(serialized_graph);
 
 		/*
@@ -1115,7 +1137,6 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 	char				*serialized_model;
 	char				*serialized_graph;
 	zval				*factory_zval;
-	xmldas::XMLDAS		*xmldasp;
 
 	/*
 	 * The serialized data comprises the model and the graph, both as null-terminated strings
@@ -1124,16 +1145,19 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 	serialized_graph = (char *)&buffer[1 + strlen(serialized_model)];
 
 	try {
-		/* the XMLDAS contains the new DataFactory, so do not use a cached XMLDAS */
-		xmldasp = xmldas::XMLDAS::create();
+		DataFactoryPtr dfp = DataFactory::getDataFactory();
+        XSDHelperPtr xsdhp = HelperProvider::getXSDHelper(dfp);
+        XMLHelperPtr xmlhp = HelperProvider::getXMLHelper(dfp);
+
 		/* Load the model from the serialized data */
-		xmldasp->loadSchema(serialized_model);
+		xsdhp->define(serialized_model);
+
 		/* Create the PHP representation of the factory */
 		MAKE_STD_ZVAL(factory_zval);
-		sdo_das_df_new(factory_zval, xmldasp->getDataFactory() TSRMLS_CC);
+		sdo_das_df_new(factory_zval, dfp TSRMLS_CC);
 
 		/* Load the graph */
-		DataObjectPtr root_dop = xmldasp->load(serialized_graph)->getRootDataObject();
+		DataObjectPtr root_dop = xmlhp->load(serialized_graph)->getRootDataObject();
 
 		/* Create a PHP object fot the root. Other nodes will be created
 		 * lazily as required.
@@ -1172,10 +1196,7 @@ void sdo_do_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_do_object_handlers.unset_property = sdo_do_unset_dimension;
 	sdo_do_object_handlers.get_properties = sdo_do_get_properties;
 	sdo_do_object_handlers.compare_objects = sdo_do_compare_objects;
-	/*TODO There's a signature change for cast_object in PHP6. */
-#if (PHP_MAJOR_VERSION < 6)
 	sdo_do_object_handlers.cast_object = sdo_do_cast_object;
-#endif
 	sdo_do_object_handlers.count_elements = sdo_do_count_elements;
 
 	sdo_do_iterator_funcs.dtor = sdo_do_iterator_dtor;

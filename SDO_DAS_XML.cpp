@@ -306,7 +306,7 @@ PHP_METHOD(SDO_DAS_XML, addTypes)
 			} 
 			print_buf << ":\n";
 			for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
-				print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix);
+				print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix) << endl;
 			}
 			string print_string = print_buf.str();
 			sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
@@ -390,7 +390,7 @@ PHP_METHOD(SDO_DAS_XML, loadFile)
 				} 
 				print_buf << ":\n";
 				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
-					print_buf << error_ix + 1 << ". " << xmldas->xmlHelperPtr->getErrorMessage(error_ix);
+					print_buf << error_ix + 1 << ". " << xmldas->xmlHelperPtr->getErrorMessage(error_ix) << endl;
 				}
 				string print_string = print_buf.str();
 				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
@@ -477,7 +477,7 @@ PHP_METHOD(SDO_DAS_XML, loadString)
 				print_buf << ":\n" ;
 				
 				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
-					print_buf << error_ix + 1 << ". " << xmldas->xmlHelperPtr->getErrorMessage(error_ix);
+					print_buf << error_ix + 1 << ". " << xmldas->xmlHelperPtr->getErrorMessage(error_ix) << endl;
 				}
 				string print_string = print_buf.str();
 				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
@@ -678,12 +678,19 @@ PHP_METHOD(SDO_DAS_XML, createDataObject)
 
 /* {{{ xmldas_cast_object
 */ 
-static void xmldas_cast_object(zval *readobj, zval *writeobj TSRMLS_DC) 
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+static int xmldas_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
+	int should_free = 0;
+#else
+static int xmldas_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+{
+#endif
     xmldas_object 	*xmldas;
 	ostringstream	 print_buf;
 	const char		*indent = "\n";
 	DataFactoryPtr   dataFactoryPtr;
+	int              rc = SUCCESS;
 	
     xmldas = (xmldas_object *) zend_object_store_get_object(readobj TSRMLS_CC);
 	
@@ -720,7 +727,10 @@ static void xmldas_cast_object(zval *readobj, zval *writeobj TSRMLS_DC)
 	} catch (SDORuntimeException e) {
 		ZVAL_NULL(writeobj);
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
+		rc = FAILURE;
 	}
+
+	return rc;
 			
 }
 /* }}} */
@@ -731,7 +741,11 @@ static void xmldas_cast_object(zval *readobj, zval *writeobj TSRMLS_DC)
  */
 PHP_METHOD(SDO_DAS_XML, __toString)
 {
-	xmldas_cast_object(getThis(), return_value TSRMLS_CC);
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+	xmldas_cast_object(getThis(), return_value, IS_STRING TSRMLS_CC);
+#else	
+	xmldas_cast_object(getThis(), return_value, IS_STRING, 0 TSRMLS_CC);
+#endif
 }
 /* }}} */
 

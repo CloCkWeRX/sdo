@@ -896,9 +896,14 @@ static HashTable *sdo_list_get_properties(zval *object TSRMLS_DC)
 /* }}} */
 
 /* {{{ sdo_list_cast_object
-*/
+*/#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+static int sdo_list_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+{
+	int should_free = 0;
+#else
 static int sdo_list_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
+#endif
 	sdo_list_object	*my_object;
 	ostringstream	 print_buf;
 	zval			 free_obj;
@@ -1066,8 +1071,21 @@ static int sdo_list_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 
 /* {{{ sdo_list_get_iterator
  */
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+{	
+	char *class_name, *space;
+	class_name = get_active_class_name(&space TSRMLS_CC);
+
+	if (by_ref) {	
+		php_error(E_ERROR, "%s%s%s(): an iterator cannot be used with foreach by reference",
+		class_name, space, get_active_function_name(TSRMLS_C));
+	}
+
+#else
 zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
+#endif
 	sdo_list_iterator *iterator = (sdo_list_iterator *)emalloc(sizeof(sdo_list_iterator));
 	object->refcount++;
 	iterator->zoi.data = (void *)object;
@@ -1241,10 +1259,7 @@ void sdo_list_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_list_object_handlers.unset_dimension = sdo_list_unset_dimension;
 	sdo_list_object_handlers.get_properties = sdo_list_get_properties;
 	sdo_list_object_handlers.compare_objects = sdo_list_compare_objects;
-	/*TODO There's a signature change for cast_object in PHP6. */
-#if (PHP_MAJOR_VERSION < 6)
 	sdo_list_object_handlers.cast_object = sdo_list_cast_object;
-#endif
 	sdo_list_object_handlers.count_elements = sdo_list_count_elements;
 
 	sdo_list_iterator_funcs.dtor = sdo_list_iterator_dtor;

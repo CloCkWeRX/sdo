@@ -76,10 +76,10 @@ static zend_object_value sdo_exception_create_object(zend_class_entry *ce TSRMLS
  */
 void sdo_exception_minit(zend_class_entry *ce TSRMLS_DC)
 {
-#if (PHP_MAJOR_VERSION < 6)
-	exception_class_entry = zend_exception_get_default();
-#else
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
 	exception_class_entry = zend_exception_get_default(TSRMLS_C);
+#else
+	exception_class_entry = zend_exception_get_default();
 #endif
 
 	sdo_exception_class_entry = zend_register_internal_class_ex(

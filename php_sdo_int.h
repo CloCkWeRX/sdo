@@ -31,7 +31,6 @@
 #include <sstream>
 
 #include "commonj/sdo/SDOSPI.h"
-#include "commonj/sdo/xmldas/XMLDAS.h"
 
 using namespace commonj::sdo;
 
@@ -131,8 +130,6 @@ extern PHP_SDO_API void sdo_cppexception_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_cppexception_new(zval *me, SDORuntimeException *cpp_exception TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_make_long_class_constant(zend_class_entry *ce, char *name, long value);
-
-extern PHP_SDO_API xmldas::XMLDAS *sdo_get_XMLDAS();
 
 extern PHP_SDO_API int sdo_parse_offset_param(DataObjectPtr dop, zval *z_offset,
 	const Property **return_property, const char **return_xpath, int property_required, int quiet TSRMLS_DC);

@@ -315,8 +315,14 @@ void sdo_model_property_string (ostringstream& print_buf, const Property *proper
 
 /* {{{ sdo_model_property_cast_object
 */ 
-static int sdo_model_property_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+static int sdo_model_property_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
+	int should_free = 0;
+#else
+static int sdo_model_property_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+{
+#endif
 	sdo_model_property_object *my_object;
 	ostringstream print_buf;
 	zval free_obj;
@@ -373,10 +379,7 @@ void sdo_model_property_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 
 	memcpy(&sdo_model_property_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	sdo_model_property_object_handlers.clone_obj = NULL;
-	/*TODO There's a signature change for cast_object in PHP6. */
-#if (PHP_MAJOR_VERSION < 6)
 	sdo_model_property_object_handlers.cast_object = sdo_model_property_cast_object;
-#endif
 }
 /* }}} */
 

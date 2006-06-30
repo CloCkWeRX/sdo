@@ -111,8 +111,14 @@ static void sdo_cppexception_get_property(zval *me, char *name, long name_len, z
 
 /* {{{ sdo_cppexception_cast_object
 */
-static int sdo_cppexception_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+static int sdo_cppexception_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC) 
 {
+	int should_free = 0;
+#else
+static int sdo_cppexception_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+{
+#endif
 	ostringstream print_buf;
 	zval free_obj;
 	int rc = SUCCESS;
@@ -160,10 +166,7 @@ void sdo_cppexception_minit(zend_class_entry *ce TSRMLS_DC)
 	sdo_cppexception_class_entry->create_object = sdo_cppexception_create_object;
 
 	memcpy(&sdo_cppexception_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-		/*TODO There's a signature change for cast_object in PHP6. */
-#if (PHP_MAJOR_VERSION < 6)
 	sdo_cppexception_object_handlers.cast_object = sdo_cppexception_cast_object;
-#endif
 
     zend_declare_property_string(sdo_cppexception_class_entry,
 		"class", sizeof("class") - 1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
@@ -337,7 +340,11 @@ PHP_METHOD(SDO_CPPException, getSeverity)
  */
 PHP_METHOD(SDO_CPPException, __toString)
 {
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+	sdo_cppexception_cast_object(getThis(), return_value, IS_STRING TSRMLS_CC);
+#else	
 	sdo_cppexception_cast_object(getThis(), return_value, IS_STRING, 0 TSRMLS_CC);
+#endif
 }
 /* }}} */
 

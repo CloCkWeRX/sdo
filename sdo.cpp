@@ -329,8 +329,7 @@ ZEND_END_ARG_INFO();
 function_entry sdo_model_reflectiondataobject_methods[] = {
     ZEND_ME(SDO_Model_ReflectionDataObject, __construct, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC) 
 	ZEND_ME(SDO_Model_ReflectionDataObject, __toString, 0, ZEND_ACC_PUBLIC)
-	ZEND_FENTRY(export, ZEND_FN(SDO_Model_ReflectionDataObject_export), arginfo_sdo_model_reflectiondataobject_export,
-	    ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) 
+	ZEND_ME(SDO_Model_ReflectionDataObject, export, 0, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getType, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getInstanceProperties, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getContainmentProperty, 0, ZEND_ACC_PUBLIC)

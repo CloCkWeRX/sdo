@@ -35,8 +35,6 @@ static char rcs_id[] = "$Id$";
 
 #include "php_sdo_int.h"
 
-static xmldas::XMLDAS *xmldasp = NULL;
-
 /* {{{ sdo_make_long_class_constant
  * creates a class constant
  */
@@ -47,17 +45,6 @@ void sdo_make_long_class_constant(zend_class_entry *ce, char *name, long value)
 	INIT_PZVAL(z_constant);
 	ZVAL_LONG(z_constant, value);
 	zend_hash_update(&ce->constants_table, name, 1 + strlen(name), &z_constant, sizeof(zval *), NULL);
-}
-/* }}} */
-
-/* {{{ sdo_get_XMLDAS
- * returns a lazily-instantiated static XMLDAS, for use in serializing /unserializing
- */
-xmldas::XMLDAS *sdo_get_XMLDAS() {
-	if (xmldasp == NULL) {
-		xmldasp = xmldas::XMLDAS::create();
-	}
-	return xmldasp;
 }
 /* }}} */
 

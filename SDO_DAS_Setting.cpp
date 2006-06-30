@@ -250,8 +250,14 @@ static HashTable *sdo_das_setting_get_properties(zval *object TSRMLS_DC)
 
 /* {{{ sdo_das_setting_cast_object
 */
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+static int sdo_das_setting_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+{
+	int should_free = 0;
+#else
 static int sdo_das_setting_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
+#endif
 	sdo_das_setting_object	*my_object;
 	ostringstream	 print_buf;
 	zval			 free_obj;
@@ -329,10 +335,7 @@ void sdo_das_setting_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	memcpy(&sdo_das_setting_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	sdo_das_setting_object_handlers.clone_obj = NULL;
 	sdo_das_setting_object_handlers.get_properties = sdo_das_setting_get_properties;
-	/*TODO There's a signature change for cast_object in PHP6. */
-#if (PHP_MAJOR_VERSION < 6)
 	sdo_das_setting_object_handlers.cast_object = sdo_das_setting_cast_object;
-#endif
 }
 /* }}} */
 
