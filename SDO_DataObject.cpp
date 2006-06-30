@@ -33,6 +33,7 @@ static char rcs_id[] = "$Id$";
 #include "zend_exceptions.h"
 
 #include "php_sdo_int.h"
+#include "commonj/sdo/DataObjectImpl.h"
 
 #define CLASS_NAME "SDO_DataObject"
 
