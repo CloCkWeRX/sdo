@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.6">
+<package version="1.0" packagerversion="1.4.9">
  <name>sdo</name>
  <summary>Service Data Objects (SDOs) for PHP</summary>
  <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (like a database query, an XML file, or a spreadsheet) using a single interface.
@@ -24,16 +24,22 @@
    <email>matthew_peters@uk.ibm.com</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+   <user>slaws</user>
+   <name>Simon Laws</name>
+   <email>simonslaws@googlemail.com</email>
+   <role>lead</role>
+  </maintainer>
   </maintainers>
  <release>
-  <version>1.0.1</version>
-  <date>2006-03-20</date>
+  <version>1.0.2</version>
+  <date>2006-06-30</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>Minor increments and fixes over 1.0.0:
-- allow data objects to be copied between data factories
-- remove memory leaks in _get_properties methods
-- remove memory leak reading value from Seqence
+  <notes>Minor increments and fixes over 1.0.1:
+- fix defect 7458
+- eliminate use of the C++ XMLDAS implementation
+- fix build errors with PHP 5.2
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -42,15 +48,6 @@
    <dir name="/" baseinstalldir="SDO">
     <dir name="commonj">
      <dir name="sdo">
-      <dir name="xmldas">
-       <file role="src" name="XMLDAS.cpp"/>
-       <file role="src" name="XMLDAS.h"/>
-       <file role="src" name="XMLDASCheck.cpp"/>
-       <file role="src" name="XMLDASCheck.h"/>
-       <file role="src" name="XMLDASExport.h"/>
-       <file role="src" name="XMLDASImpl.cpp"/>
-       <file role="src" name="XMLDASImpl.h"/>
-      </dir> <!-- /commonj/sdo/xmldas -->
       <file role="src" name="ChangedDataObjectList.h"/>
       <file role="src" name="ChangedDataObjectListImpl.cpp"/>
       <file role="src" name="ChangedDataObjectListImpl.h"/>
@@ -276,6 +273,45 @@
      </dir> <!-- /DAS/Relational -->
      <file role="php" name="Relational.php"/>
     </dir> <!-- /DAS -->
+    <dir name="scenarios">
+     <dir name="contacts">
+      <file role="test" name="confirm.php"/>
+      <file role="test" name="contactdb_mysql.sql"/>
+      <file role="test" name="contacts_config.inc.php"/>
+      <file role="test" name="contacts_data.inc.php"/>
+      <file role="test" name="contacts_schema.inc.php"/>
+      <file role="test" name="db_config.inc.php"/>
+      <file role="test" name="edit.php"/>
+      <file role="test" name="welcome.php"/>
+     </dir> <!-- /scenarios/contacts -->
+     <dir name="jungle">
+      <file role="test" name="animalTypes.xsd"/>
+      <file role="test" name="jungle.xsd"/>
+      <file role="test" name="populate_jungle.php"/>
+     </dir> <!-- /scenarios/jungle -->
+     <dir name="letter">
+      <file role="test" name="letter.xml"/>
+      <file role="test" name="letter.xsd"/>
+      <file role="test" name="show_letter.php"/>
+     </dir> <!-- /scenarios/letter -->
+     <dir name="rss-media">
+      <file role="test" name="additem.php"/>
+      <file role="test" name="base.xml"/>
+      <file role="test" name="blog.xml"/>
+      <file role="test" name="blog.xsd"/>
+      <file role="test" name="handle_upload.inc.php"/>
+      <file role="test" name="newitem.php"/>
+      <file role="test" name="rss.php"/>
+      <file role="test" name="rss.xsd"/>
+      <file role="test" name="showitem.php"/>
+     </dir> <!-- /scenarios/rss-media -->
+     <dir name="sdo-api">
+      <file role="test" name="contacts.xml"/>
+      <file role="test" name="contacts.xsd"/>
+      <file role="test" name="sdo_api.php"/>
+     </dir> <!-- /scenarios/sdo-api -->
+     <file role="test" name="index.html"/>
+    </dir> <!-- /scenarios -->
     <dir name="tests">
      <dir name="XMLDAS">
       <dir name="Examples">
@@ -333,6 +369,7 @@
      <file role="test" name="SDOAPITest.php"/>
      <file role="test" name="test.inc"/>
     </dir> <!-- /tests -->
+    <file role="src" name="CLA"/>
     <file role="src" name="config.m4"/>
     <file role="src" name="config.w32"/>
     <file role="src" name="CREDITS"/>
@@ -478,7 +515,18 @@ Minor improvements and fixes over 0.9.0.
     <notes>Minor increments and fixes over 1.0.0:
 - allow data objects to be copied between data factories
 - remove memory leaks in _get_properties methods
-- remove memory leak reading value from Seqence
+- remove memory leak reading value from Sequence
+    </notes>
+   </release>
+   <release>
+    <version>1.0.2</version>
+    <date>2006-06-30</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>Minor increments and fixes over 1.0.1:
+- fix defect 7458
+- eliminate use of the C++ XMLDAS implementation
+- fix build errors with PHP 5.2
     </notes>
    </release>
  </changelog>

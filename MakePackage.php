@@ -71,12 +71,16 @@
 // ,
 //'notes' => "First stable release.\n" 
 //. "Minor improvements and fixes over 0.9.0.",
-       'notes' => "Minor increments and fixes over 1.0.0:\n"
-. "- allow data objects to be copied between data factories\n"
-. "- remove memory leaks in _get_properties methods\n"
-. "- remove memory leak reading value from Seqence\n", 
+//'notes' => "Minor increments and fixes over 1.0.0:\n"
+//. "- allow data objects to be copied between data factories\n"
+//. "- remove memory leaks in _get_properties methods\n"
+//. "- remove memory leak reading value from Sequence\n", 
+       'notes' => "Minor increments and fixes over 1.0.1:\n"
+. "- fix defect 7458\n"
+. "- eliminate use of the C++ XMLDAS implementation\n"
+. "- fix build errors with PHP 5.2\n", 
        'simpleoutput' => true,
-       'version' => '1.0.1',
+       'version' => '1.0.2',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
@@ -91,6 +95,7 @@
            '.project',
            'acinclude.m4',
            'aclocal.m4',
+           'config.cache',
            'config.guess',
            'config.h',
            'config.h.in',
@@ -113,25 +118,27 @@
            'run-tests.php',
                         // packaging
            'MakePackage.php',
-           'package.xml',                      
+           'package.xml',    
+           'php.ini',                  
                         // wildcards
            '*.la',
            '*.lo',
            '*~',
            '*.orig',
            'sdo*tgz'
-         ),
-                
+         ),    
      'dir_roles' => array(
          '/' => 'src',
+         'scenarios' => 'test',
          'tests' => 'test', 
-         'DAS' => 'php'),
-       'filelistgenerator' => 'file' // generate from cvs, use file for directory
+         'DAS' => 'php'),         
+    'filelistgenerator' => 'file' // generate from cvs, use file for directory
         )
      );
 	$packagexml->addMaintainer('gcc','lead','Graham Charters','charters@uk.ibm.com');
 	$packagexml->addMaintainer('cem','lead','Caroline Maynard','caroline.maynard@uk.ibm.com');
 	$packagexml->addMaintainer('mfp','lead','Matthew Peters','matthew_peters@uk.ibm.com');
+	$packagexml->addMaintainer('slaws','lead','Simon Laws','simonslaws@googlemail.com');
 	
 	$packagexml->addDependency('php', '5.1.0', 'ge', 'php');
 	
