@@ -29,7 +29,7 @@
 #include "TSRM.h"
 #endif
 
-#define SDO_DAS_XML_VERSION "1.0.1"
+#define SDO_DAS_XML_VERSION "1.0.2"
 
 #ifdef PHP_WIN32
 #    if defined (SDO_DAS_XML_EXPORTS)
