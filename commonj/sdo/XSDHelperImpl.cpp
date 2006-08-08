@@ -54,6 +54,10 @@ namespace commonj
         XSDHelperImpl::XSDHelperImpl(DataFactoryPtr df)
         {
             dataFactory = (DataFactory*)df;
+            if (!dataFactory) 
+            {
+                dataFactory = DataFactory::getDataFactory();
+            }
         }
         
         XSDHelperImpl::~XSDHelperImpl()
@@ -88,19 +92,24 @@ namespace commonj
         {
             SDOSchemaSAX2Parser schemaParser(schemaInfo, this);
             clearErrors();
-            schema >> schemaParser;
+            schema  >> schemaParser;
             defineTypes(schemaParser.getTypeDefinitions());
             return schemaInfo.getTargetNamespaceURI();
         }
         
         const char*  XSDHelperImpl::define(const char* schema)
         {
-            istringstream str(schema);
+            std::istringstream str(schema);
+            SDOSchemaSAX2Parser schemaParser(schemaInfo, this);
+            clearErrors();
+            str  >> schemaParser;
+            defineTypes(schemaParser.getTypeDefinitions());
+            return schemaInfo.getTargetNamespaceURI();
             return define(str);
         }
         
         void XSDHelperImpl::newSubstitute(const char* entryName,
-                                          PropertyDefinition& prop)
+                                          PropertyDefinitionImpl& prop)
         {
             try 
             {
@@ -111,7 +120,7 @@ namespace commonj
                 for (int j = 0; j < pl.size(); j++)
                 {
                     if (!pl[j].getType().isDataType()
-                        && strcmp(pl[j].getType().getURI(),Type::SDOTypeNamespaceURI))
+                        && strcmp(pl[j].getType().getURI(),Type::SDOTypeNamespaceURI.c_str()))
                     {
                         // recurse the tree..
                         newSubstitute(pl[j].getType().getName(),
@@ -129,7 +138,7 @@ namespace commonj
                             ((DASProperty*)&pl[j])->getDASValue("XMLDAS::PropertyInfo");
                             if (pi)
                             {
-                                PropertyDefinition& propdef = (PropertyDefinition&)pi->getPropertyDefinition();
+                                PropertyDefinitionImpl& propdef = (PropertyDefinitionImpl&)pi->getPropertyDefinition();
                                 propdef.substituteNames.push_back(prop.name);
                                 propdef.substituteLocalNames.push_back(prop.localname);
                             }
@@ -144,8 +153,8 @@ namespace commonj
             }
         }
 
-        void XSDHelperImpl::addSubstitutes(PropertyDefinition& prop,
-                                            TypeDefinition& ty)
+        void XSDHelperImpl::addSubstitutes(PropertyDefinitionImpl& prop,
+                                            TypeDefinitionImpl& ty)
         {
             try 
             {
@@ -161,7 +170,7 @@ namespace commonj
                     ((DASProperty*)&pl[j])->getDASValue("XMLDAS::PropertyInfo");
                     if (pi)
                     {
-                        PropertyDefinition& propdef = (PropertyDefinition&)pi->getPropertyDefinition();
+                        PropertyDefinitionImpl& propdef = (PropertyDefinitionImpl&)pi->getPropertyDefinition();
                         if (propdef.isSubstitute && propdef.substituteName.equals(prop.name))
                         {
 
@@ -181,6 +190,19 @@ namespace commonj
             {
             }
         }
+
+
+        /**  defineTypes
+         *
+         * This method works through all the data gathered during parsing
+         * and defines all the types using the data factory.
+         */
+
+        void XSDHelperImpl::defineTypes(TypeDefinitions& types)
+        {
+            defineTypes(types.getTypeDefinitions());
+        }
+
         
         /**  defineTypes
          *
@@ -188,12 +210,9 @@ namespace commonj
          * and defines all the types using the data factory.
          */
 
-        void XSDHelperImpl::defineTypes(TypeDefinitions& typedefs) 
+        void XSDHelperImpl::defineTypes(TypeDefinitionsImpl& typedefs) 
         {
-            if (!dataFactory) 
-            {
-                dataFactory = DataFactory::getDataFactory();
-            }
+            DataFactoryImpl* df = (DataFactoryImpl*)(DataFactory*)dataFactory;
             
             XMLDAS_TypeDefs types = typedefs.types;
             XMLDAS_TypeDefs::iterator iter;
@@ -201,7 +220,7 @@ namespace commonj
 
             for (iter=types.begin(); iter != types.end(); iter++)
             {
-                TypeDefinition& ty = iter->second;
+                TypeDefinitionImpl& ty = iter->second;
                 try
                 {
                     /*
@@ -226,9 +245,9 @@ namespace commonj
                     cout << addTypeCode.c_str() <<endl;
                     */
 
-                    dataFactory->addType(ty.uri, ty.name, ty.isSequenced, 
-                                         ty.isOpen, ty.isAbstract);
-                    dataFactory->setDASValue(
+                    df->addType(ty.uri, ty.name, ty.isSequenced, 
+                                         ty.isOpen, ty.isAbstract, ty.dataType, ty.isFromList);
+                    df->setDASValue(
                         ty.uri, ty.name,
                         "XMLDAS::TypeInfo",
                         new XSDTypeInfo(ty));
@@ -254,7 +273,7 @@ namespace commonj
                             }
                             if (!al1.isNull() && !al1.equals(""))
                             {
-                                dataFactory->setAlias(
+                                df->setAlias(
                                     ty.uri,
                                     ty.name,
                                     (const char*)al1);
@@ -270,7 +289,7 @@ namespace commonj
             }
             for (iter=types.begin(); iter != types.end(); iter++)
             {
-                TypeDefinition& ty = iter->second;
+                TypeDefinitionImpl& ty = iter->second;
                 if (!ty.parentTypeName.isNull())
                 {
                     try 
@@ -294,7 +313,7 @@ namespace commonj
                         cout << addTypeCode.c_str() <<endl;
                         */
 
-                       dataFactory->setBaseType(
+                       df->setBaseType(
                             ty.uri,
                             ty.name,
                             ty.parentTypeUri,
@@ -310,7 +329,7 @@ namespace commonj
                 XmlDasPropertyDefs::iterator propsIter;
                 for (propsIter = ty.properties.begin(); propsIter != ty.properties.end(); propsIter++)
                 {
-                    PropertyDefinition& prop = *propsIter;
+                    PropertyDefinitionImpl& prop = *propsIter;
                     
                     // For a refence we need to determine the type from the
                     // global element declaration
@@ -324,11 +343,11 @@ namespace commonj
 
                         
                         XMLDAS_TypeDefs::iterator refTypeIter = 
-                            types.find(TypeDefinitions::getTypeQName(prop.typeUri, "RootType"));
+                            types.find(TypeDefinitionsImpl::getTypeQName(prop.typeUri, "RootType"));
                         if(refTypeIter != types.end())
                         {
 
-                            TypeDefinition rootTy = refTypeIter->second;
+                            TypeDefinitionImpl rootTy = refTypeIter->second;
                             
                             // find the property on the root type
                             XmlDasPropertyDefs::iterator refPropsIter;
@@ -363,14 +382,10 @@ namespace commonj
                                     if (prop.typeName.equals(pl[j].getName())
                                         || (pi && prop.typeName.equals(pi->getPropertyDefinition().localname)))
                                     {
-                                        const PropertyDefinition& propdef = pi->getPropertyDefinition();
-                                        if (propdef.localname.equals(prop.typeName))
-                                        {
-                                            prop.typeUri = pl[j].getType().getURI();
-                                            prop.typeName = pl[j].getType().getName();
-                                            refFound = true;
-                                            break;
-                                        }
+                                        prop.typeUri = pl[j].getType().getURI();
+                                        prop.typeName = pl[j].getType().getName();
+                                        refFound = true;
+                                        break;
                                     }
                                 }
                             }
@@ -392,7 +407,7 @@ namespace commonj
                         continue;
                     }
                     XMLDAS_TypeDefs::iterator propTypeIter = 
-                        types.find(TypeDefinitions::getTypeQName(prop.typeUri, prop.typeName));
+                        types.find(TypeDefinitionsImpl::getTypeQName(prop.typeUri, prop.typeName));
                     if(propTypeIter != types.end())
                     {
                         prop.typeName = propTypeIter->second.name;
@@ -400,36 +415,8 @@ namespace commonj
 
                     try 
                     {
-                        /*
-                        string isManyCode = "false";
-                        if (prop.isMany)
-                            isManyCode = "true";
-                        string isReadOnlyCode = "false";
-                        if (prop.isReadOnly)
-                            isReadOnlyCode = "true";
-                        string isContainmentCode = "false";
-                        if (prop.isContainment)
-                            isContainmentCode = "true";
-                        string uriCode = "0";
-                        if (!ty.uri.isNull())
-                        {
-                            uriCode = "\"" + string(ty.uri) + "\"";
-                        }
-                        string propUriCode = "0";
-                        if (!ty.uri.isNull())
-                        {
-                            propUriCode = "\"" + string(prop.typeUri) + "\"";
-                        }
-                        
-                        string addTypeCode = "dataFactory->addPropertyToType(\n"
-                            +  uriCode + ", \"" + string(ty.name) + "\", \n"
-                            + "\"" + string(prop.name) + "\", \n"
-                            + propUriCode + ", \"" + string(prop.typeName) + "\", \n"
-                            + isManyCode + ", " + isReadOnlyCode + ", " + isContainmentCode +");";
-                        cout << prop.isQName << addTypeCode.c_str() << endl;
-                        */
 
-                        dataFactory->addPropertyToType(ty.uri, ty.name,
+                        df->addPropertyToType(ty.uri, ty.name,
                             prop.name,
                             prop.typeUri,
                             prop.typeName,
@@ -459,7 +446,7 @@ namespace commonj
                                 }
                                 if (!al1.isNull() && !al1.equals(""))
                                 {
-                                    dataFactory->setAlias(
+                                    df->setAlias(
                                     (const char*)ty.uri,
                                     (const char*)ty.name,
                                     (const char*)prop.name,
@@ -482,10 +469,10 @@ namespace commonj
                         }
                         
                         // Do not add DASValue to ChangeSummary
-                        if (!(prop.typeUri.equals(Type::SDOTypeNamespaceURI)
+                        if (!(prop.typeUri.equals(Type::SDOTypeNamespaceURI.c_str())
                             && prop.typeName.equals("ChangeSummary")))
                         {
-                            dataFactory->setDASValue(
+                            df->setDASValue(
                                 ty.uri, ty.name,
                                 prop.name,
                                 "XMLDAS::PropertyInfo",

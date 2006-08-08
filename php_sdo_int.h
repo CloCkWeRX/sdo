@@ -33,8 +33,9 @@
 #include "commonj/sdo/SDOSPI.h"
 
 using namespace commonj::sdo;
+using std::ostringstream;
 
-#define SDO_VERSION "1.0.2"
+#define SDO_VERSION "1.0.3"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"

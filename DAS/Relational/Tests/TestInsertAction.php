@@ -101,7 +101,7 @@ class TestInsertAction extends PHPUnit2_Framework_TestCase
 		$company->name = 'acme';
 		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
 //		$insert_action->addFKToParentToSettings();
-		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$sql = $insert_action->toSQL();
 		$insert_action->buildValueList();
 		$value_list = $insert_action->getValueList();
 		$this->assertTrue($sql == 'INSERT INTO company (name) VALUES (?);', "Generated SQL was incorrect: $sql");
@@ -116,7 +116,7 @@ class TestInsertAction extends PHPUnit2_Framework_TestCase
 		$company->employee_of_the_month = null;
 		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
 //		$insert_action->addFKToParentToSettings();
-		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$sql = $insert_action->toSQL();
 		$insert_action->buildValueList();
 		$value_list = $insert_action->getValueList();
 		$this->assertTrue($sql == 'INSERT INTO company (name,employee_of_the_month) VALUES (?,?);', "Generated SQL was incorrect: $sql");
@@ -131,7 +131,7 @@ class TestInsertAction extends PHPUnit2_Framework_TestCase
 		$company->name = '';
 		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
 //		$insert_action->addFKToParentToSettings();
-		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$sql = $insert_action->toSQL();
 		$insert_action->buildValueList();
 		$value_list = $insert_action->getValueList();
 		$this->assertTrue($sql == 'INSERT INTO company (name) VALUES (?);', "Generated SQL was incorrect: $sql");
@@ -145,7 +145,7 @@ class TestInsertAction extends PHPUnit2_Framework_TestCase
 		$company->name = 0;
 		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$company);
 //		$insert_action->addFKToParentToSettings();
-		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$sql = $insert_action->toSQL();
 		$insert_action->buildValueList();
 		$value_list = $insert_action->getValueList();
 		$this->assertTrue($sql == 'INSERT INTO company (name) VALUES (?);', "Generated SQL was incorrect: $sql");
@@ -161,7 +161,7 @@ class TestInsertAction extends PHPUnit2_Framework_TestCase
 		$company->id = 1001;
 		$insert_action = new SDO_DAS_Relational_InsertAction($this->object_model,$department);
 		$insert_action->addFKToParentToSettings();
-		$sql = $insert_action->toSQL($this->settings_for_insert);
+		$sql = $insert_action->toSQL();
 		$insert_action->buildValueList();
 		$value_list = $insert_action->getValueList();
 		$this->assertTrue($sql == 'INSERT INTO department (name,co_id) VALUES (?,?);', "Generated SQL was incorrect: $sql");

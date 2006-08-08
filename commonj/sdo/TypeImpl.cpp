@@ -33,6 +33,7 @@ using namespace std;
 
 #include <list>
 #include <vector>
+using namespace std;
 
 #include "commonj/sdo/SDORuntimeException.h"
 
@@ -59,7 +60,8 @@ namespace sdo{
     "URI"        ,
     "DataObject",
     "ChangeSummary",
-    "Text"
+    "Text",
+    "OpenDataObject"
      };
 
 
@@ -77,6 +79,15 @@ namespace sdo{
         return changeSummaryType;
     }
 
+
+    ///////////////////////////////////////////////////////////////////////////
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
+    bool TypeImpl::isFromList() const
+    {
+        return bFromList;
+    }
     ///////////////////////////////////////////////////////////////////////////
     //
     ///////////////////////////////////////////////////////////////////////////
@@ -94,7 +105,8 @@ namespace sdo{
     {
         isResolving = false;
         isResolved = false;
-        brestriction = false;
+        brestriction = t.brestriction;
+        bFromList = t.bFromList;
     }
 
      TypeImpl::TypeImpl(const Type* base, const char* uri, 
@@ -108,18 +120,22 @@ namespace sdo{
         init(uri,inname,isSeq,isOp, isAbs, isData);
         baseType = (TypeImpl*)base;
         brestriction = isRestriction;
+        bFromList = false;
      }
 
      TypeImpl::TypeImpl(const char* uri, const char* inname, 
          bool isSeq,
          bool isOp,
          bool isAbs,
-         bool isData) 
+         bool isData,
+         bool isFromList) 
          
      {
         init(uri,inname,isSeq,isOp,isAbs, isData);
         baseType = 0;
         brestriction = false;
+        bFromList= false;
+        bFromList = isFromList;
      }
 
      void TypeImpl::init(const char* uri, const char* inname, 
@@ -150,7 +166,7 @@ namespace sdo{
         typeURI = new char[strlen(uri)+1];
         strcpy(typeURI,uri);
 
-        if (!strcmp(uri,Type::SDOTypeNamespaceURI))  {
+        if (!strcmp(uri,Type::SDOTypeNamespaceURI.c_str()))  {
             for (int i = 0; i < num_types ; i++) {
                 if (!strcmp(inname,types[i])) {
                     typeEnum = (Types)i;
@@ -194,7 +210,7 @@ namespace sdo{
          }
          if (name != 0)delete name;
          if (typeURI != 0) delete typeURI;
-         for (int j = 0; j < aliases.size();j++)
+         for (unsigned int j = 0; j < aliases.size();j++)
          {
              delete aliases[j];
          }
@@ -234,6 +250,8 @@ namespace sdo{
             typeEnum = baseType->typeEnum;
         }
 
+        // Removing the following and allowing "sequenced" to be inherited from base type
+        /*
         if (isSequenced && !baseType->isSequenced)
         {
             // Its an error to be sequenced and inherit from a
@@ -246,10 +264,11 @@ namespace sdo{
             SDOUnsupportedOperationException, 
             msg.c_str());
         }
+        */
 
         isSequenced = baseType->isSequenced; 
-        // if the base is open then this type must be open too.
 
+        // if the base is open then this type must be open too.
         if (baseType->isOpenType())
         {
             isOpen = true;
@@ -450,6 +469,18 @@ namespace sdo{
         }
         return (Property&)*pi;
     }
+  const Property& TypeImpl::getProperty(const SDOString& propertyName) const 
+  {
+    PropertyImpl* pi = getPropertyImpl(propertyName); // ??? GMW
+    if (pi == 0)
+      {
+        string msg("Property not found:");
+        msg += propertyName;
+        SDO_THROW_EXCEPTION("getProperty", 
+                            SDOPropertyNotFoundException, msg.c_str());
+      }
+    return (Property&)*pi;
+  }
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -479,14 +510,14 @@ namespace sdo{
             {
                     return ((*i)->getTypeImpl());
             }
-            for (int k=0;k < (*i)->getAliasCount(); k++)
+            for (unsigned int k=0;k < (*i)->getAliasCount(); k++)
             {
                 if (!strcmp(propertyName,(*i)->getAlias(k)))
                 {
                     return ((*i)->getTypeImpl());
                 }
             }
-            for (int j=0;j < (*i)->getSubstitutionCount(); j++)
+            for (unsigned int j=0;j < (*i)->getSubstitutionCount(); j++)
             {
                 if (!strcmp(propertyName,(*i)->getSubstitutionName(j)))
                 {
@@ -509,9 +540,9 @@ namespace sdo{
 
         if (propertyName == 0 || strlen(propertyName) == 0) return 0;
 
-        char*    tokenend    = strchr(propertyName,'/');
-        char *    bracket        = strchr(propertyName,'[');
-        char*    dot            = strchr(propertyName,'.');
+        char*    tokenend    = (char*) strchr(propertyName,'/');
+        char *    bracket        =  (char*) strchr(propertyName,'[');
+        char*    dot            =  (char*) strchr(propertyName,'.');
         char*   copy;
         
 
@@ -563,7 +594,7 @@ namespace sdo{
                     return (PropertyImpl*)(*i);
                 }
             }
-            for (int j=0;j < (*i)->getSubstitutionCount(); j++)
+            for (unsigned int j=0;j < (*i)->getSubstitutionCount(); j++)
             {
                 if (!strcmp(copy,(*i)->getSubstitutionName(j)))
                 {
@@ -587,7 +618,7 @@ namespace sdo{
                     }
                 }
             }
-            for (int k=0;k < (*i)->getAliasCount(); k++)
+            for (unsigned int k=0;k < (*i)->getAliasCount(); k++)
             {
                 if (!strcmp(copy,(*i)->getAlias(k)))
                 {
@@ -614,7 +645,119 @@ namespace sdo{
         }
         return 0;
     }
+  // +++
+  PropertyImpl* TypeImpl::getPropertyImpl(const SDOString& propertyName) const
+  {
 
+    // Extension - find the property from an xpath
+    // you should not be able to have both "." and "[" before a "/" - this is assumed.
+
+    if (propertyName.length() == 0) return 0;
+
+    // strchr returns NULL if target not found
+    // find_first_of returns string::npos in that case
+    // find_first_of returns the subscript of the character found eg 0 if it is the first
+    size_t tokenend = propertyName.find_first_of('/');
+    size_t bracket = propertyName.find_first_of('[');
+    size_t dot = propertyName.find_first_of('.');
+    size_t dotOrBracketOrSlash = propertyName.find_first_of(".[/");
+    SDOString copy;
+    // char* copy;
+
+    int len = propertyName.length();
+    if (dotOrBracketOrSlash != string::npos)
+      {
+        len = dotOrBracketOrSlash;
+      }
+
+    if (len != 0)
+      {
+        copy.assign(propertyName, 0, len);
+      }
+    else
+      {
+        copy = propertyName;
+      }
+            
+    std::list<PropertyImpl*>::const_iterator i;    
+    for (i = props.begin(); i != props.end(); ++i)
+      {
+        if (!strcmp(copy.c_str(),(*i)->getName())) // ie the two strings are the same
+          {
+            // delete copy;
+            if ((tokenend != string::npos) && (propertyName.length() - tokenend) > 1) 
+              {
+                // There is someting to the right of the "/"
+                const TypeImpl* ti = (*i)->getTypeImpl();
+                if (ti != 0)
+                  {
+                    PropertyImpl* p = ti->getPropertyImpl(SDOString(propertyName, tokenend + 1));
+                    return p;
+                  }
+                else
+                  {
+                    return (PropertyImpl*)(*i);
+                  }
+              }
+            else {
+              return (PropertyImpl*)(*i);
+            }
+          }
+
+        for (unsigned int j = 0; j < (*i)->getSubstitutionCount(); j++)
+          {
+            if (!strcmp(copy.c_str(), (*i)->getSubstitutionName(j))) // ie the two strings are the same
+              {
+                // delete copy;
+                if ((tokenend != string::npos) && (propertyName.length() - tokenend) > 1) 
+                  {
+                    // There is someting to the right of the "/"
+                    const TypeImpl* ti = (*i)->getTypeImpl();
+                    if (ti != 0)
+                      {
+                        // PropertyImpl* p = ti->getPropertyImpl((const char *)(tokenend+1));
+                        PropertyImpl* p = ti->getPropertyImpl(SDOString(propertyName, tokenend + 1));
+                        return p;
+                      }
+                    else
+                      {
+                        return (PropertyImpl*)(*i);
+                      }
+                  }
+                else {
+                  return (PropertyImpl*)(*i);
+                }
+              }
+          }
+        for (unsigned int k = 0; k < (*i)->getAliasCount(); k++)
+          {
+            if (!strcmp(copy.c_str(), (*i)->getAlias(k))) // ie the two strings are the same
+              {
+                // delete copy;
+                if ((tokenend != string::npos) && (propertyName.length() - tokenend) > 1)
+                  {
+                    const TypeImpl* ti = (*i)->getTypeImpl();
+                    if (ti != 0)
+                      {
+                        // PropertyImpl* p = ti->getPropertyImpl((const char *)(tokenend+1));
+                        PropertyImpl* p = ti->getPropertyImpl(SDOString(propertyName, tokenend + 1));
+                        return p;
+                      }
+                    else
+                      {
+                        return (PropertyImpl*)(*i);
+                      }
+                  }
+                else {
+                  return (PropertyImpl*)(*i);
+                }
+              }
+          }
+      }
+    return 0;
+  }
+
+  // ---
 
     ///////////////////////////////////////////////////////////////////////////
     // Returns the property with the specified name.
@@ -630,7 +773,7 @@ namespace sdo{
             {
                 return (PropertyImpl*)(*i);
             }
-            for (int k=0;k < (*i)->getAliasCount(); k++)
+            for (unsigned int k=0;k < (*i)->getAliasCount(); k++)
             {
                 if (!strcmp(propertyName,(*i)->getAlias(k)))
                 {
@@ -662,6 +805,23 @@ namespace sdo{
         SDO_THROW_EXCEPTION("getPropertyIndex", 
             SDOPropertyNotFoundException, msg.c_str());
     }
+  unsigned int TypeImpl::getPropertyIndex(const SDOString& propertyName) const 
+  {
+    std::list<PropertyImpl*>::const_iterator i;    
+    int j = 0;
+    for (i = props.begin(); i != props.end(); ++i)
+      {
+        if (!strcmp(propertyName.c_str(), (*i)->getName()))
+          {
+            return j;
+          }
+        j++;
+      }
+    string msg("Property not found:");
+    msg += propertyName;
+    SDO_THROW_EXCEPTION("getPropertyIndex", 
+                        SDOPropertyNotFoundException, msg.c_str());
+  }
     ///////////////////////////////////////////////////////////////////////////
     // Returns the property with the specified name.
     ///////////////////////////////////////////////////////////////////////////
@@ -940,7 +1100,7 @@ namespace sdo{
             {
                 if (*value != 0) delete ((wchar_t*)*value);
                 wchar_t* vw = new wchar_t[strlen(c)+1];
-                for (int i=0;i< strlen(c);i++)
+                for (unsigned int i=0;i< strlen(c);i++)
                 {
                     vw[i] = (wchar_t)c[i];
                 }
@@ -953,7 +1113,7 @@ namespace sdo{
             {
                 if (*value != 0) delete ((char*)*value);
                 char* vc = new char[strlen(c)+1];
-                for (int i=0;i< strlen(c);i++)
+                for (unsigned int i=0;i< strlen(c);i++)
                 {
                     vc[i] =  (char)c[i];
                 }
@@ -978,10 +1138,122 @@ namespace sdo{
     return 0;
     }
 
+  // +++
+
+  // This is set CString...
+  // The value supplied in s is converted and written to value.
+  unsigned int TypeImpl::convert(void** value, const SDOString& c) const
+  {
+    switch (typeEnum)
+      {
+      case BooleanType:
+        if (*value != 0) delete ((char*) *value);
+        *value = new char[sizeof(long)];
+
+        if (c == "true")
+          {
+            *(long*)*value = 0;
+          }
+        else
+          {
+            *(long*)*value = 1;
+          }
+        return sizeof(long);
+
+      case ByteType:
+      case CharacterType:
+      case IntegerType:
+      case ShortType:
+        if (*value != 0) delete ((char*)*value);
+
+        *value = new char[sizeof(long)];
+        *(long*)*value = atoi(c.c_str());
+        return sizeof(long);
+
+      case DoubleType:
+        if (*value != 0) delete ((char*)*value);
+
+        *value = new char[sizeof(long double)];
+        // TODO - atof not suitable here
+        *(long double*)*value = (long double)atof(c.c_str());
+        return sizeof(long double);
+
+      case FloatType:    
+        if (*value != 0) delete ((char*)*value);
+
+        *value = new char[sizeof(float)];
+        *(float*)*value = (float)atof(c.c_str());
+        return sizeof(float);
+
+      case LongType:   
+        if (*value != 0) delete ((char*)*value);
+
+        *value = new char[sizeof(int64_t)];
+#if defined(WIN32)  || defined (_WINDOWS)
+        *(int64_t*)*value = (int64_t)_atoi64(c.c_str());
+#else 
+        *(int64_t*)*value = (int64_t)strtoll(c.c_str(), NULL, 0);
+#endif
+        return sizeof(int64_t);
+
+      case DateType:
+        if (*value != 0) delete ((char*)*value);
+        *value = new char[sizeof(time_t)];
+        *(time_t*)*value = (time_t)atoi(c.c_str());
+        return sizeof(time_t);
+            
+      case BigDecimalType: 
+      case BigIntegerType: 
+      case StringType:    
+      case UriType:
+        {
+          if (*value != 0) delete ((wchar_t*)*value);
+          wchar_t* vw = new wchar_t[c.length() + 1];
+          for (unsigned int i = 0; i < c.length(); i++)
+            {
+              vw[i] = (wchar_t)c[i];
+            }
+          vw[c.length()] = 0;
+          *value = (void*)vw;
+          return c.length();
+        }
+        break;
+      case BytesType:
+        {
+          if (*value != 0) delete ((char*)*value);
+          char* vc = new char[c.length() + 1];
+          for (unsigned int i = 0; i < c.length(); i++)
+            {
+              vc[i] =  (char)c[i];
+            }
+          vc[c.length()] = 0;
+          *value = (void*)vc;
+          return c.length();
+        }
+        break;
+             
+      case OtherTypes:
+      case DataObjectType: 
+      case ChangeSummaryType:
+      default:
+        {
+          string msg("Cannot set CString on object of type:");
+          msg += getName();
+          SDO_THROW_EXCEPTION("setString" ,
+                              SDOInvalidConversionException, msg.c_str());
+          break;
+        }
+      }
+    return 0;
+  }
+
+
+  // ---
+
     // setString
     unsigned int TypeImpl::convert(void** value,const wchar_t* b, unsigned int len) const
     {
-    int i;
+    unsigned int i;
     switch (typeEnum)
         {
         case BigDecimalType:
@@ -1053,7 +1325,7 @@ namespace sdo{
                 if (*value != 0)delete ((char*)*value);
                 *value = new char[sizeof(long)];
                 int val = 0;
-                for (int j=0;j<len;j++)
+                for (unsigned int j=0;j<len;j++)
                 {
                     val += (1+ (10*j)) * ((char)b[len-1-j] - (char)'0');
                 }
@@ -1066,7 +1338,7 @@ namespace sdo{
                 if (*value != 0)delete ((char*)*value);
                 *value = new char[sizeof(int64_t)];
                 int64_t val = 0;
-                for (int j=0;j<len;j++)
+                for (unsigned int j=0;j<len;j++)
                 {
                     val += (int64_t)(1+ (10*j)) * ((char)b[len-1-j] - (char)'0');
                 }
@@ -1094,7 +1366,7 @@ namespace sdo{
     // setBytes
     unsigned int TypeImpl::convert(void** value,const char* b, unsigned int len) const
     {
-    int i;
+    unsigned int i;
     switch (typeEnum)
         {
         case BytesType:
@@ -1164,7 +1436,7 @@ namespace sdo{
                 if (*value != 0)delete ((char*)*value);
                 *value = new char[sizeof(long)];
                 int val = 0;
-                for (int j=0;j<len;j++)
+                for (unsigned int j=0;j<len;j++)
                 {
                     val += (1+ (10*j)) * ((char)b[len-1-j] - (char)'0');
                 }
@@ -1177,7 +1449,7 @@ namespace sdo{
                 if (*value != 0)delete ((char*)*value);
                 *value = new char[sizeof(int64_t)];
                 int64_t val = 0;
-                for (int j=0;j<len;j++)
+                for (unsigned int j=0;j<len;j++)
                 {
                     val += (int64_t)(1+ (10*j)) * ((char)b[len-1-j] - (char)'0');
                 }    
@@ -1202,7 +1474,119 @@ namespace sdo{
         }
     return 0;
     }
-    
+
+  // +++
+
+  unsigned int TypeImpl::convert(void** value, const SDOString& b, unsigned int len) const
+  {
+    unsigned int i;
+    switch (typeEnum)
+      {
+      case BytesType:
+        {
+          if (*value != 0) delete ((char*)*value);
+
+          char* vc = new char[len + 1];
+          b.copy(vc, len);
+          vc[len] = 0;
+
+          *value = (void*)vc;
+          return len;
+        }
+
+      case BigDecimalType: 
+      case BigIntegerType: 
+      case UriType:
+      case StringType:
+        {
+          if (*value != 0) delete ((wchar_t*)*value);
+
+          wchar_t* vw = new wchar_t[len+1];
+          // Can't use std::string.copy() because we are copying into wchar_t elements.
+          for (i=0;i<len;i++)
+            {
+              vw[i] = b[i];
+            }
+          vw[len] = 0;
+          *value = (void*)vw;
+          return len;
+        }
+
+      case BooleanType:
+        if (*value != 0)delete ((char*)*value);
+        *value = new char[sizeof(long)];
+        if (len > 4) 
+          {
+            *(long*)*value = 0;
+          }
+        else 
+          {
+            if (b == "true")
+              *(long*)*value = 1;
+            else *(long*)*value = 0;
+          }
+        return sizeof(long);
+
+      case ByteType:
+      case CharacterType: 
+        if (*value != 0)delete ((char*)*value);
+        *value = new char[sizeof(long)];
+        if (len > 0)
+          {
+            *(long*)*value = (long)b[0];
+          }
+        else
+          {
+            *(long*)*value = (long)0;
+          }
+        return sizeof(long);
+
+      case IntegerType: 
+      case ShortType:
+        {
+          if (*value != 0)delete ((char*)*value);
+          *value = new char[sizeof(long)];
+          int val = 0;
+          for (unsigned int j=0;j<len;j++)
+            {
+              val += (1+ (10*j)) * ((char)b[len-1-j] - (char)'0');
+            }
+          *(long*)*value = (long)val;
+          return sizeof(long);
+        }
+
+      case LongType:
+        {
+          if (*value != 0)delete ((char*)*value);
+          *value = new char[sizeof(int64_t)];
+          int64_t val = 0;
+          for (unsigned int j=0;j<len;j++)
+            {
+              val += (int64_t)(1+ (10*j)) * ((char)b[len-1-j] - (char)'0');
+            }    
+          *(int64_t*)*value = (int64_t)val;
+          return sizeof(long);
+        }
+
+      case DoubleType:    
+      case FloatType:    
+      case DateType:
+      case OtherTypes:
+      case DataObjectType: 
+      case ChangeSummaryType:
+      default:
+        {
+          string msg("Cannot set Bytes on object of type:");
+          msg += getName();
+          SDO_THROW_EXCEPTION("setBytes" ,
+                              SDOInvalidConversionException, msg.c_str());
+          return 0;
+        }
+      }
+    return 0;
+  }
+
+  // ---    
     
     unsigned int TypeImpl::convert(void** value,const short s) const
     {
@@ -1239,7 +1623,7 @@ namespace sdo{
         }
     }
 
-#if __WORDSIZE != 64
+#if __WORDSIZE !=64
     // setInteger
     unsigned int TypeImpl::convert(void** value,const long i) const
     {
@@ -1330,6 +1714,7 @@ namespace sdo{
             }
         }
     }
+
 #endif
 
     // setLongLong
@@ -1645,7 +2030,7 @@ namespace sdo{
             char* tmpstr = new char[MAX_LONG_SIZE];
             int j = 0;
 #endif
-    int i;
+    unsigned int i;
     switch (typeEnum) 
         {
 
@@ -1859,7 +2244,7 @@ namespace sdo{
     unsigned int TypeImpl::convertToBytes(void* value, char* outval, unsigned int len,
         unsigned int max) const
     {
-    int i;
+    unsigned int i;
     switch (typeEnum) 
         {
         case BytesType:
@@ -1989,10 +2374,174 @@ namespace sdo{
     return 0;
     }
 
+  // +++
+
+  // value is a pointer to the byte stream that is the value to convert
+  // outval is the resulting string representation of value
+  // len is the length of the input byte stream, it is used only when the length cannot be inferred from other information.
+  // max is the maximum size allowed for the output byte stream. (Not strictly needed when the output is an std::string but we maintain the behaviour from the earlier method.
+
+  // Questions
+  // 1. Why isn't value const?
+  // 
+  unsigned int TypeImpl::convertToBytes(const void* value,
+                                        SDOString& outval,
+                                        unsigned int len,
+                                        unsigned int max) const
+  {
+    unsigned int i;
+    switch (typeEnum) 
+      {
+      case BytesType:
+        {
+          if (value == 0) return 0;
+
+          const char* tempPtr = (const char*) value;
+          unsigned int count = (len > max) ? max : len;
+          outval.assign(tempPtr, count);
+
+          return count;
+        }
+
+      case BigDecimalType: 
+      case BigIntegerType: 
+      case UriType:
+      case StringType:
+        {
+          if (value == 0) return 0;
+
+          const wchar_t* tempPtr = (const wchar_t*) value;
+          unsigned int count = (len > max) ? max : len;
+
+          // The following loop copies the low byte from each 2 byte wchar_t
+          // into one byte of the target array eg H_E_L_P -> HELP
+          for (i = 0; (i < count); i++)
+            {
+              outval[i] = (char)(tempPtr[i]);
+            }
+          return count;
+        }
+
+      case BooleanType:
+        {
+          if (value == 0 || *(const long*)value == 0) {
+            if (max < 5) return 0;
+            outval = "false";
+            return 5;
+          }
+          else {
+            if (max < 4) return 0;
+            outval = "true";
+            return 4;
+          }
+          return 0;
+        }
+
+      case CharacterType:
+      case ByteType:
+        {
+          if (value == 0) return 0;
+
+          const long tmp = *(const long*)value;
+          outval[0] = (char)(tmp&0xFF);
+          return 1;
+        }
+
+      case ShortType:
+      case IntegerType:
+        {
+          if (value == 0) return 0;
+
+          const long tmp = *(const long*) value;
+          char* tmpstr = new char[MAX_LONG_SIZE + 1];
+          sprintf(tmpstr, "%ld", tmp);
+          if (strlen(tmpstr) > max)
+            {
+              delete tmpstr;
+              return 0;
+            }
+          outval = tmpstr;
+          delete tmpstr;
+          return outval.length();
+        }
+
+      case LongType:
+        {
+          if (value == 0) return 0;
+
+          const int64_t tmp = *(const int64_t*)value;
+          char* tmpstr = new char[MAX_LONG_SIZE + 1];
+          sprintf(tmpstr, "%lld", tmp);
+          if (strlen(tmpstr) > max) 
+            {
+              delete tmpstr;
+              return 0;
+            }
+          outval = tmpstr;
+          delete tmpstr;
+          return outval.length();
+        }
+      case DateType:
+        {
+          if (value == 0) return 0;
+
+          string msg("Conversion to string not implemented from type:");
+          msg += getName();
+          SDO_THROW_EXCEPTION("getBytes" ,
+                              SDOInvalidConversionException, msg.c_str());
+          break;
+        }
+
+      case DoubleType:
+          {
+              if (value == 0) return 0;
+
+              if (max < MAX_DOUBLE_SIZE) return 0;
+
+              char* tmpstr = new char[MAX_DOUBLE_SIZE + 1];
+              sprintf(tmpstr, "%.3Le", *(const long double*)value);
+              outval = tmpstr;
+              delete tmpstr;
+              return outval.length();
+          }
+
+      case FloatType:
+        {
+        if (value == 0) return 0;
+
+        if (max < MAX_FLOAT_SIZE) return 0;
+
+        char* tmpstr = new char[MAX_FLOAT_SIZE + 1];
+        sprintf(tmpstr, "%.3Le", *(const float*)value);
+        outval = tmpstr;
+        delete tmpstr;
+        return outval.length();
+        }
+
+      case OtherTypes:
+      case DataObjectType:
+      default:
+        {
+          if (max < 9) return 0;
+
+          char tmpstr[9];
+          sprintf(tmpstr, "%08x", value);
+          outval = tmpstr;
+          //string msg("Cannot get Bytes from object of type:");
+          //msg += getName();
+          //SDO_THROW_EXCEPTION("getBytes" ,
+          //  SDOInvalidConversionException, msg.c_str());
+          return outval.length();
+        }
+      }
+    return 0;
+  }
+
+  // ---
 
     const char* TypeImpl::convertToCString(void* value, char** asstringbuf, unsigned int len) const
     {
-    int i;
+    unsigned int i;
 
     switch (typeEnum) 
         {
@@ -2851,8 +3400,7 @@ namespace sdo{
                     return 0.0;
                 }
                 char* tmp = new char[len+1];
-                int j = 0;
-                for (j=0;j<len;j++)
+                for (unsigned int j=0;j<len;j++)
                 {
                     tmp[j] = (char)((wchar_t*)value)[j];
                 }
@@ -3036,8 +3584,7 @@ namespace sdo{
                     return 0.0;
                 }
                 char* tmp = new char[len+1];
-                int j = 0;
-                for (j=0;j<len;j++)
+                for (unsigned int j=0;j<len;j++)
                 {
                     tmp[j] = (char)((wchar_t*)value)[j];
                 }

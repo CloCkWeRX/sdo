@@ -25,7 +25,8 @@
 #include "commonj/sdo/SAX2Parser.h"
 #include "commonj/sdo/SchemaInfo.h"
 #include "stack"
-#include "commonj/sdo/TypeDefinitions.h"
+#include "commonj/sdo/TypeDefinitionsImpl.h"
+#include "commonj/sdo/GroupDefinition.h"
 #include "commonj/sdo/XMLQName.h"
 #include "commonj/sdo/ParserErrorSetter.h"
 
@@ -33,7 +34,9 @@ namespace commonj
 {
     namespace sdo
     {
-        
+
+
+
 /**
  * SDOSAX2Parser implements SAX2Parser.
  * This class gets called back by the libxml library, and
@@ -62,10 +65,18 @@ namespace commonj
                 const SDOXMLString& localname,
                 const SDOXMLString& prefix,
                 const SDOXMLString& URI);
+
+
+            virtual void stream(std::istream& input);
+
+            virtual int parse(const char* filename);
+ 
+            virtual void endDocument();
+
             
             const SDOXMLString& getTargetNamespaceURI() const {return schemaInfo.getTargetNamespaceURI();}
             
-            TypeDefinitions& getTypeDefinitions() {return typeDefinitions;}
+            TypeDefinitionsImpl& getTypeDefinitions() {return typeDefinitions;}
             
             friend std::istream& operator>>(std::istream& input, SDOSchemaSAX2Parser& parser);
             friend std::istringstream& operator>>(std::istringstream& input, SDOSchemaSAX2Parser& parser);
@@ -73,12 +84,41 @@ namespace commonj
 
         private:
 
-            const char* currentFile;
+            // group handling.
+
+            int inGroup;
+            bool preParsing;
+            GroupDefinition* currentGroup;
+            std::vector<GroupDefinition>    groupList;
+
             bool bInSchema; // only parse when within a schema
             bool bInvalidElement; // where element content is not valid
             bool bInInvalidContent; // actually inside invalid content.
+            bool bInvalidList; // a list with no type - not supported.
 
-        
+            virtual void replayEvents(
+                const SDOXMLString& uri,
+                const SDOXMLString& name,
+                bool isGroup,
+                const SAX2Attributes& groupAttributes);
+
+            virtual void storeStartElementEvent(
+                                const SDOXMLString& localname,
+                                const SDOXMLString& prefix,
+                                const SDOXMLString& URI,
+                                const SAX2Namespaces& namespaces,
+                                const SAX2Attributes& attributes);
+
+            virtual void  storeEndElementEvent(
+                                const SDOXMLString& localname,
+                                const SDOXMLString& prefix,
+                                const SDOXMLString& URI
+                                );
+
+            virtual int    startSecondaryParse(
+                                SDOSchemaSAX2Parser& schemaParser,
+                                SDOXMLString& schemaLocation);
+
             virtual void startInclude(
                 const SDOXMLString& localname,
                 const SDOXMLString& prefix,
@@ -135,6 +175,13 @@ namespace commonj
                 const SAX2Namespaces& namespaces,
                 const SAX2Attributes& attributes);            
             
+            virtual void startList(
+                const SDOXMLString& localname,
+                const SDOXMLString& prefix,
+                const SDOXMLString& URI,
+                const SAX2Namespaces& namespaces,
+                const SAX2Attributes& attributes);
+
             XMLQName resolveTypeName(
                 const SDOXMLString& fullTypeName,
                 const SAX2Namespaces& namespaces,
@@ -148,36 +195,39 @@ namespace commonj
                 );
             
             void setType(
-                PropertyDefinition& property,
+                PropertyDefinitionImpl& property,
                 const SAX2Attributes& attributes,
                 const SAX2Namespaces& namespaces);
             
             void setTypeName(
-                TypeDefinition& type,
+                TypeDefinitionImpl& type,
                 const SAX2Attributes& attributes,
                 const SAX2Namespaces& namespaces);
             
             void setDefault(
-                PropertyDefinition& thisProperty,
+                PropertyDefinitionImpl& thisProperty,
                 const SAX2Attributes& attributes);
             
             
             SchemaInfo& schemaInfo;
             
             
-            PropertyDefinition currentProperty;
-            std::stack<PropertyDefinition>    propertyStack;
-            void             setCurrentProperty(const PropertyDefinition& property);
+            PropertyDefinitionImpl currentProperty;
+            std::stack<PropertyDefinitionImpl>    propertyStack;
+            void             setCurrentProperty(const PropertyDefinitionImpl& property);
             void             defineProperty();
             
-            TypeDefinition   currentType;
-            std::stack<TypeDefinition>    typeStack;
-            void             setCurrentType(const TypeDefinition& type);
+            TypeDefinitionImpl   currentType;
+            std::stack<TypeDefinitionImpl>    typeStack;
+            void             setCurrentType(const TypeDefinitionImpl& type);
             void             defineType();
             
-            TypeDefinitions typeDefinitions;
+            TypeDefinitionsImpl typeDefinitions;
+
             
         };
+
+
     } // End - namespace sdo
 } // End - namespace commonj
 #endif //_SDOSCHEMASAX2PARSER_H_

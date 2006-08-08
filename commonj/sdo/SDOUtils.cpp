@@ -28,17 +28,97 @@ using namespace std;
 namespace commonj {
     namespace sdo {
 
+//////////////////////////////////////////////////////////////////////////
+// Conversions
+//////////////////////////////////////////////////////////////////////////
 
+
+        std::map<std::string,std::string> SDOUtils::SdoToXsd;
+
+        std::map<std::string,std::string> SDOUtils::XsdToSdo;
+
+        bool SDOUtils::populated = false;
+
+        bool SDOUtils::populate()
+        {
+            SDOUtils::XsdToSdo["ID"]     = "String";
+            SDOUtils::XsdToSdo["NCName"] = "String";
+            SDOUtils::XsdToSdo["string"] = "String";
+            SDOUtils::XsdToSdo["anyType"] = "DataObject";
+            SDOUtils::XsdToSdo["int"] = "Integer";
+            SDOUtils::XsdToSdo["integer"] = "Integer";
+            SDOUtils::XsdToSdo["negativeInteger"] = "Integer";
+            SDOUtils::XsdToSdo["nonNegativeInteger"] = "Integer";
+            SDOUtils::XsdToSdo["positiveInteger"] = "Integer";
+            SDOUtils::XsdToSdo["nonpositiveInteger"] = "Integer";
+            SDOUtils::XsdToSdo["unsignedShort"] = "Integer";
+            SDOUtils::XsdToSdo["unsignedInt"] = "Integer";
+            SDOUtils::XsdToSdo["unsignedLong"] = "Long";
+            SDOUtils::XsdToSdo["double"] = "Double";
+            SDOUtils::XsdToSdo["short"] = "Short";
+            SDOUtils::XsdToSdo["unsignedByte"] = "Short";
+            SDOUtils::XsdToSdo["float"] = "Float";
+            SDOUtils::XsdToSdo["boolean"] = "Boolean";
+            SDOUtils::XsdToSdo["byte"] = "Byte";
+            SDOUtils::XsdToSdo["base64Binary"] = "Bytes";
+            SDOUtils::XsdToSdo["hexBinary"] = "Bytes";
+            SDOUtils::XsdToSdo["anyURI"] = "URI";
+            SDOUtils::XsdToSdo["QName"] = "URI";
+
+            SDOUtils::SdoToXsd["String"]     = "string";
+            SDOUtils::SdoToXsd["DataObject"] = "anyType";
+            SDOUtils::SdoToXsd["Integer"] = "integer";
+            SDOUtils::SdoToXsd["Long"] = "unsignedLong";
+            SDOUtils::SdoToXsd["Double"] = "double";
+            SDOUtils::SdoToXsd["Short"] = "short";
+            SDOUtils::SdoToXsd["Float"] = "float";
+            SDOUtils::SdoToXsd["Boolean"] = "boolean";
+            SDOUtils::SdoToXsd["Byte"] = "byte";
+            SDOUtils::SdoToXsd["Bytes"] = "base64Binary";
+            SDOUtils::SdoToXsd["URI"] = "anyURI";
+
+            SDOUtils::populated = true;
+            return true;
+        }
+
+        const char* SDOUtils::SDOToXSD(const char* sdoname)
+        {
+            if (sdoname == 0)
+            {
+                return SDOUtils::SdoToXsd["String"].c_str();
+            }
+            if (!SDOUtils::populated) SDOUtils::populate();
+            string& s =  SDOUtils::SdoToXsd[sdoname];
+            if (s.empty())
+            {
+                return SDOUtils::SdoToXsd["String"].c_str();
+            }
+            return s.c_str();
+        }
+
+
+        const char* SDOUtils::XSDToSDO(const char* xsdname)
+        {
+            if (xsdname == 0)
+            {
+                return SDOUtils::XsdToSdo["string"].c_str();
+            }
+            if (!SDOUtils::populated) SDOUtils::populate();
+            string& s = SDOUtils::XsdToSdo[xsdname];
+            if (s.empty())
+                return SDOUtils::XsdToSdo["string"].c_str();
+            return s.c_str();
+        }
 
 //////////////////////////////////////////////////////////////////////////
 // Print Tabs
 //////////////////////////////////////////////////////////////////////////
 
-        void SDOUtils::printTabs(unsigned int incr)
+        void SDOUtils::printTabs(ostream& out, unsigned int incr)
         {
             for (int ind=0; ind < incr; ind++)
             {
-                cout << "  ";
+                out << "  ";
             }
         }
 
@@ -46,24 +126,24 @@ namespace commonj {
 // Print a DatObject tree
 //////////////////////////////////////////////////////////////////////////
 
-        void SDOUtils::printDataObject(DataObjectPtr dataObject)
+        void SDOUtils::printDataObject(ostream& out, DataObjectPtr dataObject)
         {
-            printDataObject(dataObject,0);
+            printDataObject(out, dataObject,0);
         }
 
 
-        void SDOUtils::printDataObject(DataObjectPtr dataObject,
+        void SDOUtils::printDataObject(ostream& out ,DataObjectPtr dataObject,
             unsigned int incr)
         {
     
-            cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start of DO" 
+            out << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> start of DO" 
                  << endl;
     
             if (!dataObject)return;
 
             const Type& dataObjectType = dataObject->getType();
-            printTabs(incr);
-            cout << "DataObject type: " 
+            printTabs(out, incr);
+            out << "DataObject type: " 
                  << dataObjectType.getURI() 
                  << "#" << dataObjectType.getName() << endl;
     
@@ -75,14 +155,14 @@ namespace commonj {
             PropertyList pl = dataObject->getInstanceProperties();
             for (int i = 0; i < pl.size(); i++)
             {
-                printTabs(incr);
-                cout << "Property: " << pl[i].getName() << endl;
+                printTabs(out, incr);
+                out << "Property: " << pl[i].getName() << endl;
         
                 const Type& propertyType = pl[i].getType();
         
-                printTabs(incr);
+                printTabs(out, incr);
 
-                cout << "Property Type: " 
+                out << "Property Type: " 
                      << propertyType.getURI() 
                      << "#" << propertyType.getName() << endl;
         
@@ -96,14 +176,20 @@ namespace commonj {
                     {
                         incr++;
                         DataObjectList& dol = dataObject->getList(pl[i]);
+                        char cc[20];
                         for (int j = 0; j <dol.size(); j++)
                         {
-                            printTabs(incr);
-                            cout << "Value " << j <<endl;
+                            printTabs(out, incr);
+                            // seems to be a bug in ostream? Will not print j 
+                            // as an integer.
+                            out << "Value ";
+                            sprintf(cc,"%d",j);
+                            out << cc;
+                            out << endl;
                             incr++;
-                            printDataObject(dol[j],incr);
+                            printDataObject(out, dol[j],incr);
                             incr--;
-                            cout << endl;
+                            out << endl;
                         }
                         incr--;
                     } // end IsMany
@@ -113,8 +199,8 @@ namespace commonj {
                     //////////////////////////////////////////////////////////////////////
                     else if (propertyType.isDataType())
                     {
-                        printTabs(incr);
-                        cout<< "Property Value: " 
+                        printTabs(out, incr);
+                        out<< "Property Value: " 
                             << dataObject->getCString(pl[i]) <<endl ; 
                     }
             
@@ -124,19 +210,19 @@ namespace commonj {
                     else
                     {
                         incr++;
-                        printDataObject(dataObject->getDataObject(pl[i]),incr);
+                        printDataObject(out, dataObject->getDataObject(pl[i]),incr);
                         incr--;
                     }
                 }
                 else
                 {
-                    printTabs(incr);
-                    cout << "Property Value: not set" <<endl ; 
+                    printTabs(out, incr);
+                    out << "Property Value: not set" <<endl ; 
                 }
         
             }
             incr--;
-            cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end of do" << endl;
+            out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< end of do" << endl;
         }
     };
 };

@@ -1,7 +1,7 @@
 <?php
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -32,6 +32,8 @@ class SDO_DAS_Relational_SettingListHelper
 
 	public static function getSettingsAsArray(SDO_DAS_SettingList $setting_list)
 	{
+		$settings_as_array = array();
+
 		foreach($setting_list as $setting) {
 			if ($setting->isSet()) { 
 				$property_name 	= $setting->getPropertyName();

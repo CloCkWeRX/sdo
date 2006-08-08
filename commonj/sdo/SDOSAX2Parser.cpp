@@ -30,6 +30,7 @@
 #include "commonj/sdo/TypeImpl.h"
 #include "commonj/sdo/DataObjectImpl.h"
 #include "commonj/sdo/DataFactoryImpl.h"
+using namespace std;
 
 namespace commonj
 {
@@ -61,6 +62,7 @@ namespace commonj
                 targetNamespaceURI = "";
             }
             rootDataObject = 0;
+            newSequence = true;
         }
         
         SDOSAX2Parser::~SDOSAX2Parser()
@@ -180,7 +182,7 @@ namespace commonj
                 }
 
                 const Property& property = (Property&)*pprop;
-                const Type& propertyType = ((TypeImpl&)type).getRealPropertyType(propertyName);
+                //const Type& propertyType = ((TypeImpl&)type).getRealPropertyType(propertyName);
                 if (currentDataObject->getType().isSequencedType())
                 {
                     SequencePtr seq = currentDataObject->getSequence();
@@ -236,7 +238,16 @@ namespace commonj
             
                 if (prop == 0)
                 {
-                    currentDataObject->setCString(propname,value);
+                    // need to use the sequence interface if it exists
+                    if (currentDataObject->getType().isSequencedType())
+                    {
+                        SequencePtr seq = currentDataObject->getSequence();
+                        seq->addCString(propname, value);
+                    }
+                    else
+                    {
+                        currentDataObject->setCString(propname,value);
+                    }
                     return;
                 }
 
@@ -282,7 +293,16 @@ namespace commonj
                 // regardless of what type the property now is, we can set CString , and the
                 // right conversion will happen
 
-                currentDataObject->setCString(propname,value);
+                // need to use the sequence interface if it exists.
+                if (currentDataObject->getType().isSequencedType())
+                {
+                    SequencePtr seq = currentDataObject->getSequence();
+                    seq->addCString(propname, value);
+                }
+                else
+                {
+                    currentDataObject->setCString(propname,value);
+                }
             }
             catch (SDORuntimeException)
             {
@@ -336,6 +356,14 @@ namespace commonj
                             SDOXMLString propValue;
                             
                             XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&prop)->getDASValue("XMLDAS::PropertyInfo");
+                            if (pi && pi->getPropertyDefinition().isElement)
+                            {
+                                // xml instance is trying to set an attribute when schema defines property as element
+                                LOGERROR_1(WARNING,"SDOSAX2Parser: Attribute %s should be an element. Attribute ignored",
+                                 (const char*)(attributes[i].getName()));        
+                                continue;
+                            }
+
                             if (pi && pi->getPropertyDefinition().isQName)
                             {
                                 XMLQName qname(attributes[i].getValue(),
@@ -438,8 +466,17 @@ namespace commonj
                             newDO = dataFactory->create(
                                 prop->getType().getURI(),
                                 prop->getType().getName());
-                            DataObjectList& dol = dob->getList(propertyName);
-                            dol.append(newDO);
+                            // here we need to use the sequence interface if it exists.
+                            if (dob->getType().isSequencedType())
+                            {
+                                SequencePtr seq = currentPropertySetting.dataObject->getSequence();
+                                seq->addDataObject(propertyName,newDO);
+                            }
+                            else
+                            {
+                                DataObjectList& dol = dob->getList(propertyName);
+                                dol.append(newDO);
+                            }
                             setCurrentDataObject(newDO);
                             setAttributes(tns, namespaces,attributes);
                         }
@@ -510,7 +547,16 @@ namespace commonj
                                 newDO = dataFactory->create(
                                     prop->getType().getURI(),
                                     prop->getType().getName());
-                                dob->setDataObject(propertyName, newDO);
+                                // here we need to use the sequence interface if it exists.
+                                if (dob->getType().isSequencedType())
+                                {
+                                    SequencePtr seq = dob->getSequence();
+                                    seq->addDataObject(propertyName, newDO);
+                                }
+                                else
+                                {
+                                    dob->setDataObject(propertyName, newDO);
+                                }
                                 setCurrentDataObject(newDO);
                                 setAttributes(tns,namespaces,attributes);
                                 break;
@@ -525,22 +571,32 @@ namespace commonj
                     // as many valued
                     // could be data object or primitive. All primitives will appear
                     // as bytes.
+                    // UPDATE: Spec says that all elements will appear as DataObjects which 
+                    // are sequenced - the text will come out as text elements in the sequence
+
                     if (!xsitypeName.isNull())
                     {
                         // it has a type from xsi:type
-                        pprop = ((DataObjectImpl*)dob)->defineList(propertyName);
                         newDO = dataFactory->create(xsitypeURI, xsitypeName);
-                        DataObjectList& dol = dob->getList(propertyName);
-                        dol.append(newDO);
-                        setCurrentDataObject(newDO);
-                        setAttributes(tns,namespaces,attributes);
                     }
                     else
                     {
-                        pprop = ((DataObjectImpl*)dob)->defineList(propertyName);
-                        currentPropertySetting = PropertySetting(currentDataObject, propertyName,
-                            bToBeNull);
+                        newDO = dataFactory->create(Type::SDOTypeNamespaceURI, "OpenDataObject");
                     }
+                    pprop = ((DataObjectImpl*)dob)->defineList(propertyName);
+                   // here we need to use the sequence interface if it exists.
+                    if (dob->getType().isSequencedType())
+                    {
+                        SequencePtr seq = dob->getSequence();
+                        seq->addDataObject(propertyName, newDO);
+                    }
+                    else
+                    {
+                        DataObjectList& dol = dob->getList(propertyName);
+                        dol.append(newDO);
+                    }
+                    setCurrentDataObject(newDO);
+                    setAttributes(tns,namespaces,attributes);
                 }
                 return pprop;
             }
@@ -562,7 +618,9 @@ namespace commonj
             LOGENTRY(INFO,"SDOSAX2Parser: startElementNs");
 
             LOGINFO_1(INFO,"SDOSAX2Parser: startElementNs:%s",
-                           (const char*)localname);
+                (const char*)localname);
+
+            newSequence = true;
 
             bool bToBeNull = false;
             // Save the namespace information from the first element
@@ -600,6 +658,7 @@ namespace commonj
                 return;
             }
 
+ 
             
             if (dealingWithChangeSummary)
             {
@@ -620,7 +679,7 @@ namespace commonj
             }
 
 
-            if (URI.equalsIgnoreCase(Type::SDOTypeNamespaceURI))
+            if (URI.equalsIgnoreCase(Type::SDOTypeNamespaceURI.c_str()))
             {
                 ///////////////////////////////////////////////////////////////////////
                 // Handle datagraph
@@ -781,6 +840,28 @@ namespace commonj
                             newDO = dataFactory->create(tns, "RootType");
                             currentPropertySetting = PropertySetting(newDO, localname,
                             bToBeNull);
+
+                            // TODO - need instead to record the fact that its a primitive, not
+                            // a real DO - and then present it as the root.
+                           // newDO = dataFactory->create(tns, "RootType");
+                           // const Type& tpr = dataFactory->getType(tns,"RootType");
+                           // XSDTypeInfo* typeInfo = (XSDTypeInfo*)
+                           //   ((DASType*)&tpr)->getDASValue("XMLDAS::TypeInfo");
+                           // if (typeInfo)
+                           // {
+                           //     TypeDefinitionImpl* td;
+                           //     td = (TypeDefinitionImpl*)&(typeInfo->getTypeDefinition());
+                           //     if (td)td->isExtendedPrimitive = true;
+                           //     currentPropertySetting = PropertySetting(newDO, "value" /*localname*/,
+                           //     bToBeNull);
+
+                           // }
+                           // else
+                           // {
+                           //     currentPropertySetting = PropertySetting(newDO, localname,
+                           //     bToBeNull);
+                           // }
+
                         }
                         else
                         {
@@ -793,7 +874,7 @@ namespace commonj
                               ((DASType*)&tp)->getDASValue("XMLDAS::TypeInfo");
                             if (typeInfo)
                             {
-                                const TypeDefinition& typeDefinition = typeInfo->getTypeDefinition();
+                                const TypeDefinitionImpl& typeDefinition = typeInfo->getTypeDefinition();
                                 if (typeDefinition.isExtendedPrimitive)
                                 {
                                     // The name of this element is the name of a property on the current DO
@@ -1011,6 +1092,8 @@ namespace commonj
 
             LOGENTRY(INFO,"SDOSAX2Parser: endElementNs");
 
+            newSequence = true;
+
             if (localname.equals("changeSummary"))
             {
                 // end of change summary
@@ -1066,11 +1149,11 @@ namespace commonj
 
                 }
                 else 
-                {
-					if (currentPropertySetting.value.isNull())
-					{
-						currentPropertySetting.value = SDOXMLString("");
-					}
+                {    
+                    if (currentPropertySetting.value.isNull())
+                    {
+                        currentPropertySetting.value = SDOXMLString("");
+                    }
                     try
                     {
                         const Type& tp = currentPropertySetting.dataObject->getType();
@@ -1082,14 +1165,33 @@ namespace commonj
                                 "value");
                             if (p.isMany())
                             {
-                                DataObjectList& dl = currentPropertySetting.dataObject->
-                                getList((const char*)"value");
-                                dl.append((const char*)currentPropertySetting.value);
+                                // use the sequence interface if it exists.
+                                if (currentPropertySetting.dataObject->getType().isSequencedType())
+                                {
+                                    SequencePtr seq = currentPropertySetting.dataObject->getSequence();
+                                    seq->addCString("value", currentPropertySetting.value);
+                                }
+                                else
+                                {
+                                    DataObjectList& dl = currentPropertySetting.dataObject->
+                                    getList((const char*)"value");
+                                    dl.append((const char*)currentPropertySetting.value);
+                                }
+
                             }
                             else
                             {
-                                currentPropertySetting.dataObject->
-                                setCString((const char*)"value", currentPropertySetting.value );
+                                // use the sequence interface if it exists
+                                if (currentPropertySetting.dataObject->getType().isSequencedType())
+                                {
+                                    SequencePtr seq = currentPropertySetting.dataObject->getSequence();
+                                    seq->addCString("value", currentPropertySetting.value);
+                                }
+                                else
+                                {
+                                    currentPropertySetting.dataObject->
+                                    setCString((const char*)"value", currentPropertySetting.value );
+                                }
                             }
                             if (dataObjectStack.size() == 0 || rootDataObject == dataObjectStack.top())
                             {
@@ -1125,19 +1227,20 @@ namespace commonj
 
                                 // It might be a single setting for a many-valued property.
                                 // may throw SDOPropertyNotFoundException
-
-                                const Property& p = currentPropertySetting.dataObject->getProperty(
+                                else {
+                                    const Property& p = currentPropertySetting.dataObject->getProperty(
                                     currentPropertySetting.name);
-                                if (p.isMany())
-                                {
-                                    DataObjectList& dl = currentPropertySetting.dataObject->
-                                    getList((const char*)currentPropertySetting.name);
-                                    dl.append((const char*)currentPropertySetting.value);
-                                }
-                                else
-                                {
-                                    currentPropertySetting.dataObject->
-                                    setCString((const char*)currentPropertySetting.name, currentPropertySetting.value );
+                                    if (p.isMany())
+                                    {
+                                        DataObjectList& dl = currentPropertySetting.dataObject->
+                                        getList((const char*)currentPropertySetting.name);
+                                        dl.append((const char*)currentPropertySetting.value);
+                                    }
+                                    else
+                                    {
+                                        currentPropertySetting.dataObject->
+                                        setCString((const char*)currentPropertySetting.name, currentPropertySetting.value );
+                                    }
                                 }
                             }
                         }
@@ -1183,10 +1286,20 @@ namespace commonj
             }
             LOGEXIT(INFO,"SDOSAX2Parser: endElementNs - exit4");
         }
-        
-        
+
+
+         
         void SDOSAX2Parser::characters(const SDOXMLString& chars)
         {
+            if (chars.isNull()) return;
+
+            if (!strcmp((const char*)chars,"\r") ||
+                !strcmp((const char*)chars,"\n"))
+            {
+                newSequence = true;
+                return;
+            }
+
             if (dealingWithChangeSummary)
             {
                 if (csbuilder == 0)
@@ -1200,26 +1313,90 @@ namespace commonj
 
             if (ignoreEvents)
                 return;
-            
-            // If currentPropertySetting is set (name is not null)
-            // then we need to accumulate the value
+
             if (!currentPropertySetting.name.isNull())
             {
                 currentPropertySetting.value = currentPropertySetting.value + chars;    
+                return;
             }
-            else
+            DataObject* dob = currentDataObject;
+            if ((dob != 0)  && ((DataObjectImpl*)dob)->getTypeImpl().isFromList())
             {
-                // If the current DataObject is a sequenced Type
-                // then add this as text to the sequence
-                if (currentDataObject && currentDataObjectType->isSequencedType())
+                // this is a list,so we need to split it up
+                DataObjectList& dl = currentDataObject->getList(
+                       (const char *)"values");
+
+                const char* str = (const char*)chars;
+                char* buf = new char[strlen(str)+1];
+                if (!buf) return;
+
+                strcpy(buf,str);
+
+                int start_point = 0;
+                int end_point;
+                int final = strlen(buf);
+
+                do {
+                   if (start_point >= final)break;
+                   while (buf[start_point] == (char)0x20 || buf[start_point] == (char)0x09
+                       || buf[start_point] == (char)0x0A || buf[start_point] == (char)0x0D )start_point++;
+                   end_point = start_point;
+                   while (buf[end_point] != (char)0x20 && buf[end_point] != (char)0x09 &&
+                          buf[end_point] != (char)0x0A && buf[end_point] != (char)0x0D &&
+                                                                        buf[end_point] != 0x0)end_point++;
+                   if (end_point == start_point)break; 
+                   *(buf+end_point) = 0;
+                   dl.append((const char*)(buf+start_point));
+                   start_point = end_point + 1;
+                } while(1);
+
+                delete buf;
+                return;
+            }
+
+
+            // If the current DataObject is a sequenced Type
+            // then add this as text to the sequence
+            if (currentDataObject && currentDataObjectType->isSequencedType())
+            {
+                SequencePtr seq = currentDataObject->getSequence();
+                if (seq)
                 {
-                    SequencePtr seq = currentDataObject->getSequence();
-                    if (seq)
+                    if (newSequence == true)
                     {
                         seq->addText(chars);
+                        newSequence = false;
                     }
+                    else
+                    {
+                        for (int k= (int)(seq->size())-1; k>=0 ; k --)
+                        {
+                            if (seq->isText(k))
+                            {
+                                const char * s = seq->getCStringValue(k);
+                               
+                                if (s)
+                                {
+                                    char *combi = 
+                                        new char[strlen(s)+strlen(chars) + 2];
+                                    strcpy(combi,s);
+                                    strcat(combi,chars);
+                                    seq->setText(k,(const char*)combi);
+                                    delete combi;
+                                }
+                                else
+                                {
+                                    seq->setText(k,chars);
+                                }
+                                return;
+                            }
+                        }
+                        seq->addText(chars);
+                    }
+                    return;
                 }
-            }                
+            }
+           
         }
         
         
@@ -1240,11 +1417,11 @@ namespace commonj
 /*            XSDTypeInfo* typeInfo = (XSDTypeInfo*)((DASType*)&type)->getDASValue("XMLDAS::TypeInfo");
             if (typeInfo)
             {
-                const TypeDefinition& typeDefinition = typeInfo->getTypeDefinition();
+                const TypeDefinitionImpl& typeDefinition = typeInfo->getTypeDefinition();
                 XmlDasPropertyDefs::const_iterator propsIter;
                 for (propsIter = typeDefinition.properties.begin(); propsIter != typeDefinition.properties.end(); propsIter++)
                 {
-                    const PropertyDefinition& prop = *propsIter;
+                    const PropertyDefinitionImpl& prop = *propsIter;
                     if (prop.localname.equals(localName))
                     {
                         return prop.name;
@@ -1267,7 +1444,7 @@ namespace commonj
                 XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&pl[i])->getDASValue("XMLDAS::PropertyInfo");
                 if (pi)
                 {
-                    const PropertyDefinition&  propdef = pi->getPropertyDefinition();
+                    const PropertyDefinitionImpl&  propdef = pi->getPropertyDefinition();
                     if (localName .equals(propdef.localname))
                         return propdef.name;
 

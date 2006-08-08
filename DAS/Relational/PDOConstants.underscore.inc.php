@@ -1,7 +1,7 @@
 <?php
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -27,4 +27,3 @@ define('SDO_DAS_Relational_PDO_FETCH_ASSOC', PDO_FETCH_ASSOC);
 define('SDO_DAS_Relational_PDO_FETCH_NUM', PDO_FETCH_NUM);
 define('SDO_DAS_Relational_PDO_ATTR_CLIENT_VERSION', PDO_ATTR_CLIENT_VERSION);
 ?>
- 

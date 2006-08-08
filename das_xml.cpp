@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -92,7 +92,7 @@ PHP_MINIT_FUNCTION(sdo_das_xml)
 PHP_MINFO_FUNCTION(sdo_das_xml)
 {
     php_info_print_table_start();
-    php_info_print_table_row(2, "sdo_das_xml support", "enabled");
+    php_info_print_table_header(2, "sdo_das_xml support", "enabled");
     php_info_print_table_row(2, "sdo_das_xml version", SDO_DAS_XML_VERSION);
     php_info_print_table_end();
 }

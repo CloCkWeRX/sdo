@@ -17,10 +17,9 @@
 
 /* $Rev$ $Date$ */
 
-#ifndef _TYPEDEFINITIONS_H_
-#define _TYPEDEFINITIONS_H_
+#ifndef _TYPEDefinitions_H_
+#define _TYPEDefinitions_H_
 
-#include "commonj/sdo/disable_warn.h"
 
 #include "commonj/sdo/TypeDefinition.h"
 #include "map"
@@ -29,25 +28,35 @@ namespace commonj
 {
     namespace sdo
     {
-        typedef std::map<SDOXMLString, TypeDefinition> XMLDAS_TypeDefs;
         
+    class TypeDefinitionsImpl;
+    
 /**
- * TypeDefinitions holds a list information gathered from parsing the
+ * TypeDefinitionsImpl holds a list information gathered from parsing the
  * XSD and used for creating Types
  */
-        class TypeDefinitions
+        class SDO_API TypeDefinitions
         {
             
         public:
-            TypeDefinitions();
-            virtual ~TypeDefinitions();
-            static SDOXMLString getTypeQName(const SDOXMLString& typeUri, const SDOXMLString& typeName);
+            /*SDO_API*/ TypeDefinitions();
+            TypeDefinitions(const TypeDefinitions& tds);
+            TypeDefinitions& operator=(const TypeDefinitions& tds);
 
-            XMLDAS_TypeDefs types;
+            /*SDO_API*/ virtual ~TypeDefinitions();
+
+            /*SDO_API*/ void addTypeDefinition(TypeDefinition& t);
+
+            TypeDefinitionsImpl& getTypeDefinitions();
+ 
+        private:
+            TypeDefinitionsImpl* typedefinitions;
+            void copy(const TypeDefinitions& tds);
+
             
         };
     } // End - namespace sdo
 } // End - namespace commonj
 
 
-#endif //_TYPEDEFINITIONS_H_
+#endif //_TYPEDefinitions_H_

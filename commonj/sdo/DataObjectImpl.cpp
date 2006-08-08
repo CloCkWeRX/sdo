@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright 2005, 2006 The Apache Software Foundation or its licensors, as applicable.
+ *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include "commonj/sdo/DataObjectImpl.h"
 
 
-
+ 
 #include "commonj/sdo/SDORuntimeException.h"
 
 #include "commonj/sdo/Property.h"
@@ -87,14 +87,14 @@ namespace sdo {
         PropertyImpl* p = getPropertyImpl(propertyIndex);\
         if (p != 0 ) \
         {\
-            if (p->isMany())\
+            if (p->isMany() || p->getTypeImpl()->isFromList())\
             {\
                 string msg("Get value not available on many valued property:");\
                 msg += p->getName();\
                 SDO_THROW_EXCEPTION("get value", SDOUnsupportedOperationException,\
                     msg.c_str());\
             }\
-              DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
+             DataObjectImpl* d = getDataObjectImpl(propertyIndex);\
             if (d != 0) \
             {\
                 if (d->isNull())return (retval)0;\
@@ -118,7 +118,7 @@ namespace sdo {
           PropertyImpl* p = getPropertyImpl(propertyIndex);\
         if (p != 0) \
         {\
-            if (p->isMany())\
+            if (p->isMany()|| p->getTypeImpl()->isFromList())\
             {\
                 string msg("Get value not available on many valued property:");\
                 msg += p->getName();\
@@ -150,7 +150,7 @@ namespace sdo {
         PropertyImpl* pl = getPropertyImpl(propertyIndex);\
         if (pl != 0) \
         {\
-            if (pl->isMany())\
+            if (pl->isMany()|| pl->getTypeImpl()->isFromList())\
             {\
                 string msg("Set value not available on many valued property:");\
                 msg += pl->getName();\
@@ -192,7 +192,7 @@ namespace sdo {
         PropertyImpl* pl = getPropertyImpl(propertyIndex);\
         if (pl != 0) \
         {\
-            if (pl->isMany())\
+            if (pl->isMany()|| pl->getTypeImpl()->isFromList())\
             {\
                 string msg("Set value not available on many valued property:");\
                 msg += pl->getName();\
@@ -248,7 +248,7 @@ namespace sdo {
                     PropertyImpl* p = d->getPropertyImpl(prop);\
                     if (p != 0) \
                     {\
-                        if (p->isMany())\
+                        if (p->isMany()|| p->getTypeImpl()->isFromList())\
                         {\
                             long l;\
                             DataObjectImpl* doi = d->findDataObject(prop,&l);\
@@ -266,7 +266,7 @@ namespace sdo {
                         {\
                             delete prop;\
                             prop = 0;\
-                            if (!isSet(*p)) {\
+                            if (!d->isSet(*p)) {\
                                     return p->get ##primval ##Default();\
                             }\
                             return d->get ##primval (*p);\
@@ -289,6 +289,53 @@ namespace sdo {
         }\
     }
 
+#define getPrimitiveFromPathUsingSDOString(primval, retval, defval)\
+    retval DataObjectImpl::get ##primval (const SDOString& path)\
+    {\
+        DataObjectImpl* d;\
+        SDOString spath;\
+        SDOString prop;\
+         try {\
+            DataObjectImpl::stripPath(path, spath);\
+            prop = findPropertyContainer(spath, &d);\
+            if (d != 0) {\
+                if (prop.empty()) {\
+                    return d->get ##primval ();\
+                }\
+                else {\
+                    PropertyImpl* p = d->getPropertyImpl(prop);\
+                    if (p != 0) \
+                    {\
+                        if (p->isMany()|| p->getTypeImpl()->isFromList())\
+                        {\
+                            long l;\
+                            DataObjectImpl* doi = d->findDataObject(prop,&l);\
+                            if (doi != 0)    {\
+                                return doi->get ## primval();\
+                            }\
+                            string msg("Get value - index out of range:");\
+                            msg += path;\
+                            SDO_THROW_EXCEPTION("getter", SDOIndexOutOfRangeException,\
+                            msg.c_str());\
+                        }\
+                        else\
+                        {\
+                            if (!d->isSet(*p)) {\
+                                    return p->get ##primval ##Default();\
+                            }\
+                            return d->get ##primval (*p);\
+                        }\
+                    }\
+                }\
+            }\
+            string msg("Get value  - path not found");\
+            SDO_THROW_EXCEPTION("getter", SDOPathNotFoundException,\
+            msg.c_str());\
+        }\
+        catch (SDORuntimeException e) {\
+           SDO_RETHROW_EXCEPTION("getter", e);\
+        }\
+    }
 
 /** @def getCharsFromPath
  *
@@ -316,7 +363,7 @@ namespace sdo {
                     PropertyImpl* p = d->getPropertyImpl(prop);\
                     if (p != 0)\
                     {\
-                        if (p->isMany())\
+                        if (p->isMany() || p->getTypeImpl()->isFromList())\
                         {\
                             long l;\
                             DataObjectImpl* doi = d->findDataObject(prop,&l);\
@@ -333,7 +380,7 @@ namespace sdo {
                         else { \
                             delete prop;\
                             prop = 0;\
-                            if (!isSet(*p)) {\
+                            if (!d->isSet(*p)) {\
                                 return p->get ##primval ##Default( valptr , max );\
                             }\
                             return d->get ##primval (*p, valptr , max);\
@@ -387,7 +434,13 @@ namespace sdo {
                     {\
                         p = d->define ##primval (prop);\
                     }\
-                    if (p->isMany())\
+                    if (p == 0)\
+                    {\
+                         string msg("Set value  - path not found");\
+                         SDO_THROW_EXCEPTION("setter", SDOPathNotFoundException,\
+                         msg.c_str());\
+                    }\
+                    if (p->isMany()|| p->getTypeImpl()->isFromList())\
                     {\
                         long l;\
                         DataObjectList& dol = d->getList((Property&)*p);\
@@ -395,7 +448,7 @@ namespace sdo {
                         delete prop;\
                         prop = 0;\
                         if (doi != 0)    {\
-                            doi->set ## primval (value);\
+                             doi->set ## primval (value);\
                         }\
                         else {\
                             dol.append(( platval) value);\
@@ -449,7 +502,13 @@ namespace sdo {
                     {\
                         p = d->define ##primval (prop);\
                     }\
-                    if (p->isMany())\
+                    if (p == 0)\
+                    {\
+                         string msg("Set value  - path not found");\
+                         SDO_THROW_EXCEPTION("setter", SDOPathNotFoundException,\
+                         msg.c_str());\
+                    }\
+                    if (p->isMany()|| p->getTypeImpl()->isFromList())\
                     {\
                         long l;\
                         DataObjectList& dol = d->getList((Property&)*p);\
@@ -536,29 +595,29 @@ namespace sdo {
  /**  DataObject
   *  DataObjects are the non-primitive members of a Data graph.
   *
-  * A data object is a representation of some structured data.
+  * A data object is a representation of some structured data. 
   * it is the fundamental component in the SDO (Service Data Objects) package.
-  * Data objects support reflection, path-based accesss, convenience creation
+  * Data objects support reflection, path-based accesss, convenience creation 
   * and deletion methods,and the ability to be part of a data graph.
-  * Each data object holds its data as a series of properties.
-  * Properties can be accessed by name, property index, or using the property
-  * meta object itself.
-  * A data object can also contain references to other data objects, through
+  * Each data object holds its data as a series of properties. 
+  * Properties can be accessed by name, property index, or using the property 
+  * meta object itself. 
+  * A data object can also contain references to other data objects, through 
   * reference-type properties.
-  * A data object has a series of convenience accessors for its properties.
-  * These methods either use a path (String), a property index,
+  * A data object has a series of convenience accessors for its properties. 
+  * These methods either use a path (String), a property index, 
   * or the property's meta object itself, to identify the property.
   * Some examples of the path-based accessors are as follows:
   * DataObjectPtr company = ...;
-  * company->getString("name");
+  * company->getString("name");                   
   * company->setString("name", "acme");
-  * company->getString("department.0/name")
+  * company->getString("department.0/name")       
   *                                        .n  indexes from 0.
   * company->getString("department[1]/name")      [] indexes from 1.
   * company->getDataObject("department[number=123]")  returns the department where number=123
   * company->getDataObject("..")                      returns the containing data object
   * company->getDataObject("/")                       returns the root containing data object
-  * There are specific accessors for the primitive types and commonly used
+  * There are specific accessors for the primitive types and commonly used 
   * data types like String.
   */
 
@@ -575,7 +634,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
 
 
-    // setters and getters from a path specification
+    // setters and getters from a path specification 
 
     getCharsFromPath(String, wchar_t* , 0);
     getCharsFromPath(Bytes, char* , 0);
@@ -659,23 +718,23 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (prop == 0 || (strlen(prop) == 0)) {
                 return 0;
             }
-            else
+            else 
             {
                 const Property& p  = d->getProperty(prop);
                 delete prop;
                 return getLength(p);
             }
         }
-        else
+        else 
         {
             if (prop)
             {
                 const Property& p  = getProperty(prop);
                 delete prop;
-
+                
                 return getLength(p);
             }
-            else
+            else 
             {
                 return 0;
             }
@@ -687,7 +746,13 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return getLength(getProperty(index));
     }
 
-    getPrimitiveFromPath(Boolean,bool,false);
+    bool DataObjectImpl::getBoolean(const char* path)
+    {
+       return getBoolean(SDOString(path));
+    }
+
+   // getPrimitiveFromPath(Boolean,bool,false); // Provides DataObjectImpl::getBoolean(const char*)
+    getPrimitiveFromPathUsingSDOString(Boolean,bool,false); // Provides DataObjectImpl::getBoolean(const SDOString&)
     getPrimitiveFromPath(Byte,char,0);
     getPrimitiveFromPath(Character,wchar_t,0);
     getPrimitiveFromPath(Short,short,0);
@@ -757,7 +822,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     // open type support
 
-    const PropertyImpl* DataObjectImpl::defineProperty(const char* propname,
+    const PropertyImpl* DataObjectImpl::defineProperty(const char* propname, 
                  const Type& t)
     {
         openProperties.insert(
@@ -770,6 +835,26 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
         return getPropertyImpl(propname);
     }
+   const PropertyImpl* DataObjectImpl::defineProperty(const SDOString& propname, 
+                                                      const Type& t)
+   {
+      openProperties.insert(openProperties.end(),
+                            PropertyImpl(getType(),
+                                         propname,
+                                         (TypeImpl&)t,
+                                         false,
+                                         false,
+                                         true));
+      DataFactory* df = factory;
+      ((DataFactoryImpl*)df)->addOpenProperty(PropertyImpl(getType(),
+                                                           propname,
+                                                           (TypeImpl&)t,
+                                                           false,
+                                                           false,
+                                                           true));
+
+      return getPropertyImpl(propname);
+   }
 
     void DataObjectImpl::undefineProperty(unsigned int index)
     {
@@ -792,23 +877,23 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
              }
         }
 
-        // then remove this property from the list
+        // then remove this property from the list 
 
-        std::list<PropertyImpl>::iterator it =
+        std::list<PropertyImpl>::iterator it = 
             openProperties.begin();
         for (int i=0;i<point;i++)++it; /* there must be a better way */
 
         DataFactory* df = factory;
         ((DataFactoryImpl*)df)->removeOpenProperty((*it).getName());
-
+        
         openProperties.erase(it);
-
+        
         return;
     }
 
     const PropertyImpl* DataObjectImpl::defineList(const char* propname)
     {
-        const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "DataObject");
+        const Type& t = factory->getType(Type::SDOTypeNamespaceURI, "OpenDataObject");
         openProperties.insert(
             openProperties.end(), PropertyImpl(getType(),propname,
             (TypeImpl&)t, true, false, true));
@@ -886,6 +971,11 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         return defineProperty(propname,t);
     }
+    const PropertyImpl* DataObjectImpl::defineDataObject(const SDOString& propname,
+        const Type& t)
+    {
+        return defineProperty(propname,t);
+    }
     const PropertyImpl* DataObjectImpl::defineDataObject(const char* propname,
         const char* typeURI, const char* typeName)
     {
@@ -898,13 +988,15 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     // Useful for debug, so not included in the macros above - but
     // could be.
-    // getters and setters for strings
+    // getters and setters for strings 
 
     const char* DataObjectImpl::getCString(unsigned int propertyIndex)
     {
         validateIndex(propertyIndex);
-        if ((getProperty(propertyIndex).isMany()))
+        if ((getProperty(propertyIndex).isMany())
+            || getPropertyImpl(propertyIndex)->getTypeImpl()->isFromList())
         {
+
             string msg("Get value not available on many valued property:");
             msg += getProperty(propertyIndex).getName();
             SDO_THROW_EXCEPTION("getCString", SDOUnsupportedOperationException,
@@ -916,7 +1008,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             return 0;
         }
         PropertyImpl* p = (PropertyImpl*)getPropertyImpl(propertyIndex);
-        if (p != 0)
+        if (p != 0) 
         {
             if (isSet(propertyIndex)) return 0;
             //if (p->isDefaulted())
@@ -936,7 +1028,8 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         validateIndex(propertyIndex);
         PropertyValueMap::iterator i;
-        if ((getProperty(propertyIndex).isMany()))
+        if ((getProperty(propertyIndex).isMany())
+            || getPropertyImpl(propertyIndex)->getTypeImpl()->isFromList())
         {
             string msg("Set value not available on many valued property:");
             msg += getProperty(propertyIndex).getName();
@@ -982,9 +1075,9 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 }
                 else {
                     PropertyImpl* p  = d->getPropertyImpl(prop);
-                    if (p != 0)
+                    if (p != 0) 
                     {
-                        if (p->isMany())
+                        if (p->isMany()|| p->getTypeImpl()->isFromList())
                         {
                             long l;
                             DataObjectImpl* doi = d->findDataObject(prop,&l);
@@ -1030,7 +1123,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             SDO_RETHROW_EXCEPTION("getCString",e);
         }
     }
-
+    
 
 
     void DataObjectImpl::setCString(const char* path, const char* value)
@@ -1049,7 +1142,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 if (prop == 0 || (strlen(prop) == 0)) {
                     d->setCString(value);
                 }
-                else {
+                else { 
                     const PropertyImpl* p = d->getPropertyImpl(prop);
                     if (p == 0 && d->getType().isOpenType())
                     {
@@ -1057,7 +1150,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     }
                     if (p != 0)
                     {
-                        if (p->isMany()) {
+                        if (p->isMany()|| p->getTypeImpl()->isFromList()) {
                             long l;
                             DataObjectList& dol = d->getList((Property&)*p);
                             DataObjectImpl* doi = d->findDataObject(prop,&l);
@@ -1065,7 +1158,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                             {
                                 doi->setCString(value);
                             }
-                            else
+                            else 
                             {
                                 dol.append(value);
                             }
@@ -1188,7 +1281,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         // The property was not set yet...
         logChange(propertyIndex);
         DataFactory* df = getDataFactory();
-        DataObjectImpl* b = new DataObjectImpl(df,
+        DataObjectImpl* b = new DataObjectImpl(df, 
             getProperty(propertyIndex).getType());
         b->setContainer(this);
         b->setApplicableChangeSummary();
@@ -1220,7 +1313,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                         DataObjectImpl* cont = d->getContainerImpl();
                         if (cont != 0)
                         {
-                            pc = strrchr(path,'/');
+                            pc = (char*) strrchr(path,'/');
                             if (pc != 0)pc++;
                         }
                         const Property& pcont = cont->getProperty(pc);
@@ -1271,14 +1364,14 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
 
 
-    // getters and setters for a List data object
+    // getters and setters for a List data object 
 
     DataObjectList& DataObjectImpl::getList(const char* path)
     {
         DataObjectImpl *d;
         char* spath = DataObjectImpl::stripPath(path);
          char* prop = findPropertyContainer(spath,&d);
-        if (spath) delete spath;
+        if (spath) delete spath;  
         if (d != 0) {
             if (prop == 0 || (strlen(prop) == 0)) {
                 return d->getList();
@@ -1310,10 +1403,13 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         if (!(getProperty(propIndex).isMany()))
         {
-        string msg("Get list not available on single valued property:");
-        msg += getProperty(propIndex).getName();
-        SDO_THROW_EXCEPTION("getList", SDOUnsupportedOperationException,
-            msg.c_str());
+            if (!getPropertyImpl(propIndex)->getTypeImpl()->isFromList())
+            {
+                string msg("Get list not available on single valued property:");
+                msg += getProperty(propIndex).getName();
+                SDO_THROW_EXCEPTION("getList", SDOUnsupportedOperationException,
+                    msg.c_str());
+            }
         }
         DataObjectImpl* d = getDataObjectImpl(propIndex);
         if (d == 0)
@@ -1330,55 +1426,68 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         if (!p.isMany())
         {
-            string msg("Get list not available on single valued property:");
-            msg += p.getName();
-            SDO_THROW_EXCEPTION("getList", SDOUnsupportedOperationException,
-            msg.c_str());
+            PropertyImpl* pi = (PropertyImpl*)&p;
+            if (!pi->getTypeImpl()->isFromList())
+            {
+                string msg("Get list not available on single valued property:");
+                msg += p.getName();
+                SDO_THROW_EXCEPTION("getList", SDOUnsupportedOperationException,
+                msg.c_str());
+            }
         }
 
         int propIndex = getPropertyIndex(p);
         DataObjectImpl* d = getDataObjectImpl(propIndex);
         if (d == 0) {
-            // There is no list yet, so we need to create an
+            // There is no list yet, so we need to create an 
             // empty data object to hold the list
             DataFactory* df = getDataFactory();
             d = new DataObjectImpl(df, df->getType(Type::SDOTypeNamespaceURI,"DataObject"));
             PropertyValues.insert(PropertyValues.end(),rdo(propIndex,d));
             d->setContainer(this);
             d->setApplicableChangeSummary();
-
+            
             DataObjectListImpl* list = new DataObjectListImpl(df,this,
                 propIndex,p.getType().getURI(),p.getType().getName());
-            d->setList(list);
+            d->setList(list); 
 
         }
         return d->getList();
-    }
+    }    
 
 
 
     DataObjectList& DataObjectImpl::getList()
     {
+        if (getTypeImpl().isFromList())
+        {
+            return getList("values");
+        }
         return *listValue;
     }
 
     DataObjectListImpl* DataObjectImpl::getListImpl()
     {
+        if (getTypeImpl().isFromList())
+        {
+            DataObjectList& dl = getList("values");
+            return (DataObjectListImpl*)&dl;
+        }
         return listValue;
     }
 
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Utilities
+  // Utilities 
   /////////////////////////////////////////////////////////////////////////////
+  
 
-
-    // get an index, or throw if the prop is not part of this DO
+    // get an index, or throw if the prop is not part of this DO 
 
     unsigned int DataObjectImpl::getPropertyIndex(const Property& p)
     {
-        PropertyList props = getType().getProperties();
+        PropertyList props = getType().getProperties(); 
 
         for (int i = 0; i < props.size() ; ++i)
         {
@@ -1391,7 +1500,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         {
             std::list<PropertyImpl>::iterator j;
             int count = 0;
-            for (j = openProperties.begin() ;
+            for (j = openProperties.begin() ; 
                  j != openProperties.end() ; ++j)
              {
                 if (!strcmp((*j).getName(),p.getName()))
@@ -1430,10 +1539,17 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return true;
     }
 
+    bool DataObjectImpl::hasProperty(const SDOString& name)
+    {
+        PropertyImpl* pi = getPropertyImpl(name);
+        if (pi == 0) return false;
+        return true;
+    }
+
 
     PropertyImpl* DataObjectImpl::getPropertyImpl(unsigned int index)
     {
-        PropertyList props = getType().getProperties();
+        PropertyList props = getType().getProperties();  
         if (index < props.size())
         {
             return (PropertyImpl*)&props[index];
@@ -1464,7 +1580,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     // recognise later (a-z, A-Z _ [ ] .)
     //////////////////////////////////////////////////////////////////////
 
-    const char* DataObjectImpl::templateString =
+    const char* DataObjectImpl::templateString = 
     " /abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890=[]._#";
 
     char* DataObjectImpl::stripPath(const char* path)
@@ -1475,7 +1591,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
         s = new char[strlen(path)+1];
 
-        for (int i=0;i < strlen(path); i++)
+        for (int i=0;i < strlen(path); i++) 
         {
             if (strchr(templateString,path[i]) != 0) {
                 s[pos++] = path[i];
@@ -1485,6 +1601,25 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return s;
     }
 
+    void DataObjectImpl::stripPath(const SDOString& path, SDOString& result)
+    {
+       result.erase();
+       result.reserve(path.length());
+       
+       size_t start = 0;
+       size_t position = path.find_first_not_of(templateString);
+
+       while (position != string::npos)
+       {
+          result.append(path, start, (position - start));
+          start = ++position;
+          position = path.find_first_not_of(templateString, position);
+       }
+
+       result.append(path, start, string::npos);
+
+       return;
+    }
 
     //////////////////////////////////////////////////////////////////////
     // Find a data object or return 0 if not found
@@ -1492,7 +1627,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     DataObjectImpl* DataObjectImpl::findDataObject(char* token, long* index)
     {
-        // name , name[int], name[x=y] name.int
+        // name , name[int], name[x=y] name.int 
         char c = 0;
            char* beginbrace = strchr(token,'[');
         char* endbrace   = strchr(token,']');
@@ -1502,26 +1637,26 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
         if (dot != 0)
         {
-            if (beginbrace != 0)
+            if (beginbrace != 0) 
             {
                 breaker = (beginbrace < dot)? beginbrace:dot;
             }
-            else
+            else 
             {
                 breaker = dot;
             }
         }
-        else
+        else 
         {
             breaker = beginbrace;
         }
 
         if (breaker == 0){
-            // its this object, and a property thereof
+            // its this object, and a property thereof 
             *index = -1;
             const Property& p = getProperty(token);
             return getDataObjectImpl(p);
-
+        
         }
 
         c = *breaker;
@@ -1529,7 +1664,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         const Property& p = getProperty(token);
         *breaker = c;
 
-
+    
         breaker++;
 
         if (endbrace != 0)
@@ -1545,8 +1680,8 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             DataObjectList& list = getList(p);
 
             // The spec says that depts[1] is the first element,
-            //   as is depts.0
-
+            //   as is depts.0 
+            
               if (beginbrace != 0)val--;
 
             if (endbrace != 0)*endbrace = ']';
@@ -1606,13 +1741,13 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 }
                 break;
 
-            case  Type::DateType:
+            case  Type::DateType: 
                 {
                     long  dc =  atol(eq);
                     if (dc == (long)(list[li]->getDate(p).getTime())) ok = 1;
                 }
                 break;
-
+                
             case  Type::DoubleType:
                 {
                     // TODO - double needs a bigger size than float
@@ -1714,6 +1849,227 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         *--eq='=';
         return 0;
     }
+DataObjectImpl* DataObjectImpl::findDataObject(const SDOString& token, long* index)
+{
+   // name , name[int], name[x=y] name.int 
+   // char c = 0;
+   size_t beginbrace = token.find('[');
+   size_t dot = token.find('.');
+   size_t breaker = 0;
+
+//    char* beginbrace = strchr(token,'[');
+//    char* endbrace   = strchr(token,']');
+//    char* dot = strchr(token,'.');
+//    char* breaker = 0;
+
+   if (dot != string::npos)
+   {
+      if (beginbrace != string::npos)
+      {
+         breaker = (beginbrace < dot) ? beginbrace : dot;
+      }
+      else 
+      {
+         breaker = dot;
+      }
+   }
+   else 
+   {
+      breaker = beginbrace;
+   }
+
+   if (breaker == string::npos){
+      // its this object, and a property thereof
+      *index = -1;
+      const Property& p = getProperty(token);
+      return getDataObjectImpl(p);
+   }
+
+   // We did find a breaker character.
+   const Property& p = getProperty(SDOString(token, 0, breaker));
+
+   breaker++;
+
+   size_t endbrace = token.find(']');
+   SDOString breakerStr = token.substr(breaker, (endbrace - breaker));
+   // Search for the first occurence of an = sign starting at the previously
+   // identified "breaker" character and ending at the endbrace just found. We
+   // need to make a new SDOString to contain that substring.
+
+   size_t eq = breakerStr.find('=');
+
+   if (eq == string::npos)
+   {
+      // There is no "=" sign
+      int val = atoi(breakerStr.c_str());
+      DataObjectList& list = getList(p);
+
+      // The spec says that depts[1] is the first element, as is depts.0
+      if (beginbrace != string::npos) val--;
+
+      if (val >=0 && val < list.size())
+      {
+         DataObject* dob = list[val];
+         *index = val;
+         return (DataObjectImpl*)dob;
+      }
+      *index = -1;
+      return 0;
+   }
+
+   // We did find an "=" sign.
+   // *eq = 0;
+   SDOString PropertyName = token.substr(breaker, (eq - breaker));
+   // breaker is now propname
+   eq++;
+   SDOString PropertyValue = token.substr(eq, (endbrace - eq));
+   // eq is now propval
+
+   DataObjectList& list = getList(p);
+   for (int li = 0 ; li < list.size() ; ++li)
+   {
+      // TODO  comparison for double not ok
+
+      const Type & t = list[li]->getType();
+      const Property& p  = list[li]->getProperty(PropertyName);
+      int ok = 0;
+
+      switch (p.getTypeEnum())
+      {
+         case Type::BooleanType:
+         {
+            // getCString will return "true" or "false"
+            if (!strcmp(PropertyValue.c_str(), list[li]->getCString(p))) ok = 1;
+         }
+         break;
+
+         case  Type::ByteType:
+         {
+            char cc = PropertyValue[0];
+            // getByte return a char
+            if (cc == list[li]->getByte(p)) ok = 1;
+         }
+         break;
+
+         case  Type::CharacterType:
+         {
+            wchar_t wc = *((wchar_t*) PropertyValue.c_str());
+            // wchar_t wc =  (wchar_t)((wchar_t*)eq)[0];
+            // TODO - this is not a very accesible way of storing a wchar
+            if (wc == list[li]->getCharacter(p)) ok = 1;
+         }
+         break;
+
+         case  Type::IntegerType:
+         {
+            long  ic =  atol(PropertyValue.c_str());
+            if (ic == list[li]->getInteger(p)) ok = 1;
+         }
+         break;
+
+         case  Type::DateType: 
+         {
+            long  dc =  atol(PropertyValue.c_str());
+            if (dc == (long)(list[li]->getDate(p).getTime())) ok = 1;
+         }
+         break;
+                
+         case  Type::DoubleType:
+         {
+            // TODO - double needs a bigger size than float
+            long double  ldc =  (long double)atof(PropertyValue.c_str());
+            if (ldc == list[li]->getDouble(p)) ok = 1;
+         }
+         break;
+
+         case  Type::FloatType:
+         {
+            float  fc =  atof(PropertyValue.c_str());
+            if (fc == list[li]->getFloat(p)) ok = 1;
+         }
+         break;
+
+         case  Type::LongType:
+         {
+#if defined(WIN32)  || defined (_WINDOWS)
+            int64_t lic = (int64_t)_atoi64(PropertyValue.c_str());
+#else
+            int64_t lic = (int64_t)strtoll(PropertyValue.c_str(), NULL, 0);
+#endif
+
+            if (lic == list[li]->getLong(p)) ok = 1;
+         }
+         break;
+
+         case  Type::ShortType:
+         {
+            short sic = atoi(PropertyValue.c_str());
+            if (sic == list[li]->getShort(p)) ok = 1;
+         }
+         break;
+
+         case  Type::BytesType:
+         case  Type::BigDecimalType:
+         case  Type::BigIntegerType:
+         case  Type::StringType:
+         case  Type::UriType:
+         {
+
+            if (!strcmp(PropertyValue.c_str(), list[li]->getCString(p))) ok = 1;
+            // try with quotes too
+            size_t firstquote = PropertyValue.find('"');
+            size_t firstsingle = PropertyValue.find('\'');
+
+            char searchchar = 0;
+
+            if (firstsingle == string::npos)
+            {
+               if (firstquote != string::npos)
+               {
+                  searchchar = '"';
+               }
+            }
+            else
+            {
+               if (firstquote != string::npos && firstquote < firstsingle)
+               {
+                  searchchar = '"';
+               }
+               else
+               {
+                  searchchar = '\'';
+                  firstquote = firstsingle;
+               }
+            }
+
+            if (searchchar != 0)
+            {
+               size_t ender = PropertyValue.find(searchchar, firstquote + 1);
+               if (ender != string::npos)
+               {
+                  if (!strcmp(PropertyValue.substr(firstquote + 1, ender - firstquote).c_str(), list[li]->getCString(p)))
+                     ok = 1;
+               }
+            }
+         }
+         break;
+
+         case Type::DataObjectType:
+            break;
+
+         default:
+            break;
+      }
+
+      if (ok == 1)
+      {
+         DataObject* dob = list[li];
+         *index = li;
+         return (DataObjectImpl*)dob;
+      }
+   }
+   return 0;
+}
 
 
     //////////////////////////////////////////////////////////////////////
@@ -1724,7 +2080,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
 
         // initially check for "#/" which indicates that we need to find the root
-        // object first
+        // object first 
         if (path == 0) return 0;
 
         if (strlen(path) <= 2)
@@ -1740,7 +2096,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 return 0;
             }
         }
-
+        
         if (path[0] == '#' && path[1] == '/')
         {
             DataObjectImpl* root = this;
@@ -1752,34 +2108,34 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
 
         DataObjectImpl* d;
-        char*  i = strchr(path,'/');
+        char*  i = (char*) strchr(path,'/');
         char* remaining = 0;
         char* token     = 0;
 
-        if (i != 0)
+        if (i != 0) 
         {
             int j = strlen(path) - strlen(i);
-            if (j > 0)
+            if (j > 0) 
             {
                 token = new char[j + 1];
                 strncpy(token,path, j);
                 token[j] = 0;
             }
-            if (strlen(i) > 1)
+            if (strlen(i) > 1) 
             {
                 remaining = new char[strlen(i)];
                 strcpy(remaining, i+1);
             }
         }
-        else
+        else 
         {
             remaining = new char[strlen(path) + 1];
             strcpy(remaining,path);
         }
-
-        if (token == 0)
+        
+        if (token == 0) 
         {
-            if (remaining != 0 && !strcmp(remaining,".."))
+            if (remaining != 0 && !strcmp(remaining,"..")) 
             {
                 /* Its the container itself */
                 *din = getContainerImpl();
@@ -1828,6 +2184,94 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         *din = 0;
         return 0;
     }
+  SDOString DataObjectImpl::findPropertyContainer(const SDOString& path, DataObjectImpl** din)
+  {
+    // initially check for "#/" which indicates that we need to find the root object first 
+    if (path.empty()) return 0;
+
+    if (path.length() <= 2)
+    {
+      if (path[0] == '#')
+      {
+        DataObjectImpl* root = this;
+        while (root->getContainerImpl() != 0)
+        {
+          root = root->getContainerImpl();
+        }
+        *din = root;
+        return SDOString();
+      }
+    }
+
+    if (path[0] == '#' && path[1] == '/')
+    {
+      DataObjectImpl* root = this;
+      while (root->getContainerImpl() != 0)
+      {
+        root = root->getContainerImpl();
+      }
+      return root->findPropertyContainer(SDOString(path, 2), din);
+    }
+
+    DataObjectImpl* d;
+    size_t slashPos = path.find('/');  // i is the subscript of the found character
+    SDOString remaining;
+    SDOString token;
+
+    if (slashPos != string::npos)      // If we found a slash character
+    {
+      if (slashPos > 0)              // If there is something before the slash
+      {
+        token.assign(path, 0, slashPos);
+      }
+      if ((path.length() - slashPos) > 1) // If there is something after the slash
+      {
+        remaining.assign(path, slashPos + 1, string::npos);
+      }
+    }
+    else
+    {
+      remaining = path;
+    }
+
+    if (token.empty()) 
+    {
+      if (remaining == "..") 
+      {
+        /* Its the container itself */
+        *din = getContainerImpl();
+        return SDOString();
+      }
+
+      /* Its this data object - property could be empty or
+         valid or invalid - user must check */
+      *din = this;
+      return remaining;
+    }
+
+    if (token == "..") {
+      /* Its derived from the container */
+      d = getContainerImpl();
+      /* carry on trying to find a property */
+      if (d != 0) {
+        return d->findPropertyContainer(remaining, din);
+      }
+      /* Give up - no container */
+      *din = 0;
+      return 0;
+    }
+
+    /* Try to find a property ....*/
+    long l;
+    d = findDataObject(token, &l);
+    if (d != 0) {
+      return d->findPropertyContainer(remaining, din);
+    }
+
+    /* Give up its not in the tree */
+    *din = 0;
+    return 0;
+  }
 
 
 
@@ -1837,13 +2281,13 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
    // and any properties where isSet(property) is true.
    // For example, properties resulting from the use of
    // open or mixed XML content are present if allowed by the Type.
-   // The list does not contain duplicates.
+   // The list does not contain duplicates. 
    // The order of the properties in the list begins with getType().getProperties()
    // and the order of the remaining properties is determined by the implementation.
-   // The same list will be returned unless the DataObject is updated so that
+   // The same list will be returned unless the DataObject is updated so that 
    // the contents of the list change
    // @return the list of Properties currently used in thIs DataObject.
-
+   
     PropertyList /* Property */ DataObjectImpl::getInstanceProperties()
     {
         std::vector<PropertyImpl*> theVec;
@@ -1861,7 +2305,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
         return PropertyList(theVec);
     }
-
+  
     void DataObjectImpl::setInstancePropertyType(unsigned int index,
         const Type* t)
     {
@@ -1892,7 +2336,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                         (*j).isContainment()));
 
                     openProperties.erase(j);
-
+                    
                     return;
                 }
                 count++;
@@ -1900,14 +2344,14 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
         return;
     }
-
+  
    // Returns the Sequence for thIs DataObject.
    // When Type.isSequencedType() == true,
    // the Sequence of a DataObject corresponds to the
    // XML elements representing the values of its properties.
    // Updates through DataObject and the Lists or Sequences returned
    // from DataObject operate on the same data.
-   // When Type.isSequencedType() == false, null is returned.
+   // When Type.isSequencedType() == false, null is returned.  
    // @return the <code>Sequence</code> or null.
 
     SequenceImpl* DataObjectImpl::getSequenceImpl()
@@ -1942,7 +2386,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return 0;
     }
 
-
+  
 
     ChangeSummaryPtr DataObjectImpl::getChangeSummary(const char* path)
     {
@@ -1973,7 +2417,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         // but as an additional check against looping, I will use
         // a redundent getSummary() method.
         // TODO - remove this.
-        if (changesummaryobject != 0) return
+        if (changesummaryobject != 0) return 
             (ChangeSummaryPtr)(changesummaryobject->getSummary());
         return 0;
     }
@@ -1998,7 +2442,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return localCS;
     }
 
-    // sets a property of either this object or an object reachable from it,
+    // sets a property of either this object or an object reachable from it, 
     // as identified by the specified path,
     // to the specified value.
     // @param path the path to a valid object and property.
@@ -2032,7 +2476,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                             {
                                 dol.setDataObject((unsigned int)index,value);
                             }
-                            else
+                            else 
                             {
                                 dol.append(value);
                             }
@@ -2044,7 +2488,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                         SDO_THROW_EXCEPTION("setDataObject", SDOUnsupportedOperationException,
                         msg.c_str());
                     }
-                    else
+                    else 
                     {
                         d->setDataObject((Property&)*p,value);
                         delete(prop);
@@ -2061,6 +2505,60 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             msg.c_str());
     }
 
+void DataObjectImpl::setDataObject(const SDOString& path, DataObjectPtr value)
+{
+  DataObjectImpl* d;
+  SDOString prop = findPropertyContainer(path, &d);
+  if (d != 0)
+  {
+     if (!prop.empty()) {
+        const PropertyImpl* p = d->getPropertyImpl(prop);
+        if (p == 0 && d->getType().isOpenType())
+        {
+           if (value != 0)
+           {
+              p = d->defineDataObject(prop, value->getType());
+           }
+        }
+        if (p != 0)
+        {
+           if (p->isMany())
+           {
+              DataObjectList& dol = d->getList((Property&)*p);
+              long index;
+              DataObjectImpl* dx = d->findDataObject(prop,&index);
+              if (index >= 0)
+                  {
+                    if(index < dol.size())
+                      {
+                        dol.setDataObject((unsigned int)index,value);
+                      }
+                    else 
+                      {
+                        dol.append(value);
+                      }
+                    return;
+                  }
+                string msg("Set of data object on many valued item");
+                msg += path;
+                SDO_THROW_EXCEPTION("setDataObject", SDOUnsupportedOperationException,
+                                    msg.c_str());
+              }
+            else 
+              {
+                d->setDataObject((Property&)*p,value);
+                return;
+              }
+          }
+      }
+    }
+
+  string msg("Path not valid:");
+  msg += path;
+  SDO_THROW_EXCEPTION("setDataObject", SDOPathNotFoundException,
+                      msg.c_str());
+}
+
     void DataObjectImpl::validateIndex(unsigned int index)
     {
         PropertyList pl = getType().getProperties();
@@ -2075,6 +2573,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     return;
                 }
             }
+
             string msg("Index of property out of range:");
             msg += index;
             SDO_THROW_EXCEPTION("Index Validation", SDOIndexOutOfRangeException,
@@ -2084,13 +2583,16 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     void DataObjectImpl::transferChildren(DataObject* d, DataFactory* f)
     {
+        bool isData = false;
         PropertyList pl = d->getInstanceProperties();
         for (int i=0;i<pl.size();i++)
         {
+            // even primitives need their DF fixed up
             if (pl[i].getType().isDataType())
             {
-                 continue;
+                 isData = true;
             }
+
             if (!d->isSet(pl[i]) || d->isNull(pl[i]))
             {
                 continue;
@@ -2100,11 +2602,11 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 DataObjectList& dl = d->getList(pl[i]);
                 for (int j=0;j<dl.size();j++)
                 {
-
+                    
                     DataObject* d2 = dl[j];
                     if (d2) {
                         ((DataObjectImpl*)d2)->setDataFactory(f);
-                        transferChildren(d2,f);
+                        if (!isData)transferChildren(d2,f);
                     }
                 }
             }
@@ -2112,9 +2614,9 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             {
                 DataObject* d3 = d->getDataObject(pl[i]);
                 if (d3)
-                {
+                { 
                     ((DataObjectImpl*)d3)->setDataFactory(f);
-                    transferChildren(d3,f);
+                    if (!isData)transferChildren(d3,f);
                 }
             }
         }
@@ -2125,7 +2627,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     void DataObjectImpl::checkFactory(DataObjectPtr dob,
         unsigned int propertyIndex)
     {
-
+        
         DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dob;
 
         if (d->getDataFactory() == getDataFactory()) return;
@@ -2134,7 +2636,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         // problems associated with allowing data object 'migration'
         // lets move this one and all its children to the factory of the
         // new parent if the factories are compatible.
-
+        
         DataFactoryImpl* f = (DataFactoryImpl*)getDataFactory();
 
         if (d->getContainer() != 0)
@@ -2163,7 +2665,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
 
         // This is the default position....
-
+        
         string msg("Insertion from incompatible factory ");
         const Type& t = d->getType();
         msg += t.getURI();
@@ -2192,7 +2694,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             (objectType.getURI(),objectType.getName());
         if (ti != 0)
         {
-            do
+            do 
             {
                 ti = (const TypeImpl*)ti->getBaseType();
                 if (ti == 0) break;
@@ -2200,9 +2702,9 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             } while (ti != 0);
 
             // allow types of any substitutes
-            const PropertyImpl* pi =
+            const PropertyImpl* pi = 
                 getPropertyImpl(getPropertyIndex(prop));
-            if (pi != 0)
+            if (pi != 0) 
             {
                 unsigned int subcount = pi->getSubstitutionCount();
                 for (int i=0;i<subcount;i++)
@@ -2235,7 +2737,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         unsigned int propertyIndex = getPropertyIndex(prop);
 
-
+       
         if (value != 0)
         {
             checkFactory(value, propertyIndex);
@@ -2275,7 +2777,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
 
 
-        if (value == 0)
+        if (value == 0) 
         {
             PropertyValueMap::iterator j;
             for (j = PropertyValues.begin(); j != PropertyValues.end(); ++j)
@@ -2287,13 +2789,13 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     }
                     else
                     {
-                        // log both deletion and change - change is not
+                        // log both deletion and change - change is not 
                         // automatically recorded by deletion.
                         ((*j).second)->logDeletion();
                     }
                     logChange(prop);
                     (*j).second = RefCountingPointer<DataObjectImpl>(0);
-
+            
                     return;
                 }
             }
@@ -2314,7 +2816,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 }
                 else
                 {
-                    // log both deletion and change - change is not
+                    // log both deletion and change - change is not 
                     // automatically recorded by deletion.
                     ((*i).second)->logDeletion();
                 }
@@ -2322,7 +2824,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
                 (*i).second = RefCountingPointer<DataObjectImpl>((DataObjectImpl*)dob);
 
-
+            
                 if (prop.isReference())
                 {
                     ((DataObjectImpl*)dob)->setReference(this, prop);
@@ -2372,12 +2874,12 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             msg.c_str());
     }
 
-
-    // Returns whether a property of either this object or an object reachable
+   
+    // Returns whether a property of either this object or an object reachable 
     // from it, as identified by the specified path,
     // is considered to be set.
     // @param path the path to a valid Object* and property.
-
+    
     bool DataObjectImpl::isSet(const char* path)
     {
         DataObjectImpl* d;
@@ -2439,14 +2941,14 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     }
 
 
-    // unSets a property of either this Object or an Object reachable from it,
+    // unSets a property of either this Object or an Object reachable from it, 
     // as identified by the specified path.
     // @param path the path to a valid Object and property.
     // @see #unSet(Property)
 
     void DataObjectImpl::unset(const char* path)
     {
-
+        
         DataObjectImpl* d;
         char* prop = findPropertyContainer(path,&d);
         if (d != 0)
@@ -2517,7 +3019,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     logChange(index);
                     if (p.isMany()) {
                         DataObjectList& dl = dol->getList();
-                        while (dl.size() > 0)
+                        while (dl.size() > 0) 
                         {
                             RefCountingPointer<DataObject> dli = dl.remove(0);
                         }
@@ -2531,11 +3033,11 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     // if its a reference, we dont want to delete anything
                     if (!p.isReference())
                     {
-                        if (dol) {
+                        if (dol) { 
                             dol->clearReferences();
                             if (p.isMany()) {
                                 DataObjectList& dl = dol->getList();
-                                while (dl.size() > 0)
+                                while (dl.size() > 0) 
                                 {
                                     if (p.getType().isDataObjectType())
                                     {
@@ -2547,7 +3049,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                                     RefCountingPointer<DataObject> dli = dl.remove(0);
                                 }
                             }
-                            else
+                            else 
                             {
                                 PropertyValues.erase(i);
                                 dol->logDeletion();
@@ -2579,22 +3081,28 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return;
     }
 
+    
 
-
-    // Returns the value of a DataObject property identified by
+    // Returns the value of a DataObject property identified by 
     // the specified path.
     // @param path the path to a valid object and property.
     // @return the DataObject value of the specified property.
 
     RefCountingPointer<DataObject> DataObjectImpl::getDataObject(const char* path)
     {
-        DataObjectImpl* ptr = getDataObjectImpl(path);;
+        DataObjectImpl* ptr = getDataObjectImpl(path);
         return RefCountingPointer<DataObject> ((DataObject*)ptr);
      }
 
-    DataObjectImpl* DataObjectImpl::getDataObjectImpl(const char* path)
-    {
+  RefCountingPointer<DataObject> DataObjectImpl::getDataObject(const SDOString& path)
+  {
+    DataObjectImpl* ptr = getDataObjectImpl(path);
+    return RefCountingPointer<DataObject> ((DataObject*)ptr);
+  }
 
+  DataObjectImpl* DataObjectImpl::getDataObjectImpl(const char* path)
+    {
+        
           DataObjectImpl* d = 0;
         char* prop = findPropertyContainer(path,&d);
         if (d != 0) {
@@ -2612,9 +3120,9 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     }
                     return theob;
                 }
-                else
+                else 
                 {
-                    if (strlen(prop) == 0)
+                    if (strlen(prop) == 0) 
                     {
                         delete prop;
                         prop = 0;
@@ -2637,6 +3145,51 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         SDO_THROW_EXCEPTION("getDataObject" ,SDOPathNotFoundException,
             msg.c_str());
     }
+
+  // +++
+
+  DataObjectImpl* DataObjectImpl::getDataObjectImpl(const SDOString& path)
+  {
+        
+    DataObjectImpl* d = 0;
+    SDOString prop = findPropertyContainer(path,&d);
+    // char* prop = findPropertyContainer(path,&d);
+    if (d != 0) {
+      if (!prop.empty()) {
+        if (prop.find_first_of("[.") != string::npos) {
+          /* Its a multlvalued property */
+          long l;
+          DataObjectImpl* theob = d->findDataObject(prop,&l);
+          if (theob == 0) {
+            string msg("Get DataObject - index out of range:");
+            msg += path;
+            SDO_THROW_EXCEPTION("getDataObject" ,SDOIndexOutOfRangeException,
+                                msg.c_str());
+          }
+          return theob;
+        }
+        else 
+          {
+            if (prop.length() == 0) 
+              {
+                return d;
+              }
+            const Property& p = d->getProperty(prop);
+            return d->getDataObjectImpl(p);
+          }
+      }
+      else {
+        return d;
+      }
+    }
+
+    string msg("Invalid path:");
+    msg += path;
+    SDO_THROW_EXCEPTION("getDataObject" ,SDOPathNotFoundException,
+                        msg.c_str());
+  }
+
+  // ---
 
     RefCountingPointer<DataObject> DataObjectImpl::getDataObject(unsigned int propertyIndex)
     {
@@ -2666,7 +3219,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return 0;
     }
 
-
+  
     RefCountingPointer<DataObject> DataObjectImpl::getDataObject(const Property& property)
     {
         DataObjectImpl* ptr = getDataObjectImpl(property);
@@ -2688,7 +3241,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     RefCountingPointer<DataObject> DataObjectImpl::createDataObject(const char* propertyName)
     {
-        // Throws runtime exception for type or property not found
+        // Throws runtime exception for type or property not found 
 
         const Property& p  = getProperty(propertyName);
         return createDataObject(p);
@@ -2707,7 +3260,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     // Returns a new DataObject contained by this Object using the specified property,
     // which must be a containment property.
     // The type of the created Object is the declared type of the specified property.
-
+    
     RefCountingPointer<DataObject> DataObjectImpl::createDataObject(const Property& property)
     {
         const Type& tp = property.getType();
@@ -2719,7 +3272,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     // which must be a containment property.
     // The type of the created Object is the declared type of the specified property.
 
-    RefCountingPointer<DataObject> DataObjectImpl::createDataObject(const Property& property, const char* namespaceURI,
+    RefCountingPointer<DataObject> DataObjectImpl::createDataObject(const Property& property, const char* namespaceURI, 
                                        const char* typeName)
     {
         if (!property.isContainment())
@@ -2737,8 +3290,8 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             DataObject* dob = ptr;
             ((DataObjectImpl*)dob)->setContainer(this);
             ((DataObjectImpl*)dob)->setApplicableChangeSummary();
-
-            // log creation before adding to list - the change must record the old state
+            
+            // log creation before adding to list - the change must record the old state 
             // of the list
             logCreation(((DataObjectImpl*)dob), this, property);
             //logChange(property);
@@ -2746,7 +3299,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             DataObjectImpl* theDO = getDataObjectImpl(property);
             if ( theDO == 0) { /* No value set yet */
                 unsigned int ind = getPropertyIndex(property);
-                RefCountingPointer<DataObject> listptr =
+                RefCountingPointer<DataObject> listptr = 
                     df->create(Type::SDOTypeNamespaceURI,"DataObject");
 
                 DataObject* doptr = listptr;
@@ -2768,10 +3321,10 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 //    sq->push(property,0);
                 //}
             }
-            else
+            else 
             {
                 DataObjectList& list =    theDO->getList();
-                // the append will log a change to the property, and update the
+                // the append will log a change to the property, and update the 
                 // sequence
                 list.append(ptr);
                 //if (getType().isSequencedType())
@@ -2786,7 +3339,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
         else {
             unset(property);
-            DataObjectImpl* ditem =
+            DataObjectImpl* ditem = 
               new DataObjectImpl(df, df->getType(namespaceURI, typeName));
             ditem->setContainer(this);
             ditem->setApplicableChangeSummary();
@@ -2854,7 +3407,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         // remove this data object from its tree
         clearReferences();
-        if (container == 0) return;
+        if (container == 0) return; 
         container->remove(this);
         return ;
     }
@@ -2864,7 +3417,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         // clear this objects state
         PropertyValueMap::iterator i = PropertyValues.begin();
 
-        while (i != PropertyValues.end())
+        while (i != PropertyValues.end()) 
         {
             unset((*i).first);
             i = PropertyValues.begin();
@@ -2908,15 +3461,15 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     }
                 }
             }
-            else
+            else 
             {
-                if ((*i).second == ob)
+                if ((*i).second == ob) 
                 {
                     return &(getProperty((*i).first));
                 }
             }
         }
-        return 0; // this can happen if the object has been detached
+        return 0; // this can happen if the object has been detached 
 
         //string msg("Object cannot find its containing property");
         //SDO_THROW_EXCEPTION("FindInProperties" ,SDOPropertyNotFoundException,
@@ -2942,17 +3495,17 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     const Type& DataObjectImpl::getType()
     {
-          return ObjectType;
+          return (const Type&)(*ObjectType);
     }
 
     const Type::Types DataObjectImpl::getTypeEnum()
     {
-           return ObjectType.getTypeEnum();
+           return ObjectType->getTypeEnum();
     }
 
     const TypeImpl& DataObjectImpl::getTypeImpl()
     {
-          return ObjectType;
+          return (const TypeImpl&)*ObjectType;
     }
 
 
@@ -2971,6 +3524,19 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
         return (Property&)*pi;
      }
+  const Property& DataObjectImpl::getProperty(const SDOString& prop)
+  {
+    PropertyImpl* pi = getPropertyImpl(prop);
+    if (pi == 0)
+      {
+        string msg("Cannot find property:");
+        msg += prop;
+        SDO_THROW_EXCEPTION("getProperty", SDOPropertyNotFoundException,
+                            msg.c_str());
+
+      }
+    return (Property&)*pi;
+  }
 
     PropertyImpl* DataObjectImpl::getPropertyImpl(const char* prop)
     {
@@ -2980,7 +3546,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         if (getType().isOpenType())
         {
             std::list<PropertyImpl>::iterator j;
-            for (j=openProperties.begin();
+            for (j=openProperties.begin(); 
                  j != openProperties.end(); ++j)
             {
                 if (!strcmp((*j).getName(), prop))
@@ -2991,6 +3557,25 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
         return 0;
      }
+  PropertyImpl* DataObjectImpl::getPropertyImpl(const SDOString& prop)
+  {
+    PropertyImpl* pi = getTypeImpl().getPropertyImpl(prop);
+    if (pi != 0) return pi;
+
+    if (getType().isOpenType())
+      {
+        std::list<PropertyImpl>::iterator j;
+        for (j=openProperties.begin(); 
+             j != openProperties.end(); ++j)
+          {
+            if (!strcmp((*j).getName(), prop.c_str()))
+              {
+                return (PropertyImpl*)&(*j);
+              }
+          }
+      }
+    return 0;
+  }
 
     DataFactory* DataObjectImpl::getDataFactory()
     {
@@ -2999,6 +3584,8 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     void DataObjectImpl::setDataFactory(DataFactory* df)
     {
+        ObjectType = (TypeImpl*)&(df->getType(ObjectType->getURI(),
+                        ObjectType->getName()));
         factory = df;
     }
 
@@ -3006,7 +3593,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     // These finally are the setters/getters for primitives given
     // that the data object is a primitive type.
     ///////////////////////////////////////////////////////////////////////////
-
+    
 
     bool DataObjectImpl::getBoolean()
     {
@@ -3027,7 +3614,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     }
 
-    long DataObjectImpl::getInteger()
+    long DataObjectImpl::getInteger() 
     {
         return getTypeImpl().convertToInteger(value,valuelength);
 
@@ -3126,7 +3713,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         return;
     }
 
-    void DataObjectImpl::setInteger(long invalue)
+   void DataObjectImpl::setInteger(long invalue) 
     {
 #if __WORDSIZE ==64
         valuelength = getTypeImpl().convert(&value,(int64_t)invalue);
@@ -3135,6 +3722,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 #endif
         return;
     }
+
 
     void DataObjectImpl::setDouble(long double invalue)
     {
@@ -3198,15 +3786,16 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     }
 
 
-    DataObjectImpl::DataObjectImpl(const TypeImpl& t) : ObjectType(t)
+    DataObjectImpl::DataObjectImpl(const TypeImpl& t) 
     {
+        ObjectType = (TypeImpl*)&t;
         container = 0;
         value = 0; /* Will be initialized when used */
         valuelength = 0;
         asStringBuffer = 0;
 //        asXPathBuffer = 0;
         isnull = false;
-
+        
         // open type support
         openBase = t.getPropertiesSize() ;
 
@@ -3217,7 +3806,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             changesummaryobject = 0;
             localCS = new ChangeSummaryImpl();
         }
-        else
+        else 
         {
             changesummaryobject = 0;
             localCS = 0;
@@ -3229,7 +3818,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
 
 
-    DataObjectImpl::DataObjectImpl(DataFactory* df, const Type& t) : ObjectType((TypeImpl&)t),
+    DataObjectImpl::DataObjectImpl(DataFactory* df, const Type& t) : ObjectType((TypeImpl*)&t),
         factory(df)
     {
         container = 0;
@@ -3240,26 +3829,26 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         isnull = false;
 
         // open type support
-        openBase = ObjectType.getPropertiesSize() ;
+        openBase = ObjectType->getPropertiesSize() ;
 
         userdata = (void*)0xFFFFFFFF;
 
-        if (ObjectType.isChangeSummaryType())
+        if (ObjectType->isChangeSummaryType())
         {
             changesummaryobject = 0;
             localCS = new ChangeSummaryImpl();
         }
-        else
+        else 
         {
             changesummaryobject = 0;
             localCS = 0;
         }
 
-        if (getType().isSequencedType())
+        if (getType().isSequencedType()) 
         {
             sequence = new SequenceImpl(this);
         }
-        else
+        else 
         {
             sequence = 0;
         }
@@ -3272,8 +3861,8 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         case  Type::BooleanType:
         case  Type::ByteType:
         case  Type::CharacterType:
-        case  Type::IntegerType:
-        case  Type::DateType:
+        case  Type::IntegerType: 
+        case  Type::DateType:   
         case  Type::DoubleType:
         case  Type::FloatType:
         case  Type::LongType:
@@ -3317,12 +3906,12 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
         clearReferences();
          PropertyValueMap::iterator i = PropertyValues.begin();
-        while (i != PropertyValues.end())
+        while (i != PropertyValues.end()) 
         {
             unset((*i).first);
             if (i == PropertyValues.begin())
             {
-                // unset has not removed the item from the list - do it
+                // unset has not removed the item from the list - do it 
                 // here instead
                 PropertyValues.erase(i);
             }
@@ -3333,18 +3922,18 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         //so we dont need to detach....
         //detach();
 
-
+        
         if (asStringBuffer != 0) delete asStringBuffer;
 //        if (asXPathBuffer != 0) delete asXPathBuffer;
 
-        if (value != 0)
+        if (value != 0) 
         {
             if (getType().isDataType())deleteValue();
         }
+        
+        
 
-
-
-        if (getType().isSequencedType())
+        if (getType().isSequencedType()) 
         {
             if (sequence != 0) delete sequence;
         }
@@ -3352,9 +3941,9 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
         if (getTypeImpl().isChangeSummaryType()    )
         {
-            if (getChangeSummary() != 0)
+            if (getChangeSummary() != 0) 
             {
-                delete localCS;
+                delete localCS; 
                 localCS = 0;
             }
         }
@@ -3387,7 +3976,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         if (getChangeSummaryImpl() != 0 && getChangeSummaryImpl()->isLogging())
         {
-            getChangeSummaryImpl()->logCreation(dol,cont,theprop);
+            getChangeSummaryImpl()->logCreation(dol,cont,theprop); 
         }
     }
 
@@ -3520,7 +4109,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             temp1 = new char[strlen(name) + 34];
             temp1[0] = 0;
 
-
+            
             if (p.isMany()) {
                 DataObjectList& dol = dob->getList(p);
                 for (int i=0;i<dol.size();i++)
@@ -3567,7 +4156,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 delete spath;
                 spath = 0;
             }
-            if (d != 0)
+            if (d != 0) 
             {
                 if (prop != 0)
                 {
@@ -3596,7 +4185,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (spath) delete spath;
             return 0;
         }
-
+                
     }
 
     void* DataObjectImpl::getUserData(unsigned int propertyIndex)
@@ -3647,7 +4236,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 delete spath;
                 spath = 0;
             }
-            if (d != 0)
+            if (d != 0) 
             {
                 if (prop != 0)
                 {
@@ -3676,7 +4265,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (spath) delete spath;
             return;
         }
-
+                
     }
 
     void DataObjectImpl::setUserData(unsigned int propertyIndex, void* value)

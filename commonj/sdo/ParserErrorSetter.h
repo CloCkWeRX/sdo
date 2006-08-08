@@ -25,7 +25,6 @@
 #include "commonj/sdo/disable_warn.h"
 
 #include <vector>
-using namespace std;
 
 namespace commonj{
 namespace sdo{
@@ -41,6 +40,7 @@ class ParserErrorSetter
 public:
     virtual ~ParserErrorSetter();
     virtual void setError(const char* message) = 0;
+    virtual void clearErrors() = 0;
 };
 };
 };

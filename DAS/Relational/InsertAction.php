@@ -1,7 +1,7 @@
 <?php
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -99,7 +99,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 		$this->stmt = $this->toSQL();
 		$this->buildValueList();
 
-		SDO_DAS_Relational_DatabaseHelper::executeStatement($dbh,$this->stmt,$this->value_list);
+		SDO_DAS_Relational_DatabaseHelper::executeStatementTestForCollision($dbh,$this->stmt,$this->value_list);
 		$this->storeThisObjectsPrimaryKey($dbh);
 
 		return $this->spawned_actions;

@@ -16,14 +16,20 @@
  */
 
 /* $Rev$ $Date$ */
-
+#include "libxml/uri.h"
 #include "commonj/sdo/SDOSchemaSAX2Parser.h"
 #include "commonj/sdo/XSDPropertyInfo.h"
 #include "commonj/sdo/XSDTypeInfo.h"
 #include "commonj/sdo/SDORuntimeException.h"
 #include "commonj/sdo/Logging.h"
+#include "commonj/sdo/SDOUtils.h"
+
 
 #include <stdio.h>
+
+extern "C" {
+    void sdo_error(void *ctx, const char *msg, ...);
+}
 
 namespace commonj
 {
@@ -37,6 +43,9 @@ namespace commonj
             bInSchema = false;
             bInvalidElement = false;
             bInInvalidContent = false;
+            bInvalidList = false;
+            inGroup  = 0;
+            preParsing = true;
         }
         
         SDOSchemaSAX2Parser::~SDOSchemaSAX2Parser()
@@ -44,6 +53,133 @@ namespace commonj
         }
         
         
+        void SDOSchemaSAX2Parser::storeStartElementEvent(
+                                const SDOXMLString& localname,
+                                const SDOXMLString& prefix,
+                                const SDOXMLString& URI,
+                                const SAX2Namespaces& namespaces,
+                                const SAX2Attributes& attributes)
+        {
+            // copy the event to as list for replay.
+            if (currentGroup)
+            {
+                currentGroup->events.insert( currentGroup->events.end(),
+                    GroupEvent(
+                    localname,prefix,URI,namespaces,attributes));
+            }
+
+        }
+
+        void SDOSchemaSAX2Parser::storeEndElementEvent(
+                                const SDOXMLString& localname,
+                                const SDOXMLString& prefix,
+                                const SDOXMLString& URI)
+        {
+            // copy the event to as list for replay.
+            if (currentGroup)
+            {
+                 currentGroup->events.insert(currentGroup->events.end(),
+                     GroupEvent(localname,prefix,URI));
+            }
+
+        }
+
+        void SDOSchemaSAX2Parser::replayEvents(
+            const SDOXMLString& uri,
+            const SDOXMLString& name,
+            bool isGroup,
+            const SAX2Attributes& groupAttributes)
+        {
+            for (int i=0;i< groupList.size(); i++)
+            {
+                if (groupList[i].isAttributeGroup != isGroup)
+                {
+                    if (
+                       (!name.isNull() && name.equals(groupList[i].name))
+                       && 
+                       (
+                       (uri.isNull() && groupList[i].uri.isNull())
+                       || uri.equals(groupList[i].uri))
+                       )
+                    {
+                        // Determine the maxOccurs value from the <group ref=... definition
+                        bool isMany = false;
+                        const SAX2Attribute* groupMaxOccurrs = groupAttributes.getAttribute("maxOccurs");
+                        if  (groupMaxOccurrs != 0 &&
+                            !groupMaxOccurrs->getValue().equalsIgnoreCase("1"))
+                        {
+                            isMany = true;
+                        }
+
+                        int level = 0;
+
+                        for (int j=0;j< groupList[i].events.size();j++)
+                        {
+                            if (groupList[i].events[j].isStartEvent)
+                            {
+                                if ((level == 0) && isMany)
+                                {
+                                    if (groupList[i].events[j].localname.equalsIgnoreCase("choice") 
+                                        || groupList[i].events[j].localname.equalsIgnoreCase("sequence"))
+                                    {
+                                        // Add maxOccurs attribute to list
+                                        groupList[i].events[j].attributes.addAttribute(*groupMaxOccurrs);
+                                    }
+                                }
+                                startElementNs(
+                                 (const SDOXMLString&)
+                                 groupList[i].events[j].localname,
+                                 (const SDOXMLString&) 
+                                 groupList[i].events[j].prefix,
+                                 (const SDOXMLString&) 
+                                 groupList[i].events[j].URI,
+                                 (const SAX2Namespaces&) 
+                                 groupList[i].events[j].namespaces,
+                                 (const SAX2Attributes&) 
+                                 groupList[i].events[j].attributes);
+
+                                level++;
+                            }
+                            else
+                            {
+                                endElementNs(
+                                 (const SDOXMLString&)
+                                 groupList[i].events[j].localname,
+                                 (const SDOXMLString&) 
+                                 groupList[i].events[j].prefix,
+                                 (const SDOXMLString&) 
+                                 groupList[i].events[j].URI);
+
+                                level--;
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+            // no group found
+            if (setter)
+            {
+                char *msg = new char[strlen((const char*)name) + 32];
+                if (msg) 
+                {
+                    sprintf(msg,"Use of undefined group %s",
+                                            (const char*)name);
+                    setter->setError( msg );
+                    delete msg;
+                }
+            }
+         }
+
+        // ============================================================================
+        // endDocument
+        // ============================================================================
+        void SDOSchemaSAX2Parser::endDocument()
+        {
+            preParsing=!preParsing;
+            schemaInfo.getSchemaNamespaces().empty();
+        }
+
 
         // ============================================================================
         // startElementNS
@@ -89,105 +225,184 @@ namespace commonj
                     currentType.uri = schemaInfo.getTargetNamespaceURI();
                     currentType.name = "RootType";
                     currentType.localname="RootType";
+                    return;
                     
                 } // end schema handling
+                if (preParsing)
+                {
+                    // we are now pre-parsing groups so that we can allow them to be
+                    // defined after use.
 
-                // Handle <import> of other schema
-                else if (localname.equalsIgnoreCase("import"))
-                {
-                    // TODO - import and include treated equally for now - need to
-                    // separate out the namespace info for import 
-                    startInclude(localname, prefix, URI, namespaces, attributes);
-                }
-
-                // Handle <include> of other schema
-                else if (localname.equalsIgnoreCase("include"))
-                {
-                    startInclude(localname, prefix, URI, namespaces, attributes);
-                }
-                
-                ///////////////////////////////////////////////////////////////////////
-                // Handle elements and attributes
-                // These become Properties of the current Type
-                // ?? Any special handling of global elements???
-                ///////////////////////////////////////////////////////////////////////
-                else if (localname.equalsIgnoreCase("element"))
-                {
-                    if (!bInInvalidContent) startElement(localname, prefix, URI, namespaces, attributes);
-                }
-                else if (localname.equalsIgnoreCase("attribute"))
-                {
-                    if (!bInInvalidContent) startAttribute(localname, prefix, URI, namespaces, attributes);
-                }
-                else if (localname.equalsIgnoreCase("any")
-                        || localname.equalsIgnoreCase("anyAttribute"))
-                {
-                    // the type containing this is to be created as open
-                    if (!bInInvalidContent) currentType.isOpen = true;
-                }
-                
-                
-                ///////////////////////////////////////////////////////////////////////
-                // Handle complexType
-                // These become new types
-                ///////////////////////////////////////////////////////////////////////
-                else if (localname.equalsIgnoreCase("complexType"))
-                {
-                    if (!bInInvalidContent) startComplexType(localname, prefix, URI, namespaces, attributes);
-                } // end complexType handling
-                
-                else if (localname.equalsIgnoreCase("choice") 
-                    || localname.equalsIgnoreCase("sequence")
-                    || localname.equalsIgnoreCase("all"))
-                {
-                    if (!bInInvalidContent) startGroup(localname, prefix, URI, namespaces, attributes);
-                } // end Group handling
-                
-                else if (localname.equalsIgnoreCase("group") 
-                      || localname.equalsIgnoreCase("attributeGroup"))
-                {
-                    if (setter)
+                    if (inGroup > 0)
                     {
-                        setter->setError("Schema contains a group or attributeGroup which are not yet implemented");
-                        
+                        if (   localname.equalsIgnoreCase("group")
+                        ||  localname.equalsIgnoreCase("attributeGroup"))
+                        {
+                            inGroup++;
+                        }
+                        // check for a group reference first
+                        // we are inside a group....
+                         storeStartElementEvent(
+                                localname,
+                                prefix,
+                                URI,
+                                namespaces,
+                                attributes);
+                         return;
                     }
-                }
-               else if (localname.equalsIgnoreCase("list") 
-                       )
-                {
-                    if (setter)
-                    {
-                        setter->setError("Schema contains a list which is not yet implemented");
-                        
-                    }
-                }
 
-               ///////////////////////////////////////////////////////////////////////
-                // Handle simpleType
-                // These become new types
-                ///////////////////////////////////////////////////////////////////////
-                else if (localname.equalsIgnoreCase("simpleType"))
-                {
-                    if (!bInInvalidContent) startSimpleType(localname, prefix, URI, namespaces, attributes);
-                } // end complexType handling
-                
-                else if (localname.equalsIgnoreCase("restriction"))
-                {
-                    if (!bInInvalidContent) startRestriction(localname, prefix, URI, namespaces, attributes);
-                }
-                
-                else if (localname.equalsIgnoreCase("extension"))
-                {
-                    if (!bInInvalidContent) startExtension(localname, prefix, URI, namespaces, attributes);
-                }
-                // Handle <import> of other schema
-                else if (localname.equalsIgnoreCase("union"))
-                {
-                    // TODO - unions not yet supported
-                    bInInvalidContent = true;
-                    if (setter)
+                    if (   localname.equalsIgnoreCase("group")
+                        ||  localname.equalsIgnoreCase("attributeGroup"))
                     {
-                        setter->setError("Schema contains a union which is not yet implemented");
+                        inGroup++;
+                        int i;
+                        for (i=0; i < attributes.size(); i++)
+                        {
+                            if (attributes[i].getName().equalsIgnoreCase("ref"))
+                            {
+                                // dont store references.
+                                return;
+                            }                        
+                        }
+
+                        groupList.insert(groupList.begin(),GroupDefinition());
+                        currentGroup = &groupList[0];
+
+                        if (localname.equalsIgnoreCase("group"))
+                             currentGroup->isAttributeGroup = false;
+                        else currentGroup->isAttributeGroup = true;
+
+                        for (i=0; i < attributes.size(); i++)
+                        {
+                            if (attributes[i].getName().equalsIgnoreCase("name"))
+                            {
+                                currentGroup->uri = schemaInfo.getTargetNamespaceURI();
+                                currentGroup->name = attributes[i].getValue();
+                            }                        
+                        }
+                    } 
+                } // end of preParsing groups.
+                else 
+                {
+                    if (inGroup == 0)
+                    {
+                        // Handle <import> of other schema
+                        if (localname.equalsIgnoreCase("import"))
+                        {
+                        // TODO - import and include treated equally for now - need to
+                        // separate out the namespace info for import 
+                        startInclude(localname, prefix, URI, namespaces, attributes);
+                        }
+
+                        // Handle <include> of other schema
+                        else if (localname.equalsIgnoreCase("include"))
+                        {
+                        startInclude(localname, prefix, URI, namespaces, attributes);
+                        }
+                
+                        ///////////////////////////////////////////////////////////////////////
+                        // Handle elements and attributes
+                        // These become Properties of the current Type
+                        // ?? Any special handling of global elements???
+                        ///////////////////////////////////////////////////////////////////////
+                        else if (localname.equalsIgnoreCase("element"))
+                        {
+                            if (!bInInvalidContent) startElement(localname, prefix, URI, namespaces, attributes);
+                        }
+                        else if (localname.equalsIgnoreCase("attribute"))
+                        {
+                            if (!bInInvalidContent) startAttribute(localname, prefix, URI, namespaces, attributes);
+                        }
+                        else if (localname.equalsIgnoreCase("any")
+                            || localname.equalsIgnoreCase("anyAttribute"))
+                        {
+                            // the type containing this is to be created as open
+                            if (!bInInvalidContent) currentType.isOpen = true;
+                        }
+                
+                
+                        ///////////////////////////////////////////////////////////////////////
+                        // Handle complexType
+                        // These become new types
+                        ///////////////////////////////////////////////////////////////////////
+                        else if (localname.equalsIgnoreCase("complexType"))
+                        {
+                            if (!bInInvalidContent) startComplexType(localname, prefix, URI, namespaces, attributes);
+                        } // end complexType handling
+                
+                        else if (localname.equalsIgnoreCase("choice") 
+                            || localname.equalsIgnoreCase("sequence")
+                            || localname.equalsIgnoreCase("all"))
+                        {
+                            if (!bInInvalidContent) startGroup(localname, prefix, URI, namespaces, attributes);
+                        } // end Group handling
+                
+                        else if (   localname.equalsIgnoreCase("group")
+                            ||  localname.equalsIgnoreCase("attributeGroup"))
+                        {
+
+                            int i;
+                            for (i=0; i < attributes.size(); i++)
+                            {
+                                if (attributes[i].getName().equalsIgnoreCase("ref"))
+                                {
+                                    XMLQName qname(attributes[i].getValue(), 
+                                    schemaInfo.getSchemaNamespaces(),
+                                    namespaces);
+                                    if (qname.getURI().isNull())
+                                    {
+                                        replayEvents(schemaInfo.getTargetNamespaceURI(), qname.getLocalName(),
+                                        localname.equalsIgnoreCase("group"), attributes);
+                                    }
+                                    else
+                                    {
+                                        replayEvents(qname.getURI(), qname.getLocalName(),
+                                            localname.equalsIgnoreCase("group"), attributes);
+                                    }
+                                }                        
+                            }
+                            inGroup++;
+                            // if theres no 'ref' then its a group definition, and we 
+                            // already pre-parsed it.
+                        }
+                        else if (localname.equalsIgnoreCase("list"))
+                        {
+                             startList(
+                                localname,
+                                prefix,
+                                URI,
+                                namespaces,
+                                attributes);
+                        }
+
+                        ///////////////////////////////////////////////////////////////////////
+                        // Handle simpleType
+                        // These become new types
+                        ///////////////////////////////////////////////////////////////////////
+                        else if (localname.equalsIgnoreCase("simpleType"))
+                        {
+                            if (!bInInvalidContent) startSimpleType(localname, prefix, URI, namespaces, attributes);
+                        } // end complexType handling
+                
+                        else if (localname.equalsIgnoreCase("restriction"))
+                        {
+                            if (!bInInvalidContent) startRestriction(localname, prefix, URI, namespaces, attributes);
+                        }
+                
+                        else if (localname.equalsIgnoreCase("extension"))
+                        {
+                            if (!bInInvalidContent) startExtension(localname, prefix, URI, namespaces, attributes);
+                        }
+                        // Handle <import> of other schema
+                        else if (localname.equalsIgnoreCase("union"))
+                        {
+                            // TODO - unions not yet supported
+                            bInInvalidContent = true;
+                            if (setter)
+                            {
+                                setter->setError("Schema contains a union which is not yet implemented");
+                            }
+                        }
                     }
                 }
             }
@@ -226,33 +441,69 @@ namespace commonj
                 //
                 if (!bInInvalidContent)
                 {
-                    if (localname.equalsIgnoreCase("complexType"))
+                    if (preParsing)
                     {
-                        if (!bInvalidElement) defineType();
-                    } // end complexType handling
-                    else if (localname.equalsIgnoreCase("simpleType"))
-                    {
-                        if (!bInvalidElement) defineType();
-                    } 
-                
-                    else if (localname.equalsIgnoreCase("schema"))
-                    {
-                        if (!bInvalidElement) defineType();
-                    } // end complexType handling
-                
-                    else if (localname.equalsIgnoreCase("element")
-                        || localname.equalsIgnoreCase("attribute"))
-                    {
-                        // PropertyDefinition should now be complete
-                         if (!bInvalidElement) defineProperty();
-                    } 
-                    else if (localname.equalsIgnoreCase("choice") 
-                        || localname.equalsIgnoreCase("sequence")
-                        || localname.equalsIgnoreCase("all"))
-                    {
-                        if (!bInvalidElement) currentType.isMany = false;
+                        if (inGroup > 0)
+                        {
+                            if (localname.equalsIgnoreCase("group")
+                            || localname.equalsIgnoreCase("attributeGroup"))
+                            {
+                                inGroup--;
+                                if (inGroup < 0)inGroup = 0; // should never happen.
+                            }
+                            if (inGroup > 0)  // still need to store end of group ref
+                            {
+                                storeEndElementEvent(
+                                        localname,
+                                        prefix,
+                                        URI);
+                            }
+                        }
                     }
-                    bInvalidElement = false;
+                    else
+                    {
+                        if (localname.equalsIgnoreCase("group")
+                             || localname.equalsIgnoreCase("attributeGroup"))
+                        {
+                            inGroup--;
+                            if (inGroup < 0) inGroup = 0;
+                        // outside of preparse, dont need to do anything.
+                        }
+                        else if (inGroup == 0)
+                        {
+                            if (localname.equalsIgnoreCase("complexType"))
+                            {
+                                if (!bInvalidElement) defineType();
+                            } // end complexType handling
+                            else if (localname.equalsIgnoreCase("simpleType"))
+                            {
+                                if (!bInvalidElement) defineType();
+                            } 
+                            else if (localname.equalsIgnoreCase("schema"))
+                            {   
+                                if (!bInvalidElement) defineType();
+                            } // end complexType handling
+                            else if (localname.equalsIgnoreCase("element")
+                            || localname.equalsIgnoreCase("attribute"))
+                            {
+                                // PropertyDefinition should now be complete
+                                if (!bInvalidElement) defineProperty();
+                            } 
+                            else if (localname.equalsIgnoreCase("choice") 
+                                || localname.equalsIgnoreCase("sequence")
+                                || localname.equalsIgnoreCase("all"))
+                            {
+                                if (!bInvalidElement) currentType.isMany = false;
+                            }
+                            else if (localname.equalsIgnoreCase("list"))
+                            {
+                                // PropertyDefinition should now be complete
+                                if (!bInvalidList) defineProperty();
+                                bInvalidList = false;
+                            }
+                            bInvalidElement = false;
+                        }
+                    }
     
                 } // bInUnsupportedContent
                 if (localname.equalsIgnoreCase("union"))
@@ -265,7 +516,70 @@ namespace commonj
 
         }
         
-        
+        // ============================================================================
+        // used by startInclude to try to locate the file 
+        // ============================================================================
+
+        int SDOSchemaSAX2Parser::startSecondaryParse(
+                                SDOSchemaSAX2Parser& schemaParser,
+                                SDOXMLString& schemaLocation)
+        {
+            int i,j,k;
+            SDOXMLString sl = getCurrentFile();
+          
+            i = sl.lastIndexOf('/');
+            j = sl.lastIndexOf('\\');
+            if ((j > i) || (i < 0))i=j;
+            if (i>=0)
+            {
+                sl = sl.substring(0,i+1) + schemaLocation;
+                try {
+                     if (-1 != schemaParser.parse((const char *)sl))
+                         return 1;
+                }
+                catch (SDORuntimeException e)
+                {
+                }
+                k = schemaLocation.lastIndexOf('/');
+                j = schemaLocation.lastIndexOf('\\');
+                if ((j > k) || (k < 0))k=j;
+                if (k>=0)
+                {
+                    sl = sl.substring(0,i+1) + schemaLocation.substring(0,k+1);
+                    try {
+                        if (-1 != schemaParser.parse((const char *)sl))
+                             return 1;
+                    }
+                    catch (SDORuntimeException e)
+                    {
+                    }
+                }
+            }
+            try {
+                if (-1 != schemaParser.parse((const char *)schemaLocation))
+                    return 1;
+            }
+            catch (SDORuntimeException e)
+            {
+            }
+            k = schemaLocation.lastIndexOf('/');
+            j = schemaLocation.lastIndexOf('\\');
+            if ((j > k) || (k < 0))k=j;
+            if (k>=0)
+            {
+                sl = schemaLocation.substring(0,k+1);
+                try {
+                    if (-1 != schemaParser.parse((const char *)sl))
+                        return 1;
+                }
+                catch (SDORuntimeException e)
+                {
+                }
+            }
+            return 0;
+        }
+
+
         // ============================================================================
         // startInclude
         // ============================================================================
@@ -286,61 +600,15 @@ namespace commonj
                 SchemaInfo schemaInf;
                 SDOSchemaSAX2Parser schemaParser(schemaInf, (ParserErrorSetter*)setter);
 
-                try 
+                if (startSecondaryParse(schemaParser,schemaLocation) == 0)
                 {
-                    SDOXMLString sl = getCurrentFile();
-                    FILE *f;
-                    bool bprocessed = false;
-
-                    if (!sl.isNull()) 
-                    {
-                        int i = sl.lastIndexOf('/');
-                        if (i < 0)i = sl.lastIndexOf('\\');
-                        if (i >= 0)
-                        {
-                            sl = sl.substring(0,i+1) + schemaLocation;
-                            // first attempt, relative path plus the location
-                            f = fopen(sl,"r+");
-                            if (f != NULL)
-                            {
-                                fclose(f);
-                                schemaParser.parse(sl);
-                                bprocessed = true;
-                            }
-                            else // didnt find the file  
-                            {
-                                int j = schemaLocation.lastIndexOf('/');
-                                if (j < 0)j = schemaLocation.lastIndexOf('\\');
-                                if (j >= 0) 
-                                {
-                                    sl = sl.substring(0,i+1) + 
-                                     schemaLocation.substring(0,j+1);
-                                    f = fopen(sl,"r+");
-                                    if (f != NULL)
-                                    {
-                                        fclose(f);
-                                        schemaParser.parse(sl);
-                                        bprocessed = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (!bprocessed)
-                    {
-                        schemaParser.parse(schemaLocation);
-                    }
-                }
-
-                catch (SDOFileNotFoundException e)
-                {
-                    // finally give up - its not in the current path, or
-                    // in the path specified
+                    //
+                    // we were not able to start the parse
                     return;
                 }
 
 
-                TypeDefinitions& typedefs = schemaParser.getTypeDefinitions();
+                TypeDefinitionsImpl& typedefs = schemaParser.getTypeDefinitions();
                 XMLDAS_TypeDefs types = typedefs.types;
                 XMLDAS_TypeDefs::iterator iter;
                 for (iter=types.begin(); iter != types.end(); iter++)
@@ -355,8 +623,8 @@ namespace commonj
                         XMLDAS_TypeDefs::iterator find = typeDefinitions.types.find(
                                 (*iter).first);
 
-                        std::list<PropertyDefinition>::iterator propit;
-                        std::list<PropertyDefinition>::iterator currpropit;
+                        std::list<PropertyDefinitionImpl>::iterator propit;
+                        std::list<PropertyDefinitionImpl>::iterator currpropit;
                         bool found;
 
                         for (propit = (*iter).second.properties.begin() ; 
@@ -391,6 +659,59 @@ namespace commonj
 
         
         // ============================================================================
+        // startList
+        // ============================================================================
+        void SDOSchemaSAX2Parser::startList(
+            const SDOXMLString& localname,
+            const SDOXMLString& prefix,
+            const SDOXMLString& URI,
+            const SAX2Namespaces& namespaces,
+            const SAX2Attributes& attributes)
+        {
+
+            LOGINFO_1( INFO,"SchemaParser:startList:%s",(const char*)localname);
+
+            if (!bInSchema) return;
+
+            // invent a property called "values" to hold the list
+            
+            SDOXMLString typeName = attributes.getValue("itemType");
+
+            if (typeName.isNull())
+            {
+                // we do not support lists with no item type (yet).
+                if (setter)
+                {
+                    setter->setError("Schema contains a list with no type - not supported");
+                }
+                bInvalidList = true;
+                return;
+            }
+
+            currentType.dataType = false;    
+            currentType.isFromList = true;
+
+            // attribute to set the list type
+            // define an internal property to hold the list
+            PropertyDefinitionImpl thisProperty;
+            thisProperty.name = "values";
+            thisProperty.localname = "values";
+            thisProperty.isContainment = false;
+            thisProperty.isElement=true;
+            thisProperty.isMany = true;
+ 
+            XMLQName qname = resolveTypeName(
+                typeName,
+                namespaces,
+                thisProperty.typeUri,
+                thisProperty.typeName);
+            thisProperty.fullTypeName = typeName; 
+
+            setCurrentProperty(thisProperty);
+           
+        }
+
+        // ============================================================================
         // startElement
         // ============================================================================
         void SDOSchemaSAX2Parser::startElement(
@@ -403,7 +724,7 @@ namespace commonj
 
             if (!bInSchema) return;
 
-            PropertyDefinition thisProperty;
+            PropertyDefinitionImpl thisProperty;
 
             LOGINFO_1( INFO,"SchemaParser:startElement:%s",(const char*)localname);
 
@@ -415,13 +736,20 @@ namespace commonj
 
             
             setType(thisProperty, attributes, namespaces);
-            
-            SDOXMLString maxOccurs = attributes.getValue("maxOccurs");
-            if (!maxOccurs.isNull())
+                        
+            if (currentType.isMany)
             {
-                if (!maxOccurs.equalsIgnoreCase("1"))
+                thisProperty.isMany = true;
+            }
+            else
+            {
+                SDOXMLString maxOccurs = attributes.getValue("maxOccurs");
+                if (!maxOccurs.isNull())
                 {
-                    thisProperty.isMany = true;
+                    if (!maxOccurs.equalsIgnoreCase("1"))
+                    {
+                        thisProperty.isMany = true;
+                    }
                 }
             }
 
@@ -468,7 +796,7 @@ namespace commonj
 
             if (!bInSchema) return;
 
-            PropertyDefinition thisProperty;
+            PropertyDefinitionImpl thisProperty;
             
             thisProperty.isElement =  false;
             
@@ -495,7 +823,7 @@ namespace commonj
 
             if (!bInSchema) return;
 
-            TypeDefinition thisType; // set defaults
+            TypeDefinitionImpl thisType; // set defaults
             thisType.uri=schemaInfo.getTargetNamespaceURI();
             
             setTypeName(thisType, attributes,namespaces);
@@ -545,7 +873,7 @@ namespace commonj
 
             if (!bInSchema) return;
 
-            TypeDefinition thisType; // set defaults
+            TypeDefinitionImpl thisType; // set defaults
             thisType.uri=schemaInfo.getTargetNamespaceURI();
             thisType.dataType = true;
             
@@ -638,7 +966,7 @@ namespace commonj
                 currentType.isRestriction=false;
                 
                 // ?? Does this only apply within a <simpleContent> tag??
-                if (typeUri.equalsIgnoreCase(Type::SDOTypeNamespaceURI))
+                if (typeUri.equalsIgnoreCase(Type::SDOTypeNamespaceURI.c_str()))
                 {
                     // here the type needs to be flagged so that 
                     // we know to serialize this property as an element with
@@ -646,7 +974,7 @@ namespace commonj
                     // value=abc
 
 
-                    PropertyDefinition thisProperty;
+                    PropertyDefinitionImpl thisProperty;
                     thisProperty.name = "value";
                     thisProperty.localname = "value";
                     thisProperty.typeUri = typeUri; 
@@ -700,7 +1028,7 @@ namespace commonj
         // ============================================================================
         // setCurrentType
         // ============================================================================
-        void SDOSchemaSAX2Parser::setCurrentType(const TypeDefinition& type)
+        void SDOSchemaSAX2Parser::setCurrentType(const TypeDefinitionImpl& type)
         {                
             typeStack.push(currentType);
             currentType = type;
@@ -717,7 +1045,7 @@ namespace commonj
                 currentType.isSequenced = true;
             }
             
-            SDOXMLString typeQname = TypeDefinitions::getTypeQName(currentType.uri, currentType.localname);
+            SDOXMLString typeQname = TypeDefinitionsImpl::getTypeQName(currentType.uri, currentType.localname);
             typeDefinitions.types[typeQname] = currentType;
             
             if (currentProperty.typeName.isNull())
@@ -734,14 +1062,14 @@ namespace commonj
             }
             else
             {
-                currentType = TypeDefinition();
+                currentType = TypeDefinitionImpl();
             }
         }
         
         // ============================================================================
         // setCurrentProperty
         // ============================================================================
-        void SDOSchemaSAX2Parser::setCurrentProperty(const PropertyDefinition& prop)
+        void SDOSchemaSAX2Parser::setCurrentProperty(const PropertyDefinitionImpl& prop)
         {                
             propertyStack.push(currentProperty);
             currentProperty = prop;
@@ -756,7 +1084,7 @@ namespace commonj
             if (currentProperty.typeName.isNull())
             {
                 // Set the type of this property to default (sdo:String)
-                currentProperty.typeUri = Type::SDOTypeNamespaceURI;
+                currentProperty.typeUri = Type::SDOTypeNamespaceURI.c_str();
                 currentProperty.typeName = "String";
             }
 
@@ -777,7 +1105,7 @@ namespace commonj
                 propertyStack.pop();
             }
             else
-                currentProperty = PropertyDefinition();
+                currentProperty = PropertyDefinitionImpl();
 
         }
         
@@ -785,7 +1113,7 @@ namespace commonj
         // setDefault
         // ============================================================================
         void SDOSchemaSAX2Parser::setDefault(
-            PropertyDefinition& thisProperty,
+            PropertyDefinitionImpl& thisProperty,
             const SAX2Attributes& attributes)
         {
             thisProperty.defaultValue = attributes.getValue("fixed");
@@ -840,7 +1168,7 @@ namespace commonj
         // setType 
         // ============================================================================
         void SDOSchemaSAX2Parser::setType(
-            PropertyDefinition& property,
+            PropertyDefinitionImpl& property,
             const SAX2Attributes& attributes,
             const SAX2Namespaces& namespaces)
         {
@@ -912,7 +1240,7 @@ namespace commonj
         // setTypeName
         // ============================================================================
         void SDOSchemaSAX2Parser::setTypeName(
-            TypeDefinition& type,
+            TypeDefinitionImpl& type,
             const SAX2Attributes& attributes,
             const SAX2Namespaces& namespaces)
         {
@@ -973,6 +1301,21 @@ namespace commonj
             return input;
         }
 
+        void SDOSchemaSAX2Parser::stream(std::istream& input)
+        {
+           // override to parse twice for groups
+
+            stream_twice(input);
+        }
+
+
+        int SDOSchemaSAX2Parser::parse(const char* filename)
+        {
+            return parse_twice(filename);
+        }
+         
+        
+
         // ============================================================================
         // resolveTypeName
         // ============================================================================
@@ -994,112 +1337,17 @@ namespace commonj
             ///////////////////////////////////////////////////////////////////////
             if (qname.getURI().equalsIgnoreCase("http://www.w3.org/2001/XMLSchema"))
             {
-                uri = Type::SDOTypeNamespaceURI;
-                if (qname.getLocalName().equalsIgnoreCase("ID"))
+                uri = Type::SDOTypeNamespaceURI.c_str();
+                name = SDOUtils::XSDToSDO((const char*)(qname.getLocalName()));
+                if (name.isNull())
                 {
                     name = "String";
                 }
-                if (qname.getLocalName().equalsIgnoreCase("NCName"))
-                {
-                    name = "String";
-                }
-                if (qname.getLocalName().equalsIgnoreCase("string"))
-                {
-                    name = "String";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("anyType"))
-                {
-                    name = "DataObject";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("int"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("integer"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("negativeInteger"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("nonNegativeInteger"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("positiveInteger"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("nonPositiveInteger"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("unsignedLong"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("unsignedShort"))
-                {
-                    name = "Integer";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("unsignedInt"))
-                {
-                    name = "Long";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("long"))
-                {
-                    name = "Long";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("double"))
-                {
-                    name = "Double";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("short"))
-                {
-                    name = "Short";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("unsignedByte"))
-                {
-                    name = "Short";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("float"))
-                {
-                    name = "Float";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("boolean"))
-                {
-                    name = "Boolean";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("byte"))
-                {
-                    name = "Byte";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("base64Binary"))
-                {
-                    name = "Bytes";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("hexBinary"))
-                {
-                    name = "Bytes";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("anyURI"))
-                {
-                    name = "URI";
-                }
-                else if (qname.getLocalName().equalsIgnoreCase("QName"))
-                {
-                    name = "URI";
-                }
-                else
-                {
-                    // Default unknown xs: types to string??
-                    name = "String";
-                }
+
             }
             
             // Temporary hack: ChangeSummaryType is ChangeSummary in core
-            else if (qname.getURI().equalsIgnoreCase(Type::SDOTypeNamespaceURI))
+            else if (qname.getURI().equalsIgnoreCase(Type::SDOTypeNamespaceURI.c_str()))
             {
                 if (qname.getLocalName().equalsIgnoreCase("ChangeSummaryType"))
                 {

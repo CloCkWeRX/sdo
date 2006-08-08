@@ -2,7 +2,7 @@
 
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -17,7 +17,7 @@
 | implied. See the License for the specific language governing         |
 | permissions and limitations under the License.                       |
 +----------------------------------------------------------------------+
-| Author: Anantoju V Srinivas (Srini)                                   |
+| Author: Anantoju V Srinivas (Srini), Matthew Peters, Caroline Maynard|
 +----------------------------------------------------------------------+
 
 */
@@ -136,13 +136,13 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 
 		set_error_handler('XMLDASTest_user_error_handler');
 		$XMLDASTest_error_handler_called = false;
-		$exception_thrown = false;
+		$exception_thrown = true;
 		try {
 			$xmldas = SDO_DAS_XML::create("a complete load of rubbish.xsd");
+			$exception_thrown = false;
 		} catch (SDO_DAS_XML_FileException $e) {
-			$exception_thrown = true;
 		} catch (Exception $e) {
-			$this->assertTrue(false, "Incorrect exception thrown for loadFromFile: ".$e->getMessage());
+		    $this->fail("Incorrect exception thrown for file not found; expected SDO_DAS_XML_FileException, was " . get_class($e));		    
 		}
 		$this->assertTrue($XMLDASTest_error_handler_called, 'Error handler should have been called for file not found');
 		$this->assertTrue($XMLDASTest_error_handler_severity == E_WARNING, 'Expected an E_WARNING when file not found');
@@ -175,13 +175,13 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 		$xmldas = SDO_DAS_XML::create("company.xsd");
 		set_error_handler('XMLDASTest_user_error_handler');
 		$XMLDASTest_error_handler_called = false;
-		$exception_thrown = false;
+        $exception_thrown = true;
 		try {
 			$xdoc = $xmldas->loadFile("what_a_load_of_rubbish.xml");
-		} catch (SDO_DAS_XML_FileException $e) {
-			$exception_thrown = true;
+            $exception_thrown = false;
+		} catch (SDO_DAS_XML_FileException $e) {		
 		} catch (Exception $e) {
-			$this->assertTrue(false, "Incorrect exception thrown for loadFromFile: ".$e->getMessage());
+		    $this->fail("Incorrect exception thrown for file not found; expected SDO_DAS_XML_FileException, was " . get_class($e));		    
 		}
 		$this->assertTrue($XMLDASTest_error_handler_called, 'Error handler should have been called for file not found');
 		$this->assertTrue($XMLDASTest_error_handler_severity == E_WARNING, 'Expected an E_WARNING when file not found');
@@ -237,7 +237,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testCreate - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testCreate - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -260,7 +260,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
 			$xdoc = $xmldas->loadFile("company.xml");
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testLoadFile - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testLoadFile - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -289,7 +289,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			// use assertSame to check both ways to reach Jane Doe really reach the same object
 			$this->assertSame($do->departments[0]->employees[1], $do->employeeOfTheMonth, 'Two ways to reach e.o.t.m do not agree.');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testGetRootDataObject - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -302,7 +302,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$jane = $department->employees[0];
 			$this->assertTrue($jane->SN === null && isset($jane->SN), 'Serial number is not null.');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testLoadFile_Loaded.... - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testLoadFile_Loaded.... - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -314,7 +314,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$acme->name = "Acme";
 			$this->assertEquals("Acme", $acme->name, 'testCreateDataObject - Cannot access created data object.');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testCreateDataObject - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testCreateDataObject - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -340,7 +340,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertEquals("Bangalore", $do->departments[0]->location, 'Can not access part of tree from root data object');
 			$this->assertSame($do->departments[0]->employees[0], $do->employeeOfTheMonth, 'Two ways to reach e.o.t.m do not agree.');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testSaveString - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testSaveString - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -366,7 +366,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertEquals("John Jones", $do->employeeOfTheMonth->name, 'Non-containment reference is not valid.');
 			$this->assertEquals("Bangalore", $do->departments[0]->location, 'Can not access part of tree from root data object');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testSaveFile - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testSaveFile - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -376,7 +376,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$xdoc = $xmldas->loadFile("company.xml");
 			$this->assertEquals("MegaCorp", $xdoc->getRootDataObject()->name, 'testgetRootDataObject - was not the company');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testGetRootDataObject - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -386,7 +386,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$xdoc = $xmldas->loadFile("company.xml");
 			$this->assertEquals("companyNS", $xdoc->getRootElementURI(), 'testgetRootElementURI - wrong answer ');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testGetRootDataObject - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -396,7 +396,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$xdoc = $xmldas->loadFile("company.xml");
 			$this->assertEquals("company", $xdoc->getRootElementName(), 'testgetRootElementName - wrong answer ');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testGetRootDataObject - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testGetRootDataObject - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -410,7 +410,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue(strpos($str, '1.1') > 0, 'XML Version was apparently not set correctly');
 			$this->assertTrue(strpos($str, 'ISO-8859-1') > 0, 'Encoding was apparently not set correctly');
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testsetEncoding - Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testsetEncoding - Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -427,7 +427,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue($xdoc->getRootElementURI() == 'companyNS', 'namespace for the document should be companyNS but was ' . $xdoc->getRootElementURI());
 			$this->assertTrue($xdoc->getRootElementName() == 'company', 'root element name should be company but was ' . $xdoc->getRootElementName());
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "createDocumentNoArgs - Unexpected Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "createDocumentNoArgs - Unexpected Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -444,9 +444,10 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue($xdoc->getRootElementURI() == 'companyNS', 'namespace for the document should be companyNS but was ' . $xdoc->getRootElementURI());
 			$this->assertTrue($xdoc->getRootElementName() == 'company', 'root element name should be company but was ' . $xdoc->getRootElementName());
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "createDocumentNoArgs - Unexpected Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "createDocumentNoArgs - Unexpected Exception Caught: " . $e->getMessage());
 		}
 	}
+	
 	public function testCreateDocumentTwoArgs() {
 		try {
 			$xmldas = SDO_DAS_XML::create("company.xsd");
@@ -460,7 +461,24 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue($xdoc->getRootElementURI() == 'companyNS', 'namespace for the document should be companyNS but was ' . $xdoc->getRootElementURI());
 			$this->assertTrue($xdoc->getRootElementName() == 'company', 'root element name should be company but was ' . $xdoc->getRootElementName());
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "createDocumentNoArgs - Unexpected Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "createDocumentNoArgs - Unexpected Exception Caught: " . $e->getMessage());
+		}
+	}
+	
+	public function testCreateDocumentThreeArgs() {
+	    try {
+			$xmldas = SDO_DAS_XML::create("company.xsd");
+			$root_do = $xmldas->createDataObject('companyNS', 'CompanyType');
+			$xdoc = $xmldas->createDocument('newNS', 'newElement', $root_do);
+			$rdo = new SDO_Model_ReflectionDataObject($root_do);
+			$type = $rdo->getType();
+			
+			$this->assertTrue($type->name == 'CompanyType', 'type of root object should be CompanyType but was ' . $type->name);
+			$this->assertTrue($type->namespaceURI == 'companyNS', 'name space of root element should be companyNS but was ' . $type->namespaceURI);
+			$this->assertTrue($xdoc->getRootElementURI() == 'newNS', 'namespace for the document should be newNS but was ' . $xdoc->getRootElementURI());
+			$this->assertTrue($xdoc->getRootElementName() == 'newElement', 'root element name should be newElement but was ' . $xdoc->getRootElementName());
+		} catch (SDO_Exception $e) {
+			$this->assertTrue(false, "createDocumentNoArgs - Unexpected Exception Caught: " . $e->getMessage() . ' '. $e->getCause());
 		}
 	}
 
@@ -474,7 +492,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue($xdoc->getRootElementURI() == 'TNS', 'namespace for the document should be TNS but was ' . $xdoc->getRootElementURI());
 			$this->assertTrue($xdoc->getRootElementName() == 'person', 'root element name should be person but was ' . $xdoc->getRootElementName());
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testExtendedComplexType - Unexpected Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testExtendedComplexType - Unexpected Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -488,7 +506,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$this->assertTrue($xdoc->getRootElementURI() == 'TNS', 'namespace for the document should be TNS but was ' . $xdoc->getRootElementURI());
 			$this->assertTrue($xdoc->getRootElementName() == 'formalname', 'root element name should be formalname but was ' . $xdoc->getRootElementName());
 		} catch (SDO_Exception $e) {
-			$this->assertTrue(false, "testRestrictedComplexType - Unexpected Exception  Caught" . $e->getMessage());
+			$this->assertTrue(false, "testRestrictedComplexType - Unexpected Exception Caught: " . $e->getMessage());
 		}
 	}
 
@@ -511,7 +529,7 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 			$exception_thrown = true;
 		}
 		$this->assertTrue($created_first_object_ok == true, 'Failed to create object of concrete type OK');
-		$this->assertTrue($exception_thrown,'testAbstractTypeCannotBeInstantiated - exception should have been thrown');
+		$this->assertTrue($exception_thrown, 'testAbstractTypeCannotBeInstantiated - exception should have been thrown');
 	}
 
 }

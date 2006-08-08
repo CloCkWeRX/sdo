@@ -15,28 +15,211 @@
  *  limitations under the License.
  */
 
-/* $Rev$ $Date$ */
 
 #include "commonj/sdo/TypeDefinition.h"
+#include "commonj/sdo/TypeDefinitionImpl.h"
+
 namespace commonj
 {
     namespace sdo
     {
         TypeDefinition::TypeDefinition()
-            : dataType(false),
-              isOpen(false),
-              isSequenced(false),
-              isMany(false),
-              isQName(false),
-              isAbstract(false),
-              groupElementCount(0),
-              isExtendedPrimitive(false)
         {
+            typedefinition = new TypeDefinitionImpl();
         }
         
         TypeDefinition::~TypeDefinition()
         {
+            if (typedefinition != 0) delete typedefinition;
         }
+
+        void TypeDefinition::copy (const TypeDefinition& td)
+        {
+            if (typedefinition != 0) delete typedefinition;
+            typedefinition = new TypeDefinitionImpl(*(td.typedefinition));
+        }
+ 
+        TypeDefinition::TypeDefinition(const TypeDefinition& td)
+        {
+            copy(td);
+        }
+        
+        TypeDefinition& TypeDefinition::operator=(const TypeDefinition& td)
+        {
+            if (this != &td)
+            {
+                copy(td);
+            }
+            return *this;
+        }
+
+        TypeDefinitionImpl* TypeDefinition::getTypeDefinition()
+        {
+            return typedefinition;
+        }
+        
+        void TypeDefinition::setUri(const char * inuri) 
+        {
+            typedefinition->uri = inuri;
+        }
+
+        const char * TypeDefinition::getUri() const
+        {
+            return (const char *)typedefinition->uri;
+        }
+
+
+        void TypeDefinition::setName(const char * inname)
+        {
+            typedefinition->name = inname;
+        }
+
+        const char * TypeDefinition::getName() const
+        {
+            return (const char *)typedefinition->name;
+        }
+
+
+        void TypeDefinition::setLocalName(const char * inname) 
+        {
+            typedefinition->localname = inname;
+        }
+
+        const char * TypeDefinition::getLocalName() const
+        {
+            return (const char *)typedefinition->localname;
+        }
+
+
+        void TypeDefinition::setAliases(const char * inaliases)
+        {
+            typedefinition->aliases = inaliases;
+        }
+        
+        const char * TypeDefinition::getAliases() const
+        {
+            return (const char*)typedefinition->aliases;
+        }
+
+        void TypeDefinition::setParentType(const char* uri, const char* name,
+            bool isrestriction)
+        {
+            typedefinition->parentTypeUri = uri;
+            typedefinition->parentTypeName = name;
+            typedefinition->isRestriction = isrestriction;
+        }
+
+        const char * TypeDefinition::getParentTypeUri() const
+        {
+            return (const char *)typedefinition->parentTypeUri;
+        }
+
+        const char * TypeDefinition::getParentTypeName() const
+        {
+            return (const char *)typedefinition->parentTypeName;
+        }
+
+        void TypeDefinition::setIDPropertyName(const char * idpropname)
+        {
+            typedefinition->IDPropertyName = idpropname;
+        }
+        
+        const char * TypeDefinition::getIDPropertyName() const
+        {
+            return (const char *)typedefinition->IDPropertyName;
+        }
+
+        void TypeDefinition::addPropertyDefinition(PropertyDefinition& p)
+        {
+            typedefinition->properties.push_back((PropertyDefinitionImpl&)(*(p.getPropertyDefinition())));
+        }
+
+        bool TypeDefinition::getIsDataType() const
+        {
+            return typedefinition->dataType;
+        }
+
+        bool TypeDefinition::getIsOpen() const
+        {
+            return typedefinition->isOpen;
+        }
+
+        bool TypeDefinition::getIsSequenced() const
+        {
+            return typedefinition->isSequenced;
+        }
+
+        bool TypeDefinition::getIsAbstract() const
+        {
+            return typedefinition->isAbstract;
+        }
+
+        bool TypeDefinition::getIsExtendedPrimitive() const
+        {
+            return typedefinition->isExtendedPrimitive;
+        }
+
+        bool TypeDefinition::getIsFromList() const
+        {
+            return typedefinition->isFromList;
+        }
+
+        bool TypeDefinition::getIsQName() const
+        {
+            return typedefinition->isQName;
+        }
+
+        bool TypeDefinition::getIsMany() const
+        {
+            return typedefinition->isMany;
+        }
+
+        void TypeDefinition::setIsDataType(bool value)
+        {
+            typedefinition->dataType = value;
+        }
+
+        void TypeDefinition::setIsOpen(bool value)
+        {
+            typedefinition->isOpen = value;
+        }
+
+        void TypeDefinition::setIsSequenced(bool value)
+        {
+            typedefinition->isSequenced = value;
+        }
+
+        void TypeDefinition::setIsAbstract(bool value)
+        {
+            typedefinition->isAbstract = value;
+        }
+
+        void TypeDefinition::setIsExtendedPrimitive(bool value)
+        {
+            typedefinition->isExtendedPrimitive = value;
+        }
+
+        void TypeDefinition::setIsFromList(bool value)
+        {
+            typedefinition->isFromList = value;
+        }
+
+        void TypeDefinition::setIsQName(bool value)
+        {
+            typedefinition->isQName = value;
+        }
+
+        void TypeDefinition::setIsMany(bool value)
+        {
+            typedefinition->isMany = value;
+        }
+
+
+        int TypeDefinition::getGroupElementCount() const
+         {
+             return typedefinition->groupElementCount;
+         }
+
         
     } // End - namespace sdo
 } // End - namespace commonj

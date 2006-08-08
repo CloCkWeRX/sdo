@@ -1,7 +1,7 @@
 <?php
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -74,7 +74,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
 	public function execute($dbh)
 	{
 		if ($this ->stmt != '') {
-			SDO_DAS_Relational_DatabaseHelper::executeStatement($dbh,$this->stmt,$this->value_list);
+			SDO_DAS_Relational_DatabaseHelper::executeStatementTestForCollision($dbh,$this->stmt,$this->value_list);
 		}
 		return $this->spawned_actions;
 	}

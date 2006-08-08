@@ -27,7 +27,7 @@
 #include "commonj/sdo/SDOXMLString.h"
 #include "commonj/sdo/SAX2Namespaces.h"
 #include "commonj/sdo/SchemaInfo.h"
-#include "commonj/sdo/TypeDefinitions.h"
+#include "commonj/sdo/TypeDefinitionsImpl.h"
 #include "commonj/sdo/ParserErrorSetter.h"
 
 namespace commonj
@@ -71,7 +71,7 @@ namespace commonj
                 const char* xmlFile,
                 const char* targetNamespaceURI = 0);
             virtual XMLDocumentPtr load(
-                istream& inXml,
+                std::istream& inXml,
                 const char* targetNamespaceURI = 0);
             virtual XMLDocumentPtr load(
                 const char* inXml,
@@ -130,6 +130,9 @@ namespace commonj
             SDOXMLString targetNamespaceURI;
 
             XMLDocumentPtr createDocument(DataObjectPtr dataObject);
+
+            const TypeImpl* findRoot(DataFactory* df,
+			                                        const char* rootElementURI);
 
             DataFactoryPtr getDataFactory();
         };

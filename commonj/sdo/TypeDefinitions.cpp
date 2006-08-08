@@ -17,22 +17,64 @@
 
 /* $Rev$ $Date$ */
 
+
+
 #include "commonj/sdo/TypeDefinitions.h"
+#include "commonj/sdo/TypeDefinitionsImpl.h"
+
 namespace commonj
 {
     namespace sdo
     {
         TypeDefinitions::TypeDefinitions()
         {
+            typedefinitions = new TypeDefinitionsImpl();
         }
         
         TypeDefinitions::~TypeDefinitions()
         {
+            if (typedefinitions != 0) delete typedefinitions;
         }
 
-        SDOXMLString TypeDefinitions::getTypeQName(const SDOXMLString& typeUri, const SDOXMLString& typeName)
+        void TypeDefinitions::copy (const TypeDefinitions& tds)
         {
-            return typeUri + "#" + typeName;
+            if (typedefinitions != 0) delete typedefinitions;
+            typedefinitions = new TypeDefinitionsImpl(*(tds.typedefinitions));
+        }
+ 
+        TypeDefinitions::TypeDefinitions(const TypeDefinitions& tds)
+        {
+            copy(tds);
+        }
+        
+        TypeDefinitions& TypeDefinitions::operator=(const TypeDefinitions& tds)
+        {
+            if (this != &tds)
+            {
+                copy(tds);
+            }
+            return *this;
+        }
+
+        void TypeDefinitions::addTypeDefinition(TypeDefinition& t)
+        {
+            if (typedefinitions == 0)
+            {
+                typedefinitions = new TypeDefinitionsImpl();
+            }
+
+            typedefinitions->types[
+                typedefinitions->getTypeQName(
+                     t.getUri(),t.getName())] = (TypeDefinitionImpl&)(*t.getTypeDefinition());
+        }
+
+        TypeDefinitionsImpl& TypeDefinitions::getTypeDefinitions()
+        {
+            if (typedefinitions == 0)
+            {
+                typedefinitions = new TypeDefinitionsImpl();
+            }
+            return *typedefinitions;
         }
 
     } // End - namespace sdo

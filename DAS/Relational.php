@@ -31,6 +31,7 @@ require_once 'SDO/DAS/Relational/DeleteAction.php';
 require_once 'SDO/DAS/Relational/Plan.php';
 require_once 'SDO/DAS/Relational/KeyObjectMap.php';
 require_once 'SDO/DAS/Relational/DataObjectHelper.php';
+require_once 'SDO/DAS/Relational/DatabaseHelper.php';
 
 /**
  * SDO Relational Data Access Service.
@@ -140,7 +141,7 @@ class SDO_DAS_Relational {
 		$this->ensureColumnSpecifierIsNullOrAnArrayContainingOnlyValidTableAndColumnNames($column_specifier);
 		$dbh->beginTransaction();
 		$pdo_stmt 		= $dbh->prepare($stmt);
-		$rows_affected 	= $pdo_stmt->execute();
+		$rows_affected = SDO_DAS_Relational_DatabaseHelper::executeStatementTestForError($dbh, $pdo_stmt, null, $stmt);
 		$root = $this->normaliseResultSet($pdo_stmt, $column_specifier);
 		$dbh->commit();
 		return $root;
@@ -155,7 +156,7 @@ class SDO_DAS_Relational {
 		$this->ensureValueListIsNullOrAnArray($value_list);
 		$this->ensureColumnSpecifierIsNullOrAnArrayContainingOnlyValidTableAndColumnNames($column_specifier);
 		$dbh->beginTransaction();
-		$rows_affected 	= $pdo_stmt->execute($value_list);
+		$rows_affected = SDO_DAS_Relational_DatabaseHelper::executeStatementTestForError($dbh, $pdo_stmt,$value_list, null);
 		$root = $this->normaliseResultSet($pdo_stmt, $column_specifier);
 		$dbh->commit();
 		return $root;
@@ -163,11 +164,13 @@ class SDO_DAS_Relational {
 
 	public function normaliseResultSet($pdo_stmt, $column_specifier) {
 		include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
+
 		if ($column_specifier == null) {
 			$all_rows = $pdo_stmt->fetchAll(SDO_DAS_Relational_PDO_FETCH_ASSOC);
 		} else {
 			$all_rows = $pdo_stmt->fetchAll(SDO_DAS_Relational_PDO_FETCH_NUM);
 		}
+
 		$root		 			= self::createRoot($this->data_factory);
 		$table_names = $this->database_model->getAllTableNames();	//TODO make sure they come back in graph order
 		assert ($table_names[0] == $this->application_root_type);
@@ -216,6 +219,7 @@ class SDO_DAS_Relational {
 					}
 				}
 			}
+
 			foreach ($all_later_updates as $update) {
 				$object_to_update 			= $update['object_to_update'];
 				$column_to_update 			= $update['column_to_update'];

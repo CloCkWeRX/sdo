@@ -39,6 +39,8 @@ namespace commonj
         {
             
         public:
+
+            SAX2Attributes();
             
             SAX2Attributes(
                 int nb_attributes,
@@ -56,7 +58,11 @@ namespace commonj
 
             const SDOXMLString& getValue(
                 const SDOXMLString& attributeName) const; 
-            
+
+            const SAX2Attribute* getAttribute(
+                const SDOXMLString& attributeName) const; 
+
+            void addAttribute(const SAX2Attribute& attr);
         private:
             typedef std::vector<SAX2Attribute> ATTRIBUTE_LIST;
             ATTRIBUTE_LIST    attributes;

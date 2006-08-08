@@ -166,6 +166,8 @@ class SDO_DAS_Relational_ObjectModel {
 	{
 		foreach ($this->containment_references_model->getActiveContainmentReferences() as $ref) {
 			if ($this->getTheFKSupportingAContainmentReference($ref) == null) {
+			    $parent = $ref->getParentName();
+			    $child =  $ref->getChildName();
 				throw new SDO_DAS_Relational_Exception('No foreign key was found in the database model to support the reference with (parent => '.$parent. ', child => '. $child .')');
 			}
 		}
@@ -310,7 +312,7 @@ class SDO_DAS_Relational_ObjectModel {
 	private function addPrimitive($data_factory, $type,$prim_name) 
 	{
 		if (SDO_DAS_Relational::DEBUG_BUILD_SDO_MODEL) {
-			echo "add a primtive $prim_name to $type\n";
+			echo "add a primitive $prim_name to $type\n";
 		}
 		$data_factory->addPropertyToType (
 		SDO_DAS_Relational::APP_NAMESPACE , $type,

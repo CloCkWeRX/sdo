@@ -75,12 +75,21 @@
 //. "- allow data objects to be copied between data factories\n"
 //. "- remove memory leaks in _get_properties methods\n"
 //. "- remove memory leak reading value from Sequence\n", 
-       'notes' => "Minor increments and fixes over 1.0.1:\n"
-. "- fix defect 7458\n"
-. "- eliminate use of the C++ XMLDAS implementation\n"
-. "- fix build errors with PHP 5.2\n", 
+//       'notes' => "Minor increments and fixes over 1.0.1:\n"
+//. "- fix defect 7458\n"
+//. "- eliminate use of the C++ XMLDAS implementation\n"
+//. "- fix build errors with PHP 5.2\n", 
+       'notes' => "Compatibility with Tuscany C++/SDO M1 release and some bug fixes over 1.0.2\n"
+                . " - Update the base C++/SDO implementation to be the Tuscany CPP Milestone 1 release: cpp-0.1.incubating-M1\n"
+                . " - Tested with Linux AMD 64-bit architecture\n"
+                . " - new 3-argument version of SDO_DAS_XML::createDocument() allows an SDO_DAS_XML_Document to be created from an SDO\n"
+                . " - fix defect 7878 Silent failure with malformed SQL\n"
+                . " - fix defect 7879 Improve error message in SDO_DAS_Relational_DatabaseHelper:executeStatement\n"
+                . " - fix defect 8280 Remove spaces from source files\n"
+                . " - fix defect 8300 Optimistic concurrency failure\n"                
+                . " - fix defect 8374 Exception hierarchy (temporary fix)",
        'simpleoutput' => true,
-       'version' => '1.0.2',
+       'version' => '1.0.3',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
@@ -118,7 +127,7 @@
            'run-tests.php',
                         // packaging
            'MakePackage.php',
-           'package.xml',    
+           'package.xml',                      
            'php.ini',                  
                         // wildcards
            '*.la',
@@ -126,13 +135,13 @@
            '*~',
            '*.orig',
            'sdo*tgz'
-         ),    
+         ),
      'dir_roles' => array(
          '/' => 'src',
          'scenarios' => 'test',
          'tests' => 'test', 
-         'DAS' => 'php'),         
-    'filelistgenerator' => 'file' // generate from cvs, use file for directory
+         'DAS' => 'php'),
+       'filelistgenerator' => 'file' // generate from cvs, use file for directory
         )
      );
 	$packagexml->addMaintainer('gcc','lead','Graham Charters','charters@uk.ibm.com');

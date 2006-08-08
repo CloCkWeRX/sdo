@@ -74,6 +74,7 @@ class TestPlan extends PHPUnit2_Framework_TestCase
 	}
 
 	public function testExecuteRecursivelyCallsExecuteOnSteps() {
+	    $dummy_pdo_dbh = null; 
 		$plan = new SDO_DAS_Relational_Plan();
 		$unit_test_action = new UnitTestAction();
 		$plan->addAction($unit_test_action);

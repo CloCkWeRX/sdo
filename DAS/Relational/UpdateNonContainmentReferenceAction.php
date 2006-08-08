@@ -1,7 +1,7 @@
 <?php
 /* 
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -47,7 +47,7 @@ class SDO_DAS_Relational_UpdateNonContainmentReferenceAction extends SDO_DAS_Rel
 		$name_of_the_pk_column = $this->object_model->getPropertyRepresentingPrimaryKeyFromType($type_name);
 		$stmt 	=  "UPDATE $type_name SET $this->property_name = ? WHERE $name_of_the_pk_column = ?" ;
 		$value_list = array($pk_to, $pk_from);
-		SDO_DAS_Relational_DatabaseHelper::executeStatement($dbh,$stmt,$value_list);
+		SDO_DAS_Relational_DatabaseHelper::executeStatementTestForCollision($dbh,$stmt,$value_list);
 	}
 	
 	public function toString() 

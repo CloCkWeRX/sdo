@@ -22,3 +22,6 @@ For further information about SDO, visit the Apache Tuscany Project
 
 We've published an introductory article about using SDO for PHP at 
 http://www-128.ibm.com/developerworks/opensource/library/os-sdophp/.
+
+There is also an article about working with XML using SDO at
+http://www-128.ibm.com/developerworks/opensource/library/os-php-sdo/.

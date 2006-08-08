@@ -163,7 +163,7 @@ void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC)
 		my_object->dop = dop;
 		/* add a back pointer to the C++ object */
 		try {
-			dop->setUserData ((void *)me->value.obj.handle);
+			dop->setUserData ((void *)(long)me->value.obj.handle);
 		} catch (SDORuntimeException e) {
 			sdo_throw_runtimeexception(&e TSRMLS_CC);
 		}

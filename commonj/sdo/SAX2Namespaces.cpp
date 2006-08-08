@@ -73,7 +73,7 @@ namespace commonj
             {
                 // add will not overwrite if it already exists
                 namespaceMap[nsIter->first] = nsIter->second;
-             }
+            }
             return;
         }
 

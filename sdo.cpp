@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -327,9 +327,9 @@ static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_model_reflectiondataobject_export, 0, 
 ZEND_END_ARG_INFO();
 
 function_entry sdo_model_reflectiondataobject_methods[] = {
-    ZEND_ME(SDO_Model_ReflectionDataObject, __construct, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC) 
-	ZEND_ME(SDO_Model_ReflectionDataObject, __toString, 0, ZEND_ACC_PUBLIC)
-	ZEND_ME(SDO_Model_ReflectionDataObject, export, 0, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    ZEND_ME(SDO_Model_ReflectionDataObject, __construct, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_ReflectionDataObject, __toString, 0, ZEND_ACC_PUBLIC)
+    ZEND_ME(SDO_Model_ReflectionDataObject, export, arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getType, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getInstanceProperties, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getContainmentProperty, 0, ZEND_ACC_PUBLIC)
@@ -400,11 +400,14 @@ PHP_MINIT_FUNCTION(sdo)
 	/*
 	 * Check the level of the C++ library
 	 */
-	if (SdoRuntime::getMajor() != 0) {
-		php_error (E_ERROR, "SDO: incompatible versions of SDO extension and SDO library");
+	if (SdoRuntime::getMajor() != 0 ||
+		SdoRuntime::getMinor() != 9 ||
+		SdoRuntime::getFix() < 4) {
+		php_error (E_ERROR, "SDO: incompatible versions of SDO extension and Tuscany SDO C++ library. Expected 00:09:0004, found %s",
+			SdoRuntime::getVersion());
 	}
-	
-	REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", (char *)Type::SDOTypeNamespaceURI, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", (char *)Type::SDOTypeNamespaceURI.c_str(), CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("SDO_VERSION", SDO_VERSION, CONST_CS | CONST_PERSISTENT);
 
 	/* interface SDO_PropertyAccess */
@@ -539,9 +542,9 @@ PHP_MINIT_FUNCTION(sdo)
 PHP_MINFO_FUNCTION(sdo)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "sdo support", "enabled");
-	php_info_print_table_row(2, "sdo version", SDO_VERSION);
-	php_info_print_table_row(2, "sdo4cpp version", SdoRuntime::getVersion());
+	php_info_print_table_header(2, "sdo support", "enabled");
+	php_info_print_table_row(2, "sdo extension version", SDO_VERSION);
+	php_info_print_table_row(2, "Tuscany sdo cpp version", SdoRuntime::getVersion());
 	php_info_print_table_end();
 }
 /* }}} */
