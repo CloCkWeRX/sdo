@@ -55,7 +55,6 @@ $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 ***************************************************************/
 
 try {
-echo "About to execute *******";
 	$root = $das->executeQuery($dbh,
 			"select name, id from company where name = 'Acme'",
 // MySql is happy with the following query formation, DB2 is not
