@@ -32,14 +32,19 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.0.2</version>
-  <date>2006-06-30</date>
+  <version>1.0.3</version>
+  <date>2006-08-09</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>Minor increments and fixes over 1.0.1:
-- fix defect 7458
-- eliminate use of the C++ XMLDAS implementation
-- fix build errors with PHP 5.2
+  <notes>Compatibility with Tuscany C++/SDO M1 release and some bug fixes over 1.0.2
+ - Update the base C++/SDO implementation to be the Tuscany CPP Milestone 1 release: cpp-0.1.incubating-M1
+ - Tested with Linux AMD 64-bit architecture
+ - new 3-argument version of SDO_DAS_XML::createDocument() allows an SDO_DAS_XML_Document to be created from an SDO
+ - fix defect 7878 Silent failure with malformed SQL
+ - fix defect 7879 Improve error message in SDO_DAS_Relational_DatabaseHelper:executeStatement
+ - fix defect 8280 Remove spaces from source files
+ - fix defect 8300 Optimistic concurrency failure
+ - fix defect 8374 Exception hierarchy (temporary fix)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -91,6 +96,10 @@
       <file role="src" name="EqualityHelper.cpp"/>
       <file role="src" name="EqualityHelper.h"/>
       <file role="src" name="export.h"/>
+      <file role="src" name="GroupDefinition.cpp"/>
+      <file role="src" name="GroupDefinition.h"/>
+      <file role="src" name="GroupEvent.cpp"/>
+      <file role="src" name="GroupEvent.h"/>
       <file role="src" name="HelperProvider.cpp"/>
       <file role="src" name="HelperProvider.h"/>
       <file role="src" name="Logger.cpp"/>
@@ -104,6 +113,8 @@
       <file role="src" name="Property.h"/>
       <file role="src" name="PropertyDefinition.cpp"/>
       <file role="src" name="PropertyDefinition.h"/>
+      <file role="src" name="PropertyDefinitionImpl.cpp"/>
+      <file role="src" name="PropertyDefinitionImpl.h"/>
       <file role="src" name="PropertyImpl.cpp"/>
       <file role="src" name="PropertyImpl.h"/>
       <file role="src" name="PropertyList.cpp"/>
@@ -138,6 +149,8 @@
       <file role="src" name="SDOSchemaSAX2Parser.cpp"/>
       <file role="src" name="SDOSchemaSAX2Parser.h"/>
       <file role="src" name="SDOSPI.h"/>
+      <file role="src" name="SDOString.cpp"/>
+      <file role="src" name="SDOString.h"/>
       <file role="src" name="SDOUtils.cpp"/>
       <file role="src" name="SDOUtils.h"/>
       <file role="src" name="SDOXMLBufferWriter.cpp"/>
@@ -170,8 +183,12 @@
       <file role="src" name="Type.h"/>
       <file role="src" name="TypeDefinition.cpp"/>
       <file role="src" name="TypeDefinition.h"/>
+      <file role="src" name="TypeDefinitionImpl.cpp"/>
+      <file role="src" name="TypeDefinitionImpl.h"/>
       <file role="src" name="TypeDefinitions.cpp"/>
       <file role="src" name="TypeDefinitions.h"/>
+      <file role="src" name="TypeDefinitionsImpl.cpp"/>
+      <file role="src" name="TypeDefinitionsImpl.h"/>
       <file role="src" name="TypeImpl.cpp"/>
       <file role="src" name="TypeImpl.h"/>
       <file role="src" name="TypeList.cpp"/>
@@ -204,7 +221,9 @@
        <file role="php" name="1c-C.php"/>
        <file role="php" name="1c-CD.php"/>
        <file role="php" name="1c-CRU.php"/>
+       <file role="php" name="1c-CRUCollisionD.php"/>
        <file role="php" name="1c-CRUD.php"/>
+       <file role="php" name="1c-CRUDDuffSQL.php"/>
        <file role="php" name="1c-DCsamePK.php"/>
        <file role="php" name="1c-R.php"/>
        <file role="php" name="1c-RA.php"/>
@@ -364,6 +383,7 @@
      <file role="test" name="004.phpt"/>
      <file role="test" name="005.phpt"/>
      <file role="test" name="006.phpt"/>
+     <file role="test" name="008.phpt"/>
      <file role="test" name="company.xml"/>
      <file role="test" name="company.xsd"/>
      <file role="test" name="SDOAPITest.php"/>
@@ -527,6 +547,22 @@ Minor improvements and fixes over 0.9.0.
 - fix defect 7458
 - eliminate use of the C++ XMLDAS implementation
 - fix build errors with PHP 5.2
+    </notes>
+   </release>
+   <release>
+    <version>1.0.3</version>
+    <date>2006-08-09</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>Compatibility with Tuscany C++/SDO M1 release and some bug fixes over 1.0.2
+ - Update the base C++/SDO implementation to be the Tuscany CPP Milestone 1 release: cpp-0.1.incubating-M1
+ - Tested with Linux AMD 64-bit architecture
+ - new 3-argument version of SDO_DAS_XML::createDocument() allows an SDO_DAS_XML_Document to be created from an SDO
+ - fix defect 7878 Silent failure with malformed SQL
+ - fix defect 7879 Improve error message in SDO_DAS_Relational_DatabaseHelper:executeStatement
+ - fix defect 8280 Remove spaces from source files
+ - fix defect 8300 Optimistic concurrency failure
+ - fix defect 8374 Exception hierarchy (temporary fix)
     </notes>
    </release>
  </changelog>
