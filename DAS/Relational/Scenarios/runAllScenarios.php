@@ -41,6 +41,10 @@ require '1c-RUnull.php'; // change name but change it back so new == old => no u
 require '1c-C.php';
 require '1c-RUunsetPrimitive.php'; // unset of a primitive actually does nothing but at least check it breaks nothing
 
+/* test exceptions */
+require_once '1c-CRUCollisionD.php';
+require_once '1c-CRUDDuffSQL.php';
+
 /* one-table, multi-company scenarios */
 require_once 'mc-C.php';
 require_once 'mc-R.php';
