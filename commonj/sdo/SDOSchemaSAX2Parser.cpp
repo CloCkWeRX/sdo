@@ -117,6 +117,8 @@ namespace commonj
                         {
                             if (groupList[i].events[j].isStartEvent)
                             {
+                                // For top level <choice> or <sequence> we need to add the maxOccurrs
+                                // attribute from the group definition if it was "many"
                                 if ((level == 0) && isMany)
                                 {
                                     if (groupList[i].events[j].localname.equalsIgnoreCase("choice") 
@@ -126,6 +128,7 @@ namespace commonj
                                         groupList[i].events[j].attributes.addAttribute(*groupMaxOccurrs);
                                     }
                                 }
+
                                 startElementNs(
                                  (const SDOXMLString&)
                                  groupList[i].events[j].localname,
@@ -396,12 +399,19 @@ namespace commonj
                         // Handle <import> of other schema
                         else if (localname.equalsIgnoreCase("union"))
                         {
-                            // TODO - unions not yet supported
+                            // TODO - unions not yet properly supported - for now, whatever the
+                            // enclosing thing is, we will make it an extended primitive based on
+                            // String.
                             bInInvalidContent = true;
-                            if (setter)
-                            {
-                                setter->setError("Schema contains a union which is not yet implemented");
-                            }
+                            //if (setter)
+                            //{
+                            //    setter->setError("Schema contains a union which is not yet implemented");
+                            //}
+
+                            currentType.parentTypeUri = "commonj.sdo";
+                            currentType.parentTypeName = "String";
+                            currentType.isRestriction = true;
+
                         }
                     }
                 }
@@ -510,7 +520,9 @@ namespace commonj
                 {
                     bInInvalidContent = false;
                     // the enclosing element is not useful
-                    bInvalidElement = true; 
+                    // TODO - Instead of making the union invalid, we make it an
+                    // extended primitive based on string - so its no longer invalid.
+                    //bInvalidElement = true; 
                 }
             } 
 
@@ -594,67 +606,89 @@ namespace commonj
 
             if (!bInSchema) return;
 
+            SchemaInfo schemaInf;
+            SDOSchemaSAX2Parser schemaParser(schemaInf, (ParserErrorSetter*)setter);
+
             SDOXMLString schemaLocation = attributes.getValue("schemaLocation");
+            SDOXMLString importNamespace = attributes.getValue("namespace");
             if (!schemaLocation.isNull())
             {
-                SchemaInfo schemaInf;
-                SDOSchemaSAX2Parser schemaParser(schemaInf, (ParserErrorSetter*)setter);
-
                 if (startSecondaryParse(schemaParser,schemaLocation) == 0)
                 {
                     //
                     // we were not able to start the parse
                     return;
                 }
-
-
-                TypeDefinitionsImpl& typedefs = schemaParser.getTypeDefinitions();
-                XMLDAS_TypeDefs types = typedefs.types;
-                XMLDAS_TypeDefs::iterator iter;
-                for (iter=types.begin(); iter != types.end(); iter++)
-                {    
-                    if ((*iter).second.name.equals("RootType")
-                        && currentType.name.equals("RootType")
-                        &&  (*iter).second.uri.equals(currentType.uri))
+            }
+            else
+            {
+                // schemaLocation isn't present. Try loading namespace for import
+                if (localname.equalsIgnoreCase("import")
+                    && !importNamespace.isNull())
+                {
+                    try
                     {
-                        // This must be true for an import/include to be
-                        // legally positioned
-
-                        XMLDAS_TypeDefs::iterator find = typeDefinitions.types.find(
-                                (*iter).first);
-
-                        std::list<PropertyDefinitionImpl>::iterator propit;
-                        std::list<PropertyDefinitionImpl>::iterator currpropit;
-                        bool found;
-
-                        for (propit = (*iter).second.properties.begin() ; 
-                             propit != (*iter).second.properties.end(); ++ propit)
-                        {
-                                found = false;
-                             // do not merge properties whose names clash
-                             for ( currpropit = currentType.properties.begin();
-                                   currpropit != currentType.properties.end();
-                                   ++currpropit)
-                             {
-                                 if ((*currpropit).name.equals((*propit).name))
-                                 {
-                                     found = true;
-                                     break;
-                                 }
-                             }
-                             if (!found) 
-                             {
-                                currentType.properties.insert(
-                                     currentType.properties.end(),*propit);
-                             }
-                        }
+                        schemaParser.parse(importNamespace);
                     }
-                    else 
+                    catch (SDORuntimeException&)
                     {
-                        typeDefinitions.types.insert(*iter);
+                        return;
                     }
                 }
-            }                
+                else
+                {
+                    return;
+                }
+            }
+            
+            
+            TypeDefinitionsImpl& typedefs = schemaParser.getTypeDefinitions();
+            XMLDAS_TypeDefs types = typedefs.types;
+            XMLDAS_TypeDefs::iterator iter;
+            for (iter=types.begin(); iter != types.end(); iter++)
+            {    
+                if ((*iter).second.name.equals("RootType")
+                    && currentType.name.equals("RootType")
+                    &&  (*iter).second.uri.equals(currentType.uri))
+                {
+                    // This must be true for an import/include to be
+                    // legally positioned
+                    
+                    XMLDAS_TypeDefs::iterator find = typeDefinitions.types.find(
+                        (*iter).first);
+                    
+                    std::list<PropertyDefinitionImpl>::iterator propit;
+                    std::list<PropertyDefinitionImpl>::iterator currpropit;
+                    bool found;
+                    
+                    for (propit = (*iter).second.properties.begin() ; 
+                    propit != (*iter).second.properties.end(); ++ propit)
+                    {
+                        found = false;
+                        // do not merge properties whose names clash
+                        for ( currpropit = currentType.properties.begin();
+                        currpropit != currentType.properties.end();
+                        ++currpropit)
+                        {
+                            if ((*currpropit).name.equals((*propit).name))
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) 
+                        {
+                            currentType.properties.insert(
+                                currentType.properties.end(),*propit);
+                        }
+                    }
+                }
+                else 
+                {
+                    typeDefinitions.types.insert(*iter);
+                }
+            }
+            
         }
 
         
@@ -736,7 +770,9 @@ namespace commonj
 
             
             setType(thisProperty, attributes, namespaces);
-                        
+
+            // Set isMany. currentType.isMany = true indicates we are in a 
+            // group definition (sequence/choice) with maxOccurs>1
             if (currentType.isMany)
             {
                 thisProperty.isMany = true;
