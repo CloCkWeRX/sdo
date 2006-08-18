@@ -190,20 +190,18 @@ static zend_object_value sdo_do_clone_obj(zval *object TSRMLS_DC)
 {
 	sdo_do_object *my_old_object;
 	DataObjectPtr new_dop;
-	zval *z_new;
-
-    MAKE_STD_ZVAL(z_new);
+	zval z_new;
 
 	my_old_object = sdo_do_get_instance(object TSRMLS_CC);
 
 	try {
 		new_dop = CopyHelper::copy(my_old_object->dop);
-		sdo_do_new(z_new, new_dop TSRMLS_CC);
+		sdo_do_new(&z_new, new_dop TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
 
-	return z_new->value.obj;
+	return z_new.value.obj;
 }
 /* }}} */
 
