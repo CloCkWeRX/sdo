@@ -6,19 +6,26 @@ latest version.
 
 See INSTALL (in this directory) for installation instructions.
 
-Report bugs in the PECL bug tracking system (http://pecl.php.net/bugs/).
+Report bugs in the PECL bug tracking system at http://pecl.php.net/bugs/.
+
+There is a project homepage at http://www.osoa.org/display/PHP/SOA+PHP+Homepage
+which holds any FAQ and wish list type information that can't find a home
+on the PECL page. 
 
 We're very interested in getting your comments or any feedback that 
 you may have.  Please feel free to email any of the project leads.
-You may also use the php.pecl.dev mailing list
-(http://news.php.net/group.php?group=php.pecl.dev).
+There is also a Google mail list for the extension where you can ask questions 
+and make suggestions. See the the extension homepage at
+http://www.osoa.org/display/PHP/SOA+PHP+Homepage. 
+You may also use the php.pecl.dev mailing list at
+http://news.php.net/group.php?group=php.pecl.dev.
 
 If you'd like to contribute to this project, we ask you to complete
 a Contributor License Agreement. The file CLA (in this directory)
 contains the agreement and instructions for returning it.
 
-For further information about SDO, visit the Apache Tuscany Project 
-(http://incubator.apache.org/tuscany/).
+For further information about SDO, visit the Apache Tuscany Project at
+http://incubator.apache.org/tuscany/.
 
 We've published an introductory article about using SDO for PHP at 
 http://www-128.ibm.com/developerworks/opensource/library/os-sdophp/.
