@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+        targetNamespace="http://www.apache.org/tuscany/interop" 
+        xmlns:tns="http://www.apache.org/tuscany/interop"
+        xmlns:sdo="commonj.sdo"
+        xmlns:sdoJava="commonj.sdo">
+        
+  <import schemaLocation="datagraph.xsd" namespace="commonj.sdo"/>
+  
+  <annotation>
+    <appinfo>SDO 2.0.1</appinfo>
+    <documentation>
+        A schema that includes many of the types described in the SDO sepcification 
+        futher schemas appear in this series that contain schema constructs that 
+        are mutually exclusive to the constructs contained in this file or that 
+        are particular to specific language implementations of SDO
+    </documentation>
+  </annotation>
+    
+  <notation name="SDOInteropTestingSchema1" public="commonj.sdo">
+
+  </notation>
+        
+  <!-- simple types -->
+  <simpleType name="SimpleTypeWithNameType">
+    <restriction base="string"/>
+  </simpleType>
+        
+  <element name="SimpleTypeAnonymous">
+    <simpleType>
+      <restriction base="string"/>
+    </simpleType>
+  </element>  
+  
+  <simpleType name="SimpleTypeWithSDONameType" sdo:name="SimpleTypeWithSDONameTypeSDOName">
+	<restriction base="string"/>
+  </simpleType>
+  
+  <!-- 
+  <simpleType name="SimpleTypeWithAbstractType" abstract="true">
+    <restriction base="string"/>
+  </simpleType>
+  -->
+
+  <simpleType name="SimpleTypeWithInstanceClassType" sdoJava:instanceClass="String">
+  	<restriction base="string"/>
+  </simpleType>
+  
+  <simpleType name="SimpleTypeWithExtendedInstanceClassType" sdoJava:extendedInstanceClass="String">
+  	<restriction base="string"/>
+  </simpleType>
+  
+  
+  <!-- complex types -->
+  <complexType name="ComplexTypeNoContentType"/>
+  
+  <complexType name="ComplexTypeContentType">
+    <sequence>
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+    </sequence>
+  </complexType>
+  
+  <element name="ComplexTypeAnonymousType">
+    <complexType>
+      <sequence>
+        <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+      </sequence>
+    </complexType>
+  </element>
+  
+  <complexType name="ComplexTypeWithSDONameType" sdo:name="ComplexTypeWithSDONameTypeSDOName">
+    <sequence>
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="ComplexTypeWithAbstractType" abstract="true">
+    <sequence>
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="ComplexTypeWithSDOAliasNameType" sdo:aliasName="ComplexTypeWithSDOAliasNameTypeSDOAliasName">
+    <sequence>
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+    </sequence>
+  </complexType>  
+  
+  <complexType name="ComplexTypeExtendingComplexTypeType">
+    <complexContent>
+      <extension base="tns:ComplexTypeContentType">
+        <sequence>
+          <element name="SimpleTypeWithNameExtended" type="tns:SimpleTypeWithNameType"/>
+        </sequence>
+      </extension>
+    </complexContent>  
+  </complexType> 
+  
+  <complexType name="ComplexTypeExtendingSimpleTypeType">
+    <simpleContent>
+      <extension base="tns:SimpleTypeWithNameType">
+		<attribute name="AddedByExtension" type="string"/>
+      </extension>
+    </simpleContent>  
+  </complexType> 
+
+  <complexType name="ComplexTypeComplexContentRestrictingComplexTypeType">
+    <complexContent>
+      <restriction base="tns:ComplexTypeExtendingComplexTypeType">
+        <sequence>
+          <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>        
+        </sequence>  
+      </restriction>
+    </complexContent>  
+  </complexType>   
+  
+  <complexType name="ComplexTypeSimpleContentRestrictingComplexTypeType">
+    <simpleContent>
+      <restriction base="tns:ComplexTypeExtendingSimpleTypeType">
+        <attribute name="AddedByExtension" type="NCName" />
+      </restriction>
+    </simpleContent>  
+  </complexType>    
+
+  <complexType name="ComplexTypeWithMixedType" mixed="true">
+    <sequence>
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+    </sequence>
+  </complexType>
+    
+  <complexType name="ComplexTypeWithSDOSequenceType" sdo:name="true">
+    <sequence>
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="ComplexTypeOpenContentType">
+    <sequence>
+      <any namespace="##any"/>
+    </sequence>
+  </complexType>  
+  
+  <complexType name="ComplexTypeOpenAttributesType">
+    <sequence>
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+    </sequence>
+    <anyAttribute namespace="##any"/>
+  </complexType>
+  
+  <!-- attributes -->
+  <attribute name="AttributeReference" type="string"/> 
+  
+  <complexType name="ComplexTypeOppositePropertyTestType">
+    <sequence>
+    </sequence> 
+    <attribute name="AttributeWithSDOPropertyType" type="IDREF" sdo:propertyType="tns:ComplexTypeAttributesTestType"/> 
+  </complexType>    
+  
+  <complexType name="ComplexTypeAttributesTestType">
+    <sequence>
+    </sequence> 
+    <attribute name="Attribute" type="string"/>
+    <attribute name="AttributeWithSDOName" sdo:name="AttributeWithSDONameSDOName" type="string"/>
+    <attribute name="AttributeWithSDOAliasName" sdo:aliasName="AttributeWithSDOAliasNameSDOAliasName" type="string"/>
+    <attribute name="AttributeWithDefaultValue" type="string" default="AttributeWithDefaultValueDefaultValue"/>
+    <attribute name="AttributeWithFixedValue" type="string" fixed="AttributeWithFixedValueFixedValue"/> 
+    <attribute ref="tns:AttributeReference"/>   
+    <attribute name="AttributeWithSDOString" type="string" sdo:string="true"/>     
+    <attribute name="AttributeWithSDOPropertyType" type="IDREF" sdo:propertyType="tns:SimpleTypeWithNameType"/> 
+    <attribute name="AttributeWithSDOPropertySDOOppositePropertyType" type="IDREF" sdo:propertyType="tns:SimpleTypeWithNameType" sdo:oppositeProperty="tns:AttributeWithSDOPropertyType"/>     
+    <attribute name="AttributeWithSDODataType" sdo:dataType="string" type="string"/>
+  </complexType>    
+  
+  <!-- elements -->
+  <complexType name="ComplexTypeElementInAllTestType">
+    <all>
+      <element name="ElementInAllOne" type="string"/>
+      <element name="ElementInAllTwo" type="string"/>      
+    </all>
+  </complexType>
+  
+  <complexType name="ComplexTypeSubstitutionGroupBaseType">
+    <sequence>
+      <element name="ElementInSubstitutionGroupBase" type="string"/>
+    </sequence>
+  </complexType>
+  <element name="ElementSubstitutionGroupBase" type="tns:ComplexTypeSubstitutionGroupBaseType"/>
+  
+   <complexType name="ComplexTypeSubstitutionGroupExtendsType">
+    <complexContent>
+      <extension base="tns:ComplexTypeSubstitutionGroupBaseType">
+        <sequence>
+          <element name="ElementInSubstitutionGroupExtends" type="string"/>
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="ElementSubstitutionGroupExtends" type="tns:ComplexTypeSubstitutionGroupExtendsType" substitutionGroup="tns:ElementSubstitutionGroupBase"/>
+  
+  <!-- built in data types -->
+  
+       
+  <!-- top level test type -->       
+  <complexType name="ComplexTypeRootType">
+    <sequence>
+      <!-- simple types -->
+      <element name="SimpleTypeWithName" type="tns:SimpleTypeWithNameType"/>
+      <element ref="tns:SimpleTypeAnonymous"/>  
+      <element name="SimpleTypeWithSDOName" type="tns:SimpleTypeWithSDONameType"/>  
+      <!--element name="SimpleTypeWithAbstract" type="tns:SimpleTypeWithAbstractType"/-->   
+      <element name="SimpleTypeWithInstanceClass" type="tns:SimpleTypeWithInstanceClassType"/>       
+      <element name="SimpleTypeWithExtendedInstanceClass" type="tns:SimpleTypeWithExtendedInstanceClassType"/>                               
+      
+      <!-- complex types -->
+      <element name="ComplexTypeNoContent" type="tns:ComplexTypeNoContentType"/>
+      <element name="ComplexTypeContent" type="tns:ComplexTypeContentType"/>
+      <element ref="tns:ComplexTypeAnonymousType"/>
+      <element name="ComplexTypeWithSDOName" type="tns:ComplexTypeWithSDONameType"/>      
+      <element name="ComplexTypeWithSDOAliasName" type="tns:ComplexTypeWithSDOAliasNameType"/>      
+      <element name="ComplexTypeExtendingComplexType" type="tns:ComplexTypeExtendingComplexTypeType"/>      
+      <element name="ComplexTypeExtendingSimpeType" type="tns:ComplexTypeExtendingSimpleTypeType"/>            
+      <element name="ComplexTypeComplexContentRestrictingComplexType" type="tns:ComplexTypeComplexContentRestrictingComplexTypeType"/>                  
+      <element name="ComplexTypeSimpleContentRestrictingComplexType" type="tns:ComplexTypeSimpleContentRestrictingComplexTypeType"/>                        
+      <element name="ComplexTypeWithMixed" type="tns:ComplexTypeWithMixedType"/>
+      <element name="ComplexTypeWithSDOSequence" type="tns:ComplexTypeWithSDOSequenceType"/>
+      <element name="ComplexTypeOpenContent" type="tns:ComplexTypeOpenContentType"/>      
+      <element name="ComplexTypeOpenAttributes" type="tns:ComplexTypeOpenAttributesType"/>   
+ 
+      <!-- attributes -->
+      <element name="ComplexTypeOppositePropertyTest" type="tns:ComplexTypeOppositePropertyTestType"/>
+      <element name="ComplexTypeAttributesTest" type="tns:ComplexTypeAttributesTestType"/>
+      
+      <!-- elements -->
+      <element name="ElementWithSDOName" sdo:name="ElementWithSDONameSDOName" type="string"/>
+      <element name="ElementWithSDOAliasName" sdo:aliasName="ElementWithSDOAliasNameSDOAliasName" type="string"/>
+      <element name="ElementWithMaxOccurs" type="string" maxOccurs="2"/>
+      <choice maxOccurs="3">
+        <element name="ElementInChoice" type="string" maxOccurs="2"/>
+      </choice>
+      <element name="ElementInAll" type="tns:ComplexTypeElementInAllTestType"/>
+      <element name="ElementWithNillable" type="string" nillable="true"/>      
+      <element ref="tns:ElementSubstitutionGroupBase" />
+      <element name="ElementOfSimpleTypeWithDefault" type="string" default="ElementOfSimpleTypeWithDefaultDefault" />
+      <element name="ElementOfSimpleTypeWithFixed" type="string" fixed="ElementOfSimpleTypeWithFixedFixed" />      
+      <element name="ElementOfSimpleTypeWithSDOString" type="string" sdo:string="true"/>      
+      <element name="ElementOfSimpleTypeWithSDOPropertyType" type="IDREF" sdo:propertyType="tns:SimpleTypeWithNameType"/>      
+      <element name="ElementOfSimpleTypeWithSDOOppositePropertyType" type="IDREF" sdo:propertyType="tns:SimpleTypeWithNameType" sdo:oppositeProperty="tns:ElementOfSimpleTypeWithSDOPropertyType"/>      
+      <element name="ElementOfSimpleTypeWithSDODataType" type="string" sdo:dataType="string"/>       
+      <element name="ElementOfSDOChangeSummaryType" type="sdo:ChangeSummaryType"/>                
+  
+      <!-- built in data types -->
+      <element name="anySimpleType" type="anySimpleType"/>
+      <element name="anyType" type="anyType"/>
+      <element name="anyURI" type="anyURI"/>
+      <element name="base64Binary" type="base64Binary"/>
+      <element name="boolean" type="boolean"/>
+      <element name="byte" type="byte"/>
+      <element name="date" type="date"/>
+      <element name="dateTime" type="dateTime"/>
+      <element name="decimal" type="decimal"/>
+      <element name="double" type="double"/>
+      <element name="duration" type="duration"/>
+      <element name="float" type="float"/>
+      <element name="gDay" type="gDay"/>
+      <element name="gMonth" type="gMonth"/>
+      <element name="gMonthDay" type="gMonthDay"/>
+      <element name="gYear" type="gYear"/>
+      <element name="gYearMonth" type="gYearMonth"/>
+      <element name="hexBinary" type="hexBinary"/>
+      <element name="ID" type="ID"/>
+      <element name="IDREF" type="IDREF"/>
+      <element name="IDREFS" type="IDREFS"/>
+      <element name="int" type="int"/>
+      <element name="integer" type="integer"/>
+      <element name="language" type="language"/>
+      <element name="long" type="long"/>
+      <element name="Name" type="Name"/>
+      <element name="NCName" type="NCName"/>
+      <element name="negativeInteger" type="negativeInteger"/>
+      <element name="NMTOKEN" type="NMTOKEN"/>
+      <element name="NMTOKENS" type="NMTOKENS"/>
+      <element name="nonNegativeInteger" type="nonNegativeInteger"/>
+      <element name="nonPositiveInteger" type="nonPositiveInteger"/>
+      <element name="normalizedString" type="normalizedString"/>
+      <element name="NOTATION" >
+        <simpleType >
+          <restriction base="NOTATION">
+            <enumeration value="tns:SDOInteropTestingSchema1"/>
+          </restriction>
+        </simpleType>
+      </element>
+      <element name="positiveInteger" type="positiveInteger"/>
+      <element name="QName" type="QName"/>
+      <element name="short" type="short"/>
+      <element name="string" type="string"/>
+      <element name="time" type="time"/>
+      <element name="token" type="token"/>
+      <element name="unsignedByte" type="unsignedByte"/>
+      <element name="unsignedInt" type="unsignedInt"/>
+      <element name="unsignedLong" type="unsignedLong"/>
+      <element name="unsignedShort" type="unsignedShort"/>
+            
+ <!-- need to test abstract -->
+
+    </sequence>
+  </complexType>
+        
+  <element name="RootElement" type="tns:ComplexTypeRootType"/>
+</schema>

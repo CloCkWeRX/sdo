@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RootElement2 xmlns="http://www.apache.org/tuscany/interop" xsi:type="ComplexTypeRootType" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:tns2="http://www.apache.org/tuscany/interop/import" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><SimpleTypeWithName>SimpleTypeWithName</SimpleTypeWithName><tns2:ElementOfImportedType><AnElement>SomeString</AnElement><AnotherElement>SomeString</AnotherElement></tns2:ElementOfImportedType></RootElement2>

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RootElement32 xmlns="http://www.apache.org/tuscany/interop" xsi:type="RootElement32" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ComplexTypeReferencedDataObject DataObjectId="idvalue0"><SomeData>some data string</SomeData></ComplexTypeReferencedDataObject><ComplexTypeReferencingDataObject DataObjectId="idvalue1"><OppositeProperty>idvalue2</OppositeProperty></ComplexTypeReferencingDataObject><ComplexTypeOppositeProperty DataObjectId="idvalue2"/></RootElement32>

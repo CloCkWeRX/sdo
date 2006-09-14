@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RootElement28 xmlns="http://www.apache.org/tuscany/interop" xsi:type="RootElement28" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ComplexTypeWithMixed>
+	    Some 
+	    Mixed
+		<SimpleTypeWithName>SimpleTypeWithName</SimpleTypeWithName>
+		Content
+	</ComplexTypeWithMixed></RootElement28>

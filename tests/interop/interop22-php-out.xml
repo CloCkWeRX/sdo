@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RootElement22 xmlns="http://www.apache.org/tuscany/interop" xsi:type="RootElement22" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ComplexTypeExtendsAbstractType><BaseElement>BaseElement</BaseElement><ExtensionElement>ExtensionElement</ExtensionElement></ComplexTypeExtendsAbstractType></RootElement22>
