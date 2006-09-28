@@ -17,7 +17,7 @@ rem | permissions and limitations under the License.                       |
 rem +----------------------------------------------------------------------+
 rem | Author: SL                                                           |
 rem +----------------------------------------------------------------------+
-rem $Id: runalltests.bat,v 1.2 2006-09-28 13:14:15 slaws Exp $
+rem $Id: runalltests.bat,v 1.3 2006-09-28 15:19:04 cem Exp $
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo This script runs all of the PHP SDO tests that can
