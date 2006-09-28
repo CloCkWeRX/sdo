@@ -29,51 +29,51 @@ $Id$
 class SDO_DAS_Relational_DataObjectHelper
 {
 
-	public static function getCurrentPrimitiveSettings($data_object,$object_model)
-	{
-		$nvpairs = array();
-		$type = self::getApplicationType($data_object);
-		foreach($data_object as $prop => $value) {
-			if ($object_model->isPrimitive($type,$prop)) {
-				if (isset($data_object[$prop])) {
-					$nvpairs[$prop] = $data_object[$prop];
-				}
-			}
-		}
-		return $nvpairs;
-	}
+    public static function getCurrentPrimitiveSettings($data_object,$object_model)
+    {
+        $nvpairs = array();
+        $type = self::getApplicationType($data_object);
+        foreach($data_object as $prop => $value) {
+            if ($object_model->isPrimitive($type, $prop)) {
+                if (isset($data_object[$prop])) {
+                    $nvpairs[$prop] = $data_object[$prop];
+                }
+            }
+        }
+        return $nvpairs;
+    }
 
-	public static function getApplicationType($data_object)
-	{
-		$model_reflection_object = new SDO_Model_ReflectionDataObject($data_object);
-		$type = $model_reflection_object->getType();
-		return $type->name;
-	}
+    public static function getApplicationType($data_object)
+    {
+        $model_reflection_object = new SDO_Model_ReflectionDataObject($data_object);
+        $type = $model_reflection_object->getType();
+        return $type->name;
+    }
 
-	public static function getPrimaryKeyFromDataObject($object_model,$data_object)
-	{
-		$type = self::getApplicationType($data_object);
-		$pk_property_name = $object_model->getPropertyRepresentingPrimaryKeyFromType($type);
-		if (isset($data_object[$pk_property_name])) {
-			$pk = $data_object[$pk_property_name];
-			return $pk;
-		} else {
-			return null;
-		}
-	}
+    public static function getPrimaryKeyFromDataObject($object_model,$data_object)
+    {
+        $type = self::getApplicationType($data_object);
+        $pk_property_name = $object_model->getPropertyRepresentingPrimaryKeyFromType($type);
+        if (isset($data_object[$pk_property_name])) {
+            $pk = $data_object[$pk_property_name];
+            return $pk;
+        } else {
+            return null;
+        }
+    }
 
-	public static function listNameValuePairs($data_object,$object_model)
-	{
-		$str = ' [';
-		$nvpairs = self::getCurrentPrimitiveSettings($data_object,$object_model);
-		foreach ($nvpairs as $n => $v) {
-			$str .=  " $n => ";
-			if ($v == null) $str .=  'NULL';  // TODO really think this should be === but does not compare OK hence bug 425
-			else $str .=  $v;
-		}
-		$str .= ']';
-		return $str;
-	}
+    public static function listNameValuePairs($data_object,$object_model)
+    {
+        $str = ' [';
+        $nvpairs = self::getCurrentPrimitiveSettings($data_object, $object_model);
+        foreach ($nvpairs as $n => $v) {
+            $str .=  " $n => ";
+            if ($v == null) $str .=  'NULL';  // TODO really think this should be === but does not compare OK hence bug 425
+            else $str .=  $v;
+        }
+        $str .= ']';
+        return $str;
+    }
 
 }
 

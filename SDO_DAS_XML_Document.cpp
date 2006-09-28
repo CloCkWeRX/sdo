@@ -77,6 +77,11 @@ void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC)
     zend_hash_destroy(xmldocument->zo.properties);
     FREE_HASHTABLE(xmldocument->zo.properties);
 
+	if (xmldocument->zo.guards) {
+	    zend_hash_destroy(xmldocument->zo.guards);
+	    FREE_HASHTABLE(xmldocument->zo.guards);
+	}
+
     if (xmldocument->xmlDocumentPtr) {
          delete xmldocument->xmlDocumentPtr;
     }
@@ -96,6 +101,7 @@ zend_object_value sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS
     memset(xmldocument, 0, sizeof(xmldocument_object));
 	
     xmldocument->zo.ce = ce;
+	xmldocument->zo.guards = NULL;
     ALLOC_HASHTABLE(xmldocument->zo.properties);
     zend_hash_init(xmldocument->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
     zend_hash_copy(xmldocument->zo.properties, &ce->default_properties,
@@ -203,7 +209,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootElementName)
  */
 PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration) 
 {
-    long				 xml_declaration;
+    zend_bool			 xml_declaration;
     xmldocument_object  *xmldocument;
 	char				*class_name, *space;
 

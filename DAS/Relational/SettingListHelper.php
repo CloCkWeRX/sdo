@@ -27,22 +27,22 @@ $Id$
 * so must add the behaviour with this helper routine
 */
 
-class SDO_DAS_Relational_SettingListHelper
+class SDO_DAS_Relational_SettingListHelper 
 {
 
-	public static function getSettingsAsArray(SDO_DAS_SettingList $setting_list)
-	{
-		$settings_as_array = array();
+    public static function getSettingsAsArray(SDO_DAS_SettingList $setting_list)
+    {
+        $settings_as_array = array();
 
-		foreach($setting_list as $setting) {
-			if ($setting->isSet()) { 
-				$property_name 	= $setting->getPropertyName();
-				$old_value 		= $setting->getValue();
-				$settings_as_array[$property_name] = $old_value;
-			}
-		}
-		return $settings_as_array;
-	}
+        foreach($setting_list as $setting) {
+            if ($setting->isSet()) { 
+                $property_name  = $setting->getPropertyName();
+                $old_value      = $setting->getValue();
+                $settings_as_array[$property_name] = $old_value;
+            }
+        }
+        return $settings_as_array;
+    }
 
 }
 

@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005, 2006.                                  |
+| (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -82,6 +82,11 @@ static void sdo_do_object_free_storage(void *object TSRMLS_DC)
 	zend_hash_destroy(my_object->zo.properties);
 	FREE_HASHTABLE(my_object->zo.properties);
 
+	if (my_object->zo.guards) {
+	    zend_hash_destroy(my_object->zo.guards);
+	    FREE_HASHTABLE(my_object->zo.guards);
+	}
+
 	/* just release the reference, and the reference counting will kick in */
 	if (my_object->dop) {
 		try {
@@ -110,6 +115,7 @@ static zend_object_value sdo_do_object_create(zend_class_entry *ce TSRMLS_DC)
 	my_object = (sdo_do_object *)emalloc(sizeof(sdo_do_object));
 	memset(my_object, 0, sizeof(sdo_do_object));
 	my_object->zo.ce = ce;
+	my_object->zo.guards = NULL;
 	ALLOC_HASHTABLE(my_object->zo.properties);
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
@@ -312,20 +318,19 @@ static zval *sdo_do_read_list(sdo_do_object *sdo, const char *xpath, const Prope
 {
 	zval			*return_value;
 
-	ALLOC_INIT_ZVAL(return_value);
-	return_value->refcount = 0;
-
 	try {
 		DataObjectList& list_value = sdo->dop->getList(xpath);
 		if (&list_value == NULL) {
-			RETVAL_NULL();
+			return_value = EG(uninitialized_zval_ptr);
 		} else {
+			ALLOC_INIT_ZVAL(return_value);
+			return_value->refcount = 0;
 			/* make a new SDO_DataObjectList */
 			sdo_dataobjectlist_new(return_value, propertyp->getType(), &list_value TSRMLS_CC);
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		RETVAL_NULL();
+		return_value = EG(uninitialized_zval_ptr);
 	}
 	return return_value;
 }
@@ -341,11 +346,8 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 	char			 char_value;
 	wchar_t			 wchar_value;
 	DataObjectPtr	 doh_value;
-	zval			*return_value;
+	zval			*return_value = NULL;
 	char			*class_name, *space;
-
-	ALLOC_INIT_ZVAL(return_value);
-	return_value->refcount = 0;
 
 	try {
 		if (propertyp->isMany()) {
@@ -358,7 +360,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 					0 TSRMLS_CC,
 					"Cannot read list at index '%s' because the list is empty",
 					(char *)xpath);
-				return return_value;
+				return EG(uninitialized_zval_ptr);
 			}
 		} else {
 	   /*
@@ -371,9 +373,13 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 					0 TSRMLS_CC,
 					"Cannot read property '%s' because it is not set",
 					propertyp->getName());
-				return return_value;
+				return EG(uninitialized_zval_ptr);
 			}
 		}
+		
+		
+		ALLOC_INIT_ZVAL(return_value);
+		return_value->refcount = 0;
 
 		if (dop->isNull(xpath)) {
 			RETVAL_NULL();
@@ -465,8 +471,10 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 		return return_value;
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		efree(return_value);
-		return_value = 0;
+		if (return_value) {
+		    efree(return_value);
+		}
+		return_value = EG(uninitialized_zval_ptr);
 	}
 	return return_value;
 }
@@ -490,9 +498,7 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 	try {
 		if (sdo_parse_offset_param(
 			dop, offset, &propertyp, &xpath, 1, 0 TSRMLS_CC) == FAILURE) {
-			MAKE_STD_ZVAL(return_value);
-			RETVAL_NULL();
-			return return_value;
+			return EG(uninitialized_zval_ptr);
 		}
 
 		/* Note: although we now have a reference to the Property,
@@ -513,11 +519,7 @@ static zval *sdo_do_read_dimension(zval *object, zval *offset, int type TSRMLS_D
 		}
 	} catch(SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		/* I have to return a real zval at this point, to avoid an access violation.
-		 * But if the return value is not unused, this zval leaks.
-		 */
-		ALLOC_INIT_ZVAL(return_value);
-		return_value->refcount = 0;
+		return_value = EG(uninitialized_zval_ptr);
 	}
 	return return_value;
 }
@@ -755,12 +757,12 @@ static HashTable *sdo_do_get_properties(zval *object TSRMLS_DC)
 static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 {
 	sdo_do_object	*my_object1, *my_object2;
-	DataObjectPtr		 dop1, dop2;
-	PropertyList		 pl;
+	DataObjectPtr	 dop1, dop2;
+	PropertyList	 pl;
 	int				 entries;
-	const char			*propertyName;
-	zval				 offset;
-	zval				 result;
+	const char		*propertyName;
+	zval			 offset;
+	zval			 result;
 
 	INIT_PZVAL(&offset);
 	INIT_PZVAL(&result);
@@ -804,8 +806,8 @@ static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 			if (dop1->isSet(prop1)) {
 				/* the property is set, so we must also compare its value */
 				ZVAL_STRING(&offset, (char *)propertyName, 0);
-				zval *value1 = sdo_do_read_dimension(object1, &offset, 0 TSRMLS_CC);
-				zval *value2 = sdo_do_read_dimension(object2, &offset, 0 TSRMLS_CC);
+				zval *value1 = sdo_do_read_dimension(object1, &offset, BP_VAR_R TSRMLS_CC);
+				zval *value2 = sdo_do_read_dimension(object2, &offset, BP_VAR_R TSRMLS_CC);
 				int rc = compare_function(&result, value1, value2 TSRMLS_CC);
 				zval_ptr_dtor(&value1);
 				zval_ptr_dtor(&value2);
@@ -984,12 +986,17 @@ zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSR
 }
 /* }}} */
 
-/* {{{ sdo_sequence_iterator_dtor
+/* {{{ sdo_do_iterator_dtor
  */
 static void sdo_do_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	/* nothing special to be done */
-	efree(iter);
+	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
+
+    if (iterator->zoi.data) { 
+		zval_ptr_dtor((zval **)&iterator->zoi.data);
+    }
+
+	efree(iterator);
 }
 /* }}} */
 
@@ -1135,7 +1142,6 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 {
 	char				*serialized_model;
 	char				*serialized_graph;
-	zval				*factory_zval;
 
 	/*
 	 * The serialized data comprises the model and the graph, both as null-terminated strings
@@ -1151,9 +1157,11 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 		/* Load the model from the serialized data */
 		xsdhp->define(serialized_model);
 
-		/* Create the PHP representation of the factory */
-		MAKE_STD_ZVAL(factory_zval);
-		sdo_das_df_new(factory_zval, dfp TSRMLS_CC);
+		/* Don't create a PHP object wrapper for the data factory.
+		 * The C++ library will hold on to it until its last data object
+		 * is deleted. A PHP wrapper will be instantiated lazily
+		 * on demand.
+		 */
 
 		/* Load the graph */
 		DataObjectPtr root_dop = xmlhp->load(serialized_graph)->getRootDataObject();

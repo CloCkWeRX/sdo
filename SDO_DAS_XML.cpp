@@ -148,6 +148,11 @@ void sdo_das_xml_object_free_storage(void *object TSRMLS_DC)
     zend_hash_destroy(xmldas->zo.properties);
     FREE_HASHTABLE(xmldas->zo.properties);
 
+	if (xmldas->zo.guards) {
+	    zend_hash_destroy(xmldas->zo.guards);
+	    FREE_HASHTABLE(xmldas->zo.guards);
+	}
+
 	zval_dtor(&xmldas->z_df);
     efree(xmldas);
 }
@@ -165,6 +170,7 @@ zend_object_value sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC)
     memset(xmldas, 0, sizeof(xmldas_object));
 
     xmldas->zo.ce = ce;
+	xmldas->zo.guards = NULL;
     ALLOC_HASHTABLE(xmldas->zo.properties);
     zend_hash_init(xmldas->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
     zend_hash_copy(xmldas->zo.properties, &ce->default_properties,
@@ -626,7 +632,7 @@ PHP_METHOD(SDO_DAS_XML, saveFile)
     xmldocument_object	*xmldocument;
     xmldas_object		*xmldas;
     char				*xml_file;
-    int					 xml_file_len = 0;
+    int					 xml_file_len;
     long				 indent = -1;
 	char				*class_name, *space;
 

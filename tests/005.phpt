@@ -3,7 +3,7 @@ SDO_DAS_XML load test
 --INI--
 display_errors=off
 --SKIPIF--
-<?php if (!extension_loaded("sdo_das_xml")) print "skip"; ?>
+<?php if (!extension_loaded("sdo")) print "skip"; ?>
 --FILE--
 <?php 
     $dirname = dirname($_SERVER['SCRIPT_FILENAME']);

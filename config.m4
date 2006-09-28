@@ -1,33 +1,48 @@
 dnl $Id$
 
-PHP_ARG_ENABLE(sdo, sdo ,
-[  --enable-sdo Enable sdo support])
+PHP_ARG_ENABLE(sdo, [whether to enable SDO support],
+[  --enable-sdo            enable SDO support])
 
 if test "$PHP_SDO" != "no"; then
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR     SimpleXML: libxml2 install prefix], no, no)
+  [  --with-libxml-dir=DIR     SDO: libxml2 install prefix], no, no)
 fi
 
-PHP_SETUP_LIBXML(SIMPLEXML_SHARED_LIBADD, [
-  AC_DEFINE(HAVE_SIMPLEXML,1,[ ])
-  PHP_SUBST(SIMPLEXML_SHARED_LIBADD)
-], [
-  AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
-])
-
+if test "$PHP_LIBXML" = "no"; then
+  AC_MSG_ERROR([SDO extension requires LIBXML extension, add --enable-libxml])
+fi
+  
+PHP_SETUP_LIBXML(SDO_SHARED_LIBADD, ,
+  AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.]))
+    
 PHP_CHECK_FUNC(swprintf)
 if test "$ac_cv_func_swprintf" = "no"; then
   AC_DEFINE(NO_SWPRINTF, 1, [ ])
 fi
 
+PHP_SUBST(SDO_SHARED_LIBADD)
+AC_DEFINE(HAVE_SDO, 1, [Whether you have SDO support])
 PHP_REQUIRE_CXX()
 
-dnl This step should not be necessary, but the PHP_REQUIRE_CXX does
-dnl not ensure the use of g++ as the linker, only as the compiler
-CC=g++
-PHP_SUBST(CC)
+sdo_srcs="sdo.cpp \
+SDO_CPPException.cpp \
+SDO_DAS_ChangeSummary.cpp \
+SDO_DAS_DataFactory.cpp \
+SDO_DAS_Setting.cpp \
+SDO_DataObject.cpp \
+SDO_Exception.cpp \
+SDO_List.cpp \
+SDO_Model_Type.cpp \
+SDO_Model_Property.cpp \
+SDO_Model_ReflectionDataObject.cpp \
+SDO_Sequence.cpp \
+sdo_utils.cpp"
+
+sdo_das_xml_srcs="xmldas_utils.cpp \
+SDO_DAS_XML.cpp \
+SDO_DAS_XML_Document.cpp"
 
 sdo_lib_srcs="commonj/sdo/ChangedDataObjectListImpl.cpp \
 commonj/sdo/ChangeSummary.cpp \
@@ -107,9 +122,12 @@ commonj/sdo/XSDHelperImpl.cpp \
 commonj/sdo/XSDPropertyInfo.cpp \
 commonj/sdo/XSDTypeInfo.cpp"
 
-PHP_NEW_EXTENSION(sdo, sdo.cpp SDO_CPPException.cpp SDO_DAS_ChangeSummary.cpp SDO_DAS_DataFactory.cpp SDO_DAS_Setting.cpp SDO_DataObject.cpp SDO_Exception.cpp SDO_List.cpp SDO_Model_Type.cpp SDO_Model_Property.cpp SDO_Model_ReflectionDataObject.cpp SDO_Sequence.cpp sdo_utils.cpp $sdo_lib_srcs, $ext_shared,,-I@ext_srcdir@)
+dnl The final parameter tells the build system to use the CXX linker
+PHP_NEW_EXTENSION(sdo, $sdo_srcs $sdo_das_xml_srcs $sdo_lib_srcs, $ext_shared,, -I@ext_srcdir@, 1)
 PHP_ADD_BUILD_DIR($ext_builddir/commonj/sdo)
 
-PHP_NEW_EXTENSION(sdo_das_xml, das_xml.cpp xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp, $ext_shared,,-I@ext_srcdir@)
-PHP_ADD_EXTENSION_DEP(sdo_das_xml, sdo)
+PHP_ADD_EXTENSION_DEP(sdo, libxml)
+PHP_ADD_EXTENSION_DEP(sdo, spl)
+PHP_ADD_EXTENSION_DEP(sdo, Reflection)
+
 fi

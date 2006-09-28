@@ -44,92 +44,92 @@ require_once 'SDO/DAS/Relational/ContainmentReference.php';
 
 class SDO_DAS_Relational_ContainmentReferencesModel {
 
-	private $full_set_containment_references = array(); 	// Full set of SDO_DAS_Relational_ContainmentReference
-	private $active_containment_references = array(); 	// Only those reachable from app_root_type
-	private $active_types; 			// potentially a subset of the full set of types - just those reachable from root
-	private $app_root_type;
+    private $full_set_containment_references = array();     // Full set of SDO_DAS_Relational_ContainmentReference
+    private $active_containment_references = array();   // Only those reachable from app_root_type
+    private $active_types;          // potentially a subset of the full set of types - just those reachable from root
+    private $app_root_type;
 
-	public function __construct($app_root_type, $containment_references_metadata)
-	{
-		assert(gettype($app_root_type) == 'string');
-		assert(gettype($containment_references_metadata) == 'array');
+    public function __construct($app_root_type, $containment_references_metadata)
+    {
+        assert(gettype($app_root_type) == 'string');
+        assert(gettype($containment_references_metadata) == 'array');
 
-		$this->app_root_type = $app_root_type;
+        $this->app_root_type = $app_root_type;
 
-		foreach ($containment_references_metadata as $cref) {
-			$this->full_set_containment_references[] = new SDO_DAS_Relational_ContainmentReference($cref);
-		}
+        foreach ($containment_references_metadata as $cref) {
+            $this->full_set_containment_references[] = new SDO_DAS_Relational_ContainmentReference($cref);
+        }
 
-		$reachable_types_already_visited = array();
-		$reachable_types_still_to_check = array($app_root_type);
-		$references_traversed = array();
-		while (count($reachable_types_still_to_check) > 0) {
-			$type = array_shift($reachable_types_still_to_check);
-			if (in_array($type, $reachable_types_already_visited)) {
-				throw new SDO_DAS_Relational_Exception('A cycle was found within the containment references: table ' . $type . ' was reachable by more than one way from ' . $app_root_type . '. This is not valid. The containment references must form a tree.');
-			}
-			$reachable_types_already_visited[] = $type;
-			foreach ($this->full_set_containment_references as $ref) {
-				if ($type == $ref->getParentName() ) {
-					$references_traversed[] = $ref;
-					$reachable_types_still_to_check[] = $ref->getChildName();
-				}
-			}
-		}
-		$this->active_types = $reachable_types_already_visited;
-		$this->active_containment_references = $references_traversed;
-	}
+        $reachable_types_already_visited = array();
+        $reachable_types_still_to_check = array($app_root_type);
+        $references_traversed = array();
+        while (count($reachable_types_still_to_check) > 0) {
+            $type = array_shift($reachable_types_still_to_check);
+            if (in_array($type, $reachable_types_already_visited)) {
+                throw new SDO_DAS_Relational_Exception('A cycle was found within the containment references: table ' . $type . ' was reachable by more than one way from ' . $app_root_type . '. This is not valid. The containment references must form a tree.');
+            }
+            $reachable_types_already_visited[] = $type;
+            foreach ($this->full_set_containment_references as $ref) {
+                if ($type == $ref->getParentName() ) {
+                    $references_traversed[] = $ref;
+                    $reachable_types_still_to_check[] = $ref->getChildName();
+                }
+            }
+        }
+        $this->active_types = $reachable_types_already_visited;
+        $this->active_containment_references = $references_traversed;
+    }
 
-	public function getActiveContainmentReferences()
-	{
-		return $this->active_containment_references;
-	}
+    public function getActiveContainmentReferences()
+    {
+        return $this->active_containment_references;
+    }
 
-	public function getFullSetContainmentReferences()
-	{
-		return $this->full_set_containment_references;
-	}
+    public function getFullSetContainmentReferences()
+    {
+        return $this->full_set_containment_references;
+    }
 
-	public function getActiveTypes()
-	{
-		return $this->active_types;
-	}
+    public function getActiveTypes()
+    {
+        return $this->active_types;
+    }
 
-	public function getApplicationRootType()
-	{
-		return $this->app_root_type;
-	}
+    public function getApplicationRootType()
+    {
+        return $this->app_root_type;
+    }
 
 
-	public function isValidParentName($name)
-	{
-		foreach ($this->active_containment_references as $ref) {
-			if ($name == $ref->getParentName()) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public function isValidParentName($name)
+    {
+        foreach ($this->active_containment_references as $ref) {
+            if ($name == $ref->getParentName()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public function getReferenceByParentAndChild($parent,$child)
-	{
-		foreach ($this->active_containment_references as $ref) {
-			if ($ref->getParentName() == $parent  && $ref->getChildName() == $child) {
-				return $ref;
-			}
-		}
-		return null;
-	}
+    public function getReferenceByParentAndChild($parent,$child)
+    {
+        foreach ($this->active_containment_references as $ref) {
+            if ($ref->getParentName() == $parent  && $ref->getChildName() == $child) {
+                return $ref;
+            }
+        }
+        return null;
+    }
 
-	public function getReferenceByChild($child)
-	{
-		foreach ($this->active_containment_references as $ref) {
-			if ($ref->getChildName() == $child) {
-				return $ref;
-			}
-		}
-		return null;
-	}
+    public function getReferenceByChild($child)
+    {
+        foreach ($this->active_containment_references as $ref) {
+            if ($ref->getChildName() == $child) {
+                return $ref;
+            }
+        }
+        return null;
+    }
 }
 
 ?>

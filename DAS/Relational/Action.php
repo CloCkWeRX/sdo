@@ -32,8 +32,8 @@ require_once 'SDO/DAS/Relational/DataObjectHelper.php';
 
 abstract class SDO_DAS_Relational_Action {
 
-	abstract function execute($dbh);
-	abstract function toString();
+    abstract function execute($dbh);
+    abstract function toString();
 
 }
 

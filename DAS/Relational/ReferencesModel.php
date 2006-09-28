@@ -29,77 +29,77 @@ $Id$
 
 class SDO_DAS_Relational_ReferencesModel {
 
-	private $references = array(); // Set of SDO_DAS_Relational_ContainmentReference
+    private $references = array(); // Set of SDO_DAS_Relational_ContainmentReference
 
-	public function __construct($SDO_references_metadata) 
-	{
-		foreach ($SDO_references_metadata as $rdef) {
-			$this->references[] = new SDO_DAS_Relational_ContainmentReference($rdef);
-		}
+    public function __construct($SDO_references_metadata) 
+    {
+        foreach ($SDO_references_metadata as $rdef) {
+            $this->references[] = new SDO_DAS_Relational_ContainmentReference($rdef);
+        }
 
-	}
-	
-	public function checkTableNamesAreValid(SDO_DAS_Relational_DatabaseModel $model) 
-	{
-		foreach ($this->references as $ref) {
-			$parent = $ref->getParentName();
-			$child =  $ref->getChildName();
-			if (!$model->isValidTableName($parent)  || !$model->isValidTableName($child)) {
-				throw new SDO_DAS_Relational_Exception('A reference specified a table name of ' . $parent . ' that was not specified in the database metadata');
-			}
-		}
+    }
+    
+    public function checkTableNamesAreValid(SDO_DAS_Relational_DatabaseModel $model) 
+    {
+        foreach ($this->references as $ref) {
+            $parent = $ref->getParentName();
+            $child =  $ref->getChildName();
+            if (!$model->isValidTableName($parent)  || !$model->isValidTableName($child)) {
+                throw new SDO_DAS_Relational_Exception('A reference specified a table name of ' . $parent . ' that was not specified in the database metadata');
+            }
+        }
 
-	}
-		
-	/**
-	* Check that each reference in the references model can be supported by a foreign key in the 
-	* database model.
-	*/
-	public function checkAgainstForeignKeys(SDO_DAS_Relational_DatabaseModel $model) 
-	{
-		foreach ($this->references as $ref) {
-			$parent = $ref->getParentName();
-			$child =  $ref->getChildName();
-			/**
-			* Now we look for a foreign key that suppports this parent-child relationship
-			* The foreign key we want will point from the child to the parent 
-			* (yes I did mean that, FKs go upwards when references go downwards)
-			* i.e. we want a FK where toTableName == our $parent and fromTableName == our $child
-			*/
-			$fk_list = $model->getForeignKeys();
-			$found = false;
-			foreach ($fk_list as $fk) {
-				if ($fk->getToTableName() == $parent && $fk->getFromTableName() == $child) {
-					$found = true;
-					break;
-				}
-			}
-			if (! $found) {
-				throw new SDO_DAS_Relational_Exception('No foreign key was found in the database model to support the reference with (parent => '.$parent. ', child => '. $child .')');
-			}
-		}
+    }
+        
+    /**
+    * Check that each reference in the references model can be supported by a foreign key in the 
+    * database model.
+    */
+    public function checkAgainstForeignKeys(SDO_DAS_Relational_DatabaseModel $model) 
+    {
+        foreach ($this->references as $ref) {
+            $parent = $ref->getParentName();
+            $child =  $ref->getChildName();
+            /**
+            * Now we look for a foreign key that suppports this parent-child relationship
+            * The foreign key we want will point from the child to the parent 
+            * (yes I did mean that, FKs go upwards when references go downwards)
+            * i.e. we want a FK where toTableName == our $parent and fromTableName == our $child
+            */
+            $fk_list = $model->getForeignKeys();
+            $found = false;
+            foreach ($fk_list as $fk) {
+                if ($fk->getToTableName() == $parent && $fk->getFromTableName() == $child) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (! $found) {
+                throw new SDO_DAS_Relational_Exception('No foreign key was found in the database model to support the reference with (parent => '.$parent. ', child => '. $child .')');
+            }
+        }
 
-	}
+    }
 
-	public function isValidParentName($name) 
-	{
-		foreach ($this->references as $ref) {
-			if ($name == $ref->getParentName()) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public function isValidParentName($name) 
+    {
+        foreach ($this->references as $ref) {
+            if ($name == $ref->getParentName()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public function getNeighbours($parent_name) 
-	{
-		foreach ($this->references as $ref) {
-			if ($parent_name == $ref->getParentName() ) {
-				$neighbours[] = $ref->getChildName();
-			}
-		}
-		return $neighbours;
-	}
+    public function getNeighbours($parent_name) 
+    {
+        foreach ($this->references as $ref) {
+            if ($parent_name == $ref->getParentName() ) {
+                $neighbours[] = $ref->getChildName();
+            }
+        }
+        return $neighbours;
+    }
 }
 
 ?>

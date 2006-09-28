@@ -29,29 +29,29 @@ $Id$
 
 class SDO_DAS_Relational_KeyObjectMap {
 
-	private $map;
-	
-	public function __construct() 
-	{
-		$this->map = array();
-	}
+    private $map;
+    
+    public function __construct() 
+    {
+        $this->map = array();
+    }
 
-	public function storeObjectByKeyAndType($do,$key,$type) 
-	{
-		$this->map[$type][$key] = $do;
-	}
+    public function storeObjectByKeyAndType($do,$key,$type) 
+    {
+        $this->map[$type][$key] = $do;
+    }
 
-	public function findObjectByKeyAndType($key, $type) 
-	{
-		if (array_key_exists($type,$this->map)) {
-			$key_map_for_type = $this->map[$type];
-			if (array_key_exists($key, $key_map_for_type)) {
-				$data_object = $key_map_for_type[$key];
-				return $data_object;
-			}
-		}
-		return null;
-	}
+    public function findObjectByKeyAndType($key, $type) 
+    {
+        if (array_key_exists($type, $this->map)) {
+            $key_map_for_type = $this->map[$type];
+            if (array_key_exists($key, $key_map_for_type)) {
+                $data_object = $key_map_for_type[$key];
+                return $data_object;
+            }
+        }
+        return null;
+    }
 }
 
 ?>

@@ -35,75 +35,75 @@ require_once 'SDO/DAS/Relational/PrimaryKey.php';
 
 class SDO_DAS_Relational_ContainmentReference {
 
-	// for the moment these instance variables are held exactly as the metadata. This may well change.
+    // for the moment these instance variables are held exactly as the metadata. This may well change.
 
-	private $parent;
-	private $child;
+    private $parent;
+    private $child;
 
-	public function __construct($ref_metadata)
-	{
+    public function __construct($ref_metadata)
+    {
 
-		/*
-		* Check metadata specifies a parent field
-		*/
-		if (array_key_exists('parent',$ref_metadata)){
-			$this->parent 	= $ref_metadata['parent'];
-		} else {
-			throw new SDO_DAS_Relational_Exception('The metadata for a reference did not contain a parent field.');
-		}
+        /*
+        * Check metadata specifies a parent field
+        */
+        if (array_key_exists('parent', $ref_metadata)){
+            $this->parent   = $ref_metadata['parent'];
+        } else {
+            throw new SDO_DAS_Relational_Exception('The metadata for a reference did not contain a parent field.');
+        }
 
-		/*
-		* Check parent is a string
-		*/
-		if (gettype($this->parent) != 'string'){
-			throw new SDO_DAS_Relational_Exception('The metadata for a reference specified a parent field ' . $this->parent . ' that was not a string.');
-		}
+        /*
+        * Check parent is a string
+        */
+        if (gettype($this->parent) != 'string'){
+            throw new SDO_DAS_Relational_Exception('The metadata for a reference specified a parent field ' . $this->parent . ' that was not a string.');
+        }
 
-		/*
-		* Check metadata specifies a child field
-		*/
-		if (array_key_exists('child',$ref_metadata)){
-			$this->child 	= $ref_metadata['child'];
-		} else {
-			throw new SDO_DAS_Relational_Exception('The metadata for a reference with parent field '.$this->parent.' did not contain a child field.');
-		}
+        /*
+        * Check metadata specifies a child field
+        */
+        if (array_key_exists('child', $ref_metadata)){
+            $this->child    = $ref_metadata['child'];
+        } else {
+            throw new SDO_DAS_Relational_Exception('The metadata for a reference with parent field '.$this->parent.' did not contain a child field.');
+        }
 
-		/*
-		* Check parent is a string
-		*/
-		if (gettype($this->child) != 'string'){
-			throw new SDO_DAS_Relational_Exception('The metadata for a reference specified a child field ' . $this->child . ' that was not a string.');
-		}
+        /*
+        * Check parent is a string
+        */
+        if (gettype($this->child) != 'string'){
+            throw new SDO_DAS_Relational_Exception('The metadata for a reference specified a child field ' . $this->child . ' that was not a string.');
+        }
 
-		/*
-		* Once everything else has passed, check we have only valid keys in the metadata
-		*/
-		$valid_keys = array('parent', 'child');
-		$supplied_keys = array_keys($ref_metadata);
+        /*
+        * Once everything else has passed, check we have only valid keys in the metadata
+        */
+        $valid_keys = array('parent', 'child');
+        $supplied_keys = array_keys($ref_metadata);
 
-		if (count(array_diff($supplied_keys, $valid_keys))) {
-			throw new SDO_DAS_Relational_Exception('The metadata for reference with parent field '.$this->parent.' contained an invalid key. The only valid keys are parent or child.');
-		}
+        if (count(array_diff($supplied_keys, $valid_keys))) {
+            throw new SDO_DAS_Relational_Exception('The metadata for reference with parent field '.$this->parent.' contained an invalid key. The only valid keys are parent or child.');
+        }
 
-	}
+    }
 
-	public function getParentName()
-	{
-		// for now return the name of the child
-		return $this->parent;
-	}
+    public function getParentName()
+    {
+        // for now return the name of the child
+        return $this->parent;
+    }
 
-	public function getChildName()
-	{
-		// for now return the name of the child
-		return $this->child;
-	}
+    public function getChildName()
+    {
+        // for now return the name of the child
+        return $this->child;
+    }
 
-	public function getReferenceName()
-	{
-		// for now return the name of the child. In due course might allow user to specify a name they prefer
-		return $this->child;
-	}
+    public function getReferenceName()
+    {
+        // for now return the name of the child. In due course might allow user to specify a name they prefer
+        return $this->child;
+    }
 
 }
 

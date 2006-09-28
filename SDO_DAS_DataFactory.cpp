@@ -63,6 +63,10 @@ static void sdo_das_df_object_free_storage(void *object TSRMLS_DC)
 
 	zend_hash_destroy(my_object->zo.properties);
 	FREE_HASHTABLE(my_object->zo.properties);
+	if (my_object->zo.guards) {
+	    zend_hash_destroy(my_object->zo.guards);
+	    FREE_HASHTABLE(my_object->zo.guards);
+	}
 
 	efree(object);
 }
@@ -74,16 +78,17 @@ static zend_object_value sdo_das_df_object_create(zend_class_entry *ce TSRMLS_DC
 {
 	zend_object_value retval;
 	zval *tmp; /* this must be passed to hash_copy, but doesn't seem to be used */
-	sdo_das_df_object *intern;
+	sdo_das_df_object *my_object;
 
-	intern = (sdo_das_df_object *)emalloc(sizeof(sdo_das_df_object));
-	memset(intern, 0, sizeof(sdo_das_df_object));
-	intern->zo.ce = ce;
-	ALLOC_HASHTABLE(intern->zo.properties);
-	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(intern->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
+	my_object = (sdo_das_df_object *)emalloc(sizeof(sdo_das_df_object));
+	memset(my_object, 0, sizeof(sdo_das_df_object));
+	my_object->zo.ce = ce;
+	my_object->zo.guards = NULL;
+	ALLOC_HASHTABLE(my_object->zo.properties);
+	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
 		(void *)&tmp, sizeof(zval *));
-	retval.handle = zend_objects_store_put(intern, NULL, sdo_das_df_object_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(my_object, NULL, sdo_das_df_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &sdo_das_df_object_handlers;
 
 	return retval;
@@ -161,9 +166,9 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, create)
 {
 	sdo_das_df_object *my_object;
 	char	*type_uri;
-	int		*type_uri_len;
+	int		 type_uri_len;
 	char	*type_name;
-	int		*type_name_len;
+	int		 type_name_len;
 
 	DataObjectPtr dop;
 

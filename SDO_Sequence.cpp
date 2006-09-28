@@ -233,7 +233,8 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
-		RETVAL_NULL();
+		efree(return_value);
+		return_value = EG(uninitialized_zval_ptr);
 	}
 
 	return return_value;
@@ -477,6 +478,7 @@ static zval *sdo_sequence_read_dimension(zval *object, zval *offset, int type TS
 		return_value = sdo_sequence_read_value(my_object, sequence_index TSRMLS_CC);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
+		return_value = EG(uninitialized_zval_ptr);
 	}
 
 	return return_value;
@@ -674,6 +676,7 @@ zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *obje
 zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 #endif
+
 	sdo_seq_iterator *iterator = (sdo_seq_iterator *)emalloc(sizeof(sdo_seq_iterator));
 	object->refcount++;
 	iterator->zoi.data = (void *)object;
@@ -688,8 +691,13 @@ zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *obje
  */
 static void sdo_sequence_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	/* nothing special to be done */
-	efree(iter);
+	sdo_seq_iterator *iterator = (sdo_seq_iterator *)iter;
+
+    if (iterator->zoi.data) { 
+		zval_ptr_dtor((zval **)&iterator->zoi.data);
+    }
+
+	efree(iterator);
 }
 /* }}} */
 
@@ -787,6 +795,12 @@ static void sdo_sequence_object_free_storage(void *object TSRMLS_DC)
 	my_object = (sdo_seq_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
 	FREE_HASHTABLE(my_object->zo.properties);
+	
+	if (my_object->zo.guards) {
+	    zend_hash_destroy(my_object->zo.guards);
+	    FREE_HASHTABLE(my_object->zo.guards);
+	}
+
 	my_object->seqp = NULL;
 	efree(object);
 
@@ -804,6 +818,7 @@ static zend_object_value sdo_sequence_object_create(zend_class_entry *ce TSRMLS_
 	my_object = (sdo_seq_object *)emalloc(sizeof(sdo_seq_object));
 	memset(my_object, 0, sizeof(sdo_seq_object));
 	my_object->zo.ce = ce;
+	my_object->zo.guards = NULL;
 	ALLOC_HASHTABLE(my_object->zo.properties);
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,

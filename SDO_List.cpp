@@ -90,6 +90,12 @@ static void sdo_list_object_free_storage(void *object TSRMLS_DC)
 	my_object = (sdo_list_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
 	FREE_HASHTABLE(my_object->zo.properties);
+
+	if (my_object->zo.guards) {
+	    zend_hash_destroy(my_object->zo.guards);
+	    FREE_HASHTABLE(my_object->zo.guards);
+	}
+
 	my_object->listp = NULL;
 	efree(object);
 }
@@ -106,6 +112,7 @@ static zend_object_value sdo_list_object_create(zend_class_entry *ce TSRMLS_DC)
 	my_object = (sdo_list_object *)emalloc(sizeof(sdo_list_object));
 	memset(my_object, 0, sizeof(sdo_list_object));
 	my_object->zo.ce = ce;
+	my_object->zo.guards = NULL;
 	ALLOC_HASHTABLE(my_object->zo.properties);
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
@@ -282,7 +289,8 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception (&e TSRMLS_CC);
-		RETVAL_NULL();
+		efree(return_value);
+		return_value = EG(uninitialized_zval_ptr);
 	}
 	return return_value;
 }
@@ -313,7 +321,8 @@ static zval *sdo_changeddataobjectlist_read_value(sdo_list_object *my_object, lo
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception (&e TSRMLS_CC);
-		RETVAL_NULL();
+		efree(return_value);
+		return_value = EG(uninitialized_zval_ptr);
 	}
 	return return_value;
 }
@@ -337,6 +346,8 @@ static zval *sdo_das_settinglist_read_value(sdo_list_object *my_object, long ind
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception (&e TSRMLS_CC);
+		efree(return_value);
+		return_value = EG(uninitialized_zval_ptr);
 	}
 	return return_value;
 }
@@ -710,7 +721,7 @@ static zval *sdo_list_read_dimension(zval *object, zval *offset, int type TSRMLS
 		class_name = get_active_class_name(&space TSRMLS_CC);
 		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, Z_TYPE_P(offset));
-		return 0;
+		return EG(uninitialized_zval_ptr);
 	}
 
 	index = Z_LVAL_P(offset);
@@ -730,6 +741,7 @@ static zval *sdo_list_read_dimension(zval *object, zval *offset, int type TSRMLS
 		class_name = get_active_class_name(&space TSRMLS_CC);
 		php_error(E_ERROR, "%s%s%s(): internal error (%i) - invalid dimension type %i",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, my_object->list_type);
+		return_value = EG(uninitialized_zval_ptr);
 	}
 
 	return return_value;
@@ -1086,6 +1098,7 @@ zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object, 
 zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 #endif
+
 	sdo_list_iterator *iterator = (sdo_list_iterator *)emalloc(sizeof(sdo_list_iterator));
 	object->refcount++;
 	iterator->zoi.data = (void *)object;
@@ -1100,8 +1113,13 @@ zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object T
  */
 static void sdo_list_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	/* nothing special to be done */
-	efree(iter);
+	sdo_list_iterator *iterator = (sdo_list_iterator *)iter;
+
+    if (iterator->zoi.data) { 
+		zval_ptr_dtor((zval **)&iterator->zoi.data);
+    }
+
+	efree(iterator);
 }
 /* }}} */
 

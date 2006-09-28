@@ -62,6 +62,12 @@ static void sdo_model_type_object_free_storage(void *object TSRMLS_DC)
 	my_object = (sdo_model_type_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
 	FREE_HASHTABLE(my_object->zo.properties);
+	
+	if (my_object->zo.guards) {
+	    zend_hash_destroy(my_object->zo.guards);
+	    FREE_HASHTABLE(my_object->zo.guards);
+	}
+
 	my_object->typep = NULL;
 	efree(my_object);
 
@@ -79,6 +85,7 @@ static zend_object_value sdo_model_type_object_create(zend_class_entry *ce TSRML
 	my_object = (sdo_model_type_object *)emalloc(sizeof(sdo_model_type_object));
 	memset(my_object, 0, sizeof(sdo_model_type_object));
 	my_object->zo.ce = ce;
+	my_object->zo.guards = NULL;
 	ALLOC_HASHTABLE(my_object->zo.properties);
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,

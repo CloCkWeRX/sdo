@@ -29,35 +29,35 @@ $Id$
 
 class SDO_DAS_Relational_NonContainmentReference {
 
-	// for the moment these instance variables are held exactly as the metadata. This may well change.
+    // for the moment these instance variables are held exactly as the metadata. This may well change.
 
-	private $type_name;
-	private $property_name;
-	private $to_type_name;
+    private $type_name;
+    private $property_name;
+    private $to_type_name;
 
-	public function __construct($type_name,$property_name,$to_type_name)
-	{
-		$this->type_name = $type_name;
-		$this->property_name = $property_name;
-		$this->to_type_name = $to_type_name;
-	}
+    public function __construct($type_name,$property_name,$to_type_name)
+    {
+        $this->type_name = $type_name;
+        $this->property_name = $property_name;
+        $this->to_type_name = $to_type_name;
+    }
 
-	public function getTypeName()
-	{
-		// for now return the name of the child
-		return $this->type_name;
-	}
+    public function getTypeName()
+    {
+        // for now return the name of the child
+        return $this->type_name;
+    }
 
-	public function getPropertyName()
-	{
-		// for now return the name of the child
-		return $this->property_name;
-	}
+    public function getPropertyName()
+    {
+        // for now return the name of the child
+        return $this->property_name;
+    }
 
-	public function getToTypeName()
-	{
-		return $this->to_type_name;
-	}
+    public function getToTypeName()
+    {
+        return $this->to_type_name;
+    }
 
 
 }

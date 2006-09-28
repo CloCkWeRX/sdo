@@ -50,12 +50,12 @@ class XMLDASTest extends PHPUnit2_Framework_TestCase {
 
 	public function setUp() {
 		// is the extension loaded ?
-		$loaded = extension_loaded('sdo_das_xml');
-		$this->assertTrue($loaded, 'sdo_das_xml extension is not loaded.');
+        $loaded = extension_loaded('sdo');
+        $this->assertTrue($loaded, 'sdo extension is not loaded.');
 
 
-		// are we using the matched extension version?
-		$version = phpversion('sdo_das_xml');
+        // are we using the matched extension version?
+        $version = phpversion('sdo');
 		$this->assertTrue(($version >= '0.7.0'), 'Incompatible version of sdo_das_xml extension.');
 
 		// We don''t want to force direct type comparison (e.g. we want (int)100 to be the same as "100")

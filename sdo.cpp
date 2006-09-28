@@ -40,6 +40,7 @@ static char rcs_id[] = "$Id$";
 #include "zend_interfaces.h"
 
 #include "php_sdo_int.h"
+#include "php_sdo_das_xml_int.h"
 
 /* {{{ zend_class_entry declarations
  */
@@ -365,23 +366,37 @@ PHP_SDO_API function_entry *sdo_exception_get_methods()
 }
 /* }}} */
 
+/* {{{ sdo_deps
+*/
+#if ZEND_MODULE_API_NO >= 20050922
+static zend_module_dep sdo_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("spl")
+	ZEND_MOD_REQUIRED("Reflection")
+    ZEND_MOD_CONFLICTS("sdo_das_xml")
+	{NULL, NULL, NULL}
+};
+#endif
+
 /* {{{ sdo_module_entry
 */
 zend_module_entry sdo_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
+#if ZEND_MODULE_API_NO >= 20050922
+    STANDARD_MODULE_HEADER_EX, 
+	NULL,
+    sdo_deps,
+#else
+    STANDARD_MODULE_HEADER,
 #endif
-		"sdo",
-		NULL, /* function list */
-		PHP_MINIT(sdo),
-		NULL, /* mshutdown */
-		NULL, /* rinit */
-		NULL, /* rshutdown */
-		PHP_MINFO(sdo),
-#if ZEND_MODULE_API_NO >= 20010901
-		SDO_VERSION,
-#endif
-		STANDARD_MODULE_PROPERTIES
+	"sdo",
+	NULL, /* function list */
+	PHP_MINIT(sdo),
+	NULL, /* mshutdown */
+	NULL, /* rinit */
+	NULL, /* rshutdown */
+	PHP_MINFO(sdo),
+	SDO_VERSION,
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -405,6 +420,16 @@ PHP_MINIT_FUNCTION(sdo)
 		SdoRuntime::getFix() < 4) {
 		php_error (E_ERROR, "SDO: incompatible versions of SDO extension and Tuscany SDO C++ library. Expected 00:09:0004, found %s",
 			SdoRuntime::getVersion());
+	}
+	
+	/*
+	 * The sdo_das_xml was formerly shipped as a separate extension.
+	 * Make sure the old extension is not loaded.
+	 * TODO remove this code when ZEND_MOD_CONFLICTS is better supported.
+	 */
+	if (zend_get_module_version("sdo_das_xml")) {
+		zend_error(E_CORE_WARNING, "Cannot load module sdo because conflicting module sdo_das_xml is already loaded");
+		return FAILURE;
 	}
 
 	REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", (char *)Type::SDOTypeNamespaceURI.c_str(), CONST_CS | CONST_PERSISTENT);
@@ -532,6 +557,13 @@ PHP_MINIT_FUNCTION(sdo)
 	/* class SDO_CPPException */
     INIT_CLASS_ENTRY(ce, "SDO_CPPException", sdo_cppexception_methods);
 	sdo_cppexception_minit(&ce TSRMLS_CC);
+
+	/* the SDO_DAS_XML classes */
+    sdo_das_xml_minit(TSRMLS_C);
+    sdo_das_xml_document_minit(TSRMLS_C);
+    sdo_das_xml_parserexception_minit(TSRMLS_C);
+    sdo_das_xml_fileexception_minit(TSRMLS_C);
+
    return SUCCESS;
 
 }
