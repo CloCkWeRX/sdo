@@ -17,66 +17,72 @@ rem | permissions and limitations under the License.                       |
 rem +----------------------------------------------------------------------+
 rem | Author: SL                                                           |
 rem +----------------------------------------------------------------------+
+rem $Id: runalltests.bat,v 1.2 2006-09-28 13:14:15 slaws Exp $
 
-rem ******************************************
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo This script runs all of the PHP SDO tests that can
+echo be run automatically. 
 echo You need to edit this script to set the 
 echo home directory of PHP and the path to the 
-echo directory holding the php.exe you are testing against
+echo directory holding the php.exe you are testing against.
+echo Go in and edit 
+echo PHP_HOME - the root directory for the php build
+echo PHP_BIN_HOME - the directory holding the binare to be tested
+
 set PHP_HOME=C:\simon\Projects\Tuscany\php\php-5.1.4
 set PHP_BIN_HOME=%PHP_HOME%\Debug_TS
 
-rem ******************************************
-rem set up som other environment variables based on the above
+echo You also need to ensure that the php 
+echo include path is set to include at least
+echo   - the directory holding the pear extensions
+echo   - your pecl build directory
+echo You can do this by setting include_path in 
+echo the php.ini file, for example, 
+echo    include_path=".;C:\php\php-5.1.4\pear;C:\php\pecl"
+
+rem set up some other environment variables based on the above
 set TEST_PHP_EXECUTABLE=%PHP_BIN_HOME%\php.exe
 set PHPUNIT_EXECUTABLE=%PHP_HOME%\phpunit.bat
 set PATH=%PHP_BIN_HOME%
 
-rem ******************************************
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo SDO Core Tests
 call %TEST_PHP_EXECUTABLE% %PHP_HOME%\run-tests.php tests
 
-rem ******************************************
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo Check that PHPUnit2 is installed 
 %TEST_PHP_EXECUTABLE% tests/SDOTestSetup.php
 
-rem ******************************************
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo SDO Core PHPUnit2 Tests
 cd tests
 call %PHPUNIT_EXECUTABLE% SDOAPITest SDOAPITest.php --log-xml SDOAIPITest.xml
 cd ..
 
-rem ******************************************
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo XML DAS PHPUnit2 Tests
 cd tests\XMLDAS\PHPUnitTests
 call %PHPUNIT_EXECUTABLE% XMLDASTest XMLDASTest.php
 cd ..\..\..
 
-rem ******************************************
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo Relational DAS PHPUnit2 Tests
 cd DAS\Relational\Tests
 call %PHPUNIT_EXECUTABLE% SDO_DAS_Relational_TestSuite TestSuite.php
 cd ..\..\..
 
-echo ===============================================================================
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo You may like to run the Relational samples now which 
 echo test the SDO Relational DAS against a real database. 
-echo This does however involve some manula setup of a 
-echo database first. You need to create a "company" database
-echo in either DB2 or MySQL. DDL files are provided for creating
-echo appropriate tables in the new database. See
-echo DAS\Relational\Scenarios\companydb_db2.sql for DB2
-echo DAS\Relational\Scenarios\companydb_mysql.sql for MySQL
-echo Once done you need to edit the file 
-echo DAS\Relational\Scenarios\company_metadata.inc.php
-echo ===============================================================================
+echo See DAS/Relational/Scenarios/README for details
 
-rem ******************************************
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo SDO Interop tests
 cd tests\interop
 call %TEST_PHP_EXECUTABLE% interop-xml.php
 cd ..\..
 
-echo ===============================================================================
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo You may like to run the relational interop tests now
 echo See the file tests\interop\README.txt under
 echo the test5 heading. 
