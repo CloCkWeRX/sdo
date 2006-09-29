@@ -79,17 +79,23 @@
 //. "- fix defect 7458\n"
 //. "- eliminate use of the C++ XMLDAS implementation\n"
 //. "- fix build errors with PHP 5.2\n", 
-       'notes' => "Compatibility with Tuscany C++/SDO M1 release and some bug fixes over 1.0.2\n"
-                . " - Update the base C++/SDO implementation to be the Tuscany CPP Milestone 1 release: cpp-0.1.incubating-M1\n"
-                . " - Tested with Linux AMD 64-bit architecture\n"
-                . " - new 3-argument version of SDO_DAS_XML::createDocument() allows an SDO_DAS_XML_Document to be created from an SDO\n"
-                . " - fix defect 7878 Silent failure with malformed SQL\n"
-                . " - fix defect 7879 Improve error message in SDO_DAS_Relational_DatabaseHelper:executeStatement\n"
-                . " - fix defect 8280 Remove spaces from source files\n"
-                . " - fix defect 8300 Optimistic concurrency failure\n"                
-                . " - fix defect 8374 Exception hierarchy (temporary fix)",
+//     'notes' => "Compatibility with Tuscany C++/SDO M1 release and some bug fixes over 1.0.2\n"
+//              . " - Update the base C++/SDO implementation to be the Tuscany CPP Milestone 1 release: cpp-0.1.incubating-M1\n"
+//              . " - Tested with Linux AMD 64-bit architecture\n"
+//              . " - new 3-argument version of SDO_DAS_XML::createDocument() allows an SDO_DAS_XML_Document to be created from an SDO\n"
+//              . " - fix defect 7878 Silent failure with malformed SQL\n"
+//              . " - fix defect 7879 Improve error message in SDO_DAS_Relational_DatabaseHelper:executeStatement\n"
+//              . " - fix defect 8280 Remove spaces from source files\n"
+//              . " - fix defect 8300 Optimistic concurrency failure\n"                
+//              . " - fix defect 8374 Exception hierarchy (temporary fix)",
+       'notes' => "Simplified build and install, updated Tuscany release, bug fixes\n"
+           . " - simplified the install by merging the sdo_das_xml library into the sdo core library: note you must remove sdo_das_xml from the extension list in your php.ini\n"
+           . " - fix bug #8493 WSDL with double elements\n"
+           . " - fixed several memory leaks, in iterator objects and others\n"
+           . " - update to Apache Tuscany C++ SDO revision level 433676\n"
+           . " - improved and extended the interoperability tests (see tests/interop in CVS)\n",
        'simpleoutput' => true,
-       'version' => '1.0.3',
+       'version' => '1.0.4',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
@@ -100,6 +106,7 @@
            'build/',
            'CVS/',
            'include/',
+           'interop/',
            'modules/',
            '.project',
            'acinclude.m4',

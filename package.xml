@@ -32,19 +32,16 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.0.3</version>
-  <date>2006-08-09</date>
+  <version>1.0.4</version>
+  <date>2006-09-29</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>Compatibility with Tuscany C++/SDO M1 release and some bug fixes over 1.0.2
- - Update the base C++/SDO implementation to be the Tuscany CPP Milestone 1 release: cpp-0.1.incubating-M1
- - Tested with Linux AMD 64-bit architecture
- - new 3-argument version of SDO_DAS_XML::createDocument() allows an SDO_DAS_XML_Document to be created from an SDO
- - fix defect 7878 Silent failure with malformed SQL
- - fix defect 7879 Improve error message in SDO_DAS_Relational_DatabaseHelper:executeStatement
- - fix defect 8280 Remove spaces from source files
- - fix defect 8300 Optimistic concurrency failure
- - fix defect 8374 Exception hierarchy (temporary fix)
+  <notes>Simplified build and install, updated Tuscany release, bug fixes
+ - simplified the install by merging the sdo_das_xml library into the sdo core library: note you must remove sdo_das_xml from the extension list in your php.ini
+ - fix bug #8493 WSDL with double elements
+ - fixed several memory leaks, in iterator objects and others
+ - update to Apache Tuscany C++ SDO revision level 433676
+ - improved and extended the interoperability tests (see tests/interop in CVS)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -249,6 +246,7 @@
        <file role="php" name="mc-R.php"/>
        <file role="php" name="mc-RD.php"/>
        <file role="php" name="mc-RU.php"/>
+       <file role="php" name="README"/>
        <file role="php" name="runAllScenarios.php"/>
       </dir> <!-- /DAS/Relational/Scenarios -->
       <dir name="Tests">
@@ -383,10 +381,12 @@
      <file role="test" name="004.phpt"/>
      <file role="test" name="005.phpt"/>
      <file role="test" name="006.phpt"/>
+     <file role="test" name="007.phpt"/>
      <file role="test" name="008.phpt"/>
      <file role="test" name="company.xml"/>
      <file role="test" name="company.xsd"/>
      <file role="test" name="SDOAPITest.php"/>
+     <file role="test" name="SDOTestSetup.php"/>
      <file role="test" name="test.inc"/>
     </dir> <!-- /tests -->
     <file role="src" name="CLA"/>
@@ -400,6 +400,8 @@
     <file role="src" name="php_sdo_das_xml_int.h"/>
     <file role="src" name="php_sdo_int.h"/>
     <file role="src" name="README"/>
+    <file role="src" name="runalltests.bat"/>
+    <file role="src" name="runalltests.sh"/>
     <file role="src" name="sdo.cpp"/>
     <file role="src" name="SDO_CPPException.cpp"/>
     <file role="src" name="SDO_DAS_ChangeSummary.cpp"/>
@@ -563,6 +565,19 @@ Minor improvements and fixes over 0.9.0.
  - fix defect 8280 Remove spaces from source files
  - fix defect 8300 Optimistic concurrency failure
  - fix defect 8374 Exception hierarchy (temporary fix)
+    </notes>
+   </release>
+   <release>
+    <version>1.0.4</version>
+    <date>2006-09-29</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>Simplified build and install, updated Tuscany release, bug fixes
+ - simplified the install by merging the sdo_das_xml library into the sdo core library: note you must remove sdo_das_xml from the extension list in your php.ini
+ - fix bug #8493 WSDL with double elements
+ - fixed several memory leaks, in iterator objects and others
+ - update to Apache Tuscany C++ SDO revision level 433676
+ - improved and extended the interoperability tests (see tests/interop in CVS)
     </notes>
    </release>
  </changelog>
