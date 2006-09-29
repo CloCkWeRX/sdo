@@ -29,8 +29,6 @@
 #include "TSRM.h"
 #endif
 
-#define SDO_DAS_XML_VERSION "1.0.3"
-
 #ifdef PHP_WIN32
 #define PHP_SDO_DAS_XML_API PHP_SDO_API
 #else
