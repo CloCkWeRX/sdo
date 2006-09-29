@@ -330,12 +330,17 @@ ZEND_END_ARG_INFO();
 function_entry sdo_model_reflectiondataobject_methods[] = {
     ZEND_ME(SDO_Model_ReflectionDataObject, __construct, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, __toString, 0, ZEND_ACC_PUBLIC)
-    /* ZEND_ME(SDO_Model_ReflectionDataObject, export, arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) */
+/*  ZEND_ME(SDO_Model_ReflectionDataObject, export, arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) */
     /* The above definition fails on some (but not all) platforms.
-     * The export method (and hence the entire class) gets defined as abstract.
-     * The variant below works round this.
+	 * For me, on Linux AMD_64 non-debug build, the export method (and 
+	 * hence the entire class) gets defined as abstract.
+     * The variants below works round this.
      */
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+    ZEND_FENTRY(export, ZEND_MN(SDO_Model_ReflectionDataObject_export), arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#else
     ZEND_FENTRY(export, ZEND_FN(SDO_Model_ReflectionDataObject_export), arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#endif
     ZEND_ME(SDO_Model_ReflectionDataObject, getType, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getInstanceProperties, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getContainmentProperty, 0, ZEND_ACC_PUBLIC)
