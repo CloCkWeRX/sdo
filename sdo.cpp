@@ -330,7 +330,12 @@ ZEND_END_ARG_INFO();
 function_entry sdo_model_reflectiondataobject_methods[] = {
     ZEND_ME(SDO_Model_ReflectionDataObject, __construct, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, __toString, 0, ZEND_ACC_PUBLIC)
-    ZEND_ME(SDO_Model_ReflectionDataObject, export, arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+    /* ZEND_ME(SDO_Model_ReflectionDataObject, export, arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) */
+    /* The above definition fails on some (but not all) platforms.
+     * The export method (and hence the entire class) gets defined as abstract.
+     * The variant below works round this.
+     */
+    ZEND_FENTRY(export, ZEND_FN(SDO_Model_ReflectionDataObject_export), arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getType, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getInstanceProperties, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, getContainmentProperty, 0, ZEND_ACC_PUBLIC)
@@ -377,6 +382,7 @@ static zend_module_dep sdo_deps[] = {
 	{NULL, NULL, NULL}
 };
 #endif
+/* }}} */
 
 /* {{{ sdo_module_entry
 */
@@ -418,7 +424,7 @@ PHP_MINIT_FUNCTION(sdo)
 	if (SdoRuntime::getMajor() != 0 ||
 		SdoRuntime::getMinor() != 9 ||
 		SdoRuntime::getFix() < 4) {
-		php_error (E_ERROR, "SDO: incompatible versions of SDO extension and Tuscany SDO C++ library. Expected 00:09:0004, found %s",
+		php_error (E_WARNING, "SDO: incompatible versions of SDO extension and Tuscany SDO C++ library. Expected 00:09:0004, found %s",
 			SdoRuntime::getVersion());
 	}
 	
@@ -428,7 +434,7 @@ PHP_MINIT_FUNCTION(sdo)
 	 * TODO remove this code when ZEND_MOD_CONFLICTS is better supported.
 	 */
 	if (zend_get_module_version("sdo_das_xml")) {
-		zend_error(E_CORE_WARNING, "Cannot load module sdo because conflicting module sdo_das_xml is already loaded");
+		php_error(E_ERROR, "Cannot load module sdo because obsolete conflicting module sdo_das_xml is already loaded. Remove sdo_das_xml from you php.ini.");
 		return FAILURE;
 	}
 
