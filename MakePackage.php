@@ -8,7 +8,7 @@
     }
     $e = $packagexml->setOptions(
       array(
-       'package' => 'sdo',
+       'package' => 'SDO',
        'summary' => 'Service Data Objects (SDOs) for PHP',
        'description' => 
             'Service Data Objects (SDOs) enable PHP applications to work with data from different sources ' .
