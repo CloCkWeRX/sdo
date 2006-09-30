@@ -63,11 +63,11 @@ Where
 
 You may like to run the Relational samples now which 
 test the SDO Relational DAS against a real database. 
-echo This does however involve some manula setup of a 
-echo database first. You need to create a "company" database
-echo in either DB2 or MySQL. DDL files are provided for creating
-echo appropriate tables in the new database. See
-echo  for DB2
-echo  for MySQL
-echo Once done you need to edit the file 
-echo DAS\Relational\Scenarios\company_metadata.inc.php
+This does however involve some manual setup of a 
+database first. You need to create a "company" database
+in either DB2 or MySQL. DDL files are provided for creating
+appropriate tables in the new database. See
+ companydb_db2.sql for DB2
+ companydb_mysql.sql for MySQL
+Once done you need to edit the file 
+DAS\Relational\Scenarios\company_metadata.inc.php
