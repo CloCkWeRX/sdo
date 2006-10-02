@@ -1,0 +1,28 @@
+The ajax-rss scenario
+=====================
+
+This very simple scenario allows the user to step through the items of a 
+specified RSS feed. In the process we show show how SDO can be used in AJAX type 
+applications, i.e. applications that use features such as the Javascript
+XMLHttpRequest to interact directly with a server without reloading the 
+entire page in the web browser. 
+
+The sample application shows a welcome page (welcome.php) that allows the
+user to enter the url of an RSS feed. A "Get Item" button uses  
+XMLHttpRequest to ask the server (sdoajax.php) to return the first item 
+in the RSS feed. 
+
+The server (sdoajax.php) uses SDO to read the RSS feed and to find the first item.
+If there is an item the SDO representing the ite it is converted into JSON format 
+and is returned to the browser. This JSON formatted notation is then shown in the 
+browserand appears as the strange text you should see below the "Get Item" button.
+
+Pressing the "Get Item" button again takes the JSON form of the RSS feed item
+as displayed and passes it back to the server where it is converted back into 
+an SDO and is compared against the RSS feed to find the next item
+to display. 
+
+This is a fairly useless application. It would be much better to show all the 
+items at once. However it is contrived to allow us to show how SDOs can be converted
+from and to JSON formatted messages and hence used to power an AJAX style 
+application. 
