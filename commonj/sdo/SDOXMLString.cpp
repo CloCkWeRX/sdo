@@ -27,32 +27,32 @@ namespace commonj
 {
     namespace sdo
     {
-        
+
         SDOXMLString::SDOXMLString()
             : xmlForm(0)
         {
         }
-        
+
         SDOXMLString::SDOXMLString(const xmlChar* xmlString)
         {
             xmlForm = xmlStrdup(xmlString);
         }
-        
+
         SDOXMLString::SDOXMLString(const char* localString)
         {
             xmlForm = xmlCharStrdup(localString);
         }
-        
+
         SDOXMLString::SDOXMLString(const SDOXMLString& str)
         {
             xmlForm = xmlStrdup(str.xmlForm);
         }
-        
+
         SDOXMLString::SDOXMLString(const xmlChar* str, int start, int len)
         {
             xmlForm = xmlStrsub(str, start, len);
         }
-        
+
         SDOXMLString& SDOXMLString::operator=(const SDOXMLString& str)
         {
             if (this != &str)
@@ -77,18 +77,18 @@ namespace commonj
             xmlForm = xmlStrncat(xmlForm, str.xmlForm, xmlStrlen(str.xmlForm));
             return *this;
         }
-        
+
         SDOXMLString::~SDOXMLString()
         {
             release();
         }
-        
+
         void SDOXMLString::release()
         {
             if (xmlForm)
                 xmlFree((void*)xmlForm);
         }
-        
+
         bool SDOXMLString::operator< (const SDOXMLString& str) const
         {
             if (xmlStrcmp(xmlForm, str.xmlForm) <0)
@@ -96,7 +96,7 @@ namespace commonj
             else
                 return false;
         }
-        
+
         bool SDOXMLString::operator==(const SDOXMLString& str) const
         {
             if (xmlStrEqual(xmlForm, str.xmlForm))
@@ -109,12 +109,12 @@ namespace commonj
         {
             return equals(str.xmlForm);
         }
-        
+
         bool SDOXMLString::equals(const char* localString) const
         {
             return equals(SDOXMLString(localString));
         }
-        
+
 
         bool SDOXMLString::equals(const xmlChar* xmlString) const
         {
@@ -123,17 +123,17 @@ namespace commonj
             else
                 return false;
         }
-        
+
         bool SDOXMLString::equalsIgnoreCase(const SDOXMLString& str) const
         {
             return equalsIgnoreCase(str.xmlForm);
         }
-        
+
         bool SDOXMLString::equalsIgnoreCase(const char* localString) const
         {
             return equalsIgnoreCase(SDOXMLString(localString));
         }
-        
+
 
         bool SDOXMLString::equalsIgnoreCase(const xmlChar* xmlString) const
         {
@@ -142,15 +142,15 @@ namespace commonj
             else
                 return false;
         }
-        
-        
+
+
         std::ostream& operator<<(std::ostream& output, const SDOXMLString& str)
         {
             if (str.xmlForm)
                 output << str.xmlForm;
             return output;
         }
-        
+
         bool SDOXMLString::isNull() const
         {
             if (xmlForm)
@@ -179,10 +179,10 @@ namespace commonj
             {
                 return -1;
             }
-            
+
             return int(loc-xmlForm);
         }
-        
+
         int SDOXMLString::lastIndexOf(const char ch) const
         {
             const xmlChar* index = 0;
@@ -192,30 +192,30 @@ namespace commonj
                 index = loc;
                 loc = xmlStrchr(loc+1, ch);
             }
-            
+
             if (index == 0)
                 return -1;
 
             return int(index-xmlForm);
         }
-        
+
         SDOXMLString SDOXMLString::substring(int start, int length) const
         {
             if (length >0)
             {
-                return xmlStrsub(xmlForm, start, length);
+                return SDOXMLString(xmlForm, start, length);
             }
             else
                 return SDOXMLString();
         }
-        
+
         SDOXMLString SDOXMLString::substring(int start) const
         {
-            
-            return xmlStrsub(xmlForm, start, xmlStrlen(xmlForm) - start);
+
+            return SDOXMLString(xmlForm, start, xmlStrlen(xmlForm) - start);
         }
-        
-        
+
+
     } // End - namespace sdo
 } // End - namespace commonj
 
