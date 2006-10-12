@@ -153,6 +153,8 @@ void sdo_das_xml_object_free_storage(void *object TSRMLS_DC)
 	    FREE_HASHTABLE(xmldas->zo.guards);
 	}
 
+	xmldas->xmlHelperPtr = NULL;
+	xmldas->xsdHelperPtr = NULL;
 	zval_dtor(&xmldas->z_df);
     efree(xmldas);
 }

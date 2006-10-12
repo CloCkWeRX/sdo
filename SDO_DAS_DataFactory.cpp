@@ -67,7 +67,7 @@ static void sdo_das_df_object_free_storage(void *object TSRMLS_DC)
 	    zend_hash_destroy(my_object->zo.guards);
 	    FREE_HASHTABLE(my_object->zo.guards);
 	}
-
+	my_object->dfp = NULL;
 	efree(object);
 }
 /* }}} */
