@@ -229,7 +229,7 @@ static int sdo_das_xml_cast_object(zval *readobj, zval *writeobj, int type, int 
 		
 		print_buf << indent << "}";
 		
-		string print_string = print_buf.str();
+		std::string print_string = print_buf.str();
 		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
 		
 	} catch (SDORuntimeException e) {
@@ -334,7 +334,7 @@ PHP_METHOD(SDO_DAS_XML, create)
 				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
 					print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix) << endl;
 				}
-				string print_string = print_buf.str();
+				std::string print_string = print_buf.str();
 				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
 				exception_thrown = true;
 	        }            
@@ -408,7 +408,7 @@ PHP_METHOD(SDO_DAS_XML, addTypes)
 			for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
 				print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix) << endl;
 			}
-			string print_string = print_buf.str();
+			std::string print_string = print_buf.str();
 			sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
 	        RETURN_NULL();
         }            
@@ -499,7 +499,7 @@ PHP_METHOD(SDO_DAS_XML, loadFile)
 				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
 					print_buf << error_ix + 1 << ". " << xmldas->xmlHelperPtr->getErrorMessage(error_ix) << endl;
 				}
-				string print_string = print_buf.str();
+				std::string print_string = print_buf.str();
 				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
 		        RETURN_NULL();
             }
@@ -576,7 +576,7 @@ PHP_METHOD(SDO_DAS_XML, loadString)
 		
         try {
             istringstream str((const char *)xml_string);
-            xmldocument->xmlDocumentPtr = xmldas->xmlHelperPtr->load(str);
+            xmldocument->xmlDocumentPtr = xmldas->xmlHelperPtr->load(str, NULL);
             int error_count = xmldas->xmlHelperPtr->getErrorCount();
             if ((error_count > 0) ||
 				(!xmldocument->xmlDocumentPtr) || 
@@ -593,7 +593,7 @@ PHP_METHOD(SDO_DAS_XML, loadString)
 				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
 					print_buf << error_ix + 1 << ". " << xmldas->xmlHelperPtr->getErrorMessage(error_ix) << endl;
 				}
-				string print_string = print_buf.str();
+				std::string print_string = print_buf.str();
 				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
 				RETURN_NULL();
             }

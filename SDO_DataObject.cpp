@@ -878,7 +878,7 @@ static int sdo_do_cast_object(zval *readobj, zval *writeobj, int type, int shoul
 		}
 
 		print_buf << '}';
-		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
+		std::string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
 		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);
 
 	} catch (SDORuntimeException e) {
@@ -1109,7 +1109,7 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
         XSDHelperPtr xsdhp = HelperProvider::getXSDHelper(dfp);
   		XMLHelperPtr xmlhp = HelperProvider::getXMLHelper(dfp);
 		/* create an XML representation of the model */
-		serialized_model = xsdhp->generate(dfp->getTypes());
+		serialized_model = xsdhp->generate(dfp->getTypes(), NULL);
 		model_length = strlen(serialized_model);
 
 		/* serialize the data graph to an unformatted string */

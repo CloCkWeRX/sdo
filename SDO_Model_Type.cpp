@@ -221,7 +221,7 @@ static int sdo_model_type_cast_object(zval *readobj, zval *writeobj, int type, i
 	
 	try {		
 		sdo_model_type_string (print_buf, my_object->typep, "\n" TSRMLS_CC);
-		string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
+		std::string print_string = print_buf.str()/*.substr(0, SDO_TOSTRING_MAX)*/;
 		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);						
 	} catch (SDORuntimeException e) {
 		ZVAL_NULL(writeobj);

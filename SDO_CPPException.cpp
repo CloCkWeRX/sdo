@@ -201,7 +201,7 @@ void sdo_cppexception_new(zval *me, SDORuntimeException *cpp_exception TSRMLS_DC
 	long severity;
 
 	ostringstream print_buf;
-	string print_string;
+	std::string print_string;
 
 	switch(cpp_exception->getSeverity()) {
 	case SDORuntimeException::Normal:
