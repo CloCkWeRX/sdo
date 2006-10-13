@@ -83,9 +83,8 @@ void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC)
 	}
 
     if (xmldocument->xmlDocumentPtr) {
-         delete xmldocument->xmlDocumentPtr;
+         xmldocument->xmlDocumentPtr = NULL;
     }
-	xmldocument->xmlDocumentPtr = NULL;
     efree(xmldocument);
 }
 /* }}} */
