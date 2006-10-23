@@ -180,8 +180,8 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
             $reflection = new SDO_Model_ReflectionDataObject($sdo);
             $sdo_type   = $reflection->getType(); 
 
-            $last = end($sdo);
-            reset($sdo);
+            $sdo_size = $this->_count($sdo);
+            $i        = 0;
             foreach ( $sdo as $property_name => $property_value ) {
                 $json_string .= "\"" . $property_name . "\":";
 
@@ -244,8 +244,9 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
                     // it's a primitive type
                     $this->_encodePrimitiveFromSDO($property_value, $json_string, $sdo_property_type_name);
                 }
-                
-                if ( $property_value != $last ) {
+
+                $i++;
+                if ( $i < $sdo_size ) {
                     $json_string .= ",";
                 }
             }
@@ -255,26 +256,27 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
         
         private function _encodeArrayFromSDO ( $sdo, &$json_string, $sdo_type )
         {
-            $json_string .= "[";   
+            $json_string .= "[";
+
+            $sdo_size = $this->_count($sdo);
+            $i        = 0;
             
             if ( $sdo_type->isDataType() == true )
             {
                 // it's an array of primitives
-                $last = end($sdo);
-                reset($sdo);
                 foreach ( $sdo as $property_name => $property_value ) {
                     $this->_encodePrimitiveFromSDO($property_value, $json_string, $sdo_type);
-                    if ( $property_value != $last ) {
+                    $i++;
+                    if ( $i < $sdo_size ) {
                         $json_string .= ",";
                     }
                 }                
             } else {
                 // it's an array of objects
-                $last = end($sdo);
-                reset($sdo);
                 foreach ( $sdo as $property_name => $property_value ) {
                     $this->_encodeObjectFromSDO($property_value, $json_string);
-                     if ( $property_value != $last ) {
+                    $i++;
+                    if ( $i < $sdo_size ) {
                         $json_string .= ",";
                     }
                 }
@@ -295,7 +297,7 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
                     if ( $sdo == true ) {
                         $json_string .= "true";
                     } else {
-                        $json_string .= "true"; 
+                        $json_string .= "false"; 
                     }
                     break;
                 case "Byte":
@@ -324,7 +326,23 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
                     
                 // TODO - what to do about nulls
             }
-        }        
+        }  
+
+        /**
+         * Temporary count function because using the real count on an 
+         * SDO returns the number of properties in the model rather than
+         * in the data object
+         */
+        private function _count ( $array )
+        {        
+            $i = 0;
+            
+            foreach ( $array as $item ) {
+                $i++;
+            }
+            
+            return $i;
+        }
         
         public function __destruct()
         {
