@@ -174,100 +174,105 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
         
         private function _parseSmd($smd_string, $namespace_map)
         {
-            $smd       = json_decode($smd_string);
-            $smd_types = $smd->types;
-            
-            // iterate over the types adding types to the 
-            // SDO model
-            foreach ( $smd_types as $type ) {
-                $type_name = $type->name;
-                $namespace = $this->default_namespace;
+            $smd = json_decode($smd_string);
 
-                // look type up in namespace map
-                if ( $namespace_map != null &&
-                     array_key_exists( $type_name, $namespace_map) ) {
-                    $namespace = $namespace_map[$type_name];
-                }
-              
-                // TODO - debugging
-                echo "Add Type $namespace:$type_name\n";
-  
-                // create the type
-                // TODO - assuming they are all open types at
-                //        the moment as I can;t detect this from 
-                //        the SMD
-              
-                $this->data_factory->addType($namespace, 
-                                             $type_name, 
-                                             array('open'=>true));
-            }
-            
-            // iterate over the types adding properties to the types 
-            // that have already been created. This is a two pass
-            // process because the property type must exist before
-            // we create the property of that type
-            foreach ( $smd_types as $type ) {
-                $type_name = $type->name;
-                $namespace = $this->default_namespace;
-
-                // look type up in namespace map
-                if ( $namespace_map != null &&
-                     array_key_exists( $type_name, $namespace_map) ) {
-                    $namespace = $namespace_map[$type->name];
-                }            
+            // check if any types have been specified in the SMD file. 
+            // types will only appear if complex types are used
+            // simple types map directly to the SDO basic types
+            if ( isset($smd->types) ) {
+                $smd_types = $smd->types;
                 
-                // create the properties of the type
-                foreach ( $type->typedef->properties as $property ) {
-                    $property_name      = $property->name;
-                    $property_type      = $property->type;
-                    $property_namespace = $this->default_namespace;
-                    $is_array           = false;
+                // iterate over the types adding types to the 
+                // SDO model
+                foreach ( $smd_types as $type ) {
+                    $type_name = $type->name;
+                    $namespace = $this->default_namespace;
 
-                    
-                    // work out whether the property is many 
-                    // valued   
-                    $array_pos          = strpos($property_type, "[]");
-                                                         
-                    if ( $array_pos !== false ) { 
-                        // it is an array so strip out the array
-                        // markers
-                        $property_type = substr($property_type, 0, $array_pos);
-                        $is_array      = true;
-                    } 
-                    
-                    // strip and whitespace from begining and end of property type
-                    $property_type = trim($property_type);
-
-                    // if this is a primitive type then we need to
-                    // convert to the SDO primitive types
-                    $converted_property_type = $this->_smdTypeToSdoType($property_type);
-
-                    // fix up the namespace
-                    if ( $converted_property_type === $property_type ) {
-                        // the type name wasn't changed so it's a
-                        // complex type. Map the namespace to see 
-                        // if the user has told us what namespace this
-                        // typename should have               
-                        if ( $namespace_map != null &&
-                             array_key_exists($property_type, $namespace_map) ) {
-                            $property_namespace = $namespace_map[$property_type];
-                        }  
-                    } else {
-                        // its a primitive type so use the SDO namespace
-                        $property_namespace = $this->sdo_namespace;
+                    // look type up in namespace map
+                    if ( $namespace_map != null &&
+                         array_key_exists( $type_name, $namespace_map) ) {
+                        $namespace = $namespace_map[$type_name];
                     }
- 
+              
                     // TODO - debugging
-                    echo "Add Property $property_name of type $property_namespace:$converted_property_type many=$is_array to $namespace:$type_name\n";                    
-
-                    $this->data_factory->addPropertyToType($namespace,  
-                                                           $type_name, 
-                                                           $property_name,
-                                                           $property_namespace, 
-                                                           $converted_property_type, 
-                                                           array('containment'=>true,
-                                                                 'many'       =>$is_array) );
+                    //echo "Add Type $namespace:$type_name\n";
+  
+                    // create the type
+                    // TODO - assuming they are all open types at
+                    //        the moment as I can;t detect this from 
+                    //        the SMD
+              
+                    $this->data_factory->addType($namespace, 
+                                                 $type_name, 
+                                                 array('open'=>true));
                 }
+            
+                // iterate over the types adding properties to the types 
+                // that have already been created. This is a two pass
+                // process because the property type must exist before
+                // we create the property of that type
+                foreach ( $smd_types as $type ) {
+                    $type_name = $type->name;
+                    $namespace = $this->default_namespace;
+
+                    // look type up in namespace map
+                    if ( $namespace_map != null &&
+                         array_key_exists( $type_name, $namespace_map) ) {
+                        $namespace = $namespace_map[$type->name];
+                    }            
+                
+                    // create the properties of the type
+                    foreach ( $type->typedef->properties as $property ) {
+                        $property_name      = $property->name;
+                        $property_type      = $property->type;
+                        $property_namespace = $this->default_namespace;
+                        $is_array           = false;
+                    
+                        // work out whether the property is many 
+                        // valued   
+                        $array_pos          = strpos($property_type, "[]");
+                                                         
+                        if ( $array_pos !== false ) { 
+                            // it is an array so strip out the array
+                            // markers
+                            $property_type = substr($property_type, 0, $array_pos);
+                            $is_array      = true;
+                        } 
+                     
+                        // strip and whitespace from begining and end of property type
+                        $property_type = trim($property_type);
+
+                        // if this is a primitive type then we need to
+                        // convert to the SDO primitive types
+                        $converted_property_type = $this->_smdTypeToSdoType($property_type);
+
+                        // fix up the namespace
+                        if ( $converted_property_type === $property_type ) {
+                            // the type name wasn't changed so it's a
+                            // complex type. Map the namespace to see 
+                            // if the user has told us what namespace this
+                            // typename should have               
+                            if ( $namespace_map != null &&
+                                 array_key_exists($property_type, $namespace_map) ) {
+                                $property_namespace = $namespace_map[$property_type];
+                            }  
+                        } else {
+                            // its a primitive type so use the SDO namespace
+                            $property_namespace = $this->sdo_namespace;
+                        }
+ 
+                        // TODO - debugging
+                        //echo "Add Property $property_name of type $property_namespace:$converted_property_type many=$is_array to $namespace:$type_name\n";                    
+
+                        $this->data_factory->addPropertyToType($namespace,  
+                                                               $type_name, 
+                                                               $property_name,
+                                                               $property_namespace, 
+                                                               $converted_property_type, 
+                                                               array('containment'=>true,
+                                                                     'many'       =>$is_array) );
+                    }
+                }  
             }
         }
 
