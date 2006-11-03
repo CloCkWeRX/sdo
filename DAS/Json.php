@@ -678,7 +678,7 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
                 case "URI":
 
                 case "string":
-                    $json_string .= "\"" . $sdo . "\"";
+                    $json_string .= "\"" . addslashes($sdo) . "\"";
                     break; 
                 case "BigDecimal":
                 case "BigInteger":
