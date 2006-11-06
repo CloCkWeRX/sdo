@@ -635,7 +635,7 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
             {
                 // it's an array of primitives
                 foreach ( $sdo as $property_name => $property_value ) {
-                    $this->_encodePrimitiveFromSDO($property_value, $json_string, $sdo_type);
+                    $this->_encodePrimitiveFromSDO($property_value, $json_string, $sdo_type->getName());
                     $i++;
                     if ( $i < $sdo_size ) {
                         $json_string .= ",";
@@ -658,7 +658,7 @@ if ( ! class_exists('SDO_DAS_Json', false) ) {
         private function _encodePrimitiveFromSDO ( $sdo, &$json_string, $type_name )
         {
             // Note. both PHP and SDO primitive types are included here to 
-            //       cover the open type case where I can't predice from the 
+            //       cover the open type case where I can't predict from the 
             //       model what might have been added to the SDO
             switch ($type_name) {
                 case "Boolean":
