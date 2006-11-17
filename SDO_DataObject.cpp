@@ -1109,7 +1109,8 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
         XSDHelperPtr xsdhp = HelperProvider::getXSDHelper(dfp);
   		XMLHelperPtr xmlhp = HelperProvider::getXMLHelper(dfp);
 		/* create an XML representation of the model */
-		serialized_model = xsdhp->generate(dfp->getTypes(), NULL);
+		serialized_model = xsdhp->generate(dfp->getTypes(), 
+			my_object->dop->getType().getURI());
 		model_length = strlen(serialized_model);
 
 		/* serialize the data graph to an unformatted string */
@@ -1140,8 +1141,10 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
  */
 static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsigned char *buffer, zend_uint buffer_length, zend_unserialize_data *data TSRMLS_DC)
 {
-	char				*serialized_model;
-	char				*serialized_graph;
+	const char		*serialized_model;
+	const char		*serialized_graph;
+	char			*space;
+	char			*class_name;
 
 	/*
 	 * The serialized data comprises the model and the graph, both as null-terminated strings
@@ -1153,24 +1156,34 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 		DataFactoryPtr dfp = DataFactory::getDataFactory();
         XSDHelperPtr xsdhp = HelperProvider::getXSDHelper(dfp);
         XMLHelperPtr xmlhp = HelperProvider::getXMLHelper(dfp);
-
+		
 		/* Load the model from the serialized data */
 		xsdhp->define(serialized_model);
-
+		
 		/* Don't create a PHP object wrapper for the data factory.
-		 * The C++ library will hold on to it until its last data object
-		 * is deleted. A PHP wrapper will be instantiated lazily
-		 * on demand.
-		 */
-
+		* The C++ library will hold on to it until its last data object
+		* is deleted. A PHP wrapper will be instantiated lazily
+		* on demand.
+		*/
+		
 		/* Load the graph */
-		DataObjectPtr root_dop = xmlhp->load(serialized_graph)->getRootDataObject();
-
-		/* Create a PHP object fot the root. Other nodes will be created
-		 * lazily as required.
-		 */
-        sdo_do_new(*object, root_dop TSRMLS_CC);
-
+		XMLDocumentPtr doc = xmlhp->load(serialized_graph);
+		DataObjectPtr root_dop = doc->getRootDataObject();
+		if (root_dop) {			
+		   /* Create a PHP object fot the root. Other nodes will be created
+	        * lazily as required.
+			*/
+			sdo_do_new(*object, root_dop TSRMLS_CC);
+		} else {
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			sdo_throw_exception_ex (sdo_exception_class_entry, 0,0 TSRMLS_CC,
+				"%s%s%s(): unserialized document of type \"%s\":\"%s\" has no root data object",
+				class_name, space, get_active_function_name(TSRMLS_C),
+				doc->getRootElementURI(), doc->getRootElementName());
+			return FAILURE;
+			
+		}
+		
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		return FAILURE;
