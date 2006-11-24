@@ -11,7 +11,7 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns2="http://Component" xmlns:tns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns3="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://Component">
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns2="http://Component" xmlns:tns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns3="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://Component">
   <types>
     <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
       xmlns:ns0="http://www.test.com/info"
@@ -20,29 +20,29 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
       <xs:element name="reverse">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="in" type="xs:string" nillable="true"/>
+            <xs:element name="in" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="reverseResponse">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="reverseReturn" type="xs:string" nillable="true"/>
+            <xs:element name="reverseReturn" type="xs:string"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="add">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="person" type="ns0:person" nillable="true"/>
-            <xs:element name="phone" type="ns0:phone" nillable="true"/>
+            <xs:element name="person" type="ns0:person"/>
+            <xs:element name="phone" type="ns0:phone"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="addResponse">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="addReturn" type="ns0:person" nillable="true"/>
+            <xs:element name="addReturn" type="ns0:person"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -74,24 +74,24 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
   <binding name="ComponentBinding" type="tns2:ComponentPortType">
     <operation name="reverse">
       <input>
-        <tns3:body xsi:type="tBody" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" use="literal"/>
+        <body xsi:type="tns3:tBody" use="literal"/>
       </input>
       <output>
-        <tns3:body xsi:type="tBody" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" use="literal"/>
+        <body xsi:type="tns3:tBody" use="literal"/>
       </output>
-      <tns3:operation xsi:type="tOperation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" soapAction=""/>
+      <operation xsi:type="tns3:tOperation" soapAction=""/>
     </operation>
     <operation name="add">
       <input>
-        <tns3:body xsi:type="tBody" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" use="literal"/>
+        <body xsi:type="tns3:tBody" use="literal"/>
       </input>
       <output>
-        <tns3:body xsi:type="tBody" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" use="literal"/>
+        <body xsi:type="tns3:tBody" use="literal"/>
       </output>
-      <tns3:operation xsi:type="tOperation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" soapAction=""/>
+      <operation xsi:type="tns3:tOperation" soapAction=""/>
     </operation>
-    <tns3:binding xsi:type="tBinding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <binding xsi:type="tns3:tBinding" transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
   </binding>
   <service name="ComponentService">
     <port name="ComponentPort" binding="tns2:ComponentBinding">
-      <tns3:address xsi:type="tAddress" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      <address xsi:type="tns3:tAddress"
