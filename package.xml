@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.9">
- <name>SDO</name>
- <summary>Service Data Objects (SDOs) for PHP</summary>
- <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (like a database query, an XML file, or a spreadsheet) using a single interface.
+<package version="1.0" packagerversion="1.4.11">
+ <name>SCA_SDO</name>
+ <summary>Service Component Architecture (SCA) and Service Data Objects (SDO) for PHP</summary>
+ <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (like a database query, an XML file, or a spreadsheet) using a single interface. SCA for PHP allows a PHP programmer to write reusable components (classes) in PHP, which can be called either locally, or remotely via Web Services, with an identical interface.
  </description>
  <maintainers>
   <maintainer>
@@ -32,21 +32,86 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.0.4</version>
-  <date>2006-09-29</date>
+  <version>1.1.0</version>
+  <date>2006-11-24</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>Simplified build and install, updated Tuscany release, bug fixes
- - simplified the install by merging the sdo_das_xml library into the sdo core library: note you must remove sdo_das_xml from the extension list in your php.ini
- - fix bug #8493 WSDL with double elements
- - fixed several memory leaks, in iterator objects and others
- - update to Apache Tuscany C++ SDO revision level 433676
- - improved and extended the interoperability tests (see tests/interop in CVS)
+  <notes>This is the first release under the new project name SCA_SDO (renamed from SDO).
+The rename reflects the fact that this project now implements the Service Component Architecture (SCA)
+(see http://osoa.org/display/PHP/SCA+with+PHP for more information).
+The project&apos;s stable state refers to the SDO component.
+The SCA component is currently alpha quality and experimental.
+The main changes since 1.0.4 are:
+ - inclusion of the Service Component Architecture (SCA) component
+ - new PEAR packaging to install SCA and SDO as peer directories (PEAR/SCA and PEAR/SDO)
+ - update to Apache Tuscany C++ SDO revision level 478193
+ - new function in SDO_DAS_Relational to support multiple root data objects
+ - new function in SDO_DAS_XML to support CDATA sections (not yet complete)
+ - fixes for bugs #9287, #9289, #9339
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
   </deps>
   <filelist>
+    <dir name="SCA">
+     <dir name="Samples">
+      <dir name="SCAComponentCallingLocalSCAComponent">
+       <file role="php" name="HelloClient.php"/>
+       <file role="php" name="HelloService.php"/>
+       <file role="php" name="SurnameService.php"/>
+      </dir> <!-- /SCA/Samples/SCAComponentCallingLocalSCAComponent -->
+      <dir name="SCAComponentCallingRemoteSCAComponent">
+       <file role="php" name="HelloClient.php"/>
+       <file role="php" name="HelloService.php"/>
+       <file role="php" name="SurnameService.php"/>
+      </dir> <!-- /SCA/Samples/SCAComponentCallingRemoteSCAComponent -->
+      <dir name="SCAComponentUsingDataStructures">
+       <file role="php" name="BatchService.php"/>
+       <file role="php" name="HelloClient.php"/>
+       <file role="php" name="names.xsd"/>
+      </dir> <!-- /SCA/Samples/SCAComponentUsingDataStructures -->
+      <dir name="ScriptCallingLocalSCAComponent">
+       <file role="php" name="HelloClient.php"/>
+       <file role="php" name="HelloService.php"/>
+      </dir> <!-- /SCA/Samples/ScriptCallingLocalSCAComponent -->
+      <dir name="ScriptCallingRemoteSCAComponent">
+       <file role="php" name="HelloClient.php"/>
+       <file role="php" name="HelloService.php"/>
+      </dir> <!-- /SCA/Samples/ScriptCallingRemoteSCAComponent -->
+      <file role="php" name="index.html"/>
+     </dir> <!-- /SCA/Samples -->
+     <dir name="soap">
+      <file role="php" name="2003-02-11.xsd"/>
+     </dir> <!-- /SCA/soap -->
+     <dir name="tests">
+      <file role="test" name="001.phpt"/>
+      <file role="test" name="002.phpt"/>
+      <file role="test" name="003.phpt"/>
+      <file role="test" name="004.phpt"/>
+      <file role="test" name="Component.php"/>
+      <file role="test" name="Component.wsdl"/>
+      <file role="test" name="person.xsd"/>
+     </dir> <!-- /SCA/tests -->
+     <file role="php" name="2003-02-11.xsd"/>
+     <file role="php" name="CREDITS"/>
+     <file role="php" name="EXPERIMENTAL"/>
+     <file role="php" name="INSTALL"/>
+     <file role="php" name="README"/>
+     <file role="php" name="SCA.php"/>
+     <file role="php" name="SCA_AnnotationReader.php"/>
+     <file role="php" name="SCA_AnnotationRules.php"/>
+     <file role="php" name="SCA_CommentReader.php"/>
+     <file role="php" name="SCA_GenerateWsdl.php"/>
+     <file role="php" name="SCA_Helper.php"/>
+     <file role="php" name="SCA_LocalProxy.php"/>
+     <file role="php" name="SCA_Logger.php"/>
+     <file role="php" name="SCA_RuntimeException.php"/>
+     <file role="php" name="SCA_ServiceUnavailableException.php"/>
+     <file role="php" name="SCA_ServiceWrapper.php"/>
+     <file role="php" name="SCA_SoapProxy.php"/>
+     <file role="php" name="SDO_TypeHandler.php"/>
+     <file role="php" name="wsdl-all.xsd"/>
+    </dir> <!-- /SCA -->
    <dir name="/" baseinstalldir="SDO">
     <dir name="commonj">
      <dir name="sdo">
@@ -146,7 +211,6 @@
       <file role="src" name="SDOSchemaSAX2Parser.cpp"/>
       <file role="src" name="SDOSchemaSAX2Parser.h"/>
       <file role="src" name="SDOSPI.h"/>
-      <file role="src" name="SDOString.cpp"/>
       <file role="src" name="SDOString.h"/>
       <file role="src" name="SDOUtils.cpp"/>
       <file role="src" name="SDOUtils.h"/>
@@ -241,7 +305,7 @@
        <file role="php" name="1e-CRUD.php"/>
        <file role="php" name="companydb_db2.sql"/>
        <file role="php" name="companydb_mysql.sql"/>
-       <file role="php" name="company_metadata.inc.php"/>
+       <file role="php" name="company_metadata.inc.php-dist"/>
        <file role="php" name="mc-C.php"/>
        <file role="php" name="mc-R.php"/>
        <file role="php" name="mc-RD.php"/>
@@ -393,7 +457,6 @@
     <file role="src" name="config.m4"/>
     <file role="src" name="config.w32"/>
     <file role="src" name="CREDITS"/>
-    <file role="src" name="das_xml.cpp"/>
     <file role="src" name="INSTALL"/>
     <file role="src" name="php_sdo.h"/>
     <file role="src" name="php_sdo_das_xml.h"/>
@@ -578,6 +641,25 @@ Minor improvements and fixes over 0.9.0.
  - fixed several memory leaks, in iterator objects and others
  - update to Apache Tuscany C++ SDO revision level 433676
  - improved and extended the interoperability tests (see tests/interop in CVS)
+    </notes>
+   </release>
+   <release>
+    <version>1.1.0</version>
+    <date>2006-11-24</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>This is the first release under the new project name SCA_SDO (renamed from SDO).
+The rename reflects the fact that this project now implements the Service Component Architecture (SCA)
+(see http://osoa.org/display/PHP/SCA+with+PHP for more information).
+The project&apos;s stable state refers to the SDO component.
+The SCA component is currently alpha quality and experimental.
+The main changes since 1.0.4 are:
+ - inclusion of the Service Component Architecture (SCA) component
+ - new PEAR packaging to install SCA and SDO as peer directories (PEAR/SCA and PEAR/SDO)
+ - update to Apache Tuscany C++ SDO revision level 478193
+ - new function in SDO_DAS_Relational to support multiple root data objects
+ - new function in SDO_DAS_XML to support CDATA sections (not yet complete)
+ - fixes for bugs #9287, #9289, #9339
     </notes>
    </release>
  </changelog>

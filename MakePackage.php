@@ -154,17 +154,19 @@
            'package.xml',                      
            'php.ini',                  
                         // wildcards
+           'Copy of*',                        
            '*.la',
            '*.lo',
            '*~',
            '*.orig',
-           'sdo*tgz'
+           '*tgz'
          ),
      'dir_roles' => array(
          '/' => 'src',
          'scenarios' => 'test',
          'tests' => 'test', 
          'DAS' => 'php',
+         'SCA/tests' => 'test',
          'SCA' => 'php')       
      )
         
