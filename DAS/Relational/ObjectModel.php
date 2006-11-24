@@ -1,7 +1,7 @@
 <?php
 /* 
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| Copyright IBM Corporation 2005, 2006.                                |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -143,7 +143,8 @@ class SDO_DAS_Relational_ObjectModel {
     private function ensureTheApplicationRootTypeIsAValidTable() 
     {
         $app_root_type = $this->containment_references_model->getApplicationRootType();
-        if (!$this->database_model->isValidTableName($app_root_type)) {
+        if ( $app_root_type && 
+             !$this->database_model->isValidTableName($app_root_type)) {
             throw new SDO_DAS_Relational_Exception('Application root type ' . $app_root_type . ' does not appear as a table name in the database metadata');
         }
     }
@@ -180,8 +181,10 @@ class SDO_DAS_Relational_ObjectModel {
             echo "Building SDO model as follows:\n";
         }
         $this->defineTheRootTypeToSDO($data_factory);
-        $this->addAllTheActiveTypesToSDO($data_factory);
-        $this->addTopLevelContainmentPropertyToSDO($data_factory);
+        //$this->addAllTheActiveTypesToSDO($data_factory);
+        $this->addAllTypesToSDO($data_factory);
+        //$this->addTopLevelContainmentPropertyToSDO($data_factory);
+        $this->addTopLevelContainmentPropertiesToSDO($data_factory);
         $this->addAllTheColumnsAsPropertiesToSDO($data_factory);
     }
     
@@ -206,6 +209,17 @@ class SDO_DAS_Relational_ObjectModel {
         }
     }
     
+    private function addAllTypesToSDO($data_factory) 
+    {
+        $all_types = $this->database_model->getAllTableNames();
+        foreach ($all_types as $type) {
+            if (SDO_DAS_Relational::DEBUG_BUILD_SDO_MODEL) {
+                echo "adding type $type\n";
+            }
+            $data_factory->addType(SDO_DAS_Relational::APP_NAMESPACE, $type);
+        }
+    }    
+    
     private function addTopLevelContainmentPropertyToSDO($data_factory) 
     {
         $app_root_type = $this->containment_references_model->getApplicationRootType();
@@ -218,6 +232,23 @@ class SDO_DAS_Relational_ObjectModel {
             SDO_DAS_Relational::APP_NAMESPACE, $app_root_type,
             array('many' => true, 'containment' => true));
     }
+    
+    private function addTopLevelContainmentPropertiesToSDO($data_factory) 
+    {
+        $non_contained_types = $this->containment_references_model->getAllNonContainedTypes();
+        
+        foreach ( $non_contained_types  as $type ) {
+            if (SDO_DAS_Relational::DEBUG_BUILD_SDO_MODEL) {
+                echo "adding containment property $type to hidden root type\n";
+            }
+            
+            $data_factory->addPropertyToType(
+                SDO_DAS_Relational::DAS_NAMESPACE, SDO_DAS_Relational::DAS_ROOT_TYPE,
+                $type,
+                SDO_DAS_Relational::APP_NAMESPACE, $type,
+                array('many' => true, 'containment' => true));
+        }
+    }    
     
     private function addAllTheColumnsAsPropertiesToSDO($data_factory) 
     {
@@ -258,7 +289,7 @@ class SDO_DAS_Relational_ObjectModel {
         //      end for each this column
         // end for each active type
         //////////////////////////////////////////////////////////////////////////
-        $active_types = $this->containment_references_model->getActiveTypes();
+        $active_types = $this->containment_references_model->getActiveTypes();      
         foreach ($active_types as $type) {
             $table      = $this->database_model->getTableByName($type);
             $columns    = $table->getColumns();

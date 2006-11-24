@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 477891 $ $Date$ */
 
 #include "commonj/sdo/SDOSAX2Parser.h"
 
@@ -30,6 +32,7 @@
 #include "commonj/sdo/TypeImpl.h"
 #include "commonj/sdo/DataObjectImpl.h"
 #include "commonj/sdo/DataFactoryImpl.h"
+#include <stdio.h>
 using namespace std;
 
 namespace commonj
@@ -98,7 +101,7 @@ namespace commonj
                 try
                 {
                     const Type& type = refsIter->dataObject->getType();
-                    const Property& prop = refsIter->dataObject->getProperty(refsIter->property);
+                    const Property& prop = refsIter->dataObject->getProperty((const char*)refsIter->property);
                     const Type& propType =    ((TypeImpl&)type).getRealPropertyType(refsIter->property);
 
                     // Allowing referenes to DataObjects only
@@ -122,7 +125,7 @@ namespace commonj
                             //if (xpath.firstIndexOf('/') == 0)
                             //    xpath = xpath.substring(1);
 
-                            reffedDO = rootDataObject->getDataObject(refsIter->value);
+                            reffedDO = rootDataObject->getDataObject((const char*)refsIter->value);
                         }
 
                         if (!reffedDO)
@@ -173,7 +176,7 @@ namespace commonj
                 const Type& type = currentDataObject->getType();
                 // go lower level so we can find open properties w/o exception
                 DataObject* dob = currentDataObject;
-                const PropertyImpl* pprop = ((DataObjectImpl*)dob)->getPropertyImpl(propertyName);
+                const PropertyImpl* pprop = ((DataObjectImpl*)dob)->getPropertyImpl((const char*)propertyName);
                 if (pprop == 0)
                 {
 
@@ -192,11 +195,11 @@ namespace commonj
                 {
                     if (!property.isMany())
                     {
-                        currentDataObject->setDataObject(propertyName, newDO);
+                        currentDataObject->setDataObject((const char*)propertyName, newDO);
                     }
                     else
                     {
-                        DataObjectList& dol = currentDataObject->getList(propertyName);
+                        DataObjectList& dol = currentDataObject->getList((const char*)propertyName);
                         dol.append(newDO);
                     }
                 }
@@ -210,9 +213,9 @@ namespace commonj
                     
         void SDOSAX2Parser::handleOpenAttribute(
                                     SDOXMLString& tns,
-                                    const char* propuri,
-                                    const char* propname,
-                                    const char* value)
+                                    const SDOXMLString& propuri,
+                                    const SDOXMLString& propname,
+                                    const SDOXMLString& value)
         {
             // first, see if there is a global element or attribute corresponding...
             try 
@@ -246,7 +249,7 @@ namespace commonj
                     }
                     else
                     {
-                        currentDataObject->setCString(propname,value);
+                        currentDataObject->setCString((const char*)propname,value);
                     }
                     return;
                 }
@@ -301,7 +304,7 @@ namespace commonj
                 }
                 else
                 {
-                    currentDataObject->setCString(propname,value);
+                    currentDataObject->setCString((const char*)propname,value);
                 }
             }
             catch (SDORuntimeException)
@@ -339,9 +342,9 @@ namespace commonj
                             {
                                 // if its an open type, then attributes will be allowed to have 
                                 // an invalid name, and setCString will create them all as bytes
-                                handleOpenAttribute(tns, (const char*)attributes[i].getUri(),
-                                                            (const char*)attributes[i].getName(),
-                                                    (const char*)attributes[i].getValue());
+                                handleOpenAttribute(tns, attributes[i].getUri(),
+                                                            attributes[i].getName(),
+                                                    attributes[i].getValue());
                                 
                             }
                             else 
@@ -390,7 +393,7 @@ namespace commonj
                                     IDMap[propValue] = currentDataObject;
                                 }
                                 // Always set the property as a String. SDO will do the conversion
-                                currentDataObject->setCString(attributes[i].getName(), propValue);
+                                currentDataObject->setCString((const char*)attributes[i].getName(), propValue);
                             }
                         }
                     }
@@ -447,7 +450,7 @@ namespace commonj
                         // the type of the list needs to be set, as chars sets a CString
                         try 
                         {
-                            DataObjectList& dl = ((DataObjectImpl*)dob)->getList(propertyName);
+                            DataObjectList& dl = ((DataObjectImpl*)dob)->getList((const char*)propertyName);
                             ((DataObjectListImpl*)&dl)->setType(prop->getType().getURI(),
                                 prop->getType().getName());
                         }
@@ -474,7 +477,7 @@ namespace commonj
                             }
                             else
                             {
-                                DataObjectList& dol = dob->getList(propertyName);
+                                DataObjectList& dol = dob->getList((const char*)propertyName);
                                 dol.append(newDO);
                             }
                             setCurrentDataObject(newDO);
@@ -487,12 +490,12 @@ namespace commonj
                         switch (prop->getTypeEnum())
                         {
                             case Type::BooleanType:
-                                pprop = ((DataObjectImpl*)dob)->defineBoolean(propertyName);
+                                pprop = ((DataObjectImpl*)dob)->defineBoolean((const char*)propertyName);
                                 currentPropertySetting = PropertySetting(currentDataObject, propertyName,
                                     bToBeNull);
                                 break;
                             case Type::ByteType:
-                                pprop = ((DataObjectImpl*)dob)->defineByte(propertyName);
+                                pprop = ((DataObjectImpl*)dob)->defineByte((const char*)propertyName);
                                 currentPropertySetting = PropertySetting(currentDataObject, propertyName,
                                     bToBeNull);
                                 break;
@@ -555,7 +558,7 @@ namespace commonj
                                 }
                                 else
                                 {
-                                    dob->setDataObject(propertyName, newDO);
+                                    dob->setDataObject((const char*)propertyName, newDO);
                                 }
                                 setCurrentDataObject(newDO);
                                 setAttributes(tns,namespaces,attributes);
@@ -577,7 +580,7 @@ namespace commonj
                     if (!xsitypeName.isNull())
                     {
                         // it has a type from xsi:type
-                        newDO = dataFactory->create(xsitypeURI, xsitypeName);
+                        newDO = dataFactory->create((const char*)xsitypeURI, (const char*)xsitypeName);
                     }
                     else
                     {
@@ -592,7 +595,7 @@ namespace commonj
                     }
                     else
                     {
-                        DataObjectList& dol = dob->getList(propertyName);
+                        DataObjectList& dol = dob->getList((const char*)propertyName);
                         dol.append(newDO);
                     }
                     setCurrentDataObject(newDO);
@@ -628,6 +631,10 @@ namespace commonj
             {
                 documentNamespaces = namespaces;
                 setNamespaces = false;
+            }
+            else
+            {
+                documentNamespaces.merge(namespaces);
             }
             
             if (ignoreEvents)
@@ -786,6 +793,9 @@ namespace commonj
                 
                 SDOXMLString tns = URI;
                 
+                if (tns.isNull())
+                    tns = "";
+                
                 try
                 {
                     if (currentDataObject == 0)
@@ -829,12 +839,12 @@ namespace commonj
                         else
                         {
                             DataFactory* df = dataFactory;
-                            ((DataFactoryImpl*)df)->setRootElementName(localname);
+                            ((DataFactoryImpl*)df)->setRootElementName((const char*)localname);
                         }
                         
                         // NOTE: always creating DO doesn't cater for DataType as top element
 
-                        const Type& tp = dataFactory->getType(typeURI,typeName);
+                        const Type& tp = dataFactory->getType((const char*)typeURI,typeName);
                         if (tp.isDataType())
                         {
                             newDO = dataFactory->create(tns, "RootType");
@@ -866,7 +876,7 @@ namespace commonj
                         else
                         {
 
-                            newDO = dataFactory->create(typeURI, typeName);
+                            newDO = dataFactory->create((const char*)typeURI, (const char*)typeName);
 
                             // get the type definition, and see if its an extended primitive.
 
@@ -976,7 +986,7 @@ namespace commonj
                                     }
                                     else
                                     {
-                                        newDO = dataFactory->create(typeURI, typeName);
+                                        newDO = dataFactory->create((const char*)typeURI, (const char*)typeName);
                                     }
 
                                     XSDTypeInfo* typeInfo = (XSDTypeInfo*)
@@ -1169,13 +1179,13 @@ namespace commonj
                                 if (currentPropertySetting.dataObject->getType().isSequencedType())
                                 {
                                     SequencePtr seq = currentPropertySetting.dataObject->getSequence();
-                                    seq->addCString("value", currentPropertySetting.value);
+                                    seq->addCString("value", currentPropertySetting.getStringWithCDataMarkers().c_str());
                                 }
                                 else
                                 {
                                     DataObjectList& dl = currentPropertySetting.dataObject->
                                     getList((const char*)"value");
-                                    dl.append((const char*)currentPropertySetting.value);
+                                    dl.append((const char*)currentPropertySetting.getStringWithCDataMarkers().c_str());
                                 }
 
                             }
@@ -1185,12 +1195,13 @@ namespace commonj
                                 if (currentPropertySetting.dataObject->getType().isSequencedType())
                                 {
                                     SequencePtr seq = currentPropertySetting.dataObject->getSequence();
-                                    seq->addCString("value", currentPropertySetting.value);
+                                    seq->addCString("value", currentPropertySetting.getStringWithCDataMarkers().c_str());
                                 }
                                 else
                                 {
                                     currentPropertySetting.dataObject->
-                                    setCString((const char*)"value", currentPropertySetting.value );
+//                                    setCString((const char*)"value", currentPropertySetting.value );
+                                    setCString((const char*)"value", currentPropertySetting.getStringWithCDataMarkers().c_str() );
                                 }
                             }
                             if (dataObjectStack.size() == 0 || rootDataObject == dataObjectStack.top())
@@ -1221,7 +1232,7 @@ namespace commonj
                                 if (currentPropertySetting.dataObject->getType().isSequencedType())
                                 {
                                     SequencePtr seq = currentPropertySetting.dataObject->getSequence();
-                                    seq->addCString(currentPropertySetting.name, currentPropertySetting.value);
+                                    seq->addCString(currentPropertySetting.name, currentPropertySetting.getStringWithCDataMarkers().c_str());
                                 }
                                 // Always set the property as a String. SDO will do the conversion
 
@@ -1229,17 +1240,18 @@ namespace commonj
                                 // may throw SDOPropertyNotFoundException
                                 else {
                                     const Property& p = currentPropertySetting.dataObject->getProperty(
-                                    currentPropertySetting.name);
+                                        (const char*)currentPropertySetting.name);
                                     if (p.isMany())
                                     {
                                         DataObjectList& dl = currentPropertySetting.dataObject->
                                         getList((const char*)currentPropertySetting.name);
-                                        dl.append((const char*)currentPropertySetting.value);
+                                        dl.append((const char*)currentPropertySetting.getStringWithCDataMarkers().c_str());
                                     }
                                     else
                                     {
                                         currentPropertySetting.dataObject->
-                                        setCString((const char*)currentPropertySetting.name, currentPropertySetting.value );
+//                                        setCString((const char*)currentPropertySetting.name, currentPropertySetting.value );
+                                        setCString((const char*)currentPropertySetting.name, currentPropertySetting.getStringWithCDataMarkers().c_str() );
                                     }
                                 }
                             }

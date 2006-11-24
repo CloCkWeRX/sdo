@@ -1,7 +1,7 @@
 <?php
 /* 
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| Copyright IBM Corporation 2005, 2006.                                |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -48,20 +48,34 @@ class SDO_DAS_Relational_ContainmentReferencesModel {
     private $active_containment_references = array();   // Only those reachable from app_root_type
     private $active_types;          // potentially a subset of the full set of types - just those reachable from root
     private $app_root_type;
+    private $database_model;
 
-    public function __construct($app_root_type, $containment_references_metadata)
+    public function __construct($app_root_type, $containment_references_metadata, $database_model)
     {
-        assert(gettype($app_root_type) == 'string');
+        if ( $app_root_type != null ) {
+            assert(gettype($app_root_type) == 'string');
+        }
+        
         assert(gettype($containment_references_metadata) == 'array');
 
-        $this->app_root_type = $app_root_type;
+        $this->app_root_type  = $app_root_type;
+        $this->database_model = $database_model;
 
         foreach ($containment_references_metadata as $cref) {
             $this->full_set_containment_references[] = new SDO_DAS_Relational_ContainmentReference($cref);
         }
 
         $reachable_types_already_visited = array();
-        $reachable_types_still_to_check = array($app_root_type);
+        
+        // maintain app_root_type here for backward compatibility
+        if ( $app_root_type != null ) {
+            $reachable_types_still_to_check = array($app_root_type);
+        } else {
+            // we need to check all the types and find all of the ones for which no 
+            // containment references are specified
+            $reachable_types_still_to_check = $this->getAllNonContainedTypes();
+        }
+        
         $references_traversed = array();
         while (count($reachable_types_still_to_check) > 0) {
             $type = array_shift($reachable_types_still_to_check);
@@ -79,6 +93,7 @@ class SDO_DAS_Relational_ContainmentReferencesModel {
         $this->active_types = $reachable_types_already_visited;
         $this->active_containment_references = $references_traversed;
     }
+    
 
     public function getActiveContainmentReferences()
     {
@@ -129,6 +144,30 @@ class SDO_DAS_Relational_ContainmentReferencesModel {
             }
         }
         return null;
+    }
+    
+    public function getAllNonContainedTypes()
+    {
+        $non_contained_types = array();
+        $all_types = $this->database_model->getAllTableNames();
+        
+        // loop through all the types. If a type name doesn't appear
+        // as a child in the containment meta-data then the type 
+        // is non contained
+        foreach ( $all_types as $type ) {           
+            $contained = false;
+            foreach ( $this->full_set_containment_references as $ref ) {
+                if ( $ref->getChildName() == $type ) {
+                    $contained = true;
+                    break;
+                }
+            }
+            if ( $contained == false ) {
+                $non_contained_types[] = $type;
+            }
+        }
+        
+        return $non_contained_types;
     }
 }
 

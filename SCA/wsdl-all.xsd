@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>                                                           
+<!-- $Id $ -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+           targetNamespace="http://schemas.xmlsoap.org/wsdl/"
+           elementFormDefault="qualified" > 
+  <xs:include schemaLocation="2003-02-11.xsd"/> 
+  <xs:include schemaLocation="soap/2003-02-11.xsd"/>
+
+</xs:schema>

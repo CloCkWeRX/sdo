@@ -1,20 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
+/* $Rev: 452786 $ $Date$ */
 
 #include "commonj/sdo/TypeDefinition.h"
 #include "commonj/sdo/TypeDefinitionImpl.h"
@@ -62,6 +65,10 @@ namespace commonj
         {
             typedefinition->uri = inuri;
         }
+        void TypeDefinition::setUri(const SDOString& inuri) 
+        {
+            typedefinition->uri = inuri.c_str();
+        }
 
         const char * TypeDefinition::getUri() const
         {
@@ -72,6 +79,10 @@ namespace commonj
         void TypeDefinition::setName(const char * inname)
         {
             typedefinition->name = inname;
+        }
+        void TypeDefinition::setName(const SDOString& inname)
+        {
+            typedefinition->name = inname.c_str();
         }
 
         const char * TypeDefinition::getName() const
@@ -84,6 +95,10 @@ namespace commonj
         {
             typedefinition->localname = inname;
         }
+        void TypeDefinition::setLocalName(const SDOString& inname) 
+        {
+            typedefinition->localname = inname.c_str();
+        }
 
         const char * TypeDefinition::getLocalName() const
         {
@@ -94,6 +109,10 @@ namespace commonj
         void TypeDefinition::setAliases(const char * inaliases)
         {
             typedefinition->aliases = inaliases;
+        }
+        void TypeDefinition::setAliases(const SDOString& inaliases)
+        {
+            typedefinition->aliases = inaliases.c_str();
         }
         
         const char * TypeDefinition::getAliases() const
@@ -106,6 +125,14 @@ namespace commonj
         {
             typedefinition->parentTypeUri = uri;
             typedefinition->parentTypeName = name;
+            typedefinition->isRestriction = isrestriction;
+        }
+        void TypeDefinition::setParentType(const SDOString& uri,
+                                           const SDOString& name,
+                                           bool isrestriction)
+        {
+            typedefinition->parentTypeUri = uri.c_str();
+            typedefinition->parentTypeName = name.c_str();
             typedefinition->isRestriction = isrestriction;
         }
 
@@ -122,6 +149,10 @@ namespace commonj
         void TypeDefinition::setIDPropertyName(const char * idpropname)
         {
             typedefinition->IDPropertyName = idpropname;
+        }
+        void TypeDefinition::setIDPropertyName(const SDOString& idpropname)
+        {
+            typedefinition->IDPropertyName = idpropname.c_str();
         }
         
         const char * TypeDefinition::getIDPropertyName() const

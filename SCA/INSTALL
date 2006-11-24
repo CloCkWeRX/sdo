@@ -1,0 +1,36 @@
+$Id$
+
+Prerequisites
+=============
+
+The minimum required version of PHP is 5.2, with the soap extension enabled.
+
+SCA also requires the SDO extension version 1.0.4 or later.
+See http://pecl.php.net/sdo for details.
+
+If you just want to use local components, and do not wish to use the 
+Web Service bindings, then this version of SCA for PHP will also run with 
+PHP 5.1.6.
+
+
+Installation
+============
+
+Normally SCA will be installed into your PEAR directory as part of the
+install proces for the SCA_SDO package. Alternatively, you may check the
+latest source out of CVS into some other directory.
+
+Wherever you choose, you must ensure that PHP can access the SCA code, 
+by setting the include_path property in your php.ini acordingly. 
+Examples might be: 
+  include_path=C:\php5\pear 
+or
+  include_path=/usr/local/lib/php/PEAR
+  
+Now you should be able to include SCA in your php script, using
+  include "SCA/SCA.php";
+
+
+Help
+====
+If you have any problems, you are welcome to contact the authors.

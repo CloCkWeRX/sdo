@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 452786 $ $Date$ */
 
 #ifndef _TYPEIMPL_H_
 #define _TYPEIMPL_H_
@@ -157,7 +159,6 @@ public:
     const Property& getProperty(const SDOString& propertyName) const ;
     const Property& getProperty(unsigned int index)  const ;
 
-    PropertyImpl* getPropertyImpl(const char* propertyName) const ;
     PropertyImpl* getPropertyImpl(const SDOString& propertyName) const ;
     PropertyImpl* getPropertyImpl(unsigned int index)  const ;
     
@@ -169,8 +170,8 @@ public:
     PropertyImpl* getPropertyImplPure(const char* propertyName) const ;
 
     // get the type of the property even if its a substitute
-    const Type& getRealPropertyType(const char* propertyName) const ;
-    const TypeImpl* getRealPropertyTypeImpl(const char* propertyName) const ;
+    const Type& getRealPropertyType(const std::string& propertyName) const ;
+    const TypeImpl* getRealPropertyTypeImpl(const std::string& propertyName) const ;
 
 
 

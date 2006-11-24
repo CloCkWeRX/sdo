@@ -1,0 +1,35 @@
+$Id$
+
+SCA for PHP allows a PHP programmer to write reusable components,
+which can be called either locally, or remotely via Web services, with
+an identical interface and with a minimum of fuss.
+
+Developing a Web service is made simple by automatically generating
+WSDL as needed from annotations within the component script, and
+deploying a Web service is like deploying any other script. The
+annotations are a natural extension to those provided by
+phpDocumentor.
+  
+See INSTALL (in this directory) for installation instructions.
+
+The SOA PHP homepage is at http://www.osoa.org/display/PHP/SOA+PHP+Homepage.
+There you will find information about the SCA for PHP project, including
+documentation, examples, a wish list and so on.
+
+There is a Google mail list where you can ask questions, raise bugs, and make
+suggestions. Sign up via the SOA homepage.
+
+The design and implementation of Service Component Architecture for
+PHP is currently "work-in-progress". This is the first time
+the technology has been mapped to a weakly and dynamically typed
+scripting language. The aim in the design and implementation is to
+provide a natural interface for the PHP programmer that simplifies
+common service-related tasks such as producing and consuming Web
+services. We're very interested in feedback on the approach
+(both good and bad), and any requirements people may have.
+
+For further information about SCA and SDO, visit the Apache Tuscany Project
+at http://incubator.apache.org/tuscany/.
+
+This code is licensed under the Apache 2.0 License. 
+See http://www.apache.org/licenses/LICENSE-2.0  

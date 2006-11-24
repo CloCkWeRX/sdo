@@ -1,7 +1,7 @@
 <?php
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| Copyright IBM Corporation 2005, 2006.                                |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -75,6 +75,7 @@ class SDO_DAS_Relational {
             $containment_references_metadata = array();
         }
         $this->database_model           = new SDO_DAS_Relational_DatabaseModel($database_metadata);
+/*        
         if ($application_root_type == null) {
             $all_tables_names = $this->database_model->getAllTableNames();
             if (count($all_tables_names) == 1) {
@@ -83,11 +84,12 @@ class SDO_DAS_Relational {
                 throw new SDO_DAS_Relational_Exception('Application root type (second argument to constructor) can only be null when there is exactly one table in the database metadata');
             }
         }
-        $this->application_root_type    = $application_root_type;
-        $this->containment_references_model = new SDO_DAS_Relational_ContainmentReferencesModel($application_root_type, $containment_references_metadata);
-        $this->object_model             = new SDO_DAS_Relational_ObjectModel($this->database_model, $this->containment_references_model);
-        $this->data_factory             = SDO_DAS_DataFactory::getDataFactory();
-        $this->object_model -> defineToSDO($this->data_factory);
+*/
+        $this->application_root_type        = $application_root_type;
+        $this->containment_references_model = new SDO_DAS_Relational_ContainmentReferencesModel($application_root_type, $containment_references_metadata, $this->database_model);
+        $this->object_model                 = new SDO_DAS_Relational_ObjectModel($this->database_model, $this->containment_references_model);
+        $this->data_factory                 = SDO_DAS_DataFactory::getDataFactory();
+        $this->object_model->defineToSDO($this->data_factory);
     }
 
     /**
@@ -174,7 +176,9 @@ class SDO_DAS_Relational {
 
         $root        = self::createRoot($this->data_factory);
         $table_names = $this->database_model->getAllTableNames();   //TODO make sure they come back in graph order
-        assert($table_names[0] == $this->application_root_type);
+        if ( $this->application_root_type ) {
+            assert($table_names[0] == $this->application_root_type);
+        }
         $key_object_map = new SDO_DAS_Relational_KeyObjectMap();
         if ($all_rows) {
             $all_later_updates = array();

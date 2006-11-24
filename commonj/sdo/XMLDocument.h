@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 452786 $ $Date$ */
 
 #ifndef _XMLDOCUMENT_H_
 #define _XMLDOCUMENT_H_
@@ -86,6 +88,7 @@ namespace commonj
          * This sets the encoding to save this data to XML.
          */
             SDO_API virtual void setEncoding(const char* encoding) = 0;
+            SDO_API virtual void setEncoding(const SDOString& encoding) = 0;
 
         /**  getXMLDeclaration
          *
@@ -110,6 +113,7 @@ namespace commonj
          * NOT IMPLEMENTED
          */
             SDO_API virtual void setXMLVersion(const char* xmlVersion) = 0;
+            SDO_API virtual void setXMLVersion(const SDOString& xmlVersion) = 0;
 
         /**  getSchemaLocation- return the schema location
          *
@@ -122,6 +126,7 @@ namespace commonj
          * Sets the XML Schema location.
          */
             SDO_API virtual void setSchemaLocation(const char* schemaLocation) = 0;
+            SDO_API virtual void setSchemaLocation(const SDOString& schemaLocation) = 0;
 
         /**  getNoNamespaceSchemaLocation
          *
@@ -134,6 +139,7 @@ namespace commonj
          * Sets the nonamespace schema location
          */
             SDO_API virtual void setNoNamespaceSchemaLocation(const char* noNamespaceSchemaLocation) = 0;        
+            SDO_API virtual void setNoNamespaceSchemaLocation(const SDOString& noNamespaceSchemaLocation) = 0;        
             
             SDO_API friend std::istream& operator>>(std::istream& input, XMLDocument& doc);
             

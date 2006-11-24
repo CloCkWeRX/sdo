@@ -7,8 +7,8 @@ in:
   DB2   - DAS\Relational\Scenarios\companydb_db2.sql
   MySQL - DAS\Relational\Scenarios\companydb_mysql.sql
   
-Reading these files into the database is straighforward, for example, DB2 and 
-MySQL comman line interfaces can be used as follows:
+Reading these files into the database is straighforward, for example, DB2 and MySQL
+command line interfaces can be used as follows:
 
   db2 -tvf companydb_db2.sql
   mysql < companydb_mysql.sql
@@ -19,27 +19,29 @@ The database that is created consists of three tables:
   Department 
   Employee 
   
-Foreign key rlationships connect Employee to Department and Departnment to Company. 
-These result in and SDO data graph with containment relationships where a 
-Company object holds Department objects and a where a Department object holds
-Employee objects
+Foreign key relationships connect Employee to Department and Departnment to Company.
+These result in and SDO data graph with containment relationships where a Company 
+object holds Department objects and a where a Department object holds Employee 
+objects.
 
 The employee_of_the_month column in the Company table results in a non-containment
 relationship between the Company data objcet and the Employee data object.
 
-Once you have created the database in your RDBMS of choice you need to edit the 
+Once you have created the database in your RDBMS of choice you need to copy the 
 file:
+  DAS\Relational\Scenarios\company_metadata.inc.php-dist
 
-DAS\Relational\Scenarios\company_metadata.inc.php
+and save it as:
+  DAS\Relational\Scenarios\company_metadata.inc.php
 
-Near the top you will find some constanst defined as follows:
+Near the top you will find some constants defined as follows:
 
 define ('PDO_DSN','odbc:company');
 define('DATABASE_USER','YOUR USERID');
 define ('DATABASE_PASSWORD','YOUR PASSWORD HERE');
 
 Uncomment either the DB2 version or the MySQL version and fill in the DSN, USER and 
-PASSWORD information. 
+PASSWORD information. When you're done, remove the assert!
 
 There are numerous tests in this directory. The naming convention is as follows
 
@@ -59,15 +61,4 @@ Where
   
  Each test can be run simply be running the php script against a suitably configured
  (with the SDO and appropriate PDO extensions to support DB2 and/or MySQL) PHP 
- command line executable
-
-You may like to run the Relational samples now which 
-test the SDO Relational DAS against a real database. 
-This does however involve some manual setup of a 
-database first. You need to create a "company" database
-in either DB2 or MySQL. DDL files are provided for creating
-appropriate tables in the new database. See
- companydb_db2.sql for DB2
- companydb_mysql.sql for MySQL
-Once done you need to edit the file 
-DAS\Relational\Scenarios\company_metadata.inc.php
+ command line executable.

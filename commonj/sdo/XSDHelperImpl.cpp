@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 452786 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLFileWriter.h"   // Include first to avoid libxml compile problems!
 #include "commonj/sdo/SDOXMLStreamWriter.h" // Include first to avoid libxml compile problems!
@@ -87,6 +89,18 @@ namespace commonj
             }
             return 0;
         }
+        const char* XSDHelperImpl::defineFile(const SDOString& schema, bool loadImportNamespace)
+        {
+
+            SDOSchemaSAX2Parser schemaParser(schemaInfo, this, loadImportNamespace);
+            clearErrors();
+            if (schemaParser.parse(schema.c_str()) == 0)
+            {
+                defineTypes(schemaParser.getTypeDefinitions());
+                return schemaInfo.getTargetNamespaceURI();
+            }
+            return 0;
+        }
         
         const char*  XSDHelperImpl::define(std::istream& schema, bool loadImportNamespace)
         {
@@ -98,6 +112,16 @@ namespace commonj
         }
         
         const char*  XSDHelperImpl::define(const char* schema, bool loadImportNamespace)
+        {
+            std::istringstream str(schema);
+            SDOSchemaSAX2Parser schemaParser(schemaInfo, this, loadImportNamespace);
+            clearErrors();
+            str  >> schemaParser;
+            defineTypes(schemaParser.getTypeDefinitions());
+            return schemaInfo.getTargetNamespaceURI();
+            return define(str);
+        }
+        const char*  XSDHelperImpl::define(const SDOString& schema, bool loadImportNamespace)
         {
             std::istringstream str(schema);
             SDOSchemaSAX2Parser schemaParser(schemaInfo, this, loadImportNamespace);
@@ -245,10 +269,10 @@ namespace commonj
                     cout << addTypeCode.c_str() <<endl;
                     */
 
-                    df->addType(ty.uri, ty.name, ty.isSequenced, 
+                    df->addType((const char*)ty.uri, (const char*)ty.name, ty.isSequenced, 
                                          ty.isOpen, ty.isAbstract, ty.dataType, ty.isFromList);
                     df->setDASValue(
-                        ty.uri, ty.name,
+                        (const char*)ty.uri, (const char*)ty.name,
                         "XMLDAS::TypeInfo",
                         new XSDTypeInfo(ty));
 
@@ -314,11 +338,11 @@ namespace commonj
                         */
 
                        df->setBaseType(
-                            ty.uri,
-                            ty.name,
-                            ty.parentTypeUri,
-                            ty.parentTypeName,
-                            ty.isRestriction);
+                            (const char*)ty.uri,
+                            (const char*)ty.name,
+                            (const char*)ty.parentTypeUri,
+                            (const char*)ty.parentTypeName,
+                            (const char*)ty.isRestriction);
                     }        
                     catch (SDORuntimeException& e)
                     {
@@ -416,13 +440,13 @@ namespace commonj
                     try 
                     {
 
-                        df->addPropertyToType(ty.uri, ty.name,
-                            prop.name,
-                            prop.typeUri,
-                            prop.typeName,
-                            prop.isMany,
-                            prop.isReadOnly,
-                            prop.isContainment);
+                        df->addPropertyToType((const char*)ty.uri, (const char*)ty.name,
+                            (const char*)prop.name,
+                            (const char*)prop.typeUri,
+                            (const char*)prop.typeName,
+                            (const char*)prop.isMany,
+                            (const char*)prop.isReadOnly,
+                            (const char*)prop.isContainment);
 
                         LOGINFO_1(INFO,"XSDHelper adds property %s",(const char*)(prop.name));
 
@@ -518,6 +542,18 @@ namespace commonj
             writer.write(types, targetNamespaceURI, 
                 ((DataFactoryImpl*)fac)->getOpenProperties(), indent);
         }
+        void XSDHelperImpl::generateFile(
+            const TypeList& types,
+            const SDOString& fileName, 
+            const SDOString& targetNamespaceURI,
+            int indent
+            )
+        {
+            SDOXSDFileWriter writer(fileName.c_str());
+            DataFactory* fac = dataFactory;
+            writer.write(types, targetNamespaceURI.c_str(), 
+                ((DataFactoryImpl*)fac)->getOpenProperties(), indent);
+        }
         
         void XSDHelperImpl::generate(
             const TypeList& types,
@@ -531,6 +567,18 @@ namespace commonj
             writer.write(types,    targetNamespaceURI, 
                 ((DataFactoryImpl*)fac)->getOpenProperties(), indent);                
         }
+        void XSDHelperImpl::generate(
+            const TypeList& types,
+            std::ostream& outXml,
+            const SDOString& targetNamespaceURI,
+            int indent
+            )
+        {
+            SDOXSDStreamWriter writer(outXml);
+            DataFactory* fac = dataFactory;
+            writer.write(types,    targetNamespaceURI.c_str(), 
+                ((DataFactoryImpl*)fac)->getOpenProperties(), indent);                
+        }
         
         char* XSDHelperImpl::generate(
             const TypeList& types,
@@ -541,6 +589,21 @@ namespace commonj
             SDOXSDBufferWriter writer;
             DataFactory* fac = dataFactory;
             writer.write(types, targetNamespaceURI, 
+                ((DataFactoryImpl*)fac)->getOpenProperties(), indent);
+            SDOXMLString ret = writer.getBuffer();
+            char* retString = new char[strlen(ret) +1];
+            strcpy(retString, ret);
+            return retString;
+        }
+        char* XSDHelperImpl::generate(
+            const TypeList& types,
+            const SDOString& targetNamespaceURI,
+            int indent
+            )
+        {
+            SDOXSDBufferWriter writer;
+            DataFactory* fac = dataFactory;
+            writer.write(types, targetNamespaceURI.c_str(), 
                 ((DataFactoryImpl*)fac)->getOpenProperties(), indent);
             SDOXMLString ret = writer.getBuffer();
             char* retString = new char[strlen(ret) +1];

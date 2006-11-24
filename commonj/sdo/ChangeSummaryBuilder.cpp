@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 452786 $ $Date$ */
 
 #include "commonj/sdo/ChangeSummaryBuilder.h"
 
@@ -26,6 +28,8 @@
 #include "commonj/sdo/DASProperty.h"
 #include "commonj/sdo/Logging.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 namespace commonj
 {
     namespace sdo
@@ -103,7 +107,7 @@ namespace commonj
                                 // dob may have been set by the line above.
                                 if (deletions[i].dob != 0)
                                 {
-                                    DataObjectList& dli = dob->getList(prop);
+                                    DataObjectList& dli = dob->getList((const char*)prop);
                                     dli.insert(0,deletions[i].dob);
                                 }
                                 break;
@@ -112,7 +116,7 @@ namespace commonj
                     }
                     else
                     {
-                        DataObjectList& dli = dob->getList(prop);
+                        DataObjectList& dli = dob->getList((const char*)prop);
                         dli.append((const char*)value);
                     }
                 }
@@ -145,7 +149,7 @@ namespace commonj
                 return;
             }
 
-            const Property& p = cont->getProperty(prop);
+            const Property& p = cont->getProperty((const char*)prop);
             DataObjectPtr dob = dataFactory->create(
                                 p.getType());
             populateDeletion(csi,dob,currentIndex);
@@ -212,7 +216,7 @@ namespace commonj
             else 
             {
                 try {
-                    cont = rootDataObject->getDataObject(contpath);
+                    cont = rootDataObject->getDataObject((const char*)contpath);
                     LOGINFO_2(INFO,"Handling deletion from %s of %s",
                         (const char*)contpath,(const char*)prop);
                 }
@@ -372,7 +376,7 @@ namespace commonj
                         }
                         else
                         {
-                            dob = rootDataObject->getDataObject(thispath);
+                            dob = rootDataObject->getDataObject((const char*)thispath);
                         }
                         if (dob != 0) {
                             
@@ -426,7 +430,7 @@ namespace commonj
                     }
                     else 
                     {
-                        dob = rootDataObject->getDataObject(changes[i].reference);
+                        dob = rootDataObject->getDataObject((const char*)changes[i].reference);
                     }
                     if (dob != 0)
                     {
@@ -489,7 +493,7 @@ namespace commonj
                                     (const char*)((*e).path),
                                     (const char*)((*e).value));
 
-                                DataObjectPtr pdob = rootDataObject->getDataObject((*e).value);
+                                DataObjectPtr pdob = rootDataObject->getDataObject((const char*)(*e).value);
                                 if (pdob != 0)
                                 {
                                     csi->appendToChanges(p,dob,pdob,(*e).index);

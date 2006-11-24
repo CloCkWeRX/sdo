@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 452786 $ $Date$ */
 
 #ifndef _PROPERTYDefinition_H_
 #define _PROPERTYDefinition_H_
@@ -23,6 +25,7 @@
 #include "export.h"
 
 #include <vector>
+#include "commonj/sdo/SDOString.h"
 
 
 
@@ -57,37 +60,47 @@ namespace commonj
                        
             // where this property is to be substituted for another
             /*SDO_API*/ void setSubstituteName(const char * name);
+            /*SDO_API*/ void setSubstituteName(const SDOString& name);
             /*SDO_API*/ const char* getSubstituteName() const;
 
             /*SDO_API*/ void setSubstituteUri(const char* name);
+            /*SDO_API*/ void setSubstituteUri(const SDOString& name);
             /*SDO_API*/ const char* getSubstituteUri() const;
 
             // where there are substitute names for this property.
             /*SDO_API*/ void addSubstitute(const char* name,
                 const char* localname);
+            /*SDO_API*/ void addSubstitute(const SDOString& name,
+                const SDOString& localname);
             /*SDO_API*/ int getSubstituteCount() const;
             /*SDO_API*/ const char* getSubstituteNames(int index) const;
             /*SDO_API*/ const char* getSubstituteLocalNames(int index) const;
 
             
             /*SDO_API*/ void setAliases(const char* aliases);
+            /*SDO_API*/ void setAliases(const SDOString& aliases);
             /*SDO_API*/ const char* getAliases() const;
 
             /*SDO_API*/ void setName(const char* name);
+            /*SDO_API*/ void setName(const SDOString& name);
             /*SDO_API*/ const char* getName() const;
             
             /*SDO_API*/ void setLocalName(const char* name);
+            /*SDO_API*/ void setLocalName(const SDOString& name);
             /*SDO_API*/ const char* getLocalName() const;
-            
+
             /*SDO_API*/ void setType(const char* uri, const char* name);
+            /*SDO_API*/ void setType(const SDOString& uri, const SDOString& name);
             /*SDO_API*/ const char * getTypeName() const;
             /*SDO_API*/ const char * getTypeUri() const;
             /*SDO_API*/ const char * getTypeFullName() const;
             /*SDO_API*/ const char * getTypeFullLocalName() const ;
             
             /*SDO_API*/ void setTypeFullLocalName(const char* name);
+            /*SDO_API*/ void setTypeFullLocalName(const SDOString& name);
 
             /*SDO_API*/ void setDefaultValue(const char* value);
+            /*SDO_API*/ void setDefaultValue(const SDOString& value);
             /*SDO_API*/ const char* getDefaultValue() const;
 
             /*SDO_API*/ bool getIsMany() const;

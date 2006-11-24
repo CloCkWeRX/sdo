@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 452786 $ $Date$ */
 
 #include "commonj/sdo/PropertyDefinition.h"
 #include "commonj/sdo/PropertyDefinitionImpl.h"
@@ -65,6 +67,10 @@ namespace commonj
          {
              propertydefinition->substituteName = name;
          }
+         void PropertyDefinition::setSubstituteName(const SDOString& name)
+         {
+             propertydefinition->substituteName = name.c_str();
+         }
 
          const char* PropertyDefinition::getSubstituteName() const
          {
@@ -76,6 +82,10 @@ namespace commonj
          {
              propertydefinition->substituteUri = name;
          }
+         void PropertyDefinition::setSubstituteUri(const SDOString& name)
+         {
+             propertydefinition->substituteUri = name.c_str();
+         }
 
          const char* PropertyDefinition::getSubstituteUri() const
          {
@@ -83,11 +93,11 @@ namespace commonj
          }
 
         // where there are substitute names for this property.
-         void PropertyDefinition::addSubstitute(const char* name,
-            const char* localname)
+         void PropertyDefinition::addSubstitute(const SDOString& name,
+            const SDOString& localname)
          {
-             propertydefinition->substituteNames.push_back(name);
-             propertydefinition->substituteLocalNames.push_back(localname);
+             propertydefinition->substituteNames.push_back(name.c_str());
+             propertydefinition->substituteLocalNames.push_back(localname.c_str());
          }
 
          int PropertyDefinition::getSubstituteCount() const
@@ -118,6 +128,10 @@ namespace commonj
          {
              propertydefinition->aliases = aliases;
          }
+         void PropertyDefinition::setAliases(const SDOString& aliases)
+         {
+             propertydefinition->aliases = aliases.c_str();
+         }
 
          const char* PropertyDefinition::getAliases() const
          {
@@ -128,6 +142,10 @@ namespace commonj
          {
              propertydefinition->name = name;
          }
+         void PropertyDefinition::setName(const SDOString& name)
+         {
+             propertydefinition->name = name.c_str();
+         }
 
          const char* PropertyDefinition::getName() const
          {
@@ -137,6 +155,10 @@ namespace commonj
          void PropertyDefinition::setLocalName(const char* name)
          {
              propertydefinition->localname = name;
+         }
+         void PropertyDefinition::setLocalName(const SDOString& name)
+         {
+             propertydefinition->localname = name.c_str();
          }
 
          const char* PropertyDefinition::getLocalName() const
@@ -151,6 +173,14 @@ namespace commonj
              propertydefinition->fullTypeName = uri;
              propertydefinition->fullTypeName += "#";
              propertydefinition->fullTypeName += name;
+         }
+         void PropertyDefinition::setType(const SDOString& uri, const SDOString& name)
+         {
+             propertydefinition->typeUri = uri.c_str();
+             propertydefinition->typeName = name.c_str();
+             propertydefinition->fullTypeName = uri.c_str();
+             propertydefinition->fullTypeName += "#";
+             propertydefinition->fullTypeName += name.c_str();
          }
 
          const char * PropertyDefinition::getTypeName() const
@@ -177,11 +207,19 @@ namespace commonj
          {
              propertydefinition->fullLocalTypeName = name;
          }
+         void PropertyDefinition::setTypeFullLocalName(const SDOString& name)
+         {
+             propertydefinition->fullLocalTypeName = name.c_str();
+         }
 
 
          void PropertyDefinition::setDefaultValue(const char* value)
          {
              propertydefinition->defaultValue = value;
+         }
+         void PropertyDefinition::setDefaultValue(const SDOString& value)
+         {
+             propertydefinition->defaultValue = value.c_str();
          }
 
          const char* PropertyDefinition::getDefaultValue() const

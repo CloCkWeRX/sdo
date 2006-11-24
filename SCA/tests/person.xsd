@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://www.test.com/info" 
+    xmlns:info="http://www.test.com/info">
+	<complexType name="address">
+		<sequence>
+			<element name="street" type="string"></element>
+			<element name="city" type="string"></element>
+			<element name="state" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="phone">
+		<sequence>
+			<element name="type" type="string"></element>
+			<element name="number" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="name">
+		<sequence>
+			<element name="first" type="string"></element>
+			<element name="last" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="person">
+		<sequence>
+			<element name="name" type="info:name"></element>
+			<element name="phone" type="info:phone"
+                  minOccurs="0" maxOccurs="unbounded"></element>
+			<element name="address" type="info:address"
+                        minOccurs="0" maxOccurs="1"></element>
+		</sequence>
+	</complexType>
+	
+		
+	<complexType name="raffleticket">
+		<sequence>
+			<element name="identifier" type="string"></element>
+			<element name="prize" type="string"></element>
+		</sequence>
+	</complexType>
+	
+</schema>

@@ -1,7 +1,7 @@
 <?php
 /* 
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| Copyright IBM Corporation 2005, 2006.                                |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -26,6 +26,7 @@ $Id$
  * You need to fix up and enable three defines below. 
  * Enter meaningful values, then remove the  
  * echos **AND THE ASSERT**!!! 
+ * Save your modified file as company_metadata.inc.php
  **********************************************************************/
 echo "\n";
 echo "\n";
@@ -64,32 +65,32 @@ assert(false); // remove this once you have meaningful defines
 ******************************************************************/
 
 $company_table = array (
-	'name' => 'company',
-	'columns' => array('id', 'name',  'employee_of_the_month'),
-	'PK' => 'id',
-	'FK' => array (
-		'from' => 'employee_of_the_month',
-		'to' => 'employee',
-		),
-	);
+    'name' => 'company',
+    'columns' => array('id', 'name',  'employee_of_the_month'),
+    'PK' => 'id',
+    'FK' => array (
+        'from' => 'employee_of_the_month',
+        'to' => 'employee',
+        ),
+    );
 $department_table = array (
-	'name' => 'department', 
-	'columns' => array('id', 'name', 'location' , 'number', 'co_id'),
-	'PK' => 'id',
-	'FK' => array (
-		'from' => 'co_id',
-		'to' => 'company',
-		)
-	);
+    'name' => 'department', 
+    'columns' => array('id', 'name', 'location' , 'number', 'co_id'),
+    'PK' => 'id',
+    'FK' => array (
+        'from' => 'co_id',
+        'to' => 'company',
+        )
+    );
 $employee_table = array (
-	'name' => 'employee',
-	'columns' => array('id', 'name', 'SN', 'manager', 'dept_id'),
-	'PK' => 'id',
-	'FK' => array (
-		'from' => 'dept_id',
-		'to' => 'department',
-		)
-	);
+    'name' => 'employee',
+    'columns' => array('id', 'name', 'SN', 'manager', 'dept_id'),
+    'PK' => 'id',
+    'FK' => array (
+        'from' => 'dept_id',
+        'to' => 'department',
+        )
+    );
 $database_metadata = array($company_table, $department_table, $employee_table);
 
 /*******************************************************************

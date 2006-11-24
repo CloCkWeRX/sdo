@@ -89,7 +89,6 @@ commonj/sdo/SdoRuntime.cpp \
 commonj/sdo/SDORuntimeException.cpp \
 commonj/sdo/SDOSAX2Parser.cpp \
 commonj/sdo/SDOSchemaSAX2Parser.cpp \
-commonj/sdo/SDOString.cpp \
 commonj/sdo/SDOUtils.cpp \
 commonj/sdo/SDOXMLBufferWriter.cpp \
 commonj/sdo/SDOXMLFileWriter.cpp \

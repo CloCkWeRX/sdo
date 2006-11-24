@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 472054 $ $Date$ */
 
 //////////////////////////////////////////////////////////////////////
 // DataFactoryImpl.cpp: implementation of the DataFactory class.
@@ -85,6 +87,8 @@ DataFactoryImpl::DataFactoryImpl()
 DataFactoryImpl::~DataFactoryImpl()
 {
 
+   resolvePending.clear();
+   
     TYPES_MAP::iterator typeIter;
     for (typeIter = types.begin() ; typeIter != types.end() ; ++typeIter)
     {
@@ -107,25 +111,6 @@ const SDOString& DataFactoryImpl::getRootElementName() const
     return rootElementName;
 }
 
-// ===================================================================
-// set the root element name 
-// ===================================================================
-void DataFactoryImpl::setRootElementName(const char* ren)
-{
-
-	// If the incoming string is meaningful then use it to reset the stored
-	// value. Otherwise, just erase what we have.
-
-    if (ren != 0 && (strlen(ren) != 0))
-	{
-		rootElementName = ren;
-	}
-	else
-	{
-		rootElementName.erase();
-	}
-
-}
 
 void DataFactoryImpl::setRootElementName(const SDOString& ren)
 {
@@ -161,15 +146,10 @@ DataFactoryImpl& DataFactoryImpl::operator=(const DataFactoryImpl& inmdg)
 void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
 {
 
-    if (isResolved)
-    {
-    SDO_THROW_EXCEPTION("copyTypes",
-        SDOUnsupportedOperationException, "Copying Type after data graph completed");
-    }
 
     TYPES_MAP::const_iterator typeIter;
     TYPES_MAP::iterator typeIter2;
-    char* fullTypeName;
+    SDOString fullTypeName;
 
     for (typeIter = inmdg.types.begin() ; typeIter != inmdg.types.end() ; ++typeIter)
     {
@@ -181,7 +161,6 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
                 (typeIter->second)->getURI(), 
                 (typeIter->second)->getName());
         typeIter2 = types.find(fullTypeName);
-        if (fullTypeName)delete fullTypeName;
 
         // copy the aliases , if there are any.
 
@@ -263,25 +242,21 @@ void DataFactoryImpl::addType(const char* uri, const char* inTypeName,
 {
 
 
-    if (isResolved)
-    {
-    SDO_THROW_EXCEPTION("DataFactory::addType",
-        SDOUnsupportedOperationException, "Adding Type after data graph completed");
-    }
-
     if (inTypeName == 0 || strlen(inTypeName) == 0)
     {
     SDO_THROW_EXCEPTION("DataFactory::addType",
         SDOIllegalArgumentException, " Type has empty name");
     }
 
+    SDOString typeUri;
 
-    if (findType(uri, inTypeName) == 0) 
+    if (uri)
+        typeUri = uri;
+    if (findType(typeUri, inTypeName) == 0) 
     {
-        char* fullTypeName = getFullTypeName(uri, inTypeName);
+        SDOString fullTypeName = getFullTypeName(uri, inTypeName);
         types[fullTypeName] = new TypeImpl(uri, inTypeName, isSeq, isOp, isAbs, isData, isFromList);
-        if (fullTypeName)delete fullTypeName;
-
+        resolvePending[fullTypeName] = types[fullTypeName];
     }
 }
 
@@ -326,10 +301,11 @@ bool DataFactoryImpl::checkForValidChangeSummary(TypeImpl* t)
     // None of the containing types can have a cs already.
     // None of the properties of this type can hold a type
     // which has a change summary.
-    if (isResolved)
+
+   if (t->isResolved)
     {
-    SDO_THROW_EXCEPTION("DataFactory::addChangeSummary",
-        SDOUnsupportedOperationException, "Adding Change Summary after data graph completed");
+    SDO_THROW_EXCEPTION("DataFactory::checkForValidChangeSummary",
+        SDOUnsupportedOperationException, "Adding Change Summary after type completed");
     }
 
     if (cstypes.size() > 0) {
@@ -356,10 +332,9 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
                                       const char* propTypeName,
                                       bool    many)
 {
-    char* fullPropTypeName = getFullTypeName(propTypeUri, propTypeName);
+    SDOString fullPropTypeName = getFullTypeName(propTypeUri, propTypeName);
     TYPES_MAP::iterator typeIter;
     typeIter = types.find(fullPropTypeName);
-    if (fullPropTypeName)delete fullPropTypeName;
     if (typeIter != types.end())
     {
         addPropertyToType(uri,inTypeName, 
@@ -391,12 +366,6 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
                                       bool    rdonly,
                                       bool cont)
 {
-    if (isResolved)
-    {
-    SDO_THROW_EXCEPTION("DataFactory::addPropertyToType",
-        SDOUnsupportedOperationException, "Adding Properties after data graph completed");
-    }
-
 
 
     TYPES_MAP::iterator typeIter, typeIter2;
@@ -405,9 +374,8 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
     //    << ") to type " << uri << "#" << inTypeName << endl;
 
 
-    char* fullTypeName = getFullTypeName(uri, inTypeName);
+    SDOString fullTypeName = getFullTypeName(uri, inTypeName);
     typeIter = types.find(fullTypeName);
-    if (fullTypeName)delete fullTypeName;
 
     if(typeIter == types.end())
     {
@@ -438,7 +406,6 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
 
     fullTypeName = getFullTypeName(propTypeUri, propTypeName);
     typeIter2 = types.find(fullTypeName);
-    if (fullTypeName)delete fullTypeName;
     
     if (typeIter2 == types.end())
     {
@@ -489,6 +456,13 @@ void DataFactoryImpl::addPropertyToType(const char* uri,
         // cannot try to make a property containment on a data type
     }
 */
+
+    if ((typeIter->second)->isResolved)
+    {
+    SDO_THROW_EXCEPTION("DataFactory::addPropertyToType",
+        SDOUnsupportedOperationException, "Adding Properties after type completed");
+    }
+
     ((typeIter->second)->addProperty(propname, *(typeIter2->second),many,rdonly, cont));
     return;
 }
@@ -714,57 +688,17 @@ void DataFactoryImpl::addPropertyToType(const Type& tp,
 // ===================================================================
 // getFullTypeName - return the name used as a key in the types map
 // ===================================================================
-char* DataFactoryImpl::getFullTypeName(const char* uri, const char* inTypeName) const
+SDOString DataFactoryImpl::getFullTypeName(const SDOString& uri, const SDOString& inTypeName) const
 {
-    char* c;
-    if (uri != 0 && inTypeName != 0) 
-    {
-        c = new char[strlen(uri) + strlen(inTypeName) + 2];
-        sprintf(c,"%s#%s",uri,inTypeName);
-        return c;
-    }
-    if (uri != 0)
-    {
-        c = new char[strlen(uri) + 2];
-        sprintf(c,"%s#",uri);
-        return c;
-    }
-    c = new char[strlen(inTypeName) + 2];
-    sprintf(c,"#%s",inTypeName);
-    return c;
-}
-
-char* DataFactoryImpl::getFullTypeName(const SDOString& uri, const SDOString& inTypeName) const
-{
-  return getFullTypeName(uri.c_str(), inTypeName.c_str());
+  return uri + "#" + inTypeName;
 }
 
 // ===================================================================
-// getFullTypeName - return the name used as a key in the types map
+// getAliasTypeName - return the name used as a key in the types map
 // ===================================================================
-char* DataFactoryImpl::getAliasTypeName(const char* uri, const char* inTypeName) const
+SDOString DataFactoryImpl::getAliasTypeName(const SDOString& uri, const SDOString& inTypeName) const
 {
-    char* c;
-    if (uri != 0 && inTypeName != 0) 
-    {
-        c = new char[strlen(uri) + strlen(inTypeName) + 9];
-        sprintf(c,"ALIAS::%s#%s",uri,inTypeName);
-        return c;
-    }
-    if (uri != 0)
-    {
-        c = new char[strlen(uri) + 9];
-        sprintf(c,"ALIAS::%s#",uri);
-        return c;
-    }
-    c = new char[strlen(inTypeName) + 9];
-    sprintf(c,"ALIAS::#%s",inTypeName);
-    return c;
-}
-
-char* DataFactoryImpl::getAliasTypeName(const SDOString& uri, const SDOString& inTypeName) const
-{
-  return getAliasTypeName(uri.c_str(), inTypeName.c_str());
+  return "ALIAS::" + getFullTypeName(uri, inTypeName);
 }
 
 // ===================================================================
@@ -827,9 +761,8 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 
     TYPES_MAP::const_iterator typeIter;
 
-    char* fullTypeName = getFullTypeName(typeuri, typenam);
+    SDOString fullTypeName = getFullTypeName(typeuri, typenam);
     typeIter = types.find(fullTypeName);
-    if (fullTypeName)delete fullTypeName;
     
     if(typeIter == types.end())
     {
@@ -971,12 +904,11 @@ void DataFactoryImpl::setBaseType(const SDOString& typeuri,
         setDefault(t.getURI(), t.getName(), propname, c);
     }
 
-// #pragma message( "GMW: Unimplemented method, writable string parameter" )
-//     void DataFactoryImpl::setDefault(
-//         const Type& t, const SDOString& propname , SDOString& c) 
-//     {
-//         setDefault(t.getURI(), t.getName(), propname.c_str(), c.c_str());
-//     }
+    void DataFactoryImpl::setDefault(
+        const Type& t, const SDOString& propname , SDOString& outstr)
+    {
+        setDefault(t.getURI(), t.getName(), propname, outstr);
+    }
 
     void DataFactoryImpl::setDefault(
         const Type& t, const char* propname , short s) 
@@ -1134,13 +1066,14 @@ void DataFactoryImpl::setBaseType(const SDOString& typeuri,
         if (pi != 0)pi->setDefault(c);
     }
 
-// #pragma message( "GMW: Unimplemented method, writable string parameter" )
-//     void DataFactoryImpl::setDefault(
-//         const SDOString& typuri, const SDOString& typnam, 
-//         const SDOString& propname , SDOString& c) 
-//     {
-//       setDefault(typuri.c_str(), typnam.c_str(), propname.c_str(), c.c_str());
-//     }
+    void DataFactoryImpl::setDefault(
+        const SDOString& typuri, const SDOString& typnam, 
+        const SDOString& propname , SDOString& c) 
+    {
+        const TypeImpl* ti = findTypeImpl(typuri, typnam);
+        PropertyImpl* pi = ti->getPropertyImpl(propname);
+        if (pi != 0)pi->setDefault(c);
+    }
 
     void DataFactoryImpl::setDefault(
         const char* typuri, const char* typnam, 
@@ -1295,40 +1228,27 @@ void DataFactoryImpl::setBaseType(const SDOString& typeuri,
 // ===================================================================
 // getTypeImpl - return a pointer to the required TypeImpl
 // ===================================================================
-const TypeImpl& DataFactoryImpl::getTypeImpl(const char* uri, const char* inTypeName) const
+const TypeImpl& DataFactoryImpl::getTypeImpl(const SDOString& uri, const SDOString& inTypeName) const
 {
     const TypeImpl* type = findTypeImpl(uri, inTypeName);
 
     if (type == 0)
     {
         string msg("Type not found :");
-        if (uri != 0)msg += uri;
-        msg += " ";
-        if (inTypeName != 0)msg += inTypeName;
+        msg += uri + " " + inTypeName;
         SDO_THROW_EXCEPTION("getTypeImpl" ,
         SDOTypeNotFoundException, msg.c_str());
     }
     
-    return *type;
-}
-
-const TypeImpl& DataFactoryImpl::getTypeImpl(const SDOString& uri, const SDOString& inTypeName) const
-{
-  return getTypeImpl(uri.c_str(), inTypeName.c_str());
+    return *type;;
 }
 
 // ===================================================================
 // findType
 // ===================================================================
-
-const Type* DataFactoryImpl::findType(const char* uri, const char* inTypeName) const
-{
-    return (Type*)findTypeImpl(uri,inTypeName);
-}
-
 const Type* DataFactoryImpl::findType(const SDOString uri, const SDOString inTypeName) const
 {
-    return (Type*) findTypeImpl(uri.c_str(), inTypeName.c_str());
+    return (Type*) findTypeImpl(uri, inTypeName);
 }
 
 // ===================================================================
@@ -1337,15 +1257,9 @@ const Type* DataFactoryImpl::findType(const SDOString uri, const SDOString inTyp
 
 const TypeImpl* DataFactoryImpl::findTypeImpl(const SDOString& uri, const SDOString& inTypeName) const
 {
-    return findTypeImpl(uri.c_str(), inTypeName.c_str());
-}
-
-const TypeImpl* DataFactoryImpl::findTypeImpl(const char* uri, const char* inTypeName) const
-{
-    char* fullTypeName = getFullTypeName(uri, inTypeName);
+    SDOString fullTypeName = getFullTypeName(uri, inTypeName);
     TYPES_MAP::const_iterator typeIter;
     typeIter = types.find(fullTypeName);
-    if (fullTypeName)delete fullTypeName;
     if(typeIter != types.end())
     {
         return typeIter->second;
@@ -1355,7 +1269,6 @@ const TypeImpl* DataFactoryImpl::findTypeImpl(const char* uri, const char* inTyp
         // try alias names
         fullTypeName = getAliasTypeName(uri, inTypeName);
         typeIter = types.find(fullTypeName);
-        if (fullTypeName)delete fullTypeName;
         if(typeIter != types.end())
         {
             return typeIter->second;
@@ -1373,10 +1286,9 @@ void DataFactoryImpl::setAlias(const char* typeuri,
                               const char* alias)
 {
 
-    char* fullTypeName = getFullTypeName(typeuri, typenam);
+    SDOString fullTypeName = getFullTypeName(typeuri, typenam);
     TYPES_MAP::iterator typeIter;
     typeIter = types.find(fullTypeName);
-    if (fullTypeName)delete fullTypeName;
     if(typeIter != types.end())
     {
         (typeIter->second)->setAlias(alias);
@@ -1447,17 +1359,17 @@ TypeList DataFactoryImpl::getTypes() const
 
 void DataFactoryImpl::resolve()
 {
-    if (isResolved) return; 
 
     TYPES_MAP::iterator typeIter;
-    for (typeIter = types.begin() ; typeIter != types.end();
+    for (typeIter = resolvePending.begin() ; typeIter != resolvePending.end();
     ++typeIter) 
     {
         (typeIter->second)->initCompoundProperties();
         (typeIter->second)->validateChangeSummary();
     }
+    // Need to empty the resolvePending set.
+    resolvePending.clear();
 
-    isResolved = true;
 }
 
 // ===================================================================
@@ -1470,7 +1382,11 @@ void DataFactoryImpl::resolve()
 RefCountingPointer<DataObject> DataFactoryImpl::create(const char* uri, const char* typeName) 
 {
 
-    if (!isResolved)
+// New types can always be added now, so if there are any that haven't been
+// resolved, do them now. The isResolved boolean is superseded by the
+// resolvePending set being non-empty.
+
+   if (!resolvePending.empty())
     {
         // Allow creation of types and properties before resolve.
         if (uri != 0 && !strcmp(uri,Type::SDOTypeNamespaceURI.c_str())) {
@@ -1544,12 +1460,8 @@ RefCountingPointer<DataObject> DataFactoryImpl::create(const SDOString& uri, con
 
     void DataFactoryImpl::removeOpenProperty(const SDOString& name)
     {
-      removeOpenProperty(name.c_str());
-    }
-    void DataFactoryImpl::removeOpenProperty(const char* name)
-    {
         propertyMap::iterator i = 
-            openProperties.find(name);
+            openProperties.find(name.c_str());
         if (i != openProperties.end())
         {
             openProperties.erase(i);

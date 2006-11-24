@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005, 2006.                            |
+| Copyright IBM Corporation 2005, 2006.                                |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -376,8 +376,8 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 				return EG(uninitialized_zval_ptr);
 			}
 		}
-		
-		
+
+
 		ALLOC_INIT_ZVAL(return_value);
 		return_value->refcount = 0;
 
@@ -737,9 +737,9 @@ static HashTable *sdo_do_get_properties(zval *object TSRMLS_DC)
 			} else {
 				continue;
 			}
-			
+
 			zval_add_ref(&tmp);
-			zend_hash_add(my_object->zo.properties, (char *)property_name, 1 + strlen(property_name), 
+			zend_hash_add(my_object->zo.properties, (char *)property_name, 1 + strlen(property_name),
 				&tmp, sizeof(zval *), NULL);
 		}
 	} catch (SDORuntimeException e) {
@@ -954,11 +954,11 @@ static void sdo_do_iterator_rewind (zend_object_iterator *iter TSRMLS_DC)
  */
 #if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
 zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
-{	
+{
 	char *class_name, *space;
 	class_name = get_active_class_name(&space TSRMLS_CC);
 
-	if (by_ref) {	
+	if (by_ref) {
 		php_error(E_ERROR, "%s%s%s(): an iterator cannot be used with foreach by reference",
 		class_name, space, get_active_function_name(TSRMLS_C));
 	}
@@ -992,7 +992,7 @@ static void sdo_do_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	sdo_do_iterator *iterator = (sdo_do_iterator *)iter;
 
-    if (iterator->zoi.data) { 
+    if (iterator->zoi.data) {
 		zval_ptr_dtor((zval **)&iterator->zoi.data);
     }
 
@@ -1109,7 +1109,7 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
         XSDHelperPtr xsdhp = HelperProvider::getXSDHelper(dfp);
   		XMLHelperPtr xmlhp = HelperProvider::getXMLHelper(dfp);
 		/* create an XML representation of the model */
-		serialized_model = xsdhp->generate(dfp->getTypes(), 
+		serialized_model = xsdhp->generate(dfp->getTypes(),
 			my_object->dop->getType().getURI());
 		model_length = strlen(serialized_model);
 
@@ -1165,11 +1165,11 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 		* is deleted. A PHP wrapper will be instantiated lazily
 		* on demand.
 		*/
-		
+
 		/* Load the graph */
 		XMLDocumentPtr doc = xmlhp->load(serialized_graph);
 		DataObjectPtr root_dop = doc->getRootDataObject();
-		if (root_dop) {			
+		if (root_dop) {
 		   /* Create a PHP object fot the root. Other nodes will be created
 	        * lazily as required.
 			*/
@@ -1181,9 +1181,9 @@ static int sdo_do_unserialize (zval **object, zend_class_entry *ce, const unsign
 				class_name, space, get_active_function_name(TSRMLS_C),
 				doc->getRootElementURI(), doc->getRootElementName());
 			return FAILURE;
-			
+
 		}
-		
+
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		return FAILURE;

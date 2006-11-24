@@ -1,21 +1,23 @@
 /*
- *
- *  Copyright 2005 The Apache Software Foundation or its licensors, as applicable.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-/* $Rev$ $Date$ */
+/* $Rev: 472054 $ $Date$ */
 
 #ifndef _DataFactoryIMPL_H_
 #define _DataFactoryIMPL_H_
@@ -316,11 +318,10 @@ public:
         const char* propname , 
         char* c) ;
 
-// #pragma message( "GMW: Unimplemented method, writable string parameter" )
-//     virtual void setDefault(
-//         const Type& t, 
-//         const SDOString& propname , 
-//         SDOString& c) ;
+    virtual void setDefault(
+        const Type& t, 
+        const SDOString& propname , 
+        SDOString& outstr);
 
     virtual void setDefault(
         const Type& t, 
@@ -453,12 +454,11 @@ public:
         const char* propname ,
         char* c) ;
 
-// #pragma message( "GMW: Unimplemented method, writable string parameter" )
-//     virtual void setDefault(
-//         const SDOString& typuri, 
-//         const SDOString& typnam, 
-//         const SDOString& propname ,
-//         SDOString& c) ;
+    virtual void setDefault(
+        const SDOString& typuri, 
+        const SDOString& typnam, 
+        const SDOString& propname ,
+        SDOString& c) ;
 
     virtual void setDefault(
         const char* typuri, 
@@ -653,39 +653,29 @@ public:
 
     virtual    void resolve();
 
-// TODO: Remove char* form of method since it is not exposed to users
-    const Type*    findType  (const char* uri, const char* inTypeName) const;
     const Type* findType(const SDOString uri, const SDOString inTypeName) const;
 
-// TODO: Remove char* form of method since it is not exposed to users
-    const TypeImpl*    findTypeImpl  (const char* uri, const char* inTypeName) const;
     const TypeImpl* findTypeImpl(const SDOString& uri, const SDOString& inTypeName) const;
 
     void addOpenProperty(const PropertyImpl& prop);
-// TODO: Remove char* form of method since it is not exposed to users
-    void removeOpenProperty(const char* name);
     void removeOpenProperty(const SDOString& name);
     const propertyMap& getOpenProperties();
-// TODO: Remove char* form of method since it is not exposed to users
-    virtual const TypeImpl& getTypeImpl(const char* uri, const char* inTypeName) const;
     virtual const TypeImpl& getTypeImpl(const SDOString& uri, const SDOString& inTypeName) const;
     virtual const SDOString& getRootElementName() const;
-// TODO: Remove char* form of method since it is not exposed to users
-    virtual void setRootElementName(const char* ren);
     virtual void setRootElementName(const SDOString& ren);
     virtual bool checkType(const Type& t);
     virtual bool isCompatible(DataFactory* df, DataObject* d);
     virtual bool compareTypes(const TypeImpl* t1, const Type& t2);
 
-   virtual bool generateInterface(const char* fileroot, const char* factoryname);
-
-   virtual bool generateInterface(const SDOString& fileroot, const SDOString& factoryname);
+    virtual bool generateInterface(const char* fileroot, const char* factoryname);
+    virtual bool generateInterface(const SDOString& fileroot, const SDOString& factoryname);
 
     virtual std::ostream& printSelf(std::ostream &os);
 
 private:
     typedef std::map<std::string, TypeImpl*> TYPES_MAP;
     TYPES_MAP    types;
+    TYPES_MAP    resolvePending; // Set of types that have not yet been resolved.
 
     std::vector<DataFactory*> compatibleFactories;
 
@@ -704,12 +694,8 @@ private:
     typedef std::vector<TypeImpl*> TYPES_VECTOR;
     TYPES_VECTOR cstypes;
     
-// TODO: Remove char* form of method since it is not exposed to users
-    char*        getFullTypeName(const char* uri, const char* inTypeName) const;
-    char*        getFullTypeName(const SDOString& uri, const SDOString& inTypeName) const;
-// TODO: Remove char* form of method since it is not exposed to users
-    char*        getAliasTypeName(const char* uri, const char* inTypeName) const;
-    char*        getAliasTypeName(const SDOString& uri, const SDOString& inTypeName) const;
+    SDOString getFullTypeName(const SDOString& uri, const SDOString& inTypeName) const;
+    SDOString getAliasTypeName(const SDOString& uri, const SDOString& inTypeName) const;
 
     void        copyTypes(const DataFactoryImpl& inmdg);
 };

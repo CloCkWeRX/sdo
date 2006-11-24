@@ -54,7 +54,7 @@ function compareNodeCount ( $nodename, $node1, $node2, $reason )
   $message = $reason . "  " . $nodename . ": Node1 count = $count1   Node2 count  = $count2";
 
   if ( $count1 != $count2  ){
-    throw new Exception ( $message );
+      throw new Exception ( $message );
   }
  
   if ( DEBUG == "on" ){
@@ -107,29 +107,59 @@ function compareNodeValue ( $node1, $node2 )
  */
 function compareNodeAttributes ( $node1, $node2, $namespace )
 {
-  // attributes in the default namespace
   $attributes1 = $node1->attributes($namespace);
   $attributes2 = $node2->attributes($namespace);
-
-  $reason = "ATTRIBUTE COUNT FOR NAMESPACE ";
-
-  if ( $namespace == NULL ){
-    $reason = $reason . "DEFAULT";
+ 
+  $count1 = count ($node1);
+  $count2 = count ($node2);
+  
+  $message = "for node " . $node1->getName() . " in namespace " . $namespace . " - ";
+  
+  for ( $i = 0; $i < $count1; $i += 1 ) {
+      $att1      = $attributes1[$i];
+      $att1_type = gettype($att1);
+      $att1_name = null;
+      $att2      = $attributes2[$i];
+      $att2_type = gettype($att2);
+      $att2_name = null;
+      
+      if ( $att1 != null && $att1_type != "NULL" ) {
+         $att1_name = $att1->getName();
+      } 
+      
+      if ( $att2 != null && $att2_type != "NULL" ) {
+         $att2_name = $att2->getName();
+      }
+            
+      if ( $att1_type != $att2_type || $att1_name != $att2_name ) {
+          $message = $message . "Attribute $i not equal AttributeA = " . $att1_name . "  " . $att1 . " type " . $att1_type . " AttributeB = " . $att2_name . " " . $att2 . " type " . $att2_type;
+          
+          // test for a special case because we know schema location isn't copied to output
+          if ( $att1_name == "schemaLocation"  || $att1_name == "noNamespaceSchemaLocation" ) {
+              //echo $message . "\n";
+          } else {
+              throw new Exception ( $message );
+          }
+      } 
   }
-  else
-  {
-    $reason = $reason . $namespace;
+  
+  if ( $count1 != $count2 ) {
+         $message = $message . "Attribute counts not equal count1 = " . $count1 . " count2 = " . $count2;
+         throw new Exception ( $message );
   }
-
-  $attributecount = compareNodeCount ( $node1->getName(), $attributes1, $attributes2, $reason );
-
+  
+  $attributecount = $count1;
+  
   if ( DEBUG == "on" && $attributecount > 0){
     echo "ATTRIBUTES\n";
   }
 
+  /*
   for ( $i = 0; $i < $attributecount; $i += 1) {
     compareXMLAttribute ( $attributes1[$i], $attributes2[$i] );
   }
+  */
+
 }
 
 /* 
