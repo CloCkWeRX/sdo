@@ -51,6 +51,7 @@ The main changes since 1.0.4 are:
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
+   <dep type="pkg" rel="not" optional="no">sdo</dep>
   </deps>
   <filelist>
     <dir name="SCA">

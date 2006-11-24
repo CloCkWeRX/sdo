@@ -177,6 +177,7 @@
     $packagexml->addMaintainer('slaws','lead','Simon Laws','simonslaws@googlemail.com');
     
     $packagexml->addDependency('php', '5.1.0', 'ge', 'php');
+    $packagexml->addDependency('sdo', false, 'not', 'pkg');
     
     if (PEAR::isError($e)) {
         echo $e->getMessage();
