@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 472054 $ $Date$ */
+/* $Rev: 483416 $ $Date$ */
 
 //////////////////////////////////////////////////////////////////////
 // DataFactoryImpl.cpp: implementation of the DataFactory class.
@@ -98,7 +98,7 @@ DataFactoryImpl::~DataFactoryImpl()
         }
     }
 
-	rootElementName.erase();
+    rootElementName.erase();
 
 }
 
@@ -166,7 +166,7 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
 
         if ((typeIter->second)->getAliasCount() > 0)
         {
-            for (int j=0;j<(typeIter->second)->getAliasCount();j++)
+            for (unsigned int j=0;j<(typeIter->second)->getAliasCount();j++)
             {
                 (typeIter2->second)->setAlias(
                     (typeIter->second)->getAlias());
@@ -176,7 +176,7 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
         
         // Now add all the properties
         PropertyList props = typeIter->second->getProperties();
-        for (int i=0; i < props.size(); i++)
+        for (unsigned int i=0; i < props.size(); i++)
         {
             // Ensure the properties type is added
             const Type& propType = props[i].getType();
@@ -200,7 +200,7 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
                     getPropertyImpl(props[i].getName());
                 if (p != 0)
                 {
-                    for (int j=0;j<p->getAliasCount();j++)
+                    for (unsigned int j=0;j<p->getAliasCount();j++)
                     {
                         p->setAlias(props[i].getAlias(j));
                     }
@@ -267,7 +267,7 @@ void DataFactoryImpl::addType(const SDOString& uri, const SDOString& inTypeName,
                                 bool isData,
                                 bool isFromList)
 {
-	addType(uri.c_str(), inTypeName.c_str(), isSeq, isOp, isAbs, isData, isFromList);
+    addType(uri.c_str(), inTypeName.c_str(), isSeq, isOp, isAbs, isData, isFromList);
 }
 
 // ===================================================================
@@ -286,7 +286,7 @@ bool DataFactoryImpl::recursiveCheck(TypeImpl* cs, TypeImpl* t)
 
     PropertyList pl = cs->getProperties();
     
-    for (int i=0 ; i < pl.size() ; i++ )
+    for (unsigned int i=0 ; i < pl.size() ; i++ )
     {
         if (recursiveCheck((TypeImpl*)&(pl[i].getType()), t)) return true;
     }
@@ -309,7 +309,7 @@ bool DataFactoryImpl::checkForValidChangeSummary(TypeImpl* t)
     }
 
     if (cstypes.size() > 0) {
-        for (int i = 0 ;i < cstypes.size(); i++) 
+        for (unsigned int i = 0 ;i < cstypes.size(); i++) 
         {
             if (recursiveCheck(cstypes[i], t)) 
             {
@@ -724,7 +724,7 @@ const Type& DataFactoryImpl::getType(const char* uri, const char* inTypeName) co
 
 const Type& DataFactoryImpl::getType(const SDOString& uri, const SDOString& inTypeName) const
 {
-	return getType(uri.c_str(), inTypeName.c_str());
+    return getType(uri.c_str(), inTypeName.c_str());
 }
 
 // ===================================================================
@@ -778,16 +778,16 @@ void DataFactoryImpl::setBaseType( const char* typeuri,
 }
 
 void DataFactoryImpl::setBaseType(const SDOString& typeuri,
-								  const SDOString& typenam,
-								  const SDOString& baseuri,
-								  const SDOString& basename,
-								  bool isRestriction)
+                                  const SDOString& typenam,
+                                  const SDOString& baseuri,
+                                  const SDOString& basename,
+                                  bool isRestriction)
 {
-	setBaseType(typeuri.c_str(),
-		typenam.c_str(),
-		baseuri.c_str(),
-		basename.c_str(),
-		isRestriction);
+    setBaseType(typeuri.c_str(),
+        typenam.c_str(),
+        baseuri.c_str(),
+        basename.c_str(),
+        isRestriction);
 }
 
 
@@ -1302,7 +1302,7 @@ void DataFactoryImpl::setAlias(const SDOString& typeuri,
                               const SDOString& typenam,
                               const SDOString& alias)
 {
-	setAlias(typeuri.c_str(), typenam.c_str(), alias.c_str());
+    setAlias(typeuri.c_str(), typenam.c_str(), alias.c_str());
 }
 
 // ===================================================================
@@ -1325,7 +1325,7 @@ void DataFactoryImpl::setAlias(const SDOString& typeuri,
                               const SDOString& propname,
                               const SDOString& alias)
 {
-	setAlias(typeuri.c_str(), typenam.c_str(), propname.c_str(), alias.c_str());
+    setAlias(typeuri.c_str(), typenam.c_str(), propname.c_str(), alias.c_str());
 }
 
 // ===================================================================
@@ -1651,67 +1651,6 @@ DASValue* DataFactoryImpl::getDASValue(
     return getDASValue(typeuri.c_str(), typenam.c_str(), propertyName.c_str(), name.c_str());
 }
 
-bool DataFactoryImpl::compareTypes(const TypeImpl* t1, const Type& t2)
-{
-    PropertyList pl = t2.getProperties();
-    for (int i=0;i<pl.size();i++)
-    {
-        PropertyImpl* p = t1->getPropertyImpl(i);
-        if (p == 0) return false;
-        if (p->isMany() != pl[i].isMany()) return false;
-        if (p->isContainment() != pl[i].isContainment()) return false;
-        if (strcmp(   p->getType().getURI(),
-                   pl[i].getType().getURI())) return false;
-        if (strcmp(   p->getType().getName(),
-                   pl[i].getType().getName())) return false;
-    }
-    return true;
-
-}
-bool DataFactoryImpl::checkType(const Type& t)
-{
-    const TypeImpl* t2 = findTypeImpl(t.getURI(),
-                                     t.getName());
- 
-    if (t2 == 0) return false;
- 
-    if (!compareTypes(t2,t)) return false;
-
-    PropertyList pl = t.getProperties();
-    for (int i=0;i<pl.size();i++)
-    {
-        if (pl[i].getType().isDataObjectType())
-        {
-            if (!checkType(pl[i].getType())) return false;
-        }
-    }
-    return true;
-}
- 
-
-// only checks the tree dirctly descended from this object if the
-// object is specified, otherwise validates the whole factory
-
-bool DataFactoryImpl::isCompatible(DataFactory* df, DataObject* d)
-{
-    if (d == 0)
-    {
-        TypeList tl = df->getTypes();
-        for (int j=0;j<tl.size();j++)
-        {
-            const TypeImpl* t = findTypeImpl(tl[j].getURI(),
-                                        tl[j].getName());
- 
-            if (t == 0) return false;
-            if (!compareTypes(t,tl[j]))return false;
-        }
-        return true;
-    }
-    else
-    {
-        return checkType(d->getType());
-    }
-}
 
 bool DataFactoryImpl::generateInterface(const char* fileroot, const char* factoryname)
 {
@@ -1776,7 +1715,7 @@ bool DataFactoryImpl::generateInterface(const char* fileroot, const char* factor
         fprintf(header," * Forward declarations and smart pointers *\n");
         fprintf(header," *******************************************/\n\n\n");
 
-        int i;
+        unsigned int i;
         for (i=0;i<tl.size();i++)
         {
             nscount = 0;
@@ -1846,7 +1785,7 @@ bool DataFactoryImpl::generateInterface(const char* fileroot, const char* factor
             {
                 the_uri = new char[2 * strlen(uri) + 1];
                 int jj=0;
-                for (int ii=0;ii<strlen(uri);ii++)
+                for (unsigned int ii=0;ii<strlen(uri);ii++)
                 {
                     if (uri[ii] == '.')
                     {
@@ -1949,7 +1888,7 @@ bool DataFactoryImpl::generateInterface(const char* fileroot, const char* factor
 
 
             PropertyList pl = tl[i].getProperties();
-            for (int j=0;j<pl.size();j++)
+            for (unsigned int j=0;j<pl.size();j++)
             {
                 const char* pname = pl[j].getName();
 
@@ -2176,7 +2115,7 @@ bool DataFactoryImpl::generateInterface(const char* fileroot, const char* factor
 
 bool DataFactoryImpl::generateInterface(const SDOString& fileroot, const SDOString& factoryname)
 {
-	return generateInterface(fileroot.c_str(), factoryname.c_str());
+    return generateInterface(fileroot.c_str(), factoryname.c_str());
 }
     
     std::ostream& DataFactoryImpl::printSelf(std::ostream &os)

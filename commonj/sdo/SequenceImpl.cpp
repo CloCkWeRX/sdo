@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/disable_warn.h"
 #include "commonj/sdo/Property.h"
@@ -639,7 +639,7 @@ charAdder ( Bytes , const char* );
     {\
         SEQUENCE_ITEM_LIST::iterator i;\
         SEQUENCE_ITEM_LIST::iterator i2 = the_list.end();\
-        int j;\
+        unsigned int j;\
         if (index >= the_list.size()) {\
             return add##primtype(p,v);\
         }\
@@ -701,7 +701,7 @@ charAdder ( Bytes , const char* );
     {\
         SEQUENCE_ITEM_LIST::iterator i;\
         SEQUENCE_ITEM_LIST::iterator i2 = the_list.end();\
-        int j;\
+        unsigned int j;\
         if (index >= the_list.size()) {\
             return add##primtype(p,v);\
         }\
@@ -837,7 +837,7 @@ charInserter (Bytes , const char* );
             msg.c_str());
         }
         SEQUENCE_ITEM_LIST::iterator i;
-        int j = 0;
+        unsigned int j = 0;
         for (i=the_list.begin();(j < index) && (i != the_list.end()) ; ++i)
         {
             j++;
@@ -890,7 +890,7 @@ charInserter (Bytes , const char* );
         SEQUENCE_ITEM_LIST::iterator i1,
                             i2 = the_list.end(), 
                             i3 = the_list.end();
-        int j = 0;
+        unsigned int j = 0;
         for (i3 = the_list.begin(); 
              j < toIndex && j < fromIndex && 
                  i3 != the_list.end() ; ++i3);
@@ -932,7 +932,7 @@ charInserter (Bytes , const char* );
             return false;
         }
         SEQUENCE_ITEM_LIST::iterator i;
-        int j = 0;
+        unsigned int j = 0;
         for (i= the_list.begin(); (j < index) && (i != the_list.end()); ++i)
         {
             j++;
@@ -952,7 +952,7 @@ charInserter (Bytes , const char* );
         }
 
         SEQUENCE_ITEM_LIST::iterator i;
-        int j = 0;
+        unsigned int j = 0;
         for (i= the_list.begin(); (j < index) && (i != the_list.end()); ++i)
         {
             j++;
@@ -973,7 +973,7 @@ charInserter (Bytes , const char* );
         }
 
         SEQUENCE_ITEM_LIST::iterator i;
-        int j = 0;
+        unsigned int j = 0;
         for (i= the_list.begin(); (j < index) && (i != the_list.end()); ++i)
         {
             j++;

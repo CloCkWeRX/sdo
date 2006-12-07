@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 477820 $ $Date$ */
+/* $Rev: 483416 $ $Date$ */
 
 #ifndef _DATAOBJECTIMPL_H_
 #define _DATAOBJECTIMPL_H_
@@ -591,7 +591,6 @@ class DataObjectImpl : public DataObject
     virtual const PropertyImpl* defineList(const char* propname);
     virtual void  undefineProperty(unsigned int index);
     virtual const TypeImpl& getTypeImpl();
-    virtual void transferChildren(DataObject* d, DataFactory* f);
     virtual void setDataFactory(DataFactory *df);
 
     virtual std::ostream& printSelf(std::ostream &os);
@@ -662,7 +661,7 @@ private:
 
  
     // Support for open types
-    int openBase;
+    unsigned int openBase;
     std::list<PropertyImpl> openProperties;
 
     static const char* emptyString;

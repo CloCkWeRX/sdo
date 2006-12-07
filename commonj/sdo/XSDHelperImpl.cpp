@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLFileWriter.h"   // Include first to avoid libxml compile problems!
 #include "commonj/sdo/SDOXMLStreamWriter.h" // Include first to avoid libxml compile problems!
@@ -141,7 +141,7 @@ namespace commonj
                             prop.typeUri : prop.substituteUri; 
                 const Type& rootType = dataFactory->getType(typeUri, entryName);
                 PropertyList pl = rootType.getProperties();
-                for (int j = 0; j < pl.size(); j++)
+                for (unsigned int j = 0; j < pl.size(); j++)
                 {
                     if (!pl[j].getType().isDataType()
                         && strcmp(pl[j].getType().getURI(),Type::SDOTypeNamespaceURI.c_str()))
@@ -188,7 +188,7 @@ namespace commonj
                 const Type* rootType = df->findType(typeUri,"RootType");
                 if (rootType == 0) return;
                 PropertyList pl = rootType->getProperties();
-                for (int j = 0; j < pl.size(); j++)
+                for (unsigned int j = 0; j < pl.size(); j++)
                 {
                     XSDPropertyInfo* pi = (XSDPropertyInfo*)
                     ((DASProperty*)&pl[j])->getDASValue("XMLDAS::PropertyInfo");
@@ -342,7 +342,7 @@ namespace commonj
                             (const char*)ty.name,
                             (const char*)ty.parentTypeUri,
                             (const char*)ty.parentTypeName,
-                            (const char*)ty.isRestriction);
+                            ty.isRestriction);
                     }        
                     catch (SDORuntimeException& e)
                     {
@@ -395,7 +395,7 @@ namespace commonj
                                 const Type& rootType = dataFactory->getType(prop.typeUri, "RootType");
                                 PropertyList pl = rootType.getProperties();
 
-                                for (int j = 0; j < pl.size(); j++)
+                                for (unsigned int j = 0; j < pl.size(); j++)
                                 {
                                     
                                     XSDPropertyInfo* pi = (XSDPropertyInfo*)
@@ -444,9 +444,9 @@ namespace commonj
                             (const char*)prop.name,
                             (const char*)prop.typeUri,
                             (const char*)prop.typeName,
-                            (const char*)prop.isMany,
-                            (const char*)prop.isReadOnly,
-                            (const char*)prop.isContainment);
+                            prop.isMany,
+                            prop.isReadOnly,
+                            prop.isContainment);
 
                         LOGINFO_1(INFO,"XSDHelper adds property %s",(const char*)(prop.name));
 
@@ -611,13 +611,13 @@ namespace commonj
             return retString;
         }
 
-        int XSDHelperImpl::getErrorCount() const
+        unsigned int XSDHelperImpl::getErrorCount() const
         {
             return parseErrors.size();
         }
 
 
-        const char* XSDHelperImpl::getErrorMessage(int errnum) const
+        const char* XSDHelperImpl::getErrorMessage(unsigned int errnum) const
         {
             if (errnum >= 0 && errnum < parseErrors.size())
             {

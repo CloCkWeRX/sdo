@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef _DATAOBJECTLISTIMPL_H_
 #define _DATAOBJECTLISTIMPL_H_
@@ -62,8 +62,8 @@ public:
     // open type support
     virtual void decrementPindex();
 
-    virtual DataObjectPtr operator[] (int pos);
-    virtual const DataObjectPtr operator[] (int pos) const;
+    virtual DataObjectPtr operator[] (unsigned int pos);
+    virtual const DataObjectPtr operator[] (unsigned int pos) const;
 
     // set/get primitive values 
     virtual bool getBoolean(unsigned int index) const;
@@ -99,7 +99,7 @@ public:
 
     virtual unsigned int getLength(unsigned int index) const;
 
-    virtual int size () const;
+    virtual unsigned int size () const;
 
     virtual void insert (unsigned int index, DataObjectPtr d);
     virtual void append (DataObjectPtr d);
@@ -192,7 +192,7 @@ private:
     unsigned int pindex;
     bool isReference;
 
-    void validateIndex(int index) const;
+    void validateIndex(unsigned int index) const;
 
     static const SDOString BooleanLiteral;
     static const SDOString ByteLiteral;

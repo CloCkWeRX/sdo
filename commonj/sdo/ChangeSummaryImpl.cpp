@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/ChangeSummaryImpl.h"
 
@@ -148,7 +148,7 @@ namespace sdo{
         // find any properties which are data objects, log their
         // deletion first.
 
-        int i;
+        unsigned int i;
 
         // Trace for change summaries
 
@@ -173,7 +173,7 @@ namespace sdo{
             if (changeLogIter != changedMap.end())
             {
                 // would hope there was an entry
-                int index;
+                unsigned int index;
                 if (prop.isMany())
                 {
                     DataObjectList& dl = container->getList(prop);
@@ -377,7 +377,7 @@ namespace sdo{
         // need to be created too
 
         PropertyList pl = ob->getInstanceProperties();
-        for (int p=0;p<pl.size();p++)
+        for (unsigned int p=0;p<pl.size();p++)
         {
             Property& thisprop = pl[p];
             if (!thisprop.getType().isDataType())
@@ -389,7 +389,7 @@ namespace sdo{
                     if (thisprop.isMany())
                     {
                         DataObjectList& dol = ob->getList(thisprop);
-                        for (int ds = 0; ds < dol.size(); ds++) 
+                        for (unsigned int ds = 0; ds < dol.size(); ds++) 
                         {
                             dp = dol[ds];
                             if (!dp) continue; 
@@ -837,7 +837,7 @@ namespace sdo{
                 slist.append(new Setting(false,false,0,0,prop,0));
                 return;
             }
-            for (int i=0;i< dol.size(); i++)
+            for (unsigned int i=0;i< dol.size(); i++)
             {
                 DataObject* dob = dol[i];
                 if (prop.getType().isDataType()) {
@@ -1275,7 +1275,7 @@ namespace sdo{
             {
                 char* vw = new char[(strlen(c)+1)*sizeof(wchar_t)];                
                 wchar_t* pvw = (wchar_t*)vw;
-                for (int i=0;i< strlen(c);i++)
+                for (unsigned int i=0;i< strlen(c);i++)
                 {
                     pvw[i] = (wchar_t)c[i];
                 }
@@ -1287,7 +1287,7 @@ namespace sdo{
         case Type::BytesType:
             {
                 char* vc = new char[strlen(c)+1];
-                for (int i=0;i< strlen(c);i++)
+                for (unsigned int i=0;i< strlen(c);i++)
                 {
                     vc[i] =  (char)c[i];
                 }

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 482588 $ $Date$ */
 
 #include "commonj/sdo/SAX2Parser.h"
 #include "libxml/SAX2.h"
 #include "commonj/sdo/SDORuntimeException.h"
-#include "commonj/sdo/PropertySetting.h"
+#include "commonj/sdo/SDOUtils.h"
 using namespace commonj::sdo;
 
 /**
@@ -172,9 +172,9 @@ void sdo_cdataBlock(void *ctx, const xmlChar *value, int len)
 	{
 		SDOXMLString valueAsString(value, 0, len);
 
-		SDOXMLString cdata(PropertySetting::CDataStartMarker);
+		SDOXMLString cdata(SDOUtils::CDataStartMarker);
 		cdata = cdata + valueAsString;
-		cdata = cdata + PropertySetting::CDataEndMarker;
+		cdata = cdata + SDOUtils::CDataEndMarker;
 
         ((SAX2Parser*)ctx)->characters(cdata);
 	}
@@ -500,7 +500,7 @@ namespace commonj
             ctxt = xmlCreatePushParserCtxt(handler, this,
                 bctx, bcount, NULL);
             
-            for (int i=0;i<buffer_vec.size();i++)
+            for (unsigned int i=0;i<buffer_vec.size();i++)
             {
                 if (buffer_vec[i].len > 0)
                 {

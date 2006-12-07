@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/ChangeSummaryBuilder.h"
 
@@ -95,7 +95,7 @@ namespace commonj
 
                     if ((*elementsiter).isDeletion)
                     {
-                        for (int i = 0; i < deletions.size(); i++)
+                        for (unsigned int i = 0; i < deletions.size(); i++)
                         {
                             if (value.equals (deletions[i].reference))
                             {
@@ -249,7 +249,7 @@ namespace commonj
             }
 
             // it could be a deletion which has not been processed yet
-            for (int i = 0; i < deletions.size(); i++)
+            for (unsigned int i = 0; i < deletions.size(); i++)
             {
                 if (contpath.equals (deletions[i].reference))
                 {
@@ -302,7 +302,7 @@ namespace commonj
             SDOXMLString refstring = createDeletes[index].value.substring(0,pos);
             pos = atoi((const char*)(createDeletes[index].value.substring(pos+1)));
                                      
-            for (int k=index+1;k<createDeletes.size();k++)
+            for (unsigned int k=index+1;k<createDeletes.size();k++)
             {
 
                 if (createDeletes[k].type.equals("create")) continue;
@@ -329,7 +329,7 @@ namespace commonj
         {
             LOGENTRY(INFO,"CSBuilder:buildChangeSummary");
 
-            int i;
+            unsigned int i;
 
             try {
                 if (changeSummaryDO == 0)
@@ -395,7 +395,7 @@ namespace commonj
                     else 
                     {
                         // its a deletion - match it.
-                        for (int j = 0; j < deletions.size(); j++)
+                        for (unsigned int j = 0; j < deletions.size(); j++)
                         {
                             if (deletions[j].completedprocessing)continue;
 
@@ -421,7 +421,7 @@ namespace commonj
                 std::list<changeAttribute>::iterator a;
                 std::list<changeElement>::iterator e;
 
-                for (i = 0; i< changes.size(); i++)
+                for (unsigned i = 0; i< changes.size(); i++)
                 {
                     DataObjectPtr dob;
                     if (changes[i].reference.isNull())
@@ -451,7 +451,7 @@ namespace commonj
                             }
                             else
                             {
-                                for (int j = 0; j < deletions.size(); j++)
+                                for (unsigned int j = 0; j < deletions.size(); j++)
                                 {
                                     if ((*a).value.equals (deletions[j].reference))
                                     {
@@ -473,7 +473,7 @@ namespace commonj
                                 LOGINFO_1(INFO,"CSBuilder Change was a deletion of:%s",
                                     (const char*)((*e).path));
 
-                                for (int j = 0; j < deletions.size(); j++)
+                                for (unsigned int j = 0; j < deletions.size(); j++)
                                 {
                                     if ((*e).path.equals (deletions[j].reference))
                                     {
@@ -635,7 +635,7 @@ namespace commonj
 
                 if (currentLocation.size() > 0)
                 {
-                    for (int pi = 0; pi < currentLocation.size()-1; pi++)
+                    for (unsigned int pi = 0; pi < currentLocation.size()-1; pi++)
                     {
                         curr_loc  = curr_loc + currentLocation[pi];
                         curr_loc = curr_loc + "/";
@@ -674,7 +674,7 @@ namespace commonj
 
                     bool isDelete = false;
 
-                    for (int i = 0; i < createDeletes.size(); i++)
+                    for (unsigned int i = 0; i < createDeletes.size(); i++)
                     {
                         if (createDeletes[i].type.equals("delete"))
                         {
@@ -768,7 +768,7 @@ namespace commonj
                 SDOXMLString curr_loc = "";
                 if (currentLocation.size() > 0)
                 {
-                    for (int pi = 0; pi < currentLocation.size()-1; pi++)
+                    for (unsigned int pi = 0; pi < currentLocation.size()-1; pi++)
                     {
                         curr_loc  = curr_loc + currentLocation[pi];
                         curr_loc = curr_loc + "/";
@@ -783,7 +783,7 @@ namespace commonj
                     // can we match the current path to a known deletion?
                     bool isDelete = false;
 
-                    for (int i = 0; i < createDeletes.size(); i++)
+                    for (unsigned int i = 0; i < createDeletes.size(); i++)
                     {
                         if (createDeletes[i].type.equals("delete"))
                         {

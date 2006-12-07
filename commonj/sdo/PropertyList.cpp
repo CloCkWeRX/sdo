@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef SDO_EXPORTS
     #define SDO_EXPORTS
@@ -74,7 +74,7 @@ SDO_API const Property& PropertyList::operator[] (int pos) const
     return *(plist[pos]);
 }
 
-SDO_API int PropertyList::size () 
+SDO_API unsigned int PropertyList::size () 
 {
     return plist.size();
 }

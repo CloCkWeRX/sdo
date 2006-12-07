@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 472054 $ $Date$ */
+/* $Rev: 483416 $ $Date$ */
 
 #ifndef _DataFactoryIMPL_H_
 #define _DataFactoryIMPL_H_
@@ -663,9 +663,6 @@ public:
     virtual const TypeImpl& getTypeImpl(const SDOString& uri, const SDOString& inTypeName) const;
     virtual const SDOString& getRootElementName() const;
     virtual void setRootElementName(const SDOString& ren);
-    virtual bool checkType(const Type& t);
-    virtual bool isCompatible(DataFactory* df, DataObject* d);
-    virtual bool compareTypes(const TypeImpl* t1, const Type& t2);
 
     virtual bool generateInterface(const char* fileroot, const char* factoryname);
     virtual bool generateInterface(const SDOString& fileroot, const SDOString& factoryname);

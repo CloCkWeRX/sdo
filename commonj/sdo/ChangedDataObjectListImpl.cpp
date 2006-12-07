@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/ChangedDataObjectListImpl.h"
 
@@ -128,7 +128,7 @@ namespace sdo {
      *
      */
 
-    RefCountingPointer<DataObject> ChangedDataObjectListImpl::operator[] (int pos)
+    RefCountingPointer<DataObject> ChangedDataObjectListImpl::operator[] (unsigned int pos)
     {
         validateIndex(pos);
         return plist[pos].getObject();
@@ -139,7 +139,7 @@ namespace sdo {
      *
      */
 
-    const RefCountingPointer<DataObject> ChangedDataObjectListImpl::operator[] (int pos) const
+    const RefCountingPointer<DataObject> ChangedDataObjectListImpl::operator[] (unsigned int pos) const
     {    
         validateIndex(pos);
         return  plist[pos].getObject();
@@ -160,7 +160,7 @@ namespace sdo {
      *
      */
 
-    int ChangedDataObjectListImpl::size () const
+    unsigned int ChangedDataObjectListImpl::size () const
     {
         return plist.size();
     }
@@ -229,7 +229,7 @@ namespace sdo {
      *  checks that the index is in range.
      */
 
-    void ChangedDataObjectListImpl::validateIndex(int index) const
+    void ChangedDataObjectListImpl::validateIndex(unsigned int index) const
     {
         if ((index < 0) || (index >= size()))
         {

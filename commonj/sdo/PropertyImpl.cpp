@@ -17,15 +17,12 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 482678 $ $Date$ */
+
+#include "commonj/sdo/export.h"
 
 #include <iostream>
 using namespace std;
-
-#ifndef SDO_EXPORTS 
-#define SDO_EXPORTS
-#endif
-#include "commonj/sdo/export.h"
 
 
 #include "commonj/sdo/Sequence.h"
@@ -266,7 +263,7 @@ namespace commonj{
        ///////////////////////////////////////////////////////////////////////////
     const Type* PropertyImpl::getSubstitutionType(const char* inname) const 
     {
-        for (int i=0;i<substitutions.size();i++)
+        for (unsigned int i=0;i<substitutions.size();i++)
         {
             if (!strcmp(inname, substitutions[i].name.c_str()))
             {

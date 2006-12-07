@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 462804 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLString.h"
 #include <iostream>
@@ -174,7 +174,7 @@ namespace commonj
         {
             char* newString = new char[strlen(*this)+1];
             strcpy(newString, *this);
-            for (int i = start; (i<=(strlen(newString)) && i < length); i++)
+            for (unsigned int i = start; (i<=(strlen(newString)) && i < length); i++)
             {
                 newString[i] = tolower(newString[i]);
             }

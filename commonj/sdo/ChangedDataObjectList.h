@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef _CHANGEDDATAOBJECTLIST_H_
 #define _CHANGEDDATAOBJECTLIST_H_
@@ -68,15 +68,15 @@ public:
  * 
  * Gets the nth element of a list
  */
-    virtual SDO_API DataObjectPtr operator[] (int pos) = 0;
-    virtual SDO_API const DataObjectPtr operator[] (int pos) const = 0;
+    virtual SDO_API DataObjectPtr operator[] (unsigned int pos) = 0;
+    virtual SDO_API const DataObjectPtr operator[] (unsigned int pos) const = 0;
 
 /**  size() returns the number of list elements.
  * 
  * Returns the number of list elements
  */
 
-    virtual SDO_API int size () const = 0;
+    virtual SDO_API unsigned int size () const = 0;
 
 /**  getType() returns the type of a list element.
  * 

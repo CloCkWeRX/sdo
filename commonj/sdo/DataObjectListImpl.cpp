@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 483416 $ $Date$ */
 
 #include "commonj/sdo/DataObjectListImpl.h"
 
@@ -140,13 +140,13 @@ DataObjectListImpl::~DataObjectListImpl()
     }
 }
 
-RefCountingPointer<DataObject> DataObjectListImpl::operator[] (int pos)
+RefCountingPointer<DataObject> DataObjectListImpl::operator[] (unsigned int pos)
 {
     validateIndex(pos);
     return plist[pos];
 }
 
-const RefCountingPointer<DataObject> DataObjectListImpl::operator[] (int pos) const
+const RefCountingPointer<DataObject> DataObjectListImpl::operator[] (unsigned int pos) const
 {
     validateIndex(pos);
     RefCountingPointer<DataObjectImpl> d = plist[pos];
@@ -155,7 +155,7 @@ const RefCountingPointer<DataObject> DataObjectListImpl::operator[] (int pos) co
 }
 
 
-int DataObjectListImpl::size () const
+unsigned int DataObjectListImpl::size () const
 {
     return plist.size();
 }
@@ -203,7 +203,7 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
     {
         container->logChange(pindex);
     }
-    for (int i=0;i < plist.size(); i++)
+    for (unsigned int i=0;i < plist.size(); i++)
     {
         if (plist[i] == d)
         {
@@ -280,13 +280,6 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
 
         if (d->getDataFactory() == theFactory) return;
 
-        // temporary experiment with allowing data objects
-        // to move from factory to factory if the type is 
-        // nominally present, and the type systems match
-
-        DataFactoryImpl* f = (DataFactoryImpl*)theFactory;
-
-
         if (d->getContainer() != 0)
         {
             std::string msg("Insertion of object into list from another factory is only allowed if the parent is null: ");
@@ -304,31 +297,6 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
             SDO_THROW_EXCEPTION("checkFactory", SDOInvalidConversionException,
             msg.c_str());
         }
-
-        if (f->isCompatible(d->getDataFactory(),d))
-        {
-            d->setDataFactory(theFactory);
-            // we will also need to transfer any children - assuming they
-            // are ok in the new factory!!
-            d->transferChildren(d,theFactory);
-            return;
-        }
-
-        std::string msg("Insertion into list from incompatible factory:");
-        
-        const Type& t = d->getType();
-        msg += t.getURI();
-        msg += "#";
-        msg += t.getName();
-        msg += " into property  ";
-        msg += container->getProperty(pindex).getName();
-        msg += " of type ";
-        msg += typeURI;
-        msg += "#";
-        msg += typeName;
-        SDO_THROW_EXCEPTION("checkFactory", SDOInvalidConversionException,
-            msg.c_str());
-
     }
 
 
@@ -355,7 +323,7 @@ void DataObjectListImpl::checkType(const Type& listType, const Type& objectType)
                 if (pi != 0)
                 {
                     unsigned int subcount = pi->getSubstitutionCount();
-                    for (int i=0;i<subcount;i++)
+                    for (unsigned int i=0;i<subcount;i++)
                     {
                         const Type* tsub = pi->getSubstitutionType(i);
                         if (tsub != 0 && tsub->equals(objectType)) return;
@@ -438,7 +406,7 @@ void DataObjectListImpl::append (DataObjectPtr d)
         container->logChange(pindex);
     }
 
-    for (int i=0;i < plist.size(); i++)
+    for (unsigned int i=0;i < plist.size(); i++)
     {
         if (plist[i] == d)
         {
@@ -619,7 +587,7 @@ void DataObjectListImpl::insert (unsigned int index, const char* d)
 {
     if (theFactory == 0) return;
 
-    if (typeUnset)setType(Type::SDOTypeNamespaceURI, BytesLiteral);
+    if (typeUnset)setType(Type::SDOTypeNamespaceURI, StringLiteral);
 
     RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
     DataObject* dob = dol;
@@ -630,7 +598,7 @@ void DataObjectListImpl::insert (unsigned int index, const SDOString& d)
 {
     if (theFactory == 0) return;
 
-    if (typeUnset)setType(Type::SDOTypeNamespaceURI, BytesLiteral);
+    if (typeUnset)setType(Type::SDOTypeNamespaceURI, StringLiteral);
 
     RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
     DataObject* dob = dol;
@@ -642,7 +610,7 @@ void DataObjectListImpl::append (const char* d)
 {
     if (theFactory == 0) return;
 
-    if (typeUnset)setType(Type::SDOTypeNamespaceURI, BytesLiteral);
+    if (typeUnset)setType(Type::SDOTypeNamespaceURI, StringLiteral);
 
     RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
     DataObject* dob = dol;
@@ -654,7 +622,7 @@ void DataObjectListImpl::append (const SDOString& d)
 {
     if (theFactory == 0) return;
 
-    if (typeUnset)setType(Type::SDOTypeNamespaceURI, BytesLiteral);
+    if (typeUnset)setType(Type::SDOTypeNamespaceURI, StringLiteral);
 
     RefCountingPointer<DataObject> dol = theFactory->create(typeURI, typeName);
     DataObject* dob = dol;
@@ -841,7 +809,7 @@ RefCountingPointer<DataObject> DataObjectListImpl::remove(unsigned int index)
     return d;
 }
 
-void DataObjectListImpl::validateIndex(int index) const
+void DataObjectListImpl::validateIndex(unsigned int index) const
 {
     if ((index < 0) || (index >= size()))
     {

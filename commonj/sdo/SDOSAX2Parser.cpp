@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 477891 $ $Date$ */
+/* $Rev: 482588 $ $Date$ */
 
 #include "commonj/sdo/SDOSAX2Parser.h"
 
@@ -32,6 +32,7 @@
 #include "commonj/sdo/TypeImpl.h"
 #include "commonj/sdo/DataObjectImpl.h"
 #include "commonj/sdo/DataFactoryImpl.h"
+#include "commonj/sdo/SDOUtils.h"
 #include <stdio.h>
 using namespace std;
 
@@ -1334,11 +1335,18 @@ namespace commonj
             DataObject* dob = currentDataObject;
             if ((dob != 0)  && ((DataObjectImpl*)dob)->getTypeImpl().isFromList())
             {
-                // this is a list,so we need to split it up
+                 // this is a list,so we need to split it up
                 DataObjectList& dl = currentDataObject->getList(
                        (const char *)"values");
 
                 const char* str = (const char*)chars;
+         
+                // Convert any synthetic CDATA markers back to the real thing
+                SDOString valueString(str);
+                SDOString tmpString = SDOUtils::replace(valueString, SDOUtils::CDataStartMarker, SDOUtils::XMLCDataStartMarker);
+                tmpString = SDOUtils::replace(tmpString, SDOUtils::CDataEndMarker, SDOUtils::XMLCDataEndMarker);  
+                str =  (const char*)tmpString.c_str();  
+                    
                 char* buf = new char[strlen(str)+1];
                 if (!buf) return;
 
@@ -1371,12 +1379,20 @@ namespace commonj
             // then add this as text to the sequence
             if (currentDataObject && currentDataObjectType->isSequencedType())
             {
+                // Convert any synthetic CDATA markers back to the real thing     
+                const char* str = (const char*)chars;
+            
+                SDOString valueString(str);
+                SDOString tmpString = SDOUtils::replace(valueString, SDOUtils::CDataStartMarker, SDOUtils::XMLCDataStartMarker);
+                tmpString = SDOUtils::replace(tmpString, SDOUtils::CDataEndMarker, SDOUtils::XMLCDataEndMarker);  
+                str =  tmpString.c_str(); 
+                                
                 SequencePtr seq = currentDataObject->getSequence();
                 if (seq)
                 {
                     if (newSequence == true)
                     {
-                        seq->addText(chars);
+                        seq->addText(str);
                         newSequence = false;
                     }
                     else
@@ -1390,20 +1406,20 @@ namespace commonj
                                 if (s)
                                 {
                                     char *combi = 
-                                        new char[strlen(s)+strlen(chars) + 2];
+                                        new char[strlen(s)+strlen(str) + 2];
                                     strcpy(combi,s);
-                                    strcat(combi,chars);
+                                    strcat(combi,str);
                                     seq->setText(k,(const char*)combi);
                                     delete combi;
                                 }
                                 else
                                 {
-                                    seq->setText(k,chars);
+                                    seq->setText(k,str);
                                 }
                                 return;
                             }
                         }
-                        seq->addText(chars);
+                        seq->addText(str);
                     }
                     return;
                 }
@@ -1451,7 +1467,7 @@ namespace commonj
             */
 
             PropertyList pl = type.getProperties();
-            for (int i = 0; i < pl.size(); i++)
+            for (unsigned int i = 0; i < pl.size(); i++)
             {
                 XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&pl[i])->getDASValue("XMLDAS::PropertyInfo");
                 if (pi)
@@ -1460,7 +1476,7 @@ namespace commonj
                     if (localName .equals(propdef.localname))
                         return propdef.name;
 
-                    for (int j=0;j< propdef.substituteNames.size();j++)
+                    for (unsigned int j=0;j< propdef.substituteNames.size();j++)
                     {
                         if (propdef.substituteLocalNames[j].equals(localName))
                         {

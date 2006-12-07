@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 483011 $ $Date$ */
 
 #ifndef _COPYHELPER_H_
 #define _COPYHELPER_H_
@@ -62,7 +62,12 @@ class CopyHelper
     private:
     static void transferlist(DataObjectList& to, DataObjectList& from, Type::Types t);
     static void transferitem(DataObjectPtr   to, DataObjectPtr   from, const Property& p);
+    static void transfersequenceitem(Sequence *to, Sequence *from, const Property& p, int index);
+
     static DataObjectPtr internalCopy(DataObjectPtr dataObject, bool fullCopy);
+    static void resolveReferences(DataObjectPtr oldDO, DataObjectPtr newDO);
+    static void findReferences(DataObjectPtr oldDO, DataObjectPtr newDO, DataObjectPtr obj, DataObjectPtr newObj);
+    static DataObjectPtr findReference(DataObjectPtr oldDO, DataObjectPtr newDO, DataObjectPtr ref);
 
 };
 };

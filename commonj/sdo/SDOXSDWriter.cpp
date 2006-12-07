@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/SDOXSDWriter.h"
 #include "iostream"
@@ -163,7 +163,7 @@ namespace commonj
         int SDOXSDWriter::write(const TypeList& types, const SDOXMLString& targetNamespaceURI,
                                 const propertyMap& openprops, int indent)
         {
-            int i;
+            unsigned int i;
             if (writer == NULL)
             {
                 // Throw exception
@@ -309,7 +309,7 @@ namespace commonj
                     {
                         unsigned int j = type.getAliasCount();
                         SDOXMLString value = "";
-                        for (int i=0;i<j-1;i++)
+                        for (unsigned int i=0;i<j-1;i++)
                         {
                             value = value + type.getAlias(i);
                             value = value + " ";
@@ -380,7 +380,7 @@ namespace commonj
                     {
                         unsigned int j = type.getAliasCount();
                         SDOXMLString value = "";
-                        for (int i=0;i<j-1;i++)
+                        for (unsigned int i=0;i<j-1;i++)
                         {
                             value = value + type.getAlias(i);
                             value = value + " ";
@@ -421,7 +421,7 @@ namespace commonj
                         // Create <element> definitions 
                         // -------------------------------------------------------
                         
-                        int j;
+                        unsigned int j;
                         for (j = 0; j < pl.size(); j++)
                         {
                             const Property& prop = pl[j];
@@ -513,7 +513,7 @@ namespace commonj
                                 {
                                     unsigned int j = prop.getAliasCount();
                                     SDOXMLString value = "";
-                                    for (int i=0;i<j-1;i++)
+                                    for (unsigned int i=0;i<j-1;i++)
                                     {
                                         value = value + prop.getAlias(i);
                                         value = value + " ";

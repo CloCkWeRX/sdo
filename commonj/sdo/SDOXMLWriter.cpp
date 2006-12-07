@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 477891 $ $Date$ */
+/* $Rev: 482667 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLWriter.h"
 #include "commonj/sdo/SDOXMLString.h"
@@ -497,7 +497,7 @@ namespace commonj
             const SDOXMLString& elementName,
             ChangeSummaryPtr cs)
         {
-            int i;
+            unsigned int i;
             int rc; 
 
             ChangedDataObjectList& changedDOs =  cs->getChangedDataObjects();
@@ -587,7 +587,7 @@ namespace commonj
             }
 
             PropertyList pl = dob->getInstanceProperties();
-            for (int i = 0; i < pl.size(); i++)
+            for (unsigned int i = 0; i < pl.size(); i++)
             {
                 if (!dob->isSet(pl[i]))continue;
 
@@ -596,7 +596,7 @@ namespace commonj
                     if (!pl[i].getType().isDataType())
                     {
                         DataObjectList& dl = dob->getList(pl[i]);
-                        for (int k=0;k< dl.size() ;k++)
+                        for (unsigned int k=0;k< dl.size() ;k++)
                         {
                             DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dl[k];
                             if (d != 0)addToNamespaces(d);
@@ -678,9 +678,7 @@ namespace commonj
             // Don't write the element URI if the element is a child of an open type
             // and not one of the declared properties
             SDOXMLString uri = elementURI;
-/* ------------------------------------
- Patch for bug 9498
-           if (!isRoot && !writeXSIType)
+/*            if (!isRoot && !writeXSIType)
             {
                 DataObject* dob = dataObject;
                 DataObjectImpl* cont =
@@ -695,9 +693,8 @@ namespace commonj
                         }
                     }
                 }
-            }
- Patch for bug 9498
- ------------------------------------ */
+            } */
+            
             //SDOXMLString uri;
             //if (!elementURI.equals(namespaceUriStack.top()))
             //{
@@ -730,6 +727,7 @@ namespace commonj
                 }
                 else
                   {
+                    /* Use our wrapper function just in case the element has CDATA in it */
                     writeXMLElement(writer,
                                     elementName,
                                     dataObject->getCString(""));
@@ -901,31 +899,35 @@ namespace commonj
                         //        (const unsigned char*)value.c_str());
                         //}
                         //else
-                        //{
+						//{
                         if (cont->getTypeImpl().getPropertyImpl(elementName) == 0)
                         {
                             const SDOXMLString& typeURI = dataObject->getType().getURI(); 
                             const SDOXMLString& typeName = dataObject->getType().getName();
-                            
-                            SDOXMLString theName=typeName;
-            
-/* Patch for bug9498        if (!typeURI.isNull() && !typeURI.equals(tnsURI) && !typeURI.equals("")) */
-                            if (!typeURI.isNull() && !typeURI.equals(uri) && !typeURI.equals(""))
-                            {
-                                std::map<SDOXMLString,SDOXMLString>::iterator it = namespaceMap.find(typeURI);
-                                if (it != namespaceMap.end())
-                                {
-                                    theName = (*it).second;
-                                    theName += ":";
-                                    theName += typeName;
-                                }
-                            }
-                            
-                            rc = xmlTextWriterWriteAttribute(writer, 
-                            (const unsigned char*)"xsi:type", 
-                            (const unsigned char*)theName);
 
-                            writeXmlnsXsi();
+                            // Supress the writing of xsi:type as well for DataObjects of type
+                            // commonj.sdo#OpenDataObject
+                            if (!(typeURI.equals("commonj.sdo") && typeName.equals("OpenDataObject")))
+                            {
+                                SDOXMLString theName=typeName;
+
+                                if (!typeURI.isNull() && !typeURI.equals(uri) && !typeURI.equals(""))
+                                {
+                                    std::map<SDOXMLString,SDOXMLString>::iterator it = namespaceMap.find(typeURI);
+                                    if (it != namespaceMap.end())
+                                    {
+                                        theName = (*it).second;
+                                        theName += ":";
+                                        theName += typeName;
+                                    }
+                                }
+
+                                rc = xmlTextWriterWriteAttribute(writer, 
+                                    (const unsigned char*)"xsi:type", 
+                                    (const unsigned char*)theName);
+
+                                writeXmlnsXsi();
+                            }
                         }
                     }
                 }
@@ -945,8 +947,8 @@ namespace commonj
             //////////////////////////////////////////////////////////////////////////
             // Iterate over all the properties to find attributes
             //////////////////////////////////////////////////////////////////////////
-            int i;
-            int j = 1;
+            unsigned int i;
+            unsigned int j = 1;
             PropertyList pl = dataObject->getInstanceProperties();
             for (i = 0; i < pl.size(); i++)
             {
@@ -1051,7 +1053,9 @@ namespace commonj
                         
                         if (sequence->isText(i))
                         {
-                            rc = xmlTextWriterWriteString(
+                            // This is a raw write rather than xmlTextWriterWriteString
+                            // just in case the text has a CDATA section in it 
+                            rc = xmlTextWriterWriteRaw(
                                 writer,
                                 SDOXMLString(sequence->getCStringValue(i)));
                             continue;
@@ -1060,6 +1064,14 @@ namespace commonj
                         const Property& seqProp = sequence->getProperty(i);
                         SDOXMLString seqPropName = seqProp.getName();
                         const Type& seqPropType = seqProp.getType();
+
+						// Do not write attributes as members of the sequence
+						XSDPropertyInfo* pi = getPropertyInfo(dataObjectType, seqProp);
+						PropertyDefinitionImpl propdef;
+						if (pi && !(pi->getPropertyDefinition().isElement))
+						{
+							continue;
+						}
 
                         if (seqPropType.isDataObjectType())
                         {                                
@@ -1092,10 +1104,20 @@ namespace commonj
                         else
                         {
                             // Sequence member is a primitive
+							// Only write a primitive as an element if defined by the schema or if it's
+							// many-valued.
+							if (!pi && !seqProp.isMany()) continue;
+
+                            /* Use our wrapper function just in case the element has CDATA in it */
+                            writeXMLElement(writer,
+                                    seqPropName,
+                                    sequence->getCStringValue(i));
+                            /*
                             xmlTextWriterWriteElement(
                                 writer,
                                 seqPropName,
                                 SDOXMLString(sequence->getCStringValue(i)));
+                            */
                             
                         } // end DataType
                     } // end - iterate over sequence
@@ -1132,7 +1154,7 @@ namespace commonj
                         if (pl[i].isMany())
                         {
                             DataObjectList& dol = dataObject->getList(pl[i]);
-                            for (int j = 0; j <dol.size(); j++)
+                            for (unsigned int j = 0; j <dol.size(); j++)
                             {
                                 // Handle non-containment reference to DataObject
                                 if (pl[i].isReference() )
@@ -1294,7 +1316,7 @@ namespace commonj
 
       /**
        * A wrapper for the libxml2 function xmlTextWriterWriteElement
-       * it detects CDATA sections before wrting out element contents
+       * it detects CDATA sections before writing out element contents
        */
       int SDOXMLWriter::writeXMLElement(xmlTextWriterPtr writer, 
                                         const xmlChar *name, 
@@ -1305,6 +1327,8 @@ namespace commonj
         rc = xmlTextWriterWriteRaw(writer, SDOXMLString(content));
         rc = xmlTextWriterEndElement(writer);
         /* A more complex version that doesn't work!
+         * I've left it here just in case we need to go back and separate out
+         * CDATA from text. This might provide a starting point
            SDOString contentString(content);
 
            // write the start of the element. we could write a mixture of

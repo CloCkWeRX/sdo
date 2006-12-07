@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef _TYPELIST_H_
 #define _TYPELIST_H_
@@ -48,8 +48,8 @@ public:
     SDO_API TypeList(std::vector<const Type*> p);
     SDO_API TypeList();
     virtual SDO_API ~TypeList();
-    SDO_API const Type& operator[] (int pos) const;
-    SDO_API int size () const;
+    SDO_API const Type& operator[] (unsigned int pos) const;
+    SDO_API unsigned int size () const;
     SDO_API void insert (const Type* t);
 };
 };

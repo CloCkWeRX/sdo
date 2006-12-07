@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 483011 $ $Date$ */
 
 #include "commonj/sdo/SDOUtils.h"
 #include <stdio.h>
@@ -29,6 +29,11 @@ using namespace std;
 
 namespace commonj {
     namespace sdo {
+        
+        const char *SDOUtils::CDataStartMarker    = "XXXCDATA@STARTXXX";
+        const char *SDOUtils::XMLCDataStartMarker = "<![CDATA[";
+        const char *SDOUtils::CDataEndMarker      = "XXXCDATA@ENDX";
+        const char *SDOUtils::XMLCDataEndMarker   = "]]>";        
 
 //////////////////////////////////////////////////////////////////////////
 // Conversions
@@ -118,7 +123,7 @@ namespace commonj {
 
         void SDOUtils::printTabs(ostream& out, unsigned int incr)
         {
-            for (int ind=0; ind < incr; ind++)
+            for (unsigned int ind=0; ind < incr; ind++)
             {
                 out << "  ";
             }
@@ -155,7 +160,7 @@ namespace commonj {
             // Iterate over all the properties
             //////////////////////////////////////////////////////////////
             PropertyList pl = dataObject->getInstanceProperties();
-            for (int i = 0; i < pl.size(); i++)
+            for (unsigned int i = 0; i < pl.size(); i++)
             {
                 printTabs(out, incr);
                 out << "Property: " << pl[i].getName() << endl;
@@ -179,7 +184,7 @@ namespace commonj {
                         incr++;
                         DataObjectList& dol = dataObject->getList(pl[i]);
                         char cc[20];
-                        for (int j = 0; j <dol.size(); j++)
+                        for (unsigned int j = 0; j <dol.size(); j++)
                         {
                             printTabs(out, incr);
                             // seems to be a bug in ostream? Will not print j 
@@ -189,7 +194,15 @@ namespace commonj {
                             out << cc;
                             out << endl;
                             incr++;
-                            printDataObject(out, dol[j],incr);
+                            if (pl[i].isReference())
+                            {
+                                printTabs(out, incr);
+                                out << "Reference Value: " << dol[j]->objectToXPath() <<endl;
+                            }
+                            else
+                            {
+                                printDataObject(out, dol[j],incr);
+                            }
                             incr--;
                             out << endl;
                         }
@@ -212,7 +225,15 @@ namespace commonj {
                     else
                     {
                         incr++;
-                        printDataObject(out, dataObject->getDataObject(pl[i]),incr);
+                        if (pl[i].isReference())
+                        {
+                            printTabs(out, incr);
+                            out  << "Reference Value: " << dataObject->getDataObject(pl[i])->objectToXPath() <<endl;
+                        }
+                        else
+                        {
+                            printDataObject(out, dataObject->getDataObject(pl[i]),incr);
+                        }
                         incr--;
                     }
                 }
@@ -231,13 +252,13 @@ namespace commonj {
         void SDOUtils::printTypes(std::ostream& out, DataFactoryPtr df) 
         {
             TypeList tl = df->getTypes();
-            for (int i = 0; i < tl.size(); i++)
+            for (unsigned int i = 0; i < tl.size(); i++)
             {
                 out << "Type: " << tl[i].getURI()<< "#" << tl[i].getName() <<
                     " isOpen: " << tl[i].isOpenType()
                     << " isSequenced: " << tl[i].isSequencedType() << endl;
                 PropertyList pl = tl[i].getProperties();
-                for (int j = 0; j < pl.size(); j++)
+                for (unsigned int j = 0; j < pl.size(); j++)
                 {
                     out << "\tProperty: " << pl[j].getName()
                         << " type: " <<pl[j].getType().getURI()<<"#"<<pl[j].getType().getName()<<
@@ -247,6 +268,44 @@ namespace commonj {
             }
             
         }
+        
+        /*
+         * A local utility function that replaces one string with and another within a
+         * host string and adjusts the lenght of the host string accordingly.
+         */ 
+        SDOString SDOUtils::replace(SDOString hostString, const char *fromString, const char *toString)
+        {
+            SDOString returnString("");
+
+            // find and replace all occurances of fromString with toString. The start, end
+            // and length variables are used to indicate the start, end and length
+            // of the text sections to be copied from the host string to the return
+            // string. toString is appended in between these copied sections because the
+            // string is broken whenever fromString is found
+            std::string::size_type start  = 0;
+            std::string::size_type end    = hostString.find(fromString, 0);
+            std::string::size_type length = 0;
+
+            while ( end != std::string::npos )
+            {
+                // copy all the text up to the fromString
+                length = end - start;
+                returnString.append(hostString.substr(start, length));
+
+                // add in the toString
+                returnString.append(toString);
+
+                // find the next fromString
+                start = end + strlen(fromString);
+                end = hostString.find(fromString, start);
+            }
+
+            // copy any text left at the end of the host string
+            returnString.append(hostString.substr(start));
+
+            return returnString;
+        }
+        
 
     };
 };

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef _XMLHELPER_H_
 #define _XMLHELPER_H_
@@ -166,7 +166,7 @@ namespace commonj
              * may be errors to report or handle.
              */
 
-            virtual int  getErrorCount() const = 0;
+            virtual unsigned int  getErrorCount() const = 0;
 
             /** getErrorMessage gets the nth error message
              *
@@ -174,7 +174,7 @@ namespace commonj
              * in which the parser error occurred.
              */
 
-            virtual const char* getErrorMessage(int errnum) const = 0;
+            virtual const char* getErrorMessage(unsigned int errnum) const = 0;
 
             
         };

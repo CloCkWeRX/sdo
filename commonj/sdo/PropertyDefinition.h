@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef _PROPERTYDefinition_H_
 #define _PROPERTYDefinition_H_
@@ -73,8 +73,8 @@ namespace commonj
             /*SDO_API*/ void addSubstitute(const SDOString& name,
                 const SDOString& localname);
             /*SDO_API*/ int getSubstituteCount() const;
-            /*SDO_API*/ const char* getSubstituteNames(int index) const;
-            /*SDO_API*/ const char* getSubstituteLocalNames(int index) const;
+            /*SDO_API*/ const char* getSubstituteNames(unsigned int index) const;
+            /*SDO_API*/ const char* getSubstituteLocalNames(unsigned int index) const;
 
             
             /*SDO_API*/ void setAliases(const char* aliases);

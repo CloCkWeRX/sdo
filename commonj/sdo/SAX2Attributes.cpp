@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/SAX2Attributes.h"
 
@@ -61,7 +61,7 @@ namespace commonj
 
         const SAX2Attribute* SAX2Attributes::getAttribute(const SDOXMLString& attributeName) const
         {
-            for (int i=0; i < attributes.size(); i++)
+            for (unsigned int i=0; i < attributes.size(); i++)
             {
                 if (attributes[i].getName().equalsIgnoreCase(attributeName))
                 {
@@ -73,7 +73,7 @@ namespace commonj
 
         void SAX2Attributes::addAttribute(const SAX2Attribute& attr)
         {
-            for (int i=0; i < attributes.size(); i++)
+            for (unsigned int i=0; i < attributes.size(); i++)
             {
                 if (attributes[i].getUri().equals(attr.getUri()))
                 {                    
@@ -95,7 +95,7 @@ namespace commonj
             const SDOXMLString& attributeUri,
             const SDOXMLString& attributeName) const
         {
-            for (int i=0; i < attributes.size(); i++)
+            for (unsigned int i=0; i < attributes.size(); i++)
             {
                 if (attributes[i].getUri().equalsIgnoreCase(attributeUri))
                 {                    
@@ -112,7 +112,7 @@ namespace commonj
         const SDOXMLString& SAX2Attributes::getValue(
             const SDOXMLString& attributeName) const
         {
-            for (int i=0; i < attributes.size(); i++)
+            for (unsigned int i=0; i < attributes.size(); i++)
             {
                 if (attributes[i].getName().equalsIgnoreCase(attributeName))
                 {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #include "commonj/sdo/Property.h"
 #include "commonj/sdo/Type.h"
@@ -69,7 +69,7 @@ namespace sdo{
                     wchar_t * buft = new wchar_t[siz];
                     from->getString(p, buff, siz);
                     to->getString(p, buft, siz);
-                    for (int i=0;i< siz; i++)
+                    for (unsigned int i=0;i< siz; i++)
                     {
                         if (buff[i] != buft[i])
                         {
@@ -94,7 +94,7 @@ namespace sdo{
                     char * buft = new char[siz];
                     from->getBytes(p, buff, siz);
                     to->getBytes(p, buft, siz);
-                    for (int i=0;i< siz; i++)
+                    for (unsigned int i=0;i< siz; i++)
                     {
                         if (buff[i] != buft[i])
                         {
@@ -119,7 +119,7 @@ namespace sdo{
         {
         case Type::BooleanType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getBoolean(i) != from.getBoolean(i))
                 {
@@ -131,7 +131,7 @@ namespace sdo{
 
         case Type::ByteType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getByte(i) != from.getByte(i))
                 {
@@ -143,7 +143,7 @@ namespace sdo{
 
         case Type::CharacterType:
                 {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getCharacter(i) != from.getCharacter(i))
                 {
@@ -155,7 +155,7 @@ namespace sdo{
 
         case Type::IntegerType: 
                 {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getInteger(i) != from.getInteger(i))
                 {
@@ -167,7 +167,7 @@ namespace sdo{
 
         case Type::ShortType:
                 {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getShort(i) != from.getShort(i))
                 {
@@ -178,7 +178,7 @@ namespace sdo{
         }
     case Type::DoubleType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getDouble(i) != from.getDouble(i))
                 {
@@ -190,7 +190,7 @@ namespace sdo{
 
     case Type::FloatType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getFloat(i) != from.getFloat(i))
                 {
@@ -202,7 +202,7 @@ namespace sdo{
 
     case Type::LongType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getLong(i) != from.getLong(i))
                 {
@@ -214,7 +214,7 @@ namespace sdo{
     
     case Type::DateType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 if (to.getDate(i).getTime() != from.getDate(i).getTime())
                 {
@@ -229,7 +229,7 @@ namespace sdo{
     case Type::UriType:
     case Type::StringType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 unsigned int siz = from.getLength(i);
                 if (siz != to.getLength(i)) return false;
@@ -240,7 +240,7 @@ namespace sdo{
                     wchar_t * buft = new wchar_t[siz];
                     from.getString(i,buff,siz);
                     to.getString(i,buft,siz);
-                    for (int j=0;j<siz;j++)
+                    for (unsigned int j=0;j<siz;j++)
                     {
                         if (buff[j] != buft[j]) 
                         {
@@ -258,7 +258,7 @@ namespace sdo{
 
     case Type::BytesType:
         {
-            for (int i=0;i< from.size(); i++)
+            for (unsigned int i=0;i< from.size(); i++)
             {
                 unsigned int siz = from.getLength(i);
                 if (siz != to.getLength(i)) return false;
@@ -269,7 +269,7 @@ namespace sdo{
                     char * buft = new char[siz];
                     from.getBytes(i,buff,siz);
                     to.getBytes(i,buft,siz);
-                    for (int j=0;j<siz;j++)
+                    for (unsigned int j=0;j<siz;j++)
                     {
                         if (buff[j] != buft[j]) 
                         {
@@ -310,7 +310,7 @@ namespace sdo{
 
     
         PropertyList pl = dataObject1->getInstanceProperties();
-        for (int i=0;i < pl.size(); i++)
+        for (unsigned int i=0;i < pl.size(); i++)
         {
             // data objects are only compared the deep equality case
             if (pl[i].getType().isDataObjectType())
@@ -327,7 +327,7 @@ namespace sdo{
                         DataObjectList& dolnew = dataObject2->getList(pl[i]);
                         if (dolnew.size() != dolold.size()) return false;
 
-                        for (int i=0;i< dolold.size(); i++)
+                        for (unsigned int i=0;i< dolold.size(); i++)
                         {
                             if (!internalEqual(dolold[i], dolnew[i], true))
                             {

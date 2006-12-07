@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef _PROPERTYLIST_H_
 #define _PROPERTYLIST_H_
@@ -71,7 +71,7 @@ public:
      * size() returns the number of elements in the list.
      */
 
-    SDO_API int size ();
+    SDO_API unsigned int size ();
     
     /**  insert adds an element to the list
      *

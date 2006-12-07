@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 478191 $ $Date$ */
+/* $Rev: 483416 $ $Date$ */
 
 #include "commonj/sdo/disable_warn.h"
 #include "commonj/sdo/DataObjectImpl.h"
@@ -944,8 +944,9 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     void DataObjectImpl::undefineProperty(unsigned int index)
     {
-        int point = index - openBase;
-        if (point < 0 || point >= openProperties.size()) return;
+        if (index < openBase) return;
+        unsigned int point = index - openBase;
+        if (point >= openProperties.size()) return;
 
         // downgrade all the property settings above this one
 
@@ -967,7 +968,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
         std::list<PropertyImpl>::iterator it = 
             openProperties.begin();
-        for (int i=0;i<point;i++)++it; /* there must be a better way */
+        for (unsigned int i=0;i<point;i++)++it; /* there must be a better way */
 
         DataFactory* df = factory;
         ((DataFactoryImpl*)df)->removeOpenProperty((*it).getName());
@@ -1510,7 +1511,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             }
         }
 
-        int propIndex = getPropertyIndex(p);
+        int propIndex = getPropertyIndexInternal(p);
         DataObjectImpl* d = getDataObjectImpl(propIndex);
         if (d == 0) {
             // There is no list yet, so we need to create an 
@@ -1563,7 +1564,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         PropertyList props = getType().getProperties(); 
 
-        for (int i = 0; i < props.size() ; ++i)
+        for (unsigned int i = 0; i < props.size() ; ++i)
         {
             if (!strcmp(props[i].getName(),p.getName()) )
             {
@@ -1591,43 +1592,56 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     }
 
    /**
-	 * This method is used internally to find the index of a 
-	 * property. If differs from the public getPropertyIndex method
-	 * in that if the type of the containing object is open a new
-	 * index is created. In the public version and error is thrown
-	 */
+     * This method is used internally to find the index of a 
+     * property. If differs from the public getPropertyIndex method
+     * in that if the type of the containing object is open a new
+     * index is created. In the public version and error is thrown
+     */
     unsigned int DataObjectImpl::getPropertyIndexInternal(const Property& p)
     {
-		unsigned int index;
+        unsigned int index;
 
-		try 
-		{
+        try 
+        {
             index = getPropertyIndex(p);
-		}
-		catch ( SDOPropertyNotFoundException e )
-		{
-			// this could mean that this data object has an open 
-			// type. getPropertyIndex fails in this case because it
-			// tries to access the index of the property 
-			// and it doesn't exist because it hasn't been created yet. 
-			// This new method is used where properties are being set
-			// based on existing property objects. This is like to 
-			// occur when a data object is being copied. In this case
-			// we want properties that are open to be copied also 
-			// so we need to create the property and provide the index
-			if ( this->getType().isOpenType() )
-			{
-			    const Property *prop = defineProperty(p.getName(), p.getType());
-			    index = getPropertyIndex(p);
-			}
-			else
-			{
-				throw e;
-			}
-		}
+        }
+        catch ( SDOPropertyNotFoundException e )
+        {
+            // this could mean that this data object has an open 
+            // type. getPropertyIndex fails in this case because it
+            // tries to access the index of the property 
+            // and it doesn't exist because it hasn't been created yet. 
+            // This new method is used where properties are being set
+            // based on existing property objects. This is likely to 
+            // occur when a data object is being copied. In this case
+            // we want properties that are open to be copied also 
+            // so we need to create the property and provide the index
+            if ( this->getType().isOpenType() )
+            {
+                const Property *prop = NULL;
+                
+                // need to treat many valued properties specially
+                // because the property is a list rather than 
+                // a single value
+                if ( p.isMany() )
+                {
+                    prop = defineList(p.getName());                   
+                }
+                else
+                {
+                    prop = defineProperty(p.getName(), p.getType());
+                }
+                
+                index = getPropertyIndex(p);
+            }
+            else
+            {
+                throw e;
+            }
+        }
 
-		return index;
-	}
+        return index;
+    }
 
 
     const Property& DataObjectImpl::getProperty(unsigned int index)
@@ -1672,7 +1686,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (index >= openBase && index - openBase  < openProperties.size())
             {
                 std::list<PropertyImpl>::iterator j;
-                int val = 0;
+                unsigned int val = 0;
                 j = openProperties.begin();
                 while (val < index-openBase && j != openProperties.end())
                 {
@@ -1703,7 +1717,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
         s = new char[strlen(path)+1];
 
-        for (int i=0;i < strlen(path); i++) 
+        for (unsigned int i=0;i < strlen(path); i++) 
         {
             if (strchr(templateString,path[i]) != 0) {
                 s[pos++] = path[i];
@@ -1783,7 +1797,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         if (eq == string::npos)
         {
             // There is no "=" sign
-            int val = atoi(breakerStr.c_str());
+            unsigned int val = atoi(breakerStr.c_str());
             DataObjectList& list = getList(p);
             
             // The spec says that depts[1] is the first element, as is depts.0
@@ -1807,7 +1821,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         // eq is now propval
         
         DataObjectList& list = getList(p);
-        for (int li = 0 ; li < list.size() ; ++li)
+        for (unsigned int li = 0 ; li < list.size() ; ++li)
         {
             // TODO  comparison for double not ok
             
@@ -2064,7 +2078,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         std::vector<PropertyImpl*> theVec;
         PropertyList propList = getType().getProperties();
-        for (int i = 0 ; i < propList.size() ; ++i)
+        for (unsigned int i = 0 ; i < propList.size() ; ++i)
         {
             Property& p = propList[i];
             theVec.insert(theVec.end(),(PropertyImpl*)&p);
@@ -2263,13 +2277,16 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                     if (p->isMany())
                     {
                         DataObjectList& dol = d->getList((Property&)*p);
-                        long index;
-                        DataObjectImpl* dx = d->findDataObject(prop,&index);
+                        long idx;
+                        DataObjectImpl* dx = d->findDataObject(prop,&idx);
+                        // fix this. This is the only place the 2nd parm to findDataObject
+                        // is used. Need a better way to do this
+                        unsigned int index = (unsigned int)idx;
                         if (index >= 0)
                         {
                             if(index < dol.size())
                             {
-                                dol.setDataObject((unsigned int)index,value);
+                                dol.setDataObject(index,value);
                             }
                             else 
                             {
@@ -2319,48 +2336,6 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         }
     }
 
-    void DataObjectImpl::transferChildren(DataObject* d, DataFactory* f)
-    {
-        bool isData = false;
-        PropertyList pl = d->getInstanceProperties();
-        for (int i=0;i<pl.size();i++)
-        {
-            // even primitives need their DF fixed up
-            if (pl[i].getType().isDataType())
-            {
-                 isData = true;
-            }
-
-            if (!d->isSet(pl[i]) || d->isNull(pl[i]))
-            {
-                continue;
-            }
-            if (pl[i].isMany())
-            {
-                DataObjectList& dl = d->getList(pl[i]);
-                for (int j=0;j<dl.size();j++)
-                {
-                    
-                    DataObject* d2 = dl[j];
-                    if (d2) {
-                        ((DataObjectImpl*)d2)->setDataFactory(f);
-                        if (!isData)transferChildren(d2,f);
-                    }
-                }
-            }
-            else
-            {
-                DataObject* d3 = d->getDataObject(pl[i]);
-                if (d3)
-                { 
-                    ((DataObjectImpl*)d3)->setDataFactory(f);
-                    if (!isData)transferChildren(d3,f);
-                }
-            }
-        }
-    }
-
-
 
     void DataObjectImpl::checkFactory(DataObjectPtr dob,
         unsigned int propertyIndex)
@@ -2369,13 +2344,6 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
         DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dob;
 
         if (d->getDataFactory() == getDataFactory()) return;
-
-        // Temporary alteration to test the feasibility and
-        // problems associated with allowing data object 'migration'
-        // lets move this one and all its children to the factory of the
-        // new parent if the factories are compatible.
-        
-        DataFactoryImpl* f = (DataFactoryImpl*)getDataFactory();
 
         if (d->getContainer() != 0)
         {
@@ -2394,29 +2362,6 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 msg.c_str());
         }
 
-        if (f->isCompatible(d->getDataFactory(),d))
-        {
-            d->setDataFactory(getDataFactory());
-            transferChildren(d,getDataFactory());
-            return;
-        }
-
-
-        // This is the default position....
-        
-        string msg("Insertion from incompatible factory ");
-        const Type& t = d->getType();
-        msg += t.getURI();
-        msg += "#";
-        msg += t.getName();
-        msg += " into property ";
-        msg += getProperty(propertyIndex).getName();
-        msg += " of ";
-        msg += getType().getURI();
-        msg += "#";
-        msg += getType().getName();
-        SDO_THROW_EXCEPTION("checkFactory", SDOInvalidConversionException,
-            msg.c_str());
     }
 
 
@@ -2445,7 +2390,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (pi != 0) 
             {
                 unsigned int subcount = pi->getSubstitutionCount();
-                for (int i=0;i<subcount;i++)
+                for (unsigned int i=0;i<subcount;i++)
                 {
                     const Type* tsub = pi->getSubstitutionType(i);
                     if (tsub != 0 && tsub->equals(objectType)) return;
@@ -3116,7 +3061,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (prop.isMany())
             {
                 DataObjectList& dol = ((*i).second)->getList();
-                for (int j=0;j< dol.size(); j++)
+                for (unsigned int j=0;j< dol.size(); j++)
                 {
                     if (dol[j] == indol)
                     {
@@ -3192,7 +3137,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (getProperty((*i).first).isMany())
             {
                 DataObjectList& dl = ((*i).second)->getList();
-                for (int j = 0 ; j < dl.size(); j++)
+                for (unsigned int j = 0 ; j < dl.size(); j++)
                 {
                     if (dl[j] == ob)
                     {
@@ -3748,7 +3693,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     {
         LOGINFO_1(INFO,"ChangeSummary:Unsetting a reference to %s",prop.getName());
 
-        for (int i=0;i< refs.size();i++)
+        for (unsigned int i=0;i< refs.size();i++)
         {
             if (refs[i]->getDataObject() == dol)
             {
@@ -3765,7 +3710,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     void DataObjectImpl::clearReferences()
     {
-        for (int i=0;i<refs.size();i++)
+        for (unsigned int i=0;i<refs.size();i++)
         {
             // Note - no loop as the referer must be of type reference
             refs[i]->getDataObject()->unset(refs[i]->getProperty());
@@ -3789,7 +3734,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
             if (p.isMany()) {
                 DataObjectList& dol = dob->getList(p);
-                for (int i=0;i<dol.size();i++)
+                for (unsigned int i=0;i<dol.size();i++)
                 {
                     if (dol[i] == thisob)
                     {

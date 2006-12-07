@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 479634 $ $Date$ */
 
 #ifndef SDO_EXPORTS
     #define SDO_EXPORTS
@@ -61,12 +61,12 @@ SDO_API TypeList::~TypeList()
 }
 
 
-SDO_API const Type& TypeList::operator[] (int pos) const
+SDO_API const Type& TypeList::operator[] (unsigned int pos) const
 {
     return *plist[pos];
 }
 
-SDO_API int TypeList::size () const
+SDO_API unsigned int TypeList::size () const
 {
     return plist.size();
 }
