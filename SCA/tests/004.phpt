@@ -20,29 +20,29 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
       <xs:element name="reverse">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="in" type="xs:string"/>
+            <xs:element name="in" type="xs:string" nillable="true"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="reverseResponse">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="reverseReturn" type="xs:string"/>
+            <xs:element name="reverseReturn" type="xs:string" nillable="true"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="add">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="person" type="ns0:person"/>
-            <xs:element name="phone" type="ns0:phone"/>
+            <xs:element name="person" type="ns0:person" nillable="true"/>
+            <xs:element name="phone" type="ns0:phone" nillable="true"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="addResponse">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="addReturn" type="ns0:person"/>
+            <xs:element name="addReturn" type="ns0:person" nillable="true"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -74,24 +74,24 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
   <binding name="ComponentBinding" type="tns2:ComponentPortType">
     <operation name="reverse">
       <input>
-        <body xsi:type="tns3:tBody" use="literal"/>
+        <tns3:body xsi:type="tBody" use="literal"/>
       </input>
       <output>
-        <body xsi:type="tns3:tBody" use="literal"/>
+        <tns3:body xsi:type="tBody" use="literal"/>
       </output>
-      <operation xsi:type="tns3:tOperation" soapAction=""/>
+      <tns3:operation xsi:type="tOperation" soapAction=""/>
     </operation>
     <operation name="add">
       <input>
-        <body xsi:type="tns3:tBody" use="literal"/>
+        <tns3:body xsi:type="tBody" use="literal"/>
       </input>
       <output>
-        <body xsi:type="tns3:tBody" use="literal"/>
+        <tns3:body xsi:type="tBody" use="literal"/>
       </output>
-      <operation xsi:type="tns3:tOperation" soapAction=""/>
+      <tns3:operation xsi:type="tOperation" soapAction=""/>
     </operation>
-    <binding xsi:type="tns3:tBinding" transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <tns3:binding xsi:type="tBinding" transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
   </binding>
   <service name="ComponentService">
     <port name="ComponentPort" binding="tns2:ComponentBinding">
-      <address xsi:type="tns3:tAddress"
+      <tns3:address xsi:type="tAddress"
