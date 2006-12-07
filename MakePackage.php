@@ -34,17 +34,17 @@
 //               . "- The Relational DAS contains a workaround for a problem with PDO_Statement::RowCount and ODBC driver\n"
 //               . "- Some SDO_DAS_ChangeSummary* constants, which were probably only used by the Relational DAS, have been changed",
 //      'notes' => "This release adds a small number of new features:\n"
-//              .  "- The Relational DAS now supports nulls: an SQL NULL in the database is represented as a PHP null in the data object and vice versa\n"
-//                .  "- The important SDO classes all support toString()\n"
-//                .  "- The SDO_DataObject class now supports clone()",
+//             .  "- The Relational DAS now supports nulls: an SQL NULL in the database is represented as a PHP null in the data object and vice versa\n"
+//             .  "- The important SDO classes all support toString()\n"
+//             .  "- The SDO_DataObject class now supports clone()",
 //      'notes' => "Improved reporting of Schema and XML parse errors (libxml2 errors surfaced in an XML Data Access Service SDO_DAS_XML_ParserException).\n"
-//                 . "Various bug fixes, including PECL bugs 6002 and 6006.\n"
-//                 . "Support for XML Schema 'nillable'.\n"
-//                 . "Support to build and run against PHP 6.0 (only with unicode semantics off)." ,
-// 'notes'  => "This release adds support for reflection on a data object. " 
-//           . "The SDO_Model_ReflectionDataObject gives the programmer access to " 
-//           . "the type and structure information in a data object's model. "
-//           . "This can help with debugging, or be used in dynamic user interface generation.",
+//             . "Various bug fixes, including PECL bugs 6002 and 6006.\n"
+//             . "Support for XML Schema 'nillable'.\n"
+//             . "Support to build and run against PHP 6.0 (only with unicode semantics off)." ,
+//      'notes' => "This release adds support for reflection on a data object. " 
+//             . "The SDO_Model_ReflectionDataObject gives the programmer access to " 
+//             . "the type and structure information in a data object's model. "
+//             . "This can help with debugging, or be used in dynamic user interface generation.",
 //       'notes' => "This release adds support for open types. These are types which " 
 //             . "can have additional properties added to a runtime instance, for example "
 //             . "to support an XML <any/> element.\n"
@@ -96,20 +96,23 @@
 //           . " - fixed several memory leaks, in iterator objects and others\n"
 //           . " - update to Apache Tuscany C++ SDO revision level 433676\n"
 //           . " - improved and extended the interoperability tests (see tests/interop in CVS)\n",
-       'notes' => "This is the first release under the new project name SCA_SDO (renamed from SDO).\n"
-           . "The rename reflects the fact that this project now implements the Service Component Architecture (SCA)\n"
-           . "(see http://osoa.org/display/PHP/SCA+with+PHP for more information).\n"
-           . "The project's stable state refers to the SDO component.\n"
-           . "The SCA component is currently alpha quality and experimental.\n"
-           . "The main changes since 1.0.4 are:\n"
-           . " - inclusion of the Service Component Architecture (SCA) component\n"
-           . " - new PEAR packaging to install SCA and SDO as peer directories (PEAR/SCA and PEAR/SDO)\n"
-           . " - update to Apache Tuscany C++ SDO revision level 478193\n"
-           . " - new function in SDO_DAS_Relational to support multiple root data objects\n"
-           . " - new function in SDO_DAS_XML to support CDATA sections (not yet complete)\n"
-           . " - fixes for bugs #9287, #9289, #9339\n",
+//       'notes' => "This is the first release under the new project name SCA_SDO (renamed from SDO).\n"
+//           . "The rename reflects the fact that this project now implements the Service Component Architecture (SCA)\n"
+//           . "(see http://osoa.org/display/PHP/SCA+with+PHP for more information).\n"
+//           . "The project's stable state refers to the SDO component.\n"
+//           . "The SCA component is currently alpha quality and experimental.\n"
+//           . "The main changes since 1.0.4 are:\n"
+//           . " - inclusion of the Service Component Architecture (SCA) component\n"
+//           . " - new PEAR packaging to install SCA and SDO as peer directories (PEAR/SCA and PEAR/SDO)\n"
+//           . " - update to Apache Tuscany C++ SDO revision level 478193\n"
+//           . " - new function in SDO_DAS_Relational to support multiple root data objects\n"
+//           . " - new function in SDO_DAS_XML to support CDATA sections (not yet complete)\n"
+//           . " - fixes for bugs #9287, #9289, #9339\n",
+       'notes' => " Fix for bug #9498 - invalid WSDL generation\n" 
+           . "Fix for bug 9426 - printing open types\n" 
+           . "Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes for sequenced and open data types.\n",
        'simpleoutput' => true,
-       'version' => '1.1.0',
+       'version' => '1.1.1',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
@@ -162,12 +165,12 @@
            '*tgz'
          ),
      'dir_roles' => array(
-         '/' => 'src',
+         '/'         => 'src',
          'scenarios' => 'test',
-         'tests' => 'test', 
-         'DAS' => 'php',
+         'tests'     => 'test', 
+         'DAS'       => 'php',
          'SCA/tests' => 'test',
-         'SCA' => 'php')       
+         'SCA'       => 'php')       
      )
         
     );
