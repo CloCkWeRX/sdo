@@ -527,6 +527,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 					my_object->dfp->setDefault(parentType, property_name, Z_STRVAL(temp_zval));
 					break;
 				case Type::DataObjectType:
+				case Type::OpenDataObjectType:			
 					zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC,
 						"DataObject property %s cannot have a default value",
 						property_name);

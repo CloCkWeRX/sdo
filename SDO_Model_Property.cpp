@@ -212,6 +212,7 @@ void sdo_model_property_get_default(const Property *propertyp, zval *return_valu
 			/* RETVAL_STRING((char *)property.getCStringDefault(), 1); */
 			break;		
 		case Type::DataObjectType:
+		case Type::OpenDataObjectType:
 			/* A data object type cannot have a default */
 			RETVAL_NULL();
 			break;

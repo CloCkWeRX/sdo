@@ -111,6 +111,7 @@ static int sdo_sequence_valid(sdo_seq_object *my_object, long sequence_index, in
 				return_value = (seq.getLength(sequence_index) > 0);
 				break;
 			case Type::DataObjectType:
+			case Type::OpenDataObjectType:
 				return_value = (!seq.getDataObjectValue(sequence_index));
 				break;
 			case Type::ChangeSummaryType:
@@ -210,6 +211,7 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 			RETVAL_STRING((char *)seq.getCStringValue(sequence_index), 1);
 			break;
 		case Type::DataObjectType:
+		case Type::OpenDataObjectType:
 			doh_value = seq.getDataObjectValue(sequence_index);
 			if (!doh_value) {
 				class_name = get_active_class_name(&space TSRMLS_CC);
@@ -393,6 +395,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 				seq.setCStringValue(sequence_index, Z_STRVAL(temp_zval));
 			break;
 		case Type::DataObjectType:
+		case Type::OpenDataObjectType:
 			convert_to_object(&temp_zval);
 			if (!instanceof_function(Z_OBJCE(temp_zval), sdo_dataobjectimpl_class_entry TSRMLS_CC)) {
 				zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC,

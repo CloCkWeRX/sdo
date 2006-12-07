@@ -281,6 +281,7 @@ static int sdo_do_has_dimension(zval *object, zval *offset, int check_empty TSRM
 					return_value = (dop->getLength(xpath) > 0);
 					break;
 				case Type::DataObjectType:
+				case Type::OpenDataObjectType:
 					/* since the property is set, the data object cannot be 'empty' */
 					break;
 				case Type::ChangeSummaryType:
@@ -441,6 +442,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 				RETVAL_STRING((char *)dop->getCString(xpath), 1);
 				break;
 			case Type::DataObjectType:
+			case Type::OpenDataObjectType:
 				doh_value = dop->getDataObject(xpath);
 				if (!doh_value) {
 					class_name = get_active_class_name(&space TSRMLS_CC);
@@ -657,6 +659,7 @@ static void sdo_do_write_dimension(zval *object, zval *offset, zval *z_propertyV
 				dop->setCString(xpath, Z_STRVAL(temp_zval));
 				break;
 			case Type::DataObjectType:
+			case Type::OpenDataObjectType:
 				if (Z_TYPE_P(z_propertyValue) != IS_OBJECT) {
 					class_name = get_active_class_name(&space TSRMLS_CC);
 					sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0,0 TSRMLS_CC,

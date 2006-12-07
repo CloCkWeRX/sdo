@@ -262,6 +262,7 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 				RETVAL_STRING((char *)dol.getCString(index), 1);
 				break;
 			case Type::DataObjectType:
+			case Type::OpenDataObjectType:
 				doh_value = dol[index];
 				/*find PHP object from C++ object */
 				if (!doh_value) {
@@ -509,6 +510,7 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 				dol.setCString(index, Z_STRVAL(temp_zval));
 			break;
 		case Type::DataObjectType:
+		case Type::OpenDataObjectType:
 			convert_to_object(&temp_zval);
 			if (!instanceof_function(Z_OBJCE(temp_zval), sdo_dataobjectimpl_class_entry TSRMLS_CC)) {
 				zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC,
@@ -595,6 +597,7 @@ static int sdo_dataobjectlist_valid(sdo_list_object *my_object, long index, int 
 				return_value = (dol.getLength(index) > 0);
 				break;
 			case Type::DataObjectType:
+		    case Type::OpenDataObjectType:
 				return_value = (!(dol[index]));
 				break;
 			case Type::ChangeSummaryType:

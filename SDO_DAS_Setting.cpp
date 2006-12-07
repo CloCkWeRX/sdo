@@ -189,6 +189,7 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 				RETVAL_STRING((char *)setting->getCStringValue(), 1);
 				break;
 			case Type::DataObjectType:
+			case Type::OpenDataObjectType:
 				doh_value = setting->getDataObjectValue();
 				if (!doh_value) {
 					/* An old value may legitimately be null */
