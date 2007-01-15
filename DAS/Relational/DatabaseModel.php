@@ -85,6 +85,16 @@ class SDO_DAS_Relational_DatabaseModel {
         }
         return false;
     }
+    
+    public function getParentTable($table_name)
+    {
+        foreach ($this->foreign_keys as $fk) {
+            if ($table_name == $fk->getFromTableName()) {
+                return $fk->getToTableName();
+            }
+        }
+        return null;
+    }
 
     public function isValidTableAndColumnPair($table_name, $column_name) 
     {

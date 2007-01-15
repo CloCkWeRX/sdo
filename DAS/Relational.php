@@ -164,7 +164,7 @@ class SDO_DAS_Relational {
         return $root;
     }
 
-    public function normaliseResultSet($pdo_stmt, $column_specifier) 
+    public function normaliseResultSet($pdo_stmt, $column_specifier)
     {
         include_once "SDO/DAS/Relational/PDOConstants.colon.inc.php";
 
@@ -188,8 +188,8 @@ class SDO_DAS_Relational {
                 } else {
                     $parsed_row = $this->breakRowIntoObjectsAccordingToColumnSpecifier($row, $column_specifier);
                 }
+                $this_rows_objects = array();
                 // TODO ensure PK is present for each type
-                $current = $root;
                 foreach ($table_names as $table_name) {
                     // TODO various things to do with checking that PKs are present, that graph is well-formed
                     // TODO only want tables in the model
@@ -200,25 +200,33 @@ class SDO_DAS_Relational {
                             throw new SDO_DAS_Relational_Exception("Data retrieved from table " . $table_name . " did not include the primary key for this table. Primary keys must always be included.\n");
                         }
                         $object = $key_object_map->findObjectByKeyAndType($row[$pk_name], $table_name);
-                        if ($object == null) {
-                            $current = $current->createDataObject($table_name);
+                        if ($object !== null) {
+                            $this_rows_objects[$table_name] = $object;
+                        } else {
+                            $parent_table_name = $this->database_model->getParentTable($table_name);
+                            if ($parent_table_name !== null) {
+                                $parent_object = $this_rows_objects[$parent_table_name];
+                            } else {
+                                $parent_object = $root;
+                            }
+                            $current_object = $parent_object->createDataObject($table_name);
                             foreach ($row as $column_name=>$column_value) {
                                 if ( $this->object_model->isNonContainmentReferenceProperty($table_name, $column_name)) {
                                     // object that the n-c-ref points to may not exist yet so save as update for later
                                     $later_update = array();
-                                    $later_update['object_to_update'] = $current;
+                                    $later_update['object_to_update'] = $current_object;
                                     $later_update['column_to_update'] = $column_name;
                                     $later_update['key_of_object_to_point_to'] = $column_value;
                                     $to_type = $this->object_model->getToTypeOfNonContainmentReferenceProperty($table_name, $column_name);
                                     $later_update['type_of_object_to_point_to'] = $to_type;
                                     $all_later_updates[] = $later_update;
                                 } else {
-                                    $current[$column_name] = $column_value;
+                                    echo "setting $column_name to $column_value for $table_name\n";
+                                    $current_object[$column_name] = $column_value;
                                 }
                             }
-                            $key_object_map->storeObjectByKeyAndType($current, $row[$pk_name], $table_name);
-                        } else {
-                            $current = $object;
+                            $key_object_map->storeObjectByKeyAndType($current_object, $row[$pk_name], $table_name);
+                            $this_rows_objects[$table_name] = $current_object;
                         }
                     }
                 }
