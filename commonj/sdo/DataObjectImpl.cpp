@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 483416 $ $Date$ */
+/* $Rev: 483552 $ $Date$ */
 
 #include "commonj/sdo/disable_warn.h"
 #include "commonj/sdo/DataObjectImpl.h"
@@ -141,6 +141,7 @@ namespace sdo {
         return 0;\
     }
 
+#define ASSERT_SETTABLE(property,primval) ASSERT_WRITABLE(*property, set##primval)
 
 /** @def setPrimitive
  *
@@ -161,6 +162,7 @@ namespace sdo {
                 SDO_THROW_EXCEPTION("set value",SDOUnsupportedOperationException,\
                 msg.c_str());\
             }\
+            ASSERT_SETTABLE(pl, primval)\
             PropertyValueMap::iterator i;\
             for (i = PropertyValues.begin(); i != PropertyValues.end();++i)\
             {\
@@ -203,6 +205,7 @@ namespace sdo {
                 SDO_THROW_EXCEPTION("setter",SDOUnsupportedOperationException,\
                 msg.c_str());\
             }\
+            ASSERT_SETTABLE(pl, primval)\
             PropertyValueMap::iterator i;\
             for (i = PropertyValues.begin(); i != PropertyValues.end();++i)\
             {\
@@ -263,6 +266,7 @@ namespace sdo {
                          SDO_THROW_EXCEPTION("setter", SDOPathNotFoundException,\
                          msg.c_str());\
                     }\
+                    ASSERT_SETTABLE(p, primval)\
                     if (p->isMany()|| p->getTypeImpl()->isFromList())\
                     {\
                         long l;\
@@ -440,6 +444,7 @@ namespace sdo {
                          SDO_THROW_EXCEPTION("setter", SDOPathNotFoundException,\
                          msg.c_str());\
                     }\
+                    ASSERT_SETTABLE(p, primval)\
                     if (p->isMany()|| p->getTypeImpl()->isFromList())\
                     {\
                         long l;\
@@ -485,7 +490,6 @@ namespace sdo {
     {\
         return get ##primval (getPropertyIndex(property), val, max);\
     }
-
 
 /** @def setPrimitiveFromProperty
  *
@@ -1127,14 +1131,16 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
    {
       validateIndex(propertyIndex);
       PropertyValueMap::iterator i;
-      if ((getProperty(propertyIndex).isMany())
-          || getPropertyImpl(propertyIndex)->getTypeImpl()->isFromList())
+      PropertyImpl*const p = getPropertyImpl(propertyIndex);
+      if ((p->isMany())
+          || p->getTypeImpl()->isFromList())
       {
          string msg("Set value not available on many valued property:");
-         msg += getProperty(propertyIndex).getName();
+         msg += p->getName();
          SDO_THROW_EXCEPTION("setString", SDOUnsupportedOperationException,
                              msg.c_str());
       }
+      ASSERT_SETTABLE(p, CString)
       for (i = PropertyValues.begin(); i != PropertyValues.end(); ++i)
       {
          if ((*i).first == propertyIndex)
@@ -1245,6 +1251,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                }
                if (p != 0)
                {
+                  ASSERT_SETTABLE(p, CString)
                   if (p->isMany()|| p->getTypeImpl()->isFromList()) {
                      long l;
                      DataObjectList& dol = d->getList((Property&)*p);
@@ -1347,13 +1354,16 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
     void DataObjectImpl::setNull(const unsigned int propertyIndex)
     {
         validateIndex(propertyIndex);
-        if ((getProperty(propertyIndex).isMany()))
+        const Property& property = getProperty(propertyIndex);
+        if ((property.isMany()))
         {
             string msg("Setting a list to null is not supported:");
-            msg += getProperty(propertyIndex).getName();
+            msg += property.getName();
             SDO_THROW_EXCEPTION("setNull", SDOUnsupportedOperationException,
                 msg.c_str());
         }
+
+        ASSERT_WRITABLE(property, setNull)
 
         PropertyValueMap::iterator i;
         for (i = PropertyValues.begin(); i != PropertyValues.end();++i)
@@ -1408,6 +1418,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                         pc++;   // pc is the index of the first character following the /
                   }
                   const Property& pcont = cont->getProperty(path.substr(pc));
+                  ASSERT_WRITABLE(pcont, setNull)
                   cont->logChange(pcont);
                }
                catch (SDORuntimeException&)
@@ -1434,6 +1445,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                                          msg.c_str());
                   }
                }
+               ASSERT_SETTABLE(p, Null)
                d->setNull((Property&)*p);
                return;
             }
@@ -2274,6 +2286,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 }
                 if (p != 0)
                 {
+                    ASSERT_SETTABLE(p, DataObject)
                     if (p->isMany())
                     {
                         DataObjectList& dol = d->getList((Property&)*p);
@@ -2459,6 +2472,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
                 msg.c_str());
         }
 
+        ASSERT_WRITABLE(prop, setDataObject)
 
         if (value == 0) 
         {
@@ -2672,6 +2686,7 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
             if (!prop.empty())
             {
                 const Property& p = d->getProperty(prop);
+                ASSERT_WRITABLE(p, unset)
                 if (p.isMany())
                 {
                     SDOString subscript;
@@ -2718,6 +2733,8 @@ void DataObjectImpl::handlePropertyNotSet(const char* name)
 
     void DataObjectImpl::unset(const Property& p)
     {
+        ASSERT_WRITABLE(p, unset)
+
         PropertyValueMap::iterator i;
         unsigned int index = getPropertyIndex(p);
 

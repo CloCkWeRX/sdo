@@ -211,17 +211,17 @@ static int sdo_das_xml_cast_object(zval *readobj, zval *writeobj, int type, int 
 			
 			for (int ix = 0; ix < tl.size(); ix++) {
 				if (tl[ix].getURI() == NULL || strlen(tl[ix].getURI()) == 0) {
-					print_buf << indent << ix+1 << ". " << "{no namespace)" << ":" << tl[ix].getName(); 
+					print_buf << indent << ix+1 << ". " << "{no namespace}" << "#" << tl[ix].getName(); 
 				} else {
-					print_buf << indent << ix+1 << ". " << tl[ix].getURI() << ":" << tl[ix].getName(); 
+					print_buf << indent << ix+1 << ". " << tl[ix].getURI() << "#" << tl[ix].getName(); 
 				}
 				PropertyList pl = tl[ix].getProperties();
 				for (int px = 0; px < pl.size() ; px++) {
 					print_buf << indent << "    - " << pl[px].getName() << " (" ;
 					if (pl[px].getType().getURI() == NULL || strlen(pl[px].getType().getURI()) == 0) {
-						print_buf << "{no namespace)" << ":" << pl[px].getType().getName(); 
+						print_buf << "{no namespace}" << "#" << pl[px].getType().getName(); 
 					} else {
-						print_buf <<  pl[px].getType().getURI() << ":" << pl[px].getType().getName(); 
+						print_buf <<  pl[px].getType().getURI() << "#" << pl[px].getType().getName(); 
 					}
 					print_buf << ")";
 			}

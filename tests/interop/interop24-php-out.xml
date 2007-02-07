@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RootElement24 xmlns="http://www.apache.org/tuscany/interop" xsi:type="RootElement24" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ComplexTypeExtendingComplexType><SimpleTypeWithName>SimpleTypeWithName</SimpleTypeWithName><SimpleTypeWithNameExtended>SimpleTypeWithNameExtended</SimpleTypeWithNameExtended></ComplexTypeExtendingComplexType></RootElement24>

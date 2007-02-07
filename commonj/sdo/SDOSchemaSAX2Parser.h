@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 492097 $ $Date$ */
 
 #ifndef _SDOSCHEMASAX2PARSER_H_
 #define _SDOSCHEMASAX2PARSER_H_
@@ -84,6 +84,7 @@ namespace commonj
             friend std::istream& operator>>(std::istream& input, SDOSchemaSAX2Parser& parser);
             friend std::istringstream& operator>>(std::istringstream& input, SDOSchemaSAX2Parser& parser);
 
+            void free(xmlChar* absoluteUri);
 
         private:
 
@@ -117,10 +118,6 @@ namespace commonj
                                 const SDOXMLString& prefix,
                                 const SDOXMLString& URI
                                 );
-
-            virtual int    startSecondaryParse(
-                                SDOSchemaSAX2Parser& schemaParser,
-                                SDOXMLString& schemaLocation);
 
             virtual void startInclude(
                 const SDOXMLString& localname,
@@ -213,7 +210,6 @@ namespace commonj
             
             
             SchemaInfo& schemaInfo;
-            
             
             PropertyDefinitionImpl currentProperty;
             std::stack<PropertyDefinitionImpl>    propertyStack;

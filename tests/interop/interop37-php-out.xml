@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RootElement37 xmlns="http://www.apache.org/tuscany/interop" xsi:type="RootElement37" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Element1InChoice>Element1InChoice</Element1InChoice>
-	<Element2InChoice>Element2InChoice</Element2InChoice></RootElement37>

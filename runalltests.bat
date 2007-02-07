@@ -17,7 +17,7 @@ rem | permissions and limitations under the License.                       |
 rem +----------------------------------------------------------------------+
 rem | Author: SL                                                           |
 rem +----------------------------------------------------------------------+
-rem $Id: runalltests.bat,v 1.3 2006-09-28 15:19:04 cem Exp $
+rem $Id: runalltests.bat,v 1.4 2007-02-07 11:25:35 cem Exp $
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo This script runs all of the PHP SDO tests that can
@@ -27,10 +27,12 @@ echo home directory of PHP and the path to the
 echo directory holding the php.exe you are testing against.
 echo Go in and edit 
 echo PHP_HOME - the root directory for the php build
-echo PHP_BIN_HOME - the directory holding the binare to be tested
+echo PHP_BIN_HOME - the directory holding the binary to be tested
+scho TMP - the directory where temporary files will be written during testing
 
-set PHP_HOME=C:\simon\Projects\Tuscany\php\php-5.1.4
+set PHP_HOME=C:\simon\Projects\Tuscany\php\php-5.2.0
 set PHP_BIN_HOME=%PHP_HOME%\Debug_TS
+set TMP=C:\temp
 
 echo You also need to ensure that the php 
 echo include path is set to include at least
@@ -46,41 +48,19 @@ set PHPUNIT_EXECUTABLE=%PHP_HOME%\phpunit.bat
 set PATH=%PHP_BIN_HOME%
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo SDO Core Tests
+echo PHPT Tests
 call %TEST_PHP_EXECUTABLE% %PHP_HOME%\run-tests.php tests
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo Check that PHPUnit2 is installed 
-%TEST_PHP_EXECUTABLE% tests/SDOTestSetup.php
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo SDO Core PHPUnit2 Tests
+echo PHPUnit2 Tests
 cd tests
-call %PHPUNIT_EXECUTABLE% SDOAPITest SDOAPITest.php --log-xml SDOAIPITest.xml
+call %TEST_PHP_EXECUTABLE% AllTests.php
 cd ..
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo XML DAS PHPUnit2 Tests
-cd tests\XMLDAS\PHPUnitTests
-call %PHPUNIT_EXECUTABLE% XMLDASTest XMLDASTest.php
-cd ..\..\..
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo Relational DAS PHPUnit2 Tests
-cd DAS\Relational\Tests
-call %PHPUNIT_EXECUTABLE% SDO_DAS_Relational_TestSuite TestSuite.php
-cd ..\..\..
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo You may like to run the Relational samples now which 
 echo test the SDO Relational DAS against a real database. 
 echo See DAS/Relational/Scenarios/README for details
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo SDO Interop tests
-cd tests\interop
-call %TEST_PHP_EXECUTABLE% interop-xml.php
-cd ..\..
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo You may like to run the relational interop tests now

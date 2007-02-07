@@ -108,11 +108,14 @@
 //           . " - new function in SDO_DAS_Relational to support multiple root data objects\n"
 //           . " - new function in SDO_DAS_XML to support CDATA sections (not yet complete)\n"
 //           . " - fixes for bugs #9287, #9289, #9339\n",
-       'notes' => " Fix for bug #9498 - invalid WSDL generation\n" 
-           . "Fix for bug 9426 - printing open types\n" 
-           . "Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes for sequenced and open data types.\n",
+//       'notes' => " Fix for bug #9498 - invalid WSDL generation\n" 
+//           . "Fix for bug 9426 - printing open types\n" 
+//           . "Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes for sequenced and open data types.\n",
+       'notes' => "Fix for bug #9845 - Relational DAS is failing when one parent and two children\n"
+           . "Changed from namespaceURI.type to namespaceURI#type (conform to spec)\n"
+           . "Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)\n",
        'simpleoutput' => true,
-       'version' => '1.1.1',
+       'version' => '1.1.2',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
@@ -152,6 +155,8 @@
            'missing',
            'mkinstalldirs',
            'run-tests.php',
+           'SCA.txt',
+           'wsdl-all.xsd',
                         // packaging
            'MakePackage.php',
            'package.xml',                      
@@ -165,12 +170,11 @@
            '*tgz'
          ),
      'dir_roles' => array(
-         '/'         => 'src',
-         'scenarios' => 'test',
-         'tests'     => 'test', 
-         'DAS'       => 'php',
-         'SCA/tests' => 'test',
-         'SCA'       => 'php')       
+         '/'        => 'src',
+         'examples' => 'test', 
+         'tests'    => 'test', 
+         'DAS'      => 'php',
+         'SCA'      => 'php')       
      )
         
     );
@@ -245,6 +249,11 @@
     // all the lines from package.xml
     $in_lines       = file('package.xml');
     
+    // sometimes we have to ignore a block of lines from the
+    // package.xml file listing because it contains an SCA
+    // directory we don't want to move
+    $ignore_block   = false;
+ 
     // when set true lines are recorded in $sca_buffer. When
     // set false lines are recorded in $sdo_buffer
     $sca_buffering  = false;
@@ -255,9 +264,19 @@
 
     // separate SCA lines from SDO lines
     foreach ($in_lines as $line) {
-        // find the start tag of the SCA section and 
-        // start buffering SCA lines
-        if ( strstr($line, "<dir name=\"SCA\">") ) {
+        // We have to check that we are not in the examples
+        // or tests sections as both of these sections have 
+        // SCA directories that we want to leave alone
+        if ( strstr($line, "<dir name=\"examples\">") ||
+             strstr($line, "<dir name=\"tests\">")      ) {
+            $ignore_block = true;
+        }
+
+        // find the start tag of an SCA section and 
+        // assuming we aren't ignoring the block
+        // it appears in start buffering SCA lines
+        if ( strstr($line, "<dir name=\"SCA\">") &&
+             $ignore_block == false ) {
             $sca_buffering = true;
         }
                
@@ -271,6 +290,13 @@
         // buffering SCA lines
         if ( strstr($line, "</dir> <!-- /SCA -->") ) {
             $sca_buffering = false;
+        }        
+
+        // Stop ignoring any SCA directories we see when we
+        // get to the end of the tests and examples sections
+        if ( strstr($line, "</dir> <!-- /examples -->") ||
+             strstr($line, "</dir> <!-- /tests -->") ) {
+            $ignore_block = false;
         }        
     }
 

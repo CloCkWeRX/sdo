@@ -1,7 +1,7 @@
 <?php
 /*
 +-----------------------------------------------------------------------------+
-| Copyright IBM Corporation 2006.                                             |
+| Copyright IBM Corporation 2006,2007.                                        |
 | All Rights Reserved.                                                        |
 +-----------------------------------------------------------------------------+
 | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
@@ -44,7 +44,8 @@ if ( ! class_exists('SCA_GenerateWsdl', false) ) {
             /***********************************************************************
             * Get a DAS, initialise a wsdl document, get the document element
             ***********************************************************************/
-            $xmldas = SDO_DAS_XML::create(dirname(__FILE__) . '/wsdl-all.xsd');
+            $xmldas = SDO_DAS_XML::create(dirname(__FILE__) . '/2003-02-11.xsd'); 
+            $xmldas->addTypes(dirname(__FILE__) . '/soap/2003-02-11.xsd'); 
             // expect to find xsds along with the SCA code
             $wsdl_doc = $xmldas->createDocument();
             $wsdl     = $wsdl_doc->getRootDataObject();
@@ -199,12 +200,14 @@ if ( ! class_exists('SCA_GenerateWsdl', false) ) {
                 /* Make up the wsdl elements                                            */
                 $types_element              .= $xmlns_types ;
                 $target_namespace_in_quotes  = self::QUOTES . $wsdl->targetNamespace . self::QUOTES;
-                $types_element              .= "      targetNamespace=$target_namespace_in_quotes>\n";
+                $types_element              .= "      targetNamespace=$target_namespace_in_quotes\n";
+                $types_element              .= "      elementFormDefault=" . self::QUOTES . "qualified" . self::QUOTES . ">\n";
                 $types_element              .= $schema_types ;
             } else {
                 /* No namespaces                                                        */
                 $target_namespace_in_quotes  = self::QUOTES . $wsdl->targetNamespace . self::QUOTES;
-                $types_element              .= "      targetNamespace=$target_namespace_in_quotes>\n";
+                $types_element              .= "      targetNamespace=$target_namespace_in_quotes\n";
+                $types_element              .= "      elementFormDefault=" . self::QUOTES . "qualified" . self::QUOTES . ">\n";
             }
 
             $nillable_attribute         = 'nillable=' . self::QUOTES . 'true' . self::QUOTES;

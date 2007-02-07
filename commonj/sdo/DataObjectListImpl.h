@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 483552 $ $Date$ */
 
 #ifndef _DATAOBJECTLISTIMPL_H_
 #define _DATAOBJECTLISTIMPL_H_
@@ -209,4 +209,13 @@ private:
 };
 };
 };
+
+#define ASSERT_WRITABLE(property,method)\
+      if ((property).isReadOnly())\
+      {\
+          SDOString stringBuffer = (property).getName();\
+          stringBuffer += "is read-only.";\
+          SDO_THROW_EXCEPTION(method, SDOUnsupportedOperationException, stringBuffer.c_str())\
+      }
+
 #endif

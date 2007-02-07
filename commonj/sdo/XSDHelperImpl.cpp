@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 492974 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLFileWriter.h"   // Include first to avoid libxml compile problems!
 #include "commonj/sdo/SDOXMLStreamWriter.h" // Include first to avoid libxml compile problems!
@@ -30,6 +30,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <libxml/uri.h>
 #include "commonj/sdo/SDOSchemaSAX2Parser.h"
 #include "commonj/sdo/SDOSAX2Parser.h"
 #include "commonj/sdo/XSDPropertyInfo.h"
@@ -79,27 +80,33 @@ namespace commonj
 
         const char* XSDHelperImpl::defineFile(const char* schema, bool loadImportNamespace)
         {
-
-            SDOSchemaSAX2Parser schemaParser(schemaInfo, this, loadImportNamespace);
             clearErrors();
-            if (schemaParser.parse(schema) == 0)
+            SDOSchemaSAX2Parser* schemaParser;
+
+        /*  Build URI allowing for Windows path
+        */
+            xmlChar*const uri = xmlCanonicPath((xmlChar*)schema);
+            try
             {
-                defineTypes(schemaParser.getTypeDefinitions());
-                return schemaInfo.getTargetNamespaceURI();
+                schemaParser = parseIfNot(uri, loadImportNamespace);
+            }
+            catch(...)
+            {
+                xmlFree(uri);
+                throw;
+            }
+            xmlFree(uri);
+
+            if (schemaParser)
+            {
+                defineTypes(schemaParser->getTypeDefinitions());
+                return schemaParser->getTargetNamespaceURI();
             }
             return 0;
         }
         const char* XSDHelperImpl::defineFile(const SDOString& schema, bool loadImportNamespace)
         {
-
-            SDOSchemaSAX2Parser schemaParser(schemaInfo, this, loadImportNamespace);
-            clearErrors();
-            if (schemaParser.parse(schema.c_str()) == 0)
-            {
-                defineTypes(schemaParser.getTypeDefinitions());
-                return schemaInfo.getTargetNamespaceURI();
-            }
-            return 0;
+            return defineFile(schema.c_str(), loadImportNamespace);
         }
         
         const char*  XSDHelperImpl::define(std::istream& schema, bool loadImportNamespace)

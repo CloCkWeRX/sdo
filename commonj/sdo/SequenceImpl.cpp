@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 485600 $ $Date$ */
 
 #include "commonj/sdo/disable_warn.h"
 #include "commonj/sdo/Property.h"
@@ -186,27 +186,6 @@ namespace sdo{
     ///////////////////////////////////////////////////////////////////////////
 
 
-#define StringGetter(returntype,primtype,defval)\
-    returntype SequenceImpl::get##primtype##Value(unsigned int index)\
-    {\
-        SEQUENCE_ITEM_LIST::iterator i;\
-        CHECK_RANGE;\
-        const Property* p = (*i).getProp();\
-        if (p == 0) {\
-            return (*i).getText();\
-        }\
-        if (p->isMany())\
-        {\
-            DataObjectList& dol = the_do->getList(*p);\
-            DataObject* list_do = dol[(*i).getIndex()];\
-            if (list_do != 0)\
-            {\
-                return ((DataObjectImpl*)list_do)->get##primtype();\
-            }\
-            return defval;\
-        }\
-        return the_do->get##primtype(*((*i).getProp()));\
-    }
 
 #define getter(returntype,primtype,defval)\
     returntype SequenceImpl::get##primtype##Value(unsigned int index)\
@@ -230,27 +209,6 @@ namespace sdo{
         return the_do->get##primtype(*((*i).getProp()));\
     }
 
-#define ObjectGetter(returntype,primtype,defval)\
-    returntype SequenceImpl::get##primtype##Value(unsigned int index)\
-    {\
-        SEQUENCE_ITEM_LIST::iterator i;\
-        CHECK_RANGE;\
-        const Property* p = (*i).getProp();\
-        if (p == 0) {\
-            return defval;\
-        }\
-        if (p->isMany())\
-        {\
-            DataObjectList& dol = the_do->getList(*p);\
-            DataObject* list_do = dol[(*i).getIndex()];\
-            if (list_do != 0)\
-            {\
-                    return list_do;\
-            }\
-            return defval;\
-        }\
-        return the_do->get##primtype(*((*i).getProp()));\
-    }
 
 #define CharGetter(returntype,primtype,defval)\
     unsigned int SequenceImpl::get##primtype##Value(unsigned int index, returntype ptr, unsigned int max)\
@@ -275,7 +233,26 @@ namespace sdo{
     }
 
 
-StringGetter(const char* , CString, 0);
+   const char* SequenceImpl::getCStringValue(unsigned int index)
+   {
+      SEQUENCE_ITEM_LIST::iterator i;
+      CHECK_RANGE;
+      const Property* p = (*i).getProp();
+      if (p == 0) {
+         return (*i).getText();
+      }
+      if (p->isMany())
+      {
+         DataObjectList& dol = the_do->getList(*p);
+         DataObject* list_do = dol[(*i).getIndex()];
+         if (list_do != 0)
+         {
+            return ((DataObjectImpl*)list_do)->getCString();
+         }
+         return 0;
+      }
+      return the_do->getCString(*((*i).getProp()));
+   }
 
 CharGetter( wchar_t* , String, 0);
 CharGetter( char*, Bytes, 0);
@@ -306,8 +283,26 @@ getter(float, Float, (float)0);
 getter(long double, Double, 0);
 getter(const SDODate, Date, 0);
 
-ObjectGetter(RefCountingPointer<DataObject> , DataObject, 0);
-
+   RefCountingPointer<DataObject> SequenceImpl::getDataObjectValue(unsigned int index)
+   {
+      SEQUENCE_ITEM_LIST::iterator i;
+      CHECK_RANGE;
+      const Property* p = (*i).getProp();
+      if (p == 0) {
+         return 0;
+      }
+      if (p->isMany())
+      {
+         DataObjectList& dol = the_do->getList(*p);
+         DataObject* list_do = dol[(*i).getIndex()];
+         if (list_do != 0)
+         {
+            return list_do;
+         }
+         return 0;
+      }
+      return the_do->getDataObject(*((*i).getProp()));
+   }
 
     ///////////////////////////////////////////////////////////////////////////
     // generic getter for those types which support it
@@ -442,55 +437,6 @@ ObjectGetter(RefCountingPointer<DataObject> , DataObject, 0);
         }
         the_do->setDataObject(*((*i).getProp()),d);
     }
-  
-
-#define doadder(primtype,primval)\
-    bool SequenceImpl::add##primtype(const char* propertyName, primval v)\
-    {\
-        const PropertyImpl* p = the_do->getPropertyImpl(propertyName);\
-        if (p == 0)\
-        {\
-            if (the_do->getType().isOpenType())\
-            {\
-                p = the_do->define ##primtype (propertyName, v->getType());\
-            }\
-            if (p == 0)\
-            {\
-                std::string msg("Cannot find property:");\
-                msg += propertyName;\
-                SDO_THROW_EXCEPTION("getProperty", SDOPropertyNotFoundException,\
-                msg.c_str());\
-            }\
-        }\
-        return add##primtype((const Property&)*p,v);\
-    }\
-    bool SequenceImpl::add##primtype(unsigned int propertyIndex, primval v)\
-    {\
-        return add##primtype(the_do->getProperty(propertyIndex), v);\
-    }\
-    bool SequenceImpl::add##primtype(const Property& p, primval v)\
-    {\
-        if (p.isMany())\
-        {\
-            DataObjectList& dol = the_do->getList(p);\
-            dol.append((primval)v);\
-            /* the_list.push_back(seq_item(&p,dol.size()-1));*/\
-            return true;\
-        }\
-        SEQUENCE_ITEM_LIST::iterator i;\
-        for (i=the_list.begin();i != the_list.end();++i) {\
-            const Property* pp = (*i).getProp();\
-            if (pp == 0) continue;\
-            if (!strcmp(pp->getName(),p.getName()))\
-            {\
-            SDO_THROW_EXCEPTION("add", SDOUnsupportedOperationException,\
-            "Sequence::add of property which already exists in sequence");\
-            }\
-        }\
-        the_do->set##primtype(p,v);\
-        the_list.push_back(seq_item(&p,0));\
-        return true;\
-    }
 
 
 #define adder(primtype,primval, platval)\
@@ -555,7 +501,53 @@ adder(Long, int64_t, int64_t);
 adder(Float, float, float);
 adder(Double, long double, long double);
 adder(Date, const SDODate, const SDODate);
-doadder(DataObject, RefCountingPointer<DataObject> );
+
+bool SequenceImpl::addDataObject(const char* propertyName, RefCountingPointer<DataObject> v)
+{
+   const PropertyImpl* p = the_do->getPropertyImpl(propertyName);
+   if (p == 0)
+   {
+      if (the_do->getType().isOpenType())
+      {
+         p = the_do->defineDataObject(propertyName, v->getType());
+      }
+      if (p == 0)
+      {
+         std::string msg("Cannot find property:");
+         msg += propertyName;
+         SDO_THROW_EXCEPTION("getProperty", SDOPropertyNotFoundException,
+                             msg.c_str());
+      }
+   }
+   return addDataObject((const Property&)*p,v);
+}
+bool SequenceImpl::addDataObject(unsigned int propertyIndex, RefCountingPointer<DataObject> v)
+{
+   return addDataObject(the_do->getProperty(propertyIndex), v);
+}
+bool SequenceImpl::addDataObject(const Property& p, RefCountingPointer<DataObject> v)
+{
+   if (p.isMany())
+   {
+      DataObjectList& dol = the_do->getList(p);
+      dol.append((RefCountingPointer<DataObject>)v);
+      /* the_list.push_back(seq_item(&p,dol.size()-1));*/
+      return true;
+   }
+   SEQUENCE_ITEM_LIST::iterator i;
+   for (i=the_list.begin();i != the_list.end();++i) {
+      const Property* pp = (*i).getProp();
+      if (pp == 0) continue;
+      if (!strcmp(pp->getName(),p.getName()))
+      {
+         SDO_THROW_EXCEPTION("add", SDOUnsupportedOperationException,
+                             "Sequence::add of property which already exists in sequence");
+      }
+   }
+   the_do->setDataObject(p,v);
+   the_list.push_back(seq_item(&p,0));
+   return true;
+}
 
 
 #define charAdder(primtype,primval)\
@@ -673,67 +665,6 @@ charAdder ( Bytes , const char* );
         return true;\
     }
 
-#define doinserter(primtype,primval)\
-    bool SequenceImpl::add##primtype(unsigned int index, const char* propertyName, primval v)\
-    {\
-        const PropertyImpl* p = the_do->getPropertyImpl(propertyName);\
-        if (p == 0)\
-        {\
-            if (the_do->getType().isOpenType())\
-            {\
-                p = the_do->define ##primtype (propertyName, v->getType());\
-            }\
-            if (p == 0)\
-            {\
-                std::string msg("Cannot find property:");\
-                msg += propertyName;\
-                SDO_THROW_EXCEPTION("getProperty", SDOPropertyNotFoundException,\
-                msg.c_str());\
-            }\
-        }\
-        return add##primtype(index,(const Property&)*p,v);\
-    }\
-    bool SequenceImpl::add##primtype(unsigned int index, unsigned int propertyIndex, primval v)\
-    {\
-        return add##primtype(index,the_do->getProperty(propertyIndex), v);\
-    }\
-    bool SequenceImpl::add##primtype(unsigned int index, const Property& p, primval v)\
-    {\
-        SEQUENCE_ITEM_LIST::iterator i;\
-        SEQUENCE_ITEM_LIST::iterator i2 = the_list.end();\
-        unsigned int j;\
-        if (index >= the_list.size()) {\
-            return add##primtype(p,v);\
-        }\
-        if (p.isMany())\
-        {\
-            DataObjectList& dol = the_do->getList(p);\
-            dol.append((primval)v);\
-            j = 0;\
-            for (i=the_list.begin();(j < index) && (i != the_list.end());++i) {\
-                j++;\
-            }\
-            /*the_list.insert(i,seq_item(&p,dol.size()-1));*/\
-            return true;\
-        }\
-        j = 0;\
-        for (i=the_list.begin();i != the_list.end();++i) {\
-            const Property* pp = (*i).getProp();\
-            if (pp == 0) continue;\
-            if (!strcmp(pp->getName(),p.getName()))\
-            {\
-                SDO_THROW_EXCEPTION("Insert", SDOUnsupportedOperationException,\
-                "Sequence::insert of property which already exists in sequence");\
-            }\
-            if (j == index) {\
-                i2 = i;\
-            }\
-            j++;\
-        }\
-        the_do->set##primtype(p,v);\
-        the_list.insert(i2,seq_item(&p,0));\
-        return true;\
-    }
 
 inserter( CString , const char* , const char* );
 inserter( Boolean, bool, bool);
@@ -749,7 +680,67 @@ inserter(Long, int64_t, int64_t);
 inserter(Float, float, float );
 inserter(Double, long double, long double);
 inserter(Date, const SDODate, const SDODate);
-doinserter(DataObject, RefCountingPointer<DataObject>);
+
+bool SequenceImpl::addDataObject(unsigned int index, const char* propertyName, RefCountingPointer<DataObject> v)
+{
+   const PropertyImpl* p = the_do->getPropertyImpl(propertyName);
+   if (p == 0)
+   {
+      if (the_do->getType().isOpenType())
+      {
+         p = the_do->defineDataObject(propertyName, v->getType());
+      }
+      if (p == 0)
+      {
+         std::string msg("Cannot find property:");
+         msg += propertyName;
+         SDO_THROW_EXCEPTION("getProperty", SDOPropertyNotFoundException,
+                             msg.c_str());
+      }
+   }
+   return addDataObject(index,(const Property&)*p,v);
+}
+bool SequenceImpl::addDataObject(unsigned int index, unsigned int propertyIndex, RefCountingPointer<DataObject> v)
+{
+   return addDataObject(index,the_do->getProperty(propertyIndex), v);
+}
+bool SequenceImpl::addDataObject(unsigned int index, const Property& p, RefCountingPointer<DataObject> v)
+{
+   SEQUENCE_ITEM_LIST::iterator i;
+   SEQUENCE_ITEM_LIST::iterator i2 = the_list.end();
+   unsigned int j;
+   if (index >= the_list.size()) {
+      return addDataObject(p,v);
+   }
+   if (p.isMany())
+   {
+      DataObjectList& dol = the_do->getList(p);
+      dol.append((RefCountingPointer<DataObject>)v);
+      j = 0;
+      for (i=the_list.begin();(j < index) && (i != the_list.end());++i) {
+         j++;
+      }
+      /*the_list.insert(i,seq_item(&p,dol.size()-1));*/
+      return true;
+   }
+   j = 0;
+   for (i=the_list.begin();i != the_list.end();++i) {
+      const Property* pp = (*i).getProp();
+      if (pp == 0) continue;
+      if (!strcmp(pp->getName(),p.getName()))
+      {
+         SDO_THROW_EXCEPTION("Insert", SDOUnsupportedOperationException,
+                             "Sequence::insert of property which already exists in sequence");
+      }
+      if (j == index) {
+         i2 = i;
+      }
+      j++;
+   }
+   the_do->setDataObject(p,v);
+   the_list.insert(i2,seq_item(&p,0));
+   return true;
+}
 
 
 

@@ -93,13 +93,13 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
 
                     if ( SCA_AnnotationRules::enoughPieces($words) === true ) {
                         if ( strcmp($words[ 0 ], SCA_AnnotationRules::PARAM) === 0 ) {
-                            $this->methodAnnotations[ self::PARAM_ANNOTATION ][$i++] = 
-                                $this->setParameterValues($words);
+                            $this->methodAnnotations[ self::PARAM_ANNOTATION ][$i++] =
+                            $this->setParameterValues($words);
                         } else {
                             /* Ensure that no syntax error has been detected       */
                             if ( ($checkValue = $this->setReturnValues($words)) != null ) {
-                                $this->methodAnnotations[ self::RETRN_ANNOTATION ][ 0 ] = 
-                                    $checkValue;
+                                $this->methodAnnotations[ self::RETRN_ANNOTATION ][ 0 ] =
+                                $checkValue;
                             } else {
                                 $reason = "Invalid return annotation syntax in '{$line}' " ;
                                 throw new SCA_RuntimeException($reason);
@@ -136,13 +136,32 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         {
             $paramValue                   = array() ;
             $paramValue['annotationType'] = $words[ 0 ] ;
+
+            if (!isset($words[1])) {
+                throw new SCA_RuntimeException('@param must be followed by a type');
+            }
+
+            if (!isset($words[2])) {
+                throw new SCA_RuntimeException('@param must be followed by a type then a variable name');
+            }
+
             $type                         = $words[ 1 ] ;
             $param_name                   = $words[ 2 ] ;
+
+            if (strncmp($param_name,'$',1) !== 0) {
+                throw new SCA_RuntimeException('The variable name in an @param annotation must begin with a $');
+            }
 
             /* When the type is an object the format of the line is different      */
             if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
                 $paramValue[ 'type' ]          = 'object' ;
                 $paramValue[ 'name' ]          = $param_name ;
+
+                if (!isset($words[3])) {
+                    throw new SCA_RuntimeException('@param with a data type must contain a namespace');
+                }
+
+
                 $paramValue[ 'namespace' ]     = $words[3] ;
                 $paramValue[ 'objectType' ]    = $type ;
                 if ( (count($words)) > 4 )
@@ -174,7 +193,14 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         {
             $returnValue                   = array() ;
             $returnValue['annotationType'] = $words[ 0 ] ;
+
+            if (!isset($words[1])) {
+                throw new SCA_RuntimeException('@return must be followed by a type');
+            }
             $type                          = $words[ 1 ] ;
+
+
+
 
             /* When the type is an object the format of the line is different      */
             if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
@@ -216,6 +242,12 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             while ($line !== false) {
                 if (strpos($line, "@types") !== false) {
                     $words = SCA_AnnotationRules::parseAnnotation($line);
+                    if (!isset($words[1])) {
+                        throw new SCA_RuntimeException('types annotation needs a namespace and schema location');
+                    }
+                    if (!isset($words[2])) {
+                        throw new SCA_RuntimeException('types annotation needs a schema location');
+                    }
 
                     $namespace = $words[1];
                     $filename  = $words[2];
@@ -229,6 +261,11 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                 $line = strtok("\n");  //next line
             }
             return $this->xsd_types_array;
+        }
+
+        public function isService()
+        {
+            return $this->_hasAnnotation('service');
         }
 
         public function isWebService()
@@ -248,6 +285,11 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return $this->_hasAnnotation('reference');
         }
 
+        public function hasBinding()
+        {
+            return $this->_hasAnnotation('binding');
+        }
+
         public function isNamespace()
         {
             return $this->_hasAnnotation('namespace');
@@ -260,7 +302,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             } else if ($this->_hasAnnotation(self::SERVICE_BINDING)) {
                 return $this->_getSingleWordFollowing(self::SERVICE_BINDING);
             } else {
-                throw new SCA_RuntimeException("getReference() @reference has no following @binding");
+                throw new SCA_RuntimeException("Instance variable has @reference has no valid @binding.*");
             }
         }
 
@@ -386,13 +428,13 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return null;
         }
 
-        private function _hasAnnotation($label) 
+        private function _hasAnnotation($label)
         {
             $pos = strpos($this->docComment, "@" . $label);
             return ( ($pos !== false) ? true : false ) ;
         }
 
-        private function _getEveryWordFollowing($label) 
+        private function _getEveryWordFollowing($label)
         {
             $every=$this->_getValuesFollowing($label);
 
@@ -403,7 +445,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return implode(" ", $every);
         }
 
-        private function _getValuesFollowing($label) 
+        private function _getValuesFollowing($label)
         {
             $words = explode(" ", strchr($this->docComment, "@" . $label . " "));
 
@@ -424,7 +466,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return $every;
         }
 
-        private function _getArgumentsFor($label) 
+        private function _getArgumentsFor($label)
         {
 
             $label="@".$label;
@@ -449,7 +491,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return $every;
         }
 
-        private function _getBooleanFollowing($label)  
+        private function _getBooleanFollowing($label)
         {
             $word = $this->_getSingleWordFollowing($label);
             return ($word=='true') ? true : false;

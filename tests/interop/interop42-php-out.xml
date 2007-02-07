@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RootElement42 xmlns="http://www.apache.org/tuscany/interop" xsi:type="RootElement42" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ElementOfSimpleTypeWithFixed>
-		ElementOfSimpleTypeWithFixedFixed
-	</ElementOfSimpleTypeWithFixed></RootElement42>

@@ -30,6 +30,8 @@ require "SCA/SCA_RuntimeException.php";
 if ( ! class_exists('SCA_Helper', false) ) {
     class SCA_Helper {
 
+        private static $tmpdir;
+        
         public static function guessClassName($class_file)
         {
             $basename = basename($class_file, '.php');
@@ -199,6 +201,22 @@ if ( ! class_exists('SCA_Helper', false) ) {
 
         }/* End filter methods function                                            */
 
+        /**
+        * Find the system's temporary directory.
+        * (The function formerly known as sys_get_temp_dir())
+        *
+        * @return string the path to the system temporary directory
+        */
+        public static function getTempDir() 
+        {
+            if (empty(SCA_Helper::$tmpdir)) {
+                $temp_file = tempnam(NULL, 'SCA');
+                SCA_Helper::$tmpdir = dirname(realpath($temp_file));
+                unlink($temp_file);
+            }
+            return SCA_Helper::$tmpdir;
+        }
+        
         private static function _getXmldas($class_name, $namespace_uri)
         {
             // TODO examine this code again

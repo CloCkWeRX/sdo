@@ -64,6 +64,18 @@ int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset,
 	char			*class_name;
 	char		    *space;
 	
+
+	if (!z_offset) {
+		/* get here with a statement like $sdo[] = 'some value'; */
+		if (!quiet) {
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
+				"%s%s%s(): cannot append a value - this object is not many-valued", 
+				class_name, space, get_active_function_name(TSRMLS_C));
+		}
+		return FAILURE;
+	}
+
 	switch(Z_TYPE_P(z_offset)) {
 	case IS_NULL:
 		if (!quiet) {

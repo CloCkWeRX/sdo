@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 489558 $ $Date$ */
 
 #ifndef commonj_sdo_DataObjectInstance_h
 #define commonj_sdo_DataObjectInstance_h
@@ -25,8 +25,6 @@
 
 #include "commonj/sdo/export.h"
 #include "commonj/sdo/SDO.h"
-using commonj::sdo::DataObjectPtr;
-using commonj::sdo::DataObject;
 
 
 namespace commonj

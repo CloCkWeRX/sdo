@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 477891 $ $Date$ */
+/* $Rev: 489336 $ $Date$ */
 
 #ifndef _SDOXMLWRITER_H_
 #define _SDOXMLWRITER_H_
@@ -97,29 +97,35 @@ namespace commonj
              * it detects CDATA sections before wrting out element contents
              */
             int writeXMLElement(xmlTextWriterPtr writer, 
-                                const xmlChar *name, 
-                                const char *content);
+                                const SDOXMLString& name, 
+                                const SDOXMLString& content);
 
             SchemaInfo* schemaInfo;
             DataFactoryPtr    dataFactory;
 
-            XSDPropertyInfo* getPropertyInfo(const Type& type, const Property& property);
+            XSDPropertyInfo* getPropertyInfo(const Property& property);
             
-            //std::stack<SDOXMLString>    namespaceUriStack;
-            //SAX2Namespaces namespaces;
-            //std::stack<SAX2Namespaces>    namespaceStack;
             int spacescount;
             std::map<SDOXMLString,SDOXMLString> namespaceMap;
             SDOXMLString tnsURI;
            
+            bool determineNamespace(DataObjectPtr dataObject, const Property& prop,
+                SDOXMLString& elementURI, SDOXMLString& elementName);
 
             void writeReference(
+                const SDOXMLString& propertyName,
                 DataObjectPtr dataObject, 
                 const Property& property,
                 bool isElement,
                 DataObjectPtr refferedToObject = 0);
 
-            void writeXmlnsXsi();
+            static const SDOXMLString s_xsi;
+            static const SDOXMLString s_type;
+            static const SDOXMLString s_nil;
+            static const SDOXMLString s_true;
+            static const SDOXMLString s_xsiNS;
+            static const SDOXMLString s_xmlns;
+            static const SDOXMLString s_commonjsdo;
 
         };
     } // End - namespace sdo

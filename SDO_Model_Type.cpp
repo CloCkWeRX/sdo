@@ -160,7 +160,7 @@ void sdo_model_type_summary_string (ostringstream& print_buf, const Type *typep 
 	if (typep->isDataObjectType()) {
 		print_buf << "<dataObject> ";
 	}
-	print_buf << typep->getURI() << ":" << typep->getName();
+	print_buf << typep->getURI() << "#" << typep->getName();
 }
 /* }}} */
 
@@ -181,7 +181,7 @@ void sdo_model_type_string (ostringstream& print_buf, const Type *typep, const c
 
 	const Type *base_typep = typep->getBaseType();
 	if (base_typep) {
-		print_buf << "<extends " << base_typep->getURI() << ":" << base_typep->getName() << "> ";
+		print_buf << "<extends " << base_typep->getURI() << "#" << base_typep->getName() << "> ";
 	}	
 
 	if (pl.size() > 0) {

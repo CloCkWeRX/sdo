@@ -215,7 +215,7 @@ if ( ! class_exists('SDO_TypeHandler', false) ) {
                 if ($words[0] !== '-') break;
                 $namespace_and_type_in_parens = $words[2];
                 $namespace_and_type           = substr($namespace_and_type_in_parens, 1, strlen($namespace_and_type_in_parens)-2);
-                $pos_last_colon               = strrpos($namespace_and_type, ':');
+                $pos_last_colon               = strrpos($namespace_and_type, '#');
                 $namespace                    = substr($namespace_and_type, 0, $pos_last_colon);
                 $type                         = substr($namespace_and_type, $pos_last_colon+1);
                 $types[]                      = array($namespace, $type);

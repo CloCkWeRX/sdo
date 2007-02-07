@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 486565 $ $Date$ */
 
 #ifndef _PROPERTYDefinitionImpl_H_
 #define _PROPERTYDefinitionImpl_H_
@@ -60,6 +60,7 @@ namespace commonj
 
             SDOXMLString name;
             SDOXMLString localname;
+            SDOXMLString namespaceURI;
             
             SDOXMLString typeUri;
             SDOXMLString typeName;

@@ -32,13 +32,13 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.1.1</version>
-  <date>2006-12-07</date>
+  <version>1.1.2</version>
+  <date>2007-02-07</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>Fix for bug #9498 - invalid WSDL generation
-Fix for bug 9426 - printing open types
-Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes for sequenced and open data types.
+  <notes>Fix for bug #9845 - Relational DAS is failing when one parent and two children
+Changed from namespaceURI.type to namespaceURI#type (conform to spec)
+Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -46,44 +46,9 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
   </deps>
   <filelist>
     <dir name="SCA">
-     <dir name="Samples">
-      <dir name="SCAComponentCallingLocalSCAComponent">
-       <file role="php" name="HelloClient.php"/>
-       <file role="php" name="HelloService.php"/>
-       <file role="php" name="SurnameService.php"/>
-      </dir> <!-- /SCA/Samples/SCAComponentCallingLocalSCAComponent -->
-      <dir name="SCAComponentCallingRemoteSCAComponent">
-       <file role="php" name="HelloClient.php"/>
-       <file role="php" name="HelloService.php"/>
-       <file role="php" name="SurnameService.php"/>
-      </dir> <!-- /SCA/Samples/SCAComponentCallingRemoteSCAComponent -->
-      <dir name="SCAComponentUsingDataStructures">
-       <file role="php" name="BatchService.php"/>
-       <file role="php" name="HelloClient.php"/>
-       <file role="php" name="names.xsd"/>
-      </dir> <!-- /SCA/Samples/SCAComponentUsingDataStructures -->
-      <dir name="ScriptCallingLocalSCAComponent">
-       <file role="php" name="HelloClient.php"/>
-       <file role="php" name="HelloService.php"/>
-      </dir> <!-- /SCA/Samples/ScriptCallingLocalSCAComponent -->
-      <dir name="ScriptCallingRemoteSCAComponent">
-       <file role="php" name="HelloClient.php"/>
-       <file role="php" name="HelloService.php"/>
-      </dir> <!-- /SCA/Samples/ScriptCallingRemoteSCAComponent -->
-      <file role="php" name="index.html"/>
-     </dir> <!-- /SCA/Samples -->
      <dir name="soap">
       <file role="php" name="2003-02-11.xsd"/>
      </dir> <!-- /SCA/soap -->
-     <dir name="tests">
-      <file role="test" name="001.phpt"/>
-      <file role="test" name="002.phpt"/>
-      <file role="test" name="003.phpt"/>
-      <file role="test" name="004.phpt"/>
-      <file role="test" name="Component.php"/>
-      <file role="test" name="Component.wsdl"/>
-      <file role="test" name="person.xsd"/>
-     </dir> <!-- /SCA/tests -->
      <file role="php" name="2003-02-11.xsd"/>
      <file role="php" name="CREDITS"/>
      <file role="php" name="EXPERIMENTAL"/>
@@ -102,7 +67,6 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
      <file role="php" name="SCA_ServiceWrapper.php"/>
      <file role="php" name="SCA_SoapProxy.php"/>
      <file role="php" name="SDO_TypeHandler.php"/>
-     <file role="php" name="wsdl-all.xsd"/>
     </dir> <!-- /SCA -->
    <dir name="/" baseinstalldir="SDO">
     <dir name="commonj">
@@ -204,6 +168,7 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
       <file role="src" name="SDOSchemaSAX2Parser.h"/>
       <file role="src" name="SDOSPI.h"/>
       <file role="src" name="SDOString.h"/>
+      <file role="src" name="SDOUserMacros.h"/>
       <file role="src" name="SDOUtils.cpp"/>
       <file role="src" name="SDOUtils.h"/>
       <file role="src" name="SDOXMLBufferWriter.cpp"/>
@@ -270,57 +235,6 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
     </dir> <!-- /commonj -->
     <dir name="DAS">
      <dir name="Relational">
-      <dir name="Scenarios">
-       <file role="php" name="1c-C.php"/>
-       <file role="php" name="1c-CD.php"/>
-       <file role="php" name="1c-CRU.php"/>
-       <file role="php" name="1c-CRUCollisionD.php"/>
-       <file role="php" name="1c-CRUD.php"/>
-       <file role="php" name="1c-CRUDDuffSQL.php"/>
-       <file role="php" name="1c-DCsamePK.php"/>
-       <file role="php" name="1c-R.php"/>
-       <file role="php" name="1c-RA.php"/>
-       <file role="php" name="1c-RD.php"/>
-       <file role="php" name="1c-RU.php"/>
-       <file role="php" name="1c-RUnull.php"/>
-       <file role="php" name="1c-RUunsetPrimitive.php"/>
-       <file role="php" name="1cd-C.php"/>
-       <file role="php" name="1cd-CRUD.php"/>
-       <file role="php" name="1cd-CRUDnull.php"/>
-       <file role="php" name="1cd-RA.php"/>
-       <file role="php" name="1cde-C.php"/>
-       <file role="php" name="1cde-CRU.php"/>
-       <file role="php" name="1cde-CRUD.php"/>
-       <file role="php" name="1cde-CRUDdetach.php"/>
-       <file role="php" name="1cde-CRUDnull.php"/>
-       <file role="php" name="1cde-R.php"/>
-       <file role="php" name="1e-CRUD.php"/>
-       <file role="php" name="companydb_db2.sql"/>
-       <file role="php" name="companydb_mysql.sql"/>
-       <file role="php" name="company_metadata.inc.php-dist"/>
-       <file role="php" name="mc-C.php"/>
-       <file role="php" name="mc-R.php"/>
-       <file role="php" name="mc-RD.php"/>
-       <file role="php" name="mc-RU.php"/>
-       <file role="php" name="README"/>
-       <file role="php" name="runAllScenarios.php"/>
-      </dir> <!-- /DAS/Relational/Scenarios -->
-      <dir name="Tests">
-       <file role="php" name="TestContainmentReference.php"/>
-       <file role="php" name="TestDatabaseModel.php"/>
-       <file role="php" name="TestDataObjectHelper.php"/>
-       <file role="php" name="TestDeleteAction.php"/>
-       <file role="php" name="TestForeignKey.php"/>
-       <file role="php" name="TestInsertAction.php"/>
-       <file role="php" name="TestObjectModel.php"/>
-       <file role="php" name="TestPlan.php"/>
-       <file role="php" name="TestReferencesModel.php"/>
-       <file role="php" name="TestRelational.php"/>
-       <file role="php" name="TestSuite.php"/>
-       <file role="php" name="TestTable.php"/>
-       <file role="php" name="TestUpdateAction.php"/>
-       <file role="php" name="ZDERunner.php"/>
-      </dir> <!-- /DAS/Relational/Tests -->
       <file role="php" name="Action.php"/>
       <file role="php" name="ContainmentReference.php"/>
       <file role="php" name="ContainmentReferencesModel.php"/>
@@ -346,48 +260,44 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
      </dir> <!-- /DAS/Relational -->
      <file role="php" name="Relational.php"/>
     </dir> <!-- /DAS -->
-    <dir name="scenarios">
-     <dir name="contacts">
-      <file role="test" name="confirm.php"/>
-      <file role="test" name="contactdb_mysql.sql"/>
-      <file role="test" name="contacts_config.inc.php"/>
-      <file role="test" name="contacts_data.inc.php"/>
-      <file role="test" name="contacts_schema.inc.php"/>
-      <file role="test" name="db_config.inc.php"/>
-      <file role="test" name="edit.php"/>
-      <file role="test" name="welcome.php"/>
-     </dir> <!-- /scenarios/contacts -->
-     <dir name="jungle">
-      <file role="test" name="animalTypes.xsd"/>
-      <file role="test" name="jungle.xsd"/>
-      <file role="test" name="populate_jungle.php"/>
-     </dir> <!-- /scenarios/jungle -->
-     <dir name="letter">
-      <file role="test" name="letter.xml"/>
-      <file role="test" name="letter.xsd"/>
-      <file role="test" name="show_letter.php"/>
-     </dir> <!-- /scenarios/letter -->
-     <dir name="rss-media">
-      <file role="test" name="additem.php"/>
-      <file role="test" name="base.xml"/>
-      <file role="test" name="blog.xml"/>
-      <file role="test" name="blog.xsd"/>
-      <file role="test" name="handle_upload.inc.php"/>
-      <file role="test" name="newitem.php"/>
-      <file role="test" name="rss.php"/>
-      <file role="test" name="rss.xsd"/>
-      <file role="test" name="showitem.php"/>
-     </dir> <!-- /scenarios/rss-media -->
-     <dir name="sdo-api">
-      <file role="test" name="contacts.xml"/>
-      <file role="test" name="contacts.xsd"/>
-      <file role="test" name="sdo_api.php"/>
-     </dir> <!-- /scenarios/sdo-api -->
-     <file role="test" name="index.html"/>
-    </dir> <!-- /scenarios -->
-    <dir name="tests">
-     <dir name="XMLDAS">
-      <dir name="Examples">
+    <dir name="examples">
+     <dir name="DAS">
+      <dir name="Relational">
+       <file role="test" name="1c-C.php"/>
+       <file role="test" name="1c-CD.php"/>
+       <file role="test" name="1c-CRU.php"/>
+       <file role="test" name="1c-CRUCollisionD.php"/>
+       <file role="test" name="1c-CRUD.php"/>
+       <file role="test" name="1c-CRUDDuffSQL.php"/>
+       <file role="test" name="1c-DCsamePK.php"/>
+       <file role="test" name="1c-R.php"/>
+       <file role="test" name="1c-RA.php"/>
+       <file role="test" name="1c-RD.php"/>
+       <file role="test" name="1c-RU.php"/>
+       <file role="test" name="1c-RUnull.php"/>
+       <file role="test" name="1c-RUunsetPrimitive.php"/>
+       <file role="test" name="1cd-C.php"/>
+       <file role="test" name="1cd-CRUD.php"/>
+       <file role="test" name="1cd-CRUDnull.php"/>
+       <file role="test" name="1cd-RA.php"/>
+       <file role="test" name="1cde-C.php"/>
+       <file role="test" name="1cde-CRU.php"/>
+       <file role="test" name="1cde-CRUD.php"/>
+       <file role="test" name="1cde-CRUDdetach.php"/>
+       <file role="test" name="1cde-CRUDnull.php"/>
+       <file role="test" name="1cde-R.php"/>
+       <file role="test" name="1e-CRUD.php"/>
+       <file role="test" name="companydb_db2.sql"/>
+       <file role="test" name="companydb_mysql.sql"/>
+       <file role="test" name="company_metadata.inc.php-dist"/>
+       <file role="test" name="mc-C.php"/>
+       <file role="test" name="mc-R.php"/>
+       <file role="test" name="mc-RD.php"/>
+       <file role="test" name="mc-RU.php"/>
+       <file role="test" name="README"/>
+       <file role="test" name="runAllScenarios.php"/>
+      </dir> <!-- /examples/DAS/Relational -->
+      <dir name="XML">
        <file role="test" name="animalTypes.xsd"/>
        <file role="test" name="Example1.php"/>
        <file role="test" name="Example2.php"/>
@@ -398,52 +308,202 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
        <file role="test" name="jungle.xsd"/>
        <file role="test" name="letter.xml"/>
        <file role="test" name="letter.xsd"/>
-      </dir> <!-- /tests/XMLDAS/Examples -->
-      <dir name="PHPUnitTests">
-       <dir name="abstractComplexType">
-        <file role="test" name="abstract.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/abstractComplexType -->
-       <dir name="anyElement">
-        <file role="test" name="animalTypes.xsd"/>
-        <file role="test" name="jungle.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/anyElement -->
-       <dir name="extendedComplexType">
-        <file role="test" name="person.xml"/>
+      </dir> <!-- /examples/DAS/XML -->
+     </dir> <!-- /examples/DAS -->
+     <dir name="SCA">
+      <dir name="SCAComponentCallingLocalSCAComponent">
+       <file role="test" name="HelloClient.php"/>
+       <file role="test" name="HelloService.php"/>
+       <file role="test" name="SurnameService.php"/>
+      </dir> <!-- /examples/SCA/SCAComponentCallingLocalSCAComponent -->
+      <dir name="SCAComponentCallingRemoteSCAComponent">
+       <file role="test" name="HelloClient.php"/>
+       <file role="test" name="HelloService.php"/>
+       <file role="test" name="SurnameService.php"/>
+      </dir> <!-- /examples/SCA/SCAComponentCallingRemoteSCAComponent -->
+      <dir name="SCAComponentUsingDataStructures">
+       <file role="test" name="BatchService.php"/>
+       <file role="test" name="HelloClient.php"/>
+       <file role="test" name="names.xsd"/>
+      </dir> <!-- /examples/SCA/SCAComponentUsingDataStructures -->
+      <dir name="ScriptCallingLocalSCAComponent">
+       <file role="test" name="HelloClient.php"/>
+       <file role="test" name="HelloService.php"/>
+      </dir> <!-- /examples/SCA/ScriptCallingLocalSCAComponent -->
+      <dir name="ScriptCallingRemoteSCAComponent">
+       <file role="test" name="HelloClient.php"/>
+       <file role="test" name="HelloService.php"/>
+      </dir> <!-- /examples/SCA/ScriptCallingRemoteSCAComponent -->
+      <file role="test" name="index.html"/>
+     </dir> <!-- /examples/SCA -->
+     <dir name="SDO">
+      <dir name="contacts">
+       <file role="test" name="confirm.php"/>
+       <file role="test" name="contactdb_mysql.sql"/>
+       <file role="test" name="contacts_config.inc.php"/>
+       <file role="test" name="contacts_data.inc.php"/>
+       <file role="test" name="contacts_schema.inc.php"/>
+       <file role="test" name="db_config.inc.php"/>
+       <file role="test" name="edit.php"/>
+       <file role="test" name="welcome.php"/>
+      </dir> <!-- /examples/SDO/contacts -->
+      <dir name="jungle">
+       <file role="test" name="animalTypes.xsd"/>
+       <file role="test" name="jungle.xsd"/>
+       <file role="test" name="populate_jungle.php"/>
+      </dir> <!-- /examples/SDO/jungle -->
+      <dir name="letter">
+       <file role="test" name="letter.xml"/>
+       <file role="test" name="letter.xsd"/>
+       <file role="test" name="show_letter.php"/>
+      </dir> <!-- /examples/SDO/letter -->
+      <dir name="rss-media">
+       <file role="test" name="additem.php"/>
+       <file role="test" name="base.xml"/>
+       <file role="test" name="blog.xml"/>
+       <file role="test" name="blog.xsd"/>
+       <file role="test" name="handle_upload.inc.php"/>
+       <file role="test" name="newitem.php"/>
+       <file role="test" name="rss.php"/>
+       <file role="test" name="rss.xsd"/>
+       <file role="test" name="showitem.php"/>
+      </dir> <!-- /examples/SDO/rss-media -->
+      <dir name="sdo-api">
+       <file role="test" name="contacts.xml"/>
+       <file role="test" name="contacts.xsd"/>
+       <file role="test" name="sdo_api.php"/>
+      </dir> <!-- /examples/SDO/sdo-api -->
+      <file role="test" name="index.html"/>
+     </dir> <!-- /examples/SDO -->
+    </dir> <!-- /examples -->
+    <dir name="tests">
+     <dir name="DAS">
+      <dir name="Relational">
+       <dir name="phpunit">
+        <file role="test" name="TestContainmentReference.php"/>
+        <file role="test" name="TestDatabaseModel.php"/>
+        <file role="test" name="TestDataObjectHelper.php"/>
+        <file role="test" name="TestDeleteAction.php"/>
+        <file role="test" name="TestForeignKey.php"/>
+        <file role="test" name="TestInsertAction.php"/>
+        <file role="test" name="TestObjectModel.php"/>
+        <file role="test" name="TestPlan.php"/>
+        <file role="test" name="TestReferencesModel.php"/>
+        <file role="test" name="TestRelational.php"/>
+        <file role="test" name="TestSuite.php"/>
+        <file role="test" name="TestTable.php"/>
+        <file role="test" name="TestUpdateAction.php"/>
+        <file role="test" name="ZDERunner.php"/>
+       </dir> <!-- /tests/DAS/Relational/phpunit -->
+      </dir> <!-- /tests/DAS/Relational -->
+      <dir name="XML">
+       <dir name="phpunit">
+        <dir name="abstractComplexType">
+         <file role="test" name="abstract.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/abstractComplexType -->
+        <dir name="anyElement">
+         <file role="test" name="animalTypes.xsd"/>
+         <file role="test" name="jungle.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/anyElement -->
+        <dir name="cdata">
+         <file role="test" name="cdata-in.xml"/>
+         <file role="test" name="cdata.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/cdata -->
+        <dir name="extendedComplexType">
+         <file role="test" name="person.xml"/>
+         <file role="test" name="person.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/extendedComplexType -->
+        <dir name="missingType">
+         <file role="test" name="company_missing_type.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/missingType -->
+        <dir name="nillable">
+         <file role="test" name="company_with_nillable_SN.xml"/>
+         <file role="test" name="company_with_nillable_SN.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/nillable -->
+        <dir name="parseErrors">
+         <file role="test" name="parse_errors.xml"/>
+         <file role="test" name="parse_errors.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/parseErrors -->
+        <dir name="restrictedComplexType">
+         <file role="test" name="name.xml"/>
+         <file role="test" name="name.xsd"/>
+        </dir> <!-- /tests/DAS/XML/phpunit/restrictedComplexType -->
+        <file role="test" name="company.xml"/>
+        <file role="test" name="company.xsd"/>
+        <file role="test" name="XMLDASTest.php"/>
+       </dir> <!-- /tests/DAS/XML/phpunit -->
+      </dir> <!-- /tests/DAS/XML -->
+     </dir> <!-- /tests/DAS -->
+     <dir name="SCA">
+      <dir name="phpt">
+       <file role="test" name="001.phpt"/>
+       <file role="test" name="002.phpt"/>
+       <file role="test" name="003.phpt"/>
+       <file role="test" name="004.phpt"/>
+       <file role="test" name="Component.php"/>
+       <file role="test" name="Component.wsdl"/>
+       <file role="test" name="person.xsd"/>
+      </dir> <!-- /tests/SCA/phpt -->
+      <dir name="phpunit">
+       <dir name="AnnotationTests">
+        <file role="test" name="AnnotationTestClasses.php"/>
+        <file role="test" name="BindingAnnotationTest.php"/>
+        <file role="test" name="ParamAnnotationTest.php"/>
+        <file role="test" name="PublicMethodsTest.php"/>
+        <file role="test" name="ReferenceAnnotationTest.php"/>
+        <file role="test" name="ReturnAnnotationTest.php"/>
+        <file role="test" name="ServiceAnnotationTest.php"/>
+        <file role="test" name="TypesAnnotationTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/AnnotationTests -->
+       <dir name="GetService">
+        <file role="test" name="PathsTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/GetService -->
+       <dir name="LocalProxy">
+        <file role="test" name="LocalProxyTestSDOReverser.php"/>
+        <file role="test" name="LocalProxyTestStringReverser.php"/>
         <file role="test" name="person.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/extendedComplexType -->
-       <dir name="missingType">
-        <file role="test" name="company_missing_type.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/missingType -->
-       <dir name="nillable">
-        <file role="test" name="company_with_nillable_SN.xml"/>
-        <file role="test" name="company_with_nillable_SN.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/nillable -->
-       <dir name="parseErrors">
-        <file role="test" name="parse_errors.xml"/>
-        <file role="test" name="parse_errors.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/parseErrors -->
-       <dir name="restrictedComplexType">
-        <file role="test" name="name.xml"/>
-        <file role="test" name="name.xsd"/>
-       </dir> <!-- /tests/XMLDAS/PHPUnitTests/restrictedComplexType -->
+        <file role="test" name="SCA_LocalProxyTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/LocalProxy -->
+       <dir name="SDO_TypeHandler">
+        <file role="test" name="TypeHandlerTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/SDO_TypeHandler -->
+       <dir name="SoapProxy">
+        <file role="test" name="SCA_SoapProxyTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/SoapProxy -->
+       <dir name="TabsAndSpaces">
+        <file role="test" name="SCA_TabsAndSpacesTest.php"/>
+        <file role="test" name="TabsAndSpaces.php"/>
+       </dir> <!-- /tests/SCA/phpunit/TabsAndSpaces -->
+       <dir name="WSDLGeneration">
+        <file role="test" name="SCA_WSDLTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/WSDLGeneration -->
+       <file role="test" name="run.bat"/>
+       <file role="test" name="runv.bat"/>
+       <file role="test" name="TestSuite.php"/>
+       <file role="test" name="ZDERunner.php"/>
+      </dir> <!-- /tests/SCA/phpunit -->
+     </dir> <!-- /tests/SCA -->
+     <dir name="SDO">
+      <dir name="phpt">
+       <file role="test" name="001.phpt"/>
+       <file role="test" name="002.phpt"/>
+       <file role="test" name="003.phpt"/>
+       <file role="test" name="004.phpt"/>
+       <file role="test" name="005.phpt"/>
+       <file role="test" name="006.phpt"/>
+       <file role="test" name="007.phpt"/>
+       <file role="test" name="008.phpt"/>
        <file role="test" name="company.xml"/>
        <file role="test" name="company.xsd"/>
-       <file role="test" name="XMLDASTest.php"/>
-      </dir> <!-- /tests/XMLDAS/PHPUnitTests -->
-     </dir> <!-- /tests/XMLDAS -->
-     <file role="test" name="001.phpt"/>
-     <file role="test" name="002.phpt"/>
-     <file role="test" name="003.phpt"/>
-     <file role="test" name="004.phpt"/>
-     <file role="test" name="005.phpt"/>
-     <file role="test" name="006.phpt"/>
-     <file role="test" name="007.phpt"/>
-     <file role="test" name="008.phpt"/>
-     <file role="test" name="company.xml"/>
-     <file role="test" name="company.xsd"/>
-     <file role="test" name="SDOAPITest.php"/>
-     <file role="test" name="SDOTestSetup.php"/>
-     <file role="test" name="test.inc"/>
+       <file role="test" name="test.inc"/>
+      </dir> <!-- /tests/SDO/phpt -->
+      <dir name="phpunit">
+       <file role="test" name="SDOAPITest.php"/>
+      </dir> <!-- /tests/SDO/phpunit -->
+     </dir> <!-- /tests/SDO -->
+     <file role="test" name="AllTests.php"/>
+     <file role="test" name="AllTestsSetup.php"/>
+     <file role="test" name="TestSuite.php"/>
     </dir> <!-- /tests -->
     <file role="src" name="CLA"/>
     <file role="src" name="config.m4"/>
@@ -662,6 +722,16 @@ The main changes since 1.0.4 are:
     <notes>Fix for bug #9498 - invalid WSDL generation
 Fix for bug 9426 - printing open types
 Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes for sequenced and open data types.
+    </notes>
+   </release>
+   <release>
+    <version>1.1.2</version>
+    <date>2007-02-07</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>Fix for bug #9845 - Relational DAS is failing when one parent and two children
+Changed from namespaceURI.type to namespaceURI#type (conform to spec)
+Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)
     </notes>
    </release>
  </changelog>

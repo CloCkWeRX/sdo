@@ -336,7 +336,7 @@ function test4ReadAndWriteXSD ( $commondir, $testname )
      }
      $serializedod = serialize( $root_data_object );
    
-     if (!$handle = fopen($testname . "-php-out.xsd", 'a')) {
+     if (!$handle = fopen($commondir . $testname . "-php-out.xsd", 'a')) {
            $message = "Cannot open file ". $testname . "-php-out.xsd";
            throw new Exception( $message );
      }
@@ -355,7 +355,7 @@ function test4ReadAndWriteXSD ( $commondir, $testname )
   }
 }
 
-$commondir = "./";
+$commondir = dirname(__FILE__) . "/";
 
 // uncomment this so that a debugger can be attached 
 //echo "Ready to start interop tests - hit any key"; $line = fgets(STDIN);

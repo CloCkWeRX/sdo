@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 483102 $ $Date$ */
+/* $Rev: 492974 $ $Date$ */
 
 #include "libxml/uri.h"
 #include "commonj/sdo/SDOSchemaSAX2Parser.h"
@@ -532,69 +532,38 @@ namespace commonj
 
         }
         
-        // ============================================================================
-        // used by startInclude to try to locate the file 
-        // ============================================================================
-
-        int SDOSchemaSAX2Parser::startSecondaryParse(
-                                SDOSchemaSAX2Parser& schemaParser,
-                                SDOXMLString& schemaLocation)
+        void SDOSchemaSAX2Parser::free(xmlChar* absoluteUri)
         {
-            int i,j,k;
-            SDOXMLString sl = getCurrentFile();
-          
-            i = sl.lastIndexOf('/');
-            j = sl.lastIndexOf('\\');
-            if ((j > i) || (i < 0))i=j;
-            if (i>=0)
-            {
-                sl = sl.substring(0,i+1) + schemaLocation;
-                try {
-                     if (-1 != schemaParser.parse((const char *)sl))
-                         return 1;
-                }
-                catch (SDORuntimeException e)
-                {
-                }
-                k = schemaLocation.lastIndexOf('/');
-                j = schemaLocation.lastIndexOf('\\');
-                if ((j > k) || (k < 0))k=j;
-                if (k>=0)
-                {
-                    sl = sl.substring(0,i+1) + schemaLocation.substring(0,k+1);
-                    try {
-                        if (-1 != schemaParser.parse((const char *)sl))
-                             return 1;
-                    }
-                    catch (SDORuntimeException e)
-                    {
-                    }
-                }
-            }
-            try {
-                if (-1 != schemaParser.parse((const char *)schemaLocation))
-                    return 1;
-            }
-            catch (SDORuntimeException e)
-            {
-            }
-            k = schemaLocation.lastIndexOf('/');
-            j = schemaLocation.lastIndexOf('\\');
-            if ((j > k) || (k < 0))k=j;
-            if (k>=0)
-            {
-                sl = schemaLocation.substring(0,k+1);
-                try {
-                    if (-1 != schemaParser.parse((const char *)sl))
-                        return 1;
-                }
-                catch (SDORuntimeException e)
-                {
-                }
-            }
-            return 0;
+            delete &schemaInfo;
+            delete this;
+            xmlFree(absoluteUri);
         }
-
+        ParsedLocations::~ParsedLocations()
+        {
+            for( iterator iter = begin(); iter != end(); iter++ )
+                iter->second->free(iter->first);
+        }
+        SDOSchemaSAX2Parser* ParserErrorSetter::parseIfNot(const void* location, bool loadImportNamespace, const void* base)
+        {
+            xmlChar*const absoluteUri = xmlBuildURI((xmlChar*)location, (xmlChar*)base);
+            if (! absoluteUri)
+                SDO_THROW_EXCEPTION("parseIfNot", SDOFileNotFoundException, (char*)location);
+            LocationParserMap::iterator iter = parsedLocations.find(absoluteUri);
+            if (parsedLocations.end() == iter)
+            {
+                SDOSchemaSAX2Parser*const schemaParser = new SDOSchemaSAX2Parser(*new SchemaInfo(), this, loadImportNamespace);
+			    try {
+				    if (0 == schemaParser->parse((char*)absoluteUri))
+                        return parsedLocations[ absoluteUri ] = schemaParser;
+                }
+			    catch (SDORuntimeException e)
+			    {}
+                schemaParser->free(absoluteUri);
+                return 0;
+            }
+            xmlFree(absoluteUri);
+            return iter->second;
+        }
 
         // ============================================================================
         // startInclude
@@ -610,24 +579,16 @@ namespace commonj
 
             if (!bInSchema) return;
 
-            SchemaInfo schemaInf;
-            SDOSchemaSAX2Parser schemaParser(schemaInf, (ParserErrorSetter*)setter);
-            
             TypeDefinitionsImpl* typedefs;
 
-            SDOXMLString schemaLocation = attributes.getValue("schemaLocation");
             SDOXMLString importNamespace = attributes.getValue("namespace");
+            SDOXMLString schemaLocation = attributes.getValue("schemaLocation");
             if (!schemaLocation.isNull())
             {
-                if (startSecondaryParse(schemaParser,schemaLocation) == 0)
-                {
-                    //
-                    // we were not able to start the parse
+                SDOSchemaSAX2Parser*const schemaParser = setter->parseIfNot((const char*)schemaLocation, false, getCurrentFile());
+                if (!schemaParser)
                     return;
-                }
-
-                typedefs = &schemaParser.getTypeDefinitions();
-
+                typedefs = &schemaParser->getTypeDefinitions();
             }
             else
             {
@@ -636,17 +597,10 @@ namespace commonj
                     && localname.equalsIgnoreCase("import")
                     && !importNamespace.isNull())
                 {
-                    try
-                    {
-                        SDOSchemaSAX2Parser sp(schemaInf, 0);
-
-                        sp.parse(importNamespace);
-                        typedefs = &sp.getTypeDefinitions();
-                    }
-                    catch (SDORuntimeException&)
-                    {
+                    SDOSchemaSAX2Parser*const sp = setter->parseIfNot((const char*)importNamespace);
+                    if (!sp)
                         return;
-                    }
+                    typedefs = &sp->getTypeDefinitions();
                 }
                 else
                 {
@@ -779,6 +733,7 @@ namespace commonj
                 thisProperty.name,
                 thisProperty.localname);
 
+            thisProperty.namespaceURI = schemaInfo.getTargetNamespaceURI();
             
             setType(thisProperty, attributes, namespaces);
 
@@ -850,7 +805,9 @@ namespace commonj
             setName(attributes,
                 thisProperty.name,
                 thisProperty.localname);
-            
+
+            thisProperty.namespaceURI = schemaInfo.getTargetNamespaceURI();
+
             setType(thisProperty, attributes, namespaces);
             
             setCurrentProperty(thisProperty);                    

@@ -253,6 +253,11 @@ if ( ! class_exists('SCA_AnnotationRules', false) ) {
             $entries = count($inThisArray);
 
             /* Enough entries for something                                        */
+            // TODO looks like we missed something here
+            // This is only ever going to return true, I think :-)
+            // I think the person who wrote this meant ||
+            // but it's only a crude check of the parameter and return
+            // lines anyway and not right 
             return ( ( $entries < 2 && $entries > 4 ) ? false : true ) ;
 
         }/* End enough pieces function                                             */

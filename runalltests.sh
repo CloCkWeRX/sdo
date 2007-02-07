@@ -17,7 +17,7 @@
 # +----------------------------------------------------------------------+
 # | Author: SL                                                           |
 # +----------------------------------------------------------------------+
-# $Id: runalltests.sh,v 1.2 2006-09-28 15:19:51 cem Exp $
+# $Id: runalltests.sh,v 1.3 2007-02-07 11:25:35 cem Exp $
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo This script tests the php executable installed
@@ -35,44 +35,23 @@ echo pecl is called SDO rather than sdo.
 
 export TEST_PHP_EXECUTABLE=/usr/local/bin/php
 export PHPUNIT_EXECUTABLE=/usr/local/bin/phpunit
+export TMP=/tmp
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo SDO Core Tests
+echo PHPT Tests
 $TEST_PHP_EXECUTABLE run-tests.php tests
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo Check that PHPUnit2 is installed 
-$TEST_PHP_EXECUTABLE tests/SDOTestSetup.php
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo SDO Core PHPUnit2 Tests
+echo PHPUnit Tests
 cd tests
-$PHPUNIT_EXECUTABLE SDOAPITest SDOAPITest.php --log-xml SDOAIPITest.xml
+$TEST_PHP_EXECUTABLE AllTests.php
 cd ..
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo XML DAS PHPUnit2 Tests
-cd tests/XMLDAS/PHPUnitTests
-$PHPUNIT_EXECUTABLE XMLDASTest XMLDASTest.php
-cd ../../..
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo Relational DAS PHPUnit2 Tests
-cd DAS/Relational/Tests
-$PHPUNIT_EXECUTABLE SDO_DAS_Relational_TestSuite TestSuite.php
-cd ../../..
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo You may like to run the Relational samples now which 
 echo test the SDO Relational DAS against a real database. 
 echo See DAS/Relational/Scenarios/README for details
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo SDO Interop tests
-cd tests/interop
-$TEST_PHP_EXECUTABLE interop-xml.php
-cd ../..
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo You may like to run the relational interop tests now

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 483416 $ $Date$ */
+/* $Rev: 483552 $ $Date$ */
 
 #include "commonj/sdo/DataObjectListImpl.h"
 
@@ -231,6 +231,9 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
             msg.c_str());
     }
 
+    const Property& property = container->getProperty(pindex);
+    ASSERT_WRITABLE(property,insert)
+
     DataObject* dob = d; // unwrap the data object ready for a downcasting hack.
     DataObjectImpl* con  = ((DataObjectImpl*)dob)->getContainerImpl();  
     if (!isReference)
@@ -254,7 +257,7 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
             ((DataObjectImpl*)dob)->setApplicableChangeSummary();
             ((DataObjectImpl*)dob)->logCreation((DataObjectImpl*)dob,
                 (DataObjectImpl*)container,
-                container->getProperty(pindex));
+                property);
         }
     }
 
@@ -265,7 +268,7 @@ void DataObjectListImpl::insert (unsigned int index, DataObjectPtr d)
         if (container->getType().isSequencedType())
         {
             SequenceImpl* sq = container->getSequenceImpl();
-            if (sq)sq->push(container->getProperty(pindex),index);
+            if (sq)sq->push(property,index);
         }
     }
 
@@ -424,6 +427,9 @@ void DataObjectListImpl::append (DataObjectPtr d)
     checkType(theFactory->getType(typeURI,typeName),
                 d->getType());
 
+    const Property& property = container->getProperty(pindex);
+    ASSERT_WRITABLE(property,append)
+
     DataObject* dob = d; // unwrap the data object ready for a downcasting hack.
     DataObjectImpl* con  = ((DataObjectImpl*)dob)->getContainerImpl();  
     
@@ -449,7 +455,7 @@ void DataObjectListImpl::append (DataObjectPtr d)
             if (!container->getProperty(pindex).getType().isDataType())
             {
                 ((DataObjectImpl*)dob)->logCreation((DataObjectImpl*)dob,
-                    container,container->getProperty(pindex));
+                    container,property);
             }
 
         }
@@ -460,7 +466,7 @@ void DataObjectListImpl::append (DataObjectPtr d)
         if (container->getType().isSequencedType())
         {
             SequenceImpl* sq = container->getSequenceImpl();
-            if (sq)sq->push(container->getProperty(pindex),plist.size()-1);
+            if (sq)sq->push(property,plist.size()-1);
         }
     }
 }

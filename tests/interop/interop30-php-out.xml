@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RootElement30 xmlns="http://www.apache.org/tuscany/interop" xsi:type="RootElement30" xmlns:tns2="commonj.sdo" xmlns:tns="http://www.apache.org/tuscany/interop" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><ComplexTypeOpenContent><tns2:ComplexTypeWithMixed xsi:type="OpenDataObject">
-	    Some 
-	    Mixed
-		<tns2:SimpleTypeWithName xsi:type="OpenDataObject">SimpleTypeWithName</tns2:SimpleTypeWithName>
-		Content
-	  </tns2:ComplexTypeWithMixed></ComplexTypeOpenContent></RootElement30>

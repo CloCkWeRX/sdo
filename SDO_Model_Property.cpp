@@ -268,7 +268,7 @@ void sdo_model_property_string (ostringstream& print_buf, const Property *proper
 		print_buf << "<opposite of " << opposite_p->getName() << "> ";
 	}
 
-	print_buf << type.getURI() << ":" << type.getName() << " $" << propertyp->getName();
+	print_buf << type.getURI() << "#" << type.getName() << " $" << propertyp->getName();
 
 	if (propertyp->isMany()) {
 		print_buf << "[]";

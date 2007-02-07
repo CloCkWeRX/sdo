@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 485591 $ $Date$ */
 
 #ifndef _TYPEIMPL_H_
 #define _TYPEIMPL_H_
@@ -284,6 +284,7 @@ private:
     TypeImpl();
     TypeImpl(const TypeImpl& t);
 
+    bool isBaseTypeOf(const Type* type)const;
 
     char* name;
     char* typeURI;
