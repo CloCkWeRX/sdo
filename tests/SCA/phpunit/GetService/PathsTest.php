@@ -10,7 +10,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     public function testExceptionThrownForNullArgument()
     {
         try {
-            $service        = SCA::getService(null);
+            $service 		= SCA::getService(null);
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("null argument",$e->getMessage());
@@ -22,7 +22,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     public function testExceptionThrownForEmptyArgument()
     {
         try {
-            $service        = SCA::getService('');
+            $service 		= SCA::getService('');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("empty argument",$e->getMessage());
@@ -35,7 +35,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     {
 
         try {
-            $service        = SCA::getService('a_total_load_of_rubbish');
+            $service 		= SCA::getService('a_total_load_of_rubbish');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());
@@ -49,7 +49,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     {
 
         try {
-            $service        = SCA::getService('./a_total_load_of_rubbish');
+            $service 		= SCA::getService('./a_total_load_of_rubbish');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());
@@ -62,7 +62,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     public function testExceptionThrownForFileNotFoundByDotDotRelativePath()
     {
         try {
-            $service        = SCA::getService('../a_total_load_of_rubbish');
+            $service 		= SCA::getService('../a_total_load_of_rubbish');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());
@@ -75,7 +75,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     public function testExceptionThrownForFileNotFoundByAbsolutePath()
     {
         try {
-            $service        = SCA::getService('C:\a_total_load_of_rubbish');
+            $service 		= SCA::getService('C:\a_total_load_of_rubbish');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());
@@ -89,10 +89,10 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     {
         file_put_contents(dirname(__FILE__) . "/temp.txt","hello");
         try {
-            $service        = SCA::getService('./temp.txt');
+            $service 		= SCA::getService('./temp.txt');
         }
         catch (SCA_RuntimeException $e) {
-            $this->assertContains("incorrect extension",$e->getMessage());
+            $this->assertContains("The right binding to use could not be inferred",$e->getMessage());
             unlink(dirname(__FILE__) . "/temp.txt");
             return;
         }
@@ -103,7 +103,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     {
         $this->markTestIncomplete('this test has started taking a full minute to time out. Needs rethinking');
         try {
-            $service        = @SCA::getService('http://localhost/yet_more_rubbish.wsdl');
+            $service 		= @SCA::getService('http://localhost/yet_more_rubbish.wsdl');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("yet_more_rubbish",$e->getMessage());

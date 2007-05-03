@@ -73,8 +73,8 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
         $instance            = new ParamWithValidTypeAndName();
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
-        $this->assertTrue(key_exists('myPublicMethod',$service_description['operations']));
-        $op_array = $service_description['operations'];
+        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
+        $op_array = $service_description->operations;
         $method = $op_array['myPublicMethod'];
 
         $this->assertEquals(
@@ -89,8 +89,8 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
         $instance            = new ParamWithFourValidScalarTypes();
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
-        $this->assertTrue(key_exists('myPublicMethod',$service_description['operations']));
-        $op_array = $service_description['operations'];
+        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
+        $op_array = $service_description->operations;
         $method = $op_array['myPublicMethod'];
 
         $this->assertEquals(

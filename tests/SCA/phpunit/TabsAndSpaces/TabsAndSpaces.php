@@ -14,7 +14,7 @@ include_once "SCA/SCA.php";
 
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  *
  */
 class TabsAndSpaces
@@ -31,7 +31,7 @@ class TabsAndSpaces
 	 * binding annotation  has tabs
 	 *
      * @reference
-     * @binding.ws									tabs.wsdl
+     * @binding.soap									tabs.wsdl
      */
 	public $tabs;
 

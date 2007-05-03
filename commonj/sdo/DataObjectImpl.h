@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 483416 $ $Date$ */
+/* $Rev: 527087 $ $Date$ */
 
 #ifndef _DATAOBJECTIMPL_H_
 #define _DATAOBJECTIMPL_H_
@@ -42,6 +42,7 @@
 #include "commonj/sdo/RefCountingPointer.h"
 #include "commonj/sdo/ChangeSummaryImpl.h"
 #include "commonj/sdo/SDODate.h"
+#include "commonj/sdo/SDOValue.h"
 
 namespace commonj{
 namespace sdo{
@@ -120,9 +121,6 @@ class DataObjectImpl : public DataObject
     /////////////////////////////////////////////////////////////////////////
     //    Introspection
     /////////////////////////////////////////////////////////////////////////
-
-
-    void handlePropertyNotSet(const char* name);
 
     /**  getPropertyIndex gets the unique index of a property
      *
@@ -217,9 +215,13 @@ class DataObjectImpl : public DataObject
      */
     
     virtual void setDataObject(const char* path, DataObjectPtr value); 
+    virtual void setDataObject(const char* path, DataObjectPtr value, bool updateSequence); 
     virtual void setDataObject(const SDOString& path, DataObjectPtr value); 
+    virtual void setDataObject(const SDOString& path, DataObjectPtr value, bool updateSequence); 
     virtual void setDataObject(unsigned int propertyIndex, DataObjectPtr value); 
+    virtual void setDataObject(unsigned int propertyIndex, DataObjectPtr value, bool updateSequence); 
     virtual void setDataObject(const Property& property, DataObjectPtr value); 
+    virtual void setDataObject(const Property& property, DataObjectPtr value, bool updateSequence);
 
     /**  getBoolean returns a boolean by path, index or property
      *
@@ -277,7 +279,7 @@ class DataObjectImpl : public DataObject
     virtual unsigned int getString(const char* path, wchar_t* buf, unsigned int max) ;
     virtual unsigned int getString(unsigned int propindex,wchar_t* buf, unsigned int max) ;
     virtual unsigned int getString(const Property& p,wchar_t* buf, unsigned int max) ;
-    
+
     virtual void setString(const SDOString& path, const wchar_t* c,unsigned int len);
     virtual void setString(const char* path, const wchar_t* c,unsigned int len) ;
     virtual void setString(unsigned int propindex, const wchar_t* c,unsigned int len) ;
@@ -509,6 +511,7 @@ class DataObjectImpl : public DataObject
     virtual const char*  getCString();
     virtual void setCString(const char* s);
     virtual void setCString(const SDOString& s);
+    virtual void setSDOValue(const SDOValue& s);
     virtual DataObjectImpl* getDataObject();
     virtual void setDataObject(DataObject* d);
 
@@ -553,13 +556,6 @@ class DataObjectImpl : public DataObject
       
     SDO_API DataFactory* getDataFactory();
 
-
-    // cache a copy of the change summary in this data object, if there
-    // is one in the tree.
-
-    virtual void setApplicableChangeSummary();
-
-
     // open type support
     virtual void   setInstancePropertyType(unsigned int index,
                                             const Type* t);
@@ -572,7 +568,9 @@ class DataObjectImpl : public DataObject
     virtual const PropertyImpl* defineProperty(const SDOString& propname, 
                  const Type& t);
 
-     virtual const PropertyImpl* defineBoolean(const SDOString& propname);
+    virtual const PropertyImpl* defineSDOValue(const SDOString& propname,
+                                               const SDOValue& sval);
+    virtual const PropertyImpl* defineBoolean(const SDOString& propname);
     virtual const PropertyImpl* defineByte(const SDOString& propname);
     virtual const PropertyImpl* defineCharacter(const SDOString& propname);
     virtual const PropertyImpl* defineString(const SDOString& propname);
@@ -594,6 +592,21 @@ class DataObjectImpl : public DataObject
     virtual void setDataFactory(DataFactory *df);
 
     virtual std::ostream& printSelf(std::ostream &os);
+
+    virtual const SDOValue& getSDOValue(PropertyImpl** propertyForDefault);
+    virtual const SDOValue& getSDOValue(const unsigned int propertyIndex,
+                                        PropertyImpl** propertyForDefault);
+    virtual const SDOValue& getSDOValue(const Property& property,
+                                        PropertyImpl** propertyForDefault);
+    virtual const SDOValue& getSDOValue(const SDOString& path,
+                                        PropertyImpl** propertyForDefault);
+    virtual void setSDOValue(const SDOString& path, const SDOValue& sval, const SDOString& dataType);
+    virtual void setSDOValue(unsigned int propindex, const SDOValue& sval, const SDOString& dataType);
+    virtual void setSDOValue(unsigned int propindex, const SDOValue& sval, const SDOString& dataType, bool updateSequence);
+    virtual void setSDOValue(const Property& p, const SDOValue& sval, const SDOString& dataType);
+    virtual void setSDOValue(const Property& p, const SDOValue& sval, const SDOString& dataType, bool updateSequence);
+
+
 
 private:
 	/**
@@ -633,10 +646,6 @@ private:
 
     // Does not keep a reference counted pointer to the container.
     DataObjectImpl* container;
- 
-    // remove the value from the data object.
-    void deleteValue();
-
 
     PropertyValueMap PropertyValues;
     
@@ -644,14 +653,11 @@ private:
 
     DataObjectListImpl* listValue;
     
-    // Holds the value , reallocated as necessary for strings
-    void* value;  
+    // Holds the value as an SDOValue object, if the value is a primitive data type.
+    SDOValue sdoValue;
 
-    // In the case of a bytes/string - this holds the length;
-    unsigned int valuelength;
-                         
-    // holds the value as a string - if requested.
-    char* asStringBuffer; 
+    // If the value is a data object, it is recorded here.
+    DataObjectImpl* doValue;
 
     // holds the Xpath to this object if requested.
     std::string asXPathBuffer;
@@ -664,7 +670,6 @@ private:
     unsigned int openBase;
     std::list<PropertyImpl> openProperties;
 
-    static const char* emptyString;
     static const char* templateString;
 
     // Data may be set to null in any data object
@@ -688,7 +693,6 @@ private:
     ChangeSummaryImpl* getChangeSummaryImpl();
     ChangeSummaryImpl* getSummary();
     ChangeSummaryImpl* localCS;
-    DataObjectImpl* changesummaryobject;
 
 
     // reference type support

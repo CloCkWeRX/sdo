@@ -6,7 +6,7 @@ SCA::initComponent(__FILE__);
 
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  * @types http://www.test.com/info person.xsd (comment)
  */
 

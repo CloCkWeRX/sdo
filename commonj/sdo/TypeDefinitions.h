@@ -17,14 +17,13 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 524004 $ $Date$ */
 
 #ifndef _TYPEDefinitions_H_
 #define _TYPEDefinitions_H_
 
 
 #include "commonj/sdo/TypeDefinition.h"
-#include "map"
 
 namespace commonj
 {
@@ -41,20 +40,25 @@ namespace commonj
         {
             
         public:
-            /*SDO_API*/ TypeDefinitions();
+            TypeDefinitions();
             TypeDefinitions(const TypeDefinitions& tds);
             TypeDefinitions& operator=(const TypeDefinitions& tds);
 
-            /*SDO_API*/ virtual ~TypeDefinitions();
+            TypeDefinitions(const TypeDefinitionsImpl& tds);
 
-            /*SDO_API*/ void addTypeDefinition(TypeDefinition& t);
+            virtual ~TypeDefinitions();
+
+            void addTypeDefinition(TypeDefinition& t);
 
             TypeDefinitionsImpl& getTypeDefinitions();
+
+            unsigned int size();
  
-        private:
+        protected:
             TypeDefinitionsImpl* typedefinitions;
             void copy(const TypeDefinitions& tds);
 
+        friend class XSDHelperImpl;
             
         };
     } // End - namespace sdo

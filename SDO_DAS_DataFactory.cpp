@@ -61,6 +61,8 @@ static void sdo_das_df_object_free_storage(void *object TSRMLS_DC)
 
 	my_object = (sdo_das_df_object *)object;
 
+	SDO_DEBUG_FREE(object);
+
 	zend_hash_destroy(my_object->zo.properties);
 	FREE_HASHTABLE(my_object->zo.properties);
 	if (my_object->zo.guards) {
@@ -70,6 +72,13 @@ static void sdo_das_df_object_free_storage(void *object TSRMLS_DC)
 	my_object->dfp = NULL;
 	efree(object);
 }
+/* }}} */
+
+/* {{{ debug macro functions
+ */
+SDO_DEBUG_ADDREF(das_df)
+SDO_DEBUG_DELREF(das_df)
+SDO_DEBUG_DESTROY(das_df)
 /* }}} */
 
 /* {{{ sdo_das_df_object_create
@@ -88,8 +97,9 @@ static zend_object_value sdo_das_df_object_create(zend_class_entry *ce TSRMLS_DC
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
 		(void *)&tmp, sizeof(zval *));
-	retval.handle = zend_objects_store_put(my_object, NULL, sdo_das_df_object_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(my_object, SDO_FUNC_DESTROY(das_df), sdo_das_df_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &sdo_das_df_object_handlers;
+	SDO_DEBUG_ALLOCATE(retval.handle, my_object);
 
 	return retval;
 }
@@ -108,6 +118,9 @@ DataFactoryPtr sdo_das_df_get(zval *me TSRMLS_DC)
 /* }}} */
 
 /* {{{ sdo_das_df_new
+ * take as arguments 1. a pointer field for a zval and 2. a pointer to a C++ data factory object
+ * create a PHP SDO_DAS_DataFactory object, point the first argument at it, and push into it
+ * the second argument
  */
 void sdo_das_df_new(zval *me, DataFactoryPtr dfp TSRMLS_DC)
 {
@@ -135,6 +148,8 @@ void sdo_das_df_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_das_datafactoryimpl_class_entry = zend_register_internal_class(tmp_ce TSRMLS_CC);
 	zend_class_implements(sdo_das_datafactoryimpl_class_entry TSRMLS_CC, 1, sdo_das_datafactory_class_entry);
 	memcpy(&sdo_das_df_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sdo_das_df_object_handlers.add_ref = SDO_FUNC_ADDREF(das_df);
+	sdo_das_df_object_handlers.del_ref = SDO_FUNC_DELREF(das_df);
 	sdo_das_df_object_handlers.clone_obj = NULL;
 }
 /* }}} */

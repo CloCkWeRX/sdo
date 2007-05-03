@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 483011 $ $Date$ */
+/* $Rev: 510951 $ $Date$ */
 
 #include "commonj/sdo/SDOUtils.h"
 #include <stdio.h>
@@ -251,21 +251,32 @@ namespace commonj {
         
         void SDOUtils::printTypes(std::ostream& out, DataFactoryPtr df) 
         {
-            TypeList tl = df->getTypes();
-            for (unsigned int i = 0; i < tl.size(); i++)
-            {
-                out << "Type: " << tl[i].getURI()<< "#" << tl[i].getName() <<
-                    " isOpen: " << tl[i].isOpenType()
-                    << " isSequenced: " << tl[i].isSequencedType() << endl;
-                PropertyList pl = tl[i].getProperties();
-                for (unsigned int j = 0; j < pl.size(); j++)
-                {
-                    out << "\tProperty: " << pl[j].getName()
-                        << " type: " <<pl[j].getType().getURI()<<"#"<<pl[j].getType().getName()<<
-                        " isMany: " << pl[j].isMany() << endl;
-                    
-                }
-            }
+           TypeList tl = df->getTypes();
+           for (unsigned int i = 0; i < tl.size(); i++)
+           {
+              out << "Type: " << tl[i].getURI()<< "#" << tl[i].getName() <<
+                 " isOpen: " << tl[i].isOpenType()
+                  << " isSequenced: " << tl[i].isSequencedType() << endl;
+
+              const std::list<PropertyImpl*> pl = tl[i].getPropertyListReference();
+
+              for (std::list<PropertyImpl*>::const_iterator j = pl.begin();
+                   j != pl.end();
+                   j++)
+              {
+                 const Property* current = (Property*) (*j);
+
+                 out << "\tProperty: "
+                     << current->getName()
+                     << " type: "
+                     << current->getType().getURI()
+                     << "#"
+                     << current->getType().getName()
+                     << " isMany: "
+                     << current->isMany()
+                     << endl;
+              }
+           }
             
         }
         

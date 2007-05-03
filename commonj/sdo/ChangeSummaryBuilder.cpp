@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 511929 $ $Date$ */
 
 #include "commonj/sdo/ChangeSummaryBuilder.h"
 
@@ -548,8 +548,7 @@ namespace commonj
                     // will be expecting a chars message to give the 
                     // contents
             
-                    createDeletes.insert(
-                        createDeletes.end(),createDelete(localname));
+                    createDeletes.push_back(createDelete(localname));
 
                     LOGINFO_1(INFO,"CSBuilder: Processing a %s",(const char*)localname);
                     LOGEXIT(INFO,"CSBuilder:processStart Exit1");
@@ -887,7 +886,7 @@ namespace commonj
             {
                 // we should have finished, there are no nested changes
                 currentState = baseState;
-                changes.insert(changes.end(),currentChange);
+                changes.push_back(currentChange);
                 currentLocation.clear();
                 LOGEXIT(INFO,"CSBuilder:processEnd Exit4");
                 return;
@@ -895,7 +894,7 @@ namespace commonj
             else if (currentState == dealingWithDeletion)
             {
                 currentLocation.pop_back();
-                deletions.insert(deletions.end(),currentDeletion);
+                deletions.push_back(currentDeletion);
                 if (deletionLevel > 0)
                 {
                     deletionLevel--;
@@ -1060,12 +1059,12 @@ namespace commonj
 
         void change::addAttribute(changeAttribute ca)
         {
-            attributes.insert(attributes.end(),ca);
+            attributes.push_back(ca);
         }
 
         void change::addElement(changeElement ce)
         {
-            elements.insert(elements.end(),ce);
+            elements.push_back(ce);
         }
 
         /////////////////////////////////////////////////
@@ -1118,12 +1117,12 @@ namespace commonj
 
         void deletion::addAttribute(deletionAttribute ca)
         {
-            attributes.insert(attributes.end(),ca);
+            attributes.push_back(ca);
         }
 
         void deletion::addElement(deletionElement ce)
         {
-            elements.insert(elements.end(),ce);
+            elements.push_back(ce);
         }
 
         void deletion::insertElement(deletionElement ce)

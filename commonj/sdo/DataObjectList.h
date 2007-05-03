@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 502599 $ $Date$ */
 
 #ifndef _DATAOBJECTLIST_H_
 #define _DATAOBJECTLIST_H_
@@ -27,6 +27,7 @@
 #include "commonj/sdo/RefCountingPointer.h"
 #include "commonj/sdo/DataObject.h"
 #include "commonj/sdo/SDODate.h"
+#include "commonj/sdo/SDOValue.h"
 #include <wchar.h>
 
 
@@ -143,6 +144,8 @@ public:
     virtual SDO_API void insert (unsigned int index, const SDOString& d) = 0;
     virtual SDO_API void append (const char* d) = 0;
     virtual SDO_API void append (const SDOString& d) = 0;
+
+    virtual SDO_API void append (const SDOValue& sval) = 0;
 
     virtual SDO_API void insert (unsigned int index, short d) = 0;
     virtual SDO_API void append (short d) = 0;

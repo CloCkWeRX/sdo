@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005, 2007.                            |
 | All Rights Reserved.                                                 |
@@ -42,9 +42,15 @@ require_once 'AnnotationTests/ReferenceAnnotationTest.php';
 require_once 'TabsAndSpaces/SCA_TabsAndSpacesTest.php';
 require_once 'LocalProxy/SCA_LocalProxyTest.php';
 require_once 'SoapProxy/SCA_SoapProxyTest.php';
+require_once 'SoapHandler/SCA_SoapHandlerTest.php';
 require_once 'WSDLGeneration/SCA_WSDLTest.php';
 require_once 'SDO_TypeHandler/TypeHandlerTest.php';
 require_once 'GetService/PathsTest.php';
+require_once 'JsonRpc/JsonRpcTest.php';
+require_once 'XmlRpc/XmlRpcTest.php';
+require_once 'RestRpc/RestRpcTest.php';
+//require_once 'LogTests/SCALoggerTest.php' ;
+//require_once 'LogTests/SCALogFilterTest.php' ;
 
 class SCA_TestSuite {
 
@@ -54,7 +60,7 @@ class SCA_TestSuite {
     }
 
     public static function suite() {
-		$suite = new PHPUnit_Framework_TestSuite();
+        $suite = new PHPUnit_Framework_TestSuite();
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Annotation_ServiceTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Annotation_BindingTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Annotation_MethodTest"));
@@ -65,11 +71,19 @@ class SCA_TestSuite {
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_TabsAndSpacesTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_LocalProxyTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_SoapProxyTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_SoapHandlerTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_WSDLTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SDO_TypeHandlerTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_GetServicePathsTest"));
-        
-		return $suite;
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_XmlRpcTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_RestRpcTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_JsonRpcTest"));
+        // TODO
+        // interface to logger has changed - rework the tests
+        //        $suite->addTest( new PHPUnit_Framework_TestSuite("SCALoggerTest"));
+        //        $suite->addTest( new PHPUnit_Framework_TestSuite("SCALogFilterTest"));
+
+        return $suite;
     }
 
 }

@@ -22,7 +22,7 @@ class SCA_Annotation_MethodTest extends PHPUnit_Framework_TestCase {
         $instance            = new NoMethods();
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
-        $this->assertEquals(array(),$service_description['operations']);
+        $this->assertEquals(array(),$service_description->operations);
     }
 
     public function testAWsWithNoPublicMethodsIsUnusualButOk()
@@ -30,7 +30,7 @@ class SCA_Annotation_MethodTest extends PHPUnit_Framework_TestCase {
         $instance            = new NoPublicMethods();
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
-        $this->assertEquals(array(),$service_description['operations']);
+        $this->assertEquals(array(),$service_description->operations);
     }
 
     public function testAPublicMethodWithNoAnnotationsHasEmptyParametersAndReturn()
@@ -39,8 +39,8 @@ class SCA_Annotation_MethodTest extends PHPUnit_Framework_TestCase {
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
 
-        $this->assertTrue(key_exists('myPublicMethod',$service_description['operations']));
-        $op_array = $service_description['operations'];
+        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
+        $op_array = $service_description->operations;
         $method = $op_array['myPublicMethod'];
 
         $this->assertEquals(array('parameters' => array(), 'return' => null),$method);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 482588 $ $Date$ */
+/* $Rev: 524004 $ $Date$ */
 
 #ifndef _SDOUTILS_H_
 #define _SDOUTILS_H_
@@ -45,7 +45,7 @@ namespace commonj
             static SDO_API void printDataObject(std::ostream& out, DataObjectPtr d);                
             static SDO_API const char* SDOToXSD(const char* sdoname);
             static SDO_API const char*  XSDToSDO(const char* xsdname);
-            static void printTypes(std::ostream& out, DataFactoryPtr df);
+            static SDO_API void printTypes(std::ostream& out, DataFactoryPtr df);
             static SDOString replace(SDOString hostString, const char *fromString, const char *toString);
             
            /*

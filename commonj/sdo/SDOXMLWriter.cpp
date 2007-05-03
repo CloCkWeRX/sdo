@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 489336 $ $Date$ */
+/* $Rev: 509991 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLWriter.h"
 #include "commonj/sdo/SDOXMLString.h"
@@ -101,7 +101,7 @@ namespace commonj
                     for (int i=0;i<indent;i++)chars[i] = ' ';
                     chars[indent] = 0;
                     xmlTextWriterSetIndentString(writer, SDOXMLString(chars));
-                    delete chars;
+                    delete[] chars;
                 }
                 else
                 {

@@ -35,7 +35,9 @@
 using namespace commonj::sdo;
 using std::ostringstream;
 
-#define SDO_VERSION "1.1.2"
+
+
+#define SDO_VERSION "1.2.0"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
@@ -96,7 +98,7 @@ extern PHP_SDO_API void sdo_do_new(zval *me, DataObjectPtr dop TSRMLS_DC);
 extern PHP_SDO_API DataObjectPtr sdo_do_get(zval *me TSRMLS_DC);
 
 extern PHP_SDO_API void sdo_list_minit(zend_class_entry *tmp TSRMLS_DC);
-extern PHP_SDO_API void sdo_dataobjectlist_new(zval *me, const Type& typeh, DataObjectList *listh TSRMLS_DC);
+extern PHP_SDO_API void sdo_dataobjectlist_new(zval *me, const Type& typeh, DataObjectPtr dop, DataObjectList *listh TSRMLS_DC);
 extern PHP_SDO_API void sdo_changeddataobjectlist_new(zval *me, const ChangedDataObjectList *listh TSRMLS_DC);
 extern PHP_SDO_API void sdo_das_settinglist_new(zval *me, SettingList& listh TSRMLS_DC);
 extern PHP_SDO_API int  sdo_list_count_elements(zval *object, long *count TSRMLS_DC);
@@ -135,6 +137,53 @@ extern PHP_SDO_API void sdo_make_long_class_constant(zend_class_entry *ce, char 
 extern PHP_SDO_API int sdo_parse_offset_param(DataObjectPtr dop, zval *z_offset,
 	const Property **return_property, const char **return_xpath, int property_required, int quiet TSRMLS_DC);
 extern PHP_SDO_API Type::Types sdo_map_zval_type (zval *z_value);
+
+
+/* {{{ object memory debugging macros
+ */
+#ifdef SDO_DEBUG_OBJECTS
+
+#define SDO_DEBUG_ALLOCATE(handle,object) \
+    fprintf(stderr, "Allocating " CLASS_NAME " id #%d at 0x%x\n", (handle), (object))
+
+#define SDO_FUNC_ADDREF(prefix) sdo_##prefix##_add_ref
+#define SDO_FUNC_DELREF(prefix) sdo_##prefix##_del_ref
+#define SDO_FUNC_DESTROY(prefix) sdo_##prefix##_destroy_object 
+
+#define SDO_DEBUG_ADDREF(prefix) \
+static void sdo_##prefix##_add_ref(zval *object TSRMLS_DC) { \
+	fprintf(stderr, "Incrementing refcount for " CLASS_NAME " id #%d\n", object->value.obj.handle); \
+    zend_objects_store_add_ref(object TSRMLS_CC); \
+}
+
+#define SDO_DEBUG_DELREF(prefix) \
+static void sdo_##prefix##_del_ref(zval *object TSRMLS_DC) { \
+	fprintf(stderr, "Decrementing refcount for " CLASS_NAME " id #%d\n", object->value.obj.handle); \
+    zend_objects_store_del_ref(object TSRMLS_CC); \
+}
+
+#define SDO_DEBUG_DESTROY(prefix) \
+static void sdo_##prefix##_destroy_object(void *object, zend_object_handle handle TSRMLS_DC) { \
+    fprintf(stderr, "Destroying " CLASS_NAME " id #%d at 0x%x\n", handle, object); \
+    zend_objects_destroy_object((zend_object *)object, handle TSRMLS_CC); \
+}
+
+#define SDO_DEBUG_FREE(object) \
+    fprintf(stderr, "Freeing " CLASS_NAME " at 0x%x\n", (object))
+
+#else
+
+#define SDO_DEBUG_ALLOCATE(handle,object) 
+#define SDO_FUNC_ADDREF(prefix) zend_objects_store_add_ref
+#define SDO_FUNC_DELREF(prefix) zend_objects_store_del_ref
+#define SDO_FUNC_DESTROY(prefix) NULL
+#define SDO_DEBUG_ADDREF(prefix)
+#define SDO_DEBUG_DELREF(prefix)
+#define SDO_DEBUG_DESTROY(prefix) 
+#define SDO_DEBUG_FREE(object) 
+
+#endif
+/* }}} */
 
 #endif	/* PHP_SDO_INT_H */
 

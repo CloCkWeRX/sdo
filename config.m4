@@ -62,6 +62,7 @@ commonj/sdo/DataObjectImpl.cpp \
 commonj/sdo/DataObjectInstance.cpp \
 commonj/sdo/DataObjectList.cpp \
 commonj/sdo/DataObjectListImpl.cpp \
+commonj/sdo/DataTypeInfo.cpp \
 commonj/sdo/DefaultLogWriter.cpp \
 commonj/sdo/EqualityHelper.cpp \
 commonj/sdo/GroupDefinition.cpp \
@@ -85,11 +86,13 @@ commonj/sdo/SAX2Parser.cpp \
 commonj/sdo/SchemaInfo.cpp \
 commonj/sdo/SdoCheck.cpp \
 commonj/sdo/SDODate.cpp \
+commonj/sdo/SDODataConverter.cpp \
 commonj/sdo/SdoRuntime.cpp \
 commonj/sdo/SDORuntimeException.cpp \
 commonj/sdo/SDOSAX2Parser.cpp \
 commonj/sdo/SDOSchemaSAX2Parser.cpp \
 commonj/sdo/SDOUtils.cpp \
+commonj/sdo/SDOValue.cpp \
 commonj/sdo/SDOXMLBufferWriter.cpp \
 commonj/sdo/SDOXMLFileWriter.cpp \
 commonj/sdo/SDOXMLStreamWriter.cpp \

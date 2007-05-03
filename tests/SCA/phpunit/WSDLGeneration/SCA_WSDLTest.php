@@ -4,6 +4,7 @@ require_once "PHPUnit/Framework/TestCase.php";
 require_once "PHPUnit/Framework/TestSuite.php";
 
 require_once 'SCA/SCA.php';
+require_once 'SCA/Bindings/soap/ServiceDescriptionGenerator.php';
 
 class SCA_WSDLTest extends PHPUnit_Framework_TestCase
 {
@@ -15,18 +16,19 @@ class SCA_WSDLTest extends PHPUnit_Framework_TestCase
 <?php
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  */
  class ClassNameDoesNotMatchTheFileName {
  }
 ?>
 EOF;
-        $class_file = SCA_Helper::getTempDir().'/Class1.php';
+        $class_file = './Class1.php';
         file_put_contents($class_file, $php);
         try {
-            $wsdl = SCA::generateWSDL($class_file);
+            $service_description = SCA::constructServiceDescription($class_file);
+            $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
         } catch (Exception $e) {
-            $this->assertContains("Classname", $e->getMessage());
+            $this->assertContains("Classname",$e->getMessage());
             unlink($class_file);
             return;
         }
@@ -40,18 +42,19 @@ EOF;
 <?php
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class Class2 {
     public function hello() {}
 }
 ?>
 EOF;
-        $class_file = SCA_Helper::getTempDir().'/Class2.php';    
+        $class_file = './Class2.php';
         file_put_contents($class_file, $php);
-        $wsdl = SCA::generateWSDL($class_file);
-        $this->assertContains('<xs:element name="hello">', $wsdl);
-        $this->assertContains('<xs:element name="helloResponse">', $wsdl);
+        $service_description = SCA::constructServiceDescription($class_file);
+        $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
+        $this->assertContains('<xs:element name="hello">',$wsdl);
+        $this->assertContains('<xs:element name="helloResponse">',$wsdl);
         unlink($class_file);
     }
 
@@ -62,7 +65,7 @@ EOF;
 <?php
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class Class3 {
     /**
@@ -76,14 +79,15 @@ class Class3 {
 }
 ?>
 EOF;
-        $class_file = SCA_Helper::getTempDir().'/Class3.php';    
+        $class_file = './Class3.php';
         file_put_contents($class_file, $php);
-        $wsdl = SCA::generateWSDL($class_file);
-        $this->assertContains('<xs:element name="a" type="xs:string" nillable="true"/>', $wsdl);
-        $this->assertContains('<xs:element name="b" type="xs:float" nillable="true"/>', $wsdl);
-        $this->assertContains('<xs:element name="c" type="xs:integer" nillable="true"/>', $wsdl);
-        $this->assertContains('<xs:element name="d" type="xs:boolean" nillable="true"/>', $wsdl);
-        $this->assertContains('<xs:element name="fourargsReturn" type="xs:string" nillable="true"/>', $wsdl);
+        $service_description = SCA::constructServiceDescription($class_file);
+        $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
+        $this->assertContains('<xs:element name="a" type="xs:string" nillable="true"/>',$wsdl);
+        $this->assertContains('<xs:element name="b" type="xs:float" nillable="true"/>',$wsdl);
+        $this->assertContains('<xs:element name="c" type="xs:integer" nillable="true"/>',$wsdl);
+        $this->assertContains('<xs:element name="d" type="xs:boolean" nillable="true"/>',$wsdl);
+        $this->assertContains('<xs:element name="fourargsReturn" type="xs:string" nillable="true"/>',$wsdl);
         unlink($class_file);
 
     }
@@ -95,7 +99,7 @@ EOF;
 <?php
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  * @types PersonNamespace person.xsd
  */
 class Class4 {
@@ -107,7 +111,7 @@ class Class4 {
 }
 ?>
 EOF;
-        $class_file = SCA_Helper::getTempDir().'/Class4.php';  
+        $class_file = './Class4.php';
         file_put_contents($class_file, $php);
 
 
@@ -125,12 +129,13 @@ EOF;
   </complexType>
 </schema>
 EOF;
-        file_put_contents('person.xsd', $xsd);
+        file_put_contents('person.xsd',$xsd);
 
-        $wsdl = SCA::generateWSDL($class_file);
-        $this->assertContains('<xs:import schemaLocation="person.xsd" namespace="PersonNamespace"/>', $wsdl);
-        $this->assertContains('<xs:element name="p1" type="ns0:personType" nillable="true"/>', $wsdl);
-        $this->assertContains('<xs:element name="takesSDOReturn" type="ns0:personType" nillable="true"/>', $wsdl);
+        $service_description = SCA::constructServiceDescription($class_file);
+        $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
+        $this->assertContains('<xs:import schemaLocation="person.xsd" namespace="PersonNamespace"/>',$wsdl);
+        $this->assertContains('<xs:element name="p1" type="ns0:personType" nillable="true"/>',$wsdl);
+        $this->assertContains('<xs:element name="takesSDOReturn" type="ns0:personType" nillable="true"/>',$wsdl);
         unlink($class_file);
         unlink('person.xsd');
 

@@ -1,7 +1,7 @@
 <?php
 /*
 +-----------------------------------------------------------------------------+
-| Copyright IBM Corporation 2006.                                             |
+| (c) Copyright IBM Corporation 2006, 2007.                                   |
 | All Rights Reserved.                                                        |
 +-----------------------------------------------------------------------------+
 | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
@@ -19,15 +19,15 @@
 | Author: Graham Charters,                                                    |
 |         Matthew Peters,                                                     |
 |         Megan Beynon,                                                       |
-|         Chris Miller.                                                       |
-|                                                                             |
+|         Chris Miller,                                                       |
+|         Caroline Maynard,                                                   |
+|         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id$
 */
 
-
-
 require "SCA/SCA_AnnotationRules.php";
+require "SCA/SCA_ReferenceType.php";
 
 if ( ! class_exists('SCA_CommentReader', false) ) {
     class SCA_CommentReader {
@@ -36,11 +36,11 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         const   NAMESPACE               = "@namespace" ;
         const   STRETCHEDNS             = "@namespace " ;
 
-        const   LOCAL_BINDING           = 'binding.php' ;
-        const   SERVICE_BINDING         = 'binding.ws' ;
+        const   BINDING                 = 'binding' ;
 
         const   PARAM_ANNOTATION        = 'parameters' ;
         const   RETRN_ANNOTATION        = 'return' ;
+        const   NAME_ANNOTATION         = 'name' ;
 
         private $docComment             = null ;
         private $Rule                   = null ;
@@ -52,6 +52,37 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         private $annotation             = null ;
 
         private $reason                 = null ; // In event of an exception
+
+        /**
+         * Pulls out name value pairs from the doc comment
+         *
+         */
+        public function getNameValuePairs() {
+            $lines = explode("\n", $this->docComment);
+
+            $binding_config = array();
+
+            foreach ($lines as $line) {
+                $words = explode(" ", $line);
+                for ($i=0; $i<count($words); $i++) {
+                    if (($pos = strpos($words[$i], '@') !== false)
+                         && isset($words[$i+1])) {
+                        // If it's come from an annotation we need to get rid of the 
+                        // newlines.
+/*
+                        $temp  = str_replace("\r", "", substr($words[$i], 1, strlen($words[$i])-1));
+                        $name  = str_replace("\n", "", $temp);
+                        $temp  = str_replace("\r", "", $words[$i+1]);
+                        $value = str_replace("\n", "", $temp);
+                        $binding_config[$name] = $value;
+*/
+                        $binding_config[trim(substr($words[$i], 1,
+                                         strlen($words[$i])-1))] = trim($words[$i+1]);
+                    }
+                }
+            }
+            return $binding_config;
+        }
 
         public function __construct($comment)
         {
@@ -94,12 +125,15 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                     if ( SCA_AnnotationRules::enoughPieces($words) === true ) {
                         if ( strcmp($words[ 0 ], SCA_AnnotationRules::PARAM) === 0 ) {
                             $this->methodAnnotations[ self::PARAM_ANNOTATION ][$i++] =
-                            $this->setParameterValues($words);
+                                $this->setParameterValues($words);
+                        } else if ( strcmp($words[ 0 ], SCA_AnnotationRules::NAME) === 0 ) {
+                            $this->methodAnnotations[ self::NAME_ANNOTATION ] =
+                                $this->setMethodAlias($words);
                         } else {
                             /* Ensure that no syntax error has been detected       */
                             if ( ($checkValue = $this->setReturnValues($words)) != null ) {
                                 $this->methodAnnotations[ self::RETRN_ANNOTATION ][ 0 ] =
-                                $checkValue;
+                                    $checkValue;
                             } else {
                                 $reason = "Invalid return annotation syntax in '{$line}' " ;
                                 throw new SCA_RuntimeException($reason);
@@ -199,14 +233,11 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             }
             $type                          = $words[ 1 ] ;
 
-
-
-
             /* When the type is an object the format of the line is different      */
             if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
                 /**
-                 * Make sure that the return annotation although appearing as if 
-                 * it is an object has enough elements to make the wsdl definition   
+                 * Make sure that the return annotation although appearing as if
+                 * it is an object has enough elements to make the wsdl definition
                  */
                 if ( count($words) > 2 ) {
                     $returnValue[ 'type' ]          = 'object' ;
@@ -231,6 +262,28 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         }/* End set return annotation values function                               */
 
         /**
+        * Return method alias specified using @name
+        *
+        * @param  array   Containing the raw words
+        * @return array   Method alias (Currently used only for XMLRPC)
+        */
+        public function setMethodAlias( $words )
+        {
+            $alias                   = array() ;
+            $alias['annotationType'] = $words[ 0 ] ;
+
+            if (!isset($words[1])) {
+                throw new SCA_RuntimeException('@name must be followed by a name');
+            }
+
+            $alias[ 'name' ]          = $words[ 1 ] ;
+
+
+            return  $alias ;
+
+        }/* End set alias annotation values function                               */
+
+        /**
         * Extract the XML Schema Definition from the script comment
         *
         * @return array  Containing the xsd types or null
@@ -242,11 +295,9 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             while ($line !== false) {
                 if (strpos($line, "@types") !== false) {
                     $words = SCA_AnnotationRules::parseAnnotation($line);
-                    if (!isset($words[1])) {
-                        throw new SCA_RuntimeException('types annotation needs a namespace and schema location');
-                    }
+
                     if (!isset($words[2])) {
-                        throw new SCA_RuntimeException('types annotation needs a schema location');
+                        throw new SCA_RuntimeException('types annotation needs a namespace and schema location');
                     }
 
                     $namespace = $words[1];
@@ -268,10 +319,77 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return $this->_hasAnnotation('service');
         }
 
-        public function isWebService()
-        {
-            return $this->_hasAnnotation('service') && $this->_hasAnnotation(self::SERVICE_BINDING);
+        // Return the binding annotation in the comment starting from the specified start position
+        // Update the start position so that the next binding can be retrieved using this method
+        // when scanning bindings for services.
+        //
+        // Return only valid bindings which are identified by the subdirectories under SCA/Bindings
+        // 
+        private function getBinding($ignoreLocal=false, &$pos = 0) {
+
+            $binding = null;
+
+            // Find the next binding annotation @binding.<binding>
+            $bindingAnnotation = "@" . self::BINDING . ".";
+            $pos = strpos($this->docComment, $bindingAnnotation, $pos);
+            if ($pos !== false) {
+                
+                $targetLine = substr($this->docComment, $pos);
+                $pos = $pos + strlen($bindingAnnotation);
+
+                $targetLine = ereg_replace("\t", " ", $targetLine);
+                $words      = explode(" ", $targetLine);
+                for ($i = 0; $i < count($words); $i++) {
+                    $word = trim($words[$i++]);
+                    if (strpos($word, $word, $bindingAnnotation) === 0) {
+                        $binding = substr($word, strlen($bindingAnnotation));
+                        break;
+                    }
+                }
+            }
+
+            // binding.php is local binding 
+            if ($binding == "php") 
+                $binding = $ignoreLocal? null: "local";
+
+            // Check if this is a known binding - all known bindings have a Binding/<binding> 
+            // subdirectory under the directory containing SCA.php
+            if ($binding != null) {
+
+                 foreach (get_included_files() as $file) {
+                     if (basename($file, ".php") == "SCA") {
+                         $scaDir     = dirname($file);
+                         $bindingDir = realpath("$scaDir/Bindings/$binding");
+                         break;
+                     }
+                 }
+                 if (!isset($bindingDir)||$bindingDir === false)
+                     $binding = null;
+            }
+
+            return $binding;
+            
         }
+
+        // Find all valid bindings under following a service annotation
+        public function getBindings() {
+
+            $bindings = array();
+            $pos = 0;
+            $bindingAnnotation = "@" . self::BINDING . ".";
+            while ($pos < strlen($this->docComment)) {
+                $binding = $this->getBinding(true, $pos);
+                if ($binding != null) {
+                    $bindings[] = $binding;
+                } else {
+                    break;
+                }
+            }
+
+            return $bindings;
+            
+        }
+
 
         public function isWebMethod()
         {
@@ -284,7 +402,6 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         {
             return $this->_hasAnnotation('reference');
         }
-
         public function hasBinding()
         {
             return $this->_hasAnnotation('binding');
@@ -295,15 +412,39 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return $this->_hasAnnotation('namespace');
         }
 
+
         public function getReference()
         {
-            if ($this->_hasAnnotation(self::LOCAL_BINDING)) {
-                return $this->_getSingleWordFollowing(self::LOCAL_BINDING);
-            } else if ($this->_hasAnnotation(self::SERVICE_BINDING)) {
-                return $this->_getSingleWordFollowing(self::SERVICE_BINDING);
+            if ($this->getBinding() != null) {
+                return $this->_getSingleWordFollowing(self::BINDING);
             } else {
                 throw new SCA_RuntimeException("Instance variable has @reference has no valid @binding.*");
             }
+        }
+
+        public function getReferenceFull()
+        {
+            $reference_type = new SCA_ReferenceType();
+
+            // get the binding info from the reference comment
+            $binding = null;
+
+            if (($bindingType = $this->getBinding()) != null) {
+                $binding = $this->_getSingleWordFollowing(self::BINDING);
+                $reference_type->setBindingType($bindingType);
+            }else {
+                throw new SCA_RuntimeException("An @reference was found with no following @binding, or an invalid @binding");
+            }
+
+            $reference_type->addBinding($binding);
+            
+            $reference_type->setBindingConfig($this->getNameValuePairs());
+
+            // get any extra type info from the reference comment
+            $types = $this->getXsdTypes();
+            $reference_type->addTypes($types);
+
+            return $reference_type;
         }
 
         public function getTemplate()

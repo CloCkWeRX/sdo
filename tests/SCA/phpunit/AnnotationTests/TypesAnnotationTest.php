@@ -52,8 +52,8 @@ class SCA_Annotation_TypesTest extends PHPUnit_Framework_TestCase {
         $instance            = new TypesWithValidNamespaceAndXsd();
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
-        $this->assertTrue(key_exists('xsd_types',$service_description));
-        $types = $service_description['xsd_types'];
+        $this->assertTrue(isset($service_description->xsd_types));
+        $types = $service_description->xsd_types;
         $this->assertEquals(1,count($types));
 
         $this->assertEquals(
@@ -68,7 +68,7 @@ class SCA_Annotation_TypesTest extends PHPUnit_Framework_TestCase {
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
         $this->assertTrue(key_exists('xsd_types',$service_description));
-        $types = $service_description['xsd_types'];
+        $types = $service_description->xsd_types;
         $this->assertEquals(2,count($types));
 
         $this->assertEquals(

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 473864 $ $Date$ */
+/* $Rev: 509544 $ $Date$ */
 
 
 #include "commonj/sdo/SDORuntimeException.h"
@@ -79,14 +79,26 @@ SDORuntimeException ::  SDORuntimeException(const SDORuntimeException& c)
 // ========================================================================
 SDORuntimeException :: ~SDORuntimeException()
 {
-    if (class_name) delete class_name;
-    if (message_text) delete message_text;
-    for (int i=0;i<location_set;i++)
-    {
-        if (locations[i].file) delete locations[i].file;
-        if (locations[i].function) delete locations[i].function;
-    }
-
+   if (class_name)
+   {
+      delete[] class_name;
+   }
+   if (message_text)
+   {
+      delete[] message_text;
+   }
+   
+   for (int i = 0; i < location_set; i++)
+   {
+      if (locations[i].file)
+      {
+         delete[] locations[i].file;
+         if (locations[i].function)
+         {
+            delete[] locations[i].function;
+         }
+      }
+   }
 } // end SDORuntimeException destructor
                     
 // ========================================================================

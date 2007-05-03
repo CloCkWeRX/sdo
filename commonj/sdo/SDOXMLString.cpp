@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 509659 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLString.h"
 #include <iostream>
@@ -179,7 +179,7 @@ namespace commonj
                 newString[i] = tolower(newString[i]);
             }
             SDOXMLString retString(newString);
-            delete newString;
+            delete[] newString;
             return retString;
         }
 

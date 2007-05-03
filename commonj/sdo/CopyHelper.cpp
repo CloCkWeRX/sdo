@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 483011 $ $Date$ */
+/* $Rev: 532769 $ $Date$ */
 
 #include "commonj/sdo/Property.h"
 #include "commonj/sdo/Type.h"
@@ -44,6 +44,11 @@ namespace sdo{
 
     void CopyHelper::transferitem(DataObjectPtr to, DataObjectPtr from, const Property& p)
     {
+		if (from->isNull(p)) {
+			to->setNull(p);
+			return;
+		}
+
         switch (p.getTypeEnum())
         {
         case Type::BooleanType:
@@ -84,7 +89,12 @@ namespace sdo{
                     wchar_t * buf = new wchar_t[siz];
                     from->getString(p,buf, siz);
                     to->setString(p, buf, siz);
-                    delete buf;
+                    delete[] buf;
+                }
+                else
+                {
+                    // property is set to a NULL value
+                    to->setString(p, (const wchar_t*)0, 0);
                 }
             }
             break;
@@ -97,6 +107,11 @@ namespace sdo{
                     from->getBytes(p,buf, siz);
                     to->setBytes(p, buf, siz);
                     delete buf;
+                }
+                else
+                {
+                    // property is set to a NULL value
+                    to->setBytes(p, (const char*)0, 0);
                 }
             }
             break;
@@ -157,6 +172,11 @@ namespace sdo{
                         to.append(buf,siz);
                         delete buf;
                     }
+                    else
+                    {
+                        // Property is set to a NULL value
+                        to.append((const wchar_t*)0, 0);
+                    }
                 }
                 break;
 
@@ -169,6 +189,11 @@ namespace sdo{
                         from.getBytes(i,buf,siz);
                         to.append(buf,siz);
                         delete buf;
+                    }
+                    else
+                    {
+                        // Property is set to a NULL value
+                        to.append((const char*)0, 0);
                     }
                 }
                 break;
@@ -223,7 +248,12 @@ namespace sdo{
                     wchar_t * buf = new wchar_t[siz];
                     from->getStringValue(index, buf, siz);
                     to->addString(p, buf, siz);
-                    delete buf;
+                    delete[] buf;
+                }
+                else
+                {
+                    // property is set to a NULL value
+                    to->addString(p, 0, 0);
                 }
             }
             break;
@@ -236,6 +266,11 @@ namespace sdo{
                     from->getBytesValue(index, buf, siz);
                     to->addBytes(p, buf, siz);
                     delete buf;
+                }
+                else
+                {
+                    // property is set to a NULL value
+                    to->addBytes(p, 0, 0);
                 }
             }
             break;
@@ -274,6 +309,8 @@ namespace sdo{
     {
 
         DataObject* theob = dataObject;
+        if (!theob) return 0;
+
         DataFactoryPtr fac = ((DataObjectImpl*)theob)->getDataFactory();
         if (!fac) return 0;
 
@@ -393,6 +430,11 @@ namespace sdo{
                             }
                             else 
                             {
+								if (dataObject->isNull(pl[i])) {
+									newob->setNull(pl[i]);
+									continue;
+								}
+								
                                 DataObjectPtr dob = dataObject->getDataObject(pl[i]);
                                 if (pl[i].isReference()) 
                                 {
@@ -438,6 +480,8 @@ namespace sdo{
     void CopyHelper::findReferences(DataObjectPtr oldDO, DataObjectPtr newDO,
         DataObjectPtr obj, DataObjectPtr newObj)
     {
+		if (!obj) return;
+
         if ( obj->getType().isSequencedType() )
         {
             Sequence* fromSequence = obj->getSequence();

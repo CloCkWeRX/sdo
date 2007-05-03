@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 517787 $ $Date$ */
 
 #ifndef _SEQUENCEIMPL_H_
 #define _SEQUENCEIMPL_H_
@@ -94,6 +94,7 @@ class SequenceImpl : public Sequence
     virtual long double getDoubleValue(unsigned int index);
     virtual const SDODate   getDateValue(unsigned int index);
     virtual DataObjectPtr getDataObjectValue(unsigned int index);
+    virtual const SDOValue&        getSDOValue(unsigned int index);
 
     virtual unsigned int getLength(unsigned int index);
  
@@ -137,6 +138,7 @@ class SequenceImpl : public Sequence
     virtual bool addDouble(    const char* propertyName,long double d );
     virtual bool addDate(      const char* propertyName,const SDODate t );
     virtual bool addDataObject(const char* propertyName,DataObjectPtr d );
+    virtual bool addSDOValue(const char* propertyName, const SDOValue& sval);
 
     
     ///////////////////////////////////////////////////////////////////////////
@@ -158,6 +160,7 @@ class SequenceImpl : public Sequence
     virtual bool addDouble(    unsigned int propertyIndex,long double d );
     virtual bool addDate(      unsigned int propertyIndex,const SDODate t );
     virtual bool addDataObject(unsigned int propertyIndex,DataObjectPtr d );
+    virtual bool addSDOValue(unsigned int propertyIndex, const SDOValue& sval);
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -180,6 +183,7 @@ class SequenceImpl : public Sequence
     virtual bool addDouble(    const Property& property,long double d );
     virtual bool addDate(      const Property& property,const SDODate t );
     virtual bool addDataObject(const Property& property,DataObjectPtr d );
+    virtual bool addSDOValue(const Property& property, const SDOValue& sval);
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -202,7 +206,7 @@ class SequenceImpl : public Sequence
     virtual bool addDouble(    unsigned int index,const char* propertyName,long double d );
     virtual bool addDate(      unsigned int index,const char* propertyName,const SDODate t );
     virtual bool addDataObject(unsigned int index,const char* propertyName,DataObjectPtr d );
-
+    virtual bool addSDOValue(unsigned int index, const char* propertyName, const SDOValue& sval);
 
     ///////////////////////////////////////////////////////////////////////////
     // adds a new entry with the specified property index and value
@@ -224,7 +228,7 @@ class SequenceImpl : public Sequence
     virtual bool addDouble(    unsigned int index,unsigned int propertyIndex,long double d );
     virtual bool addDate(      unsigned int index,unsigned int propertyIndex,const SDODate t );
     virtual bool addDataObject(unsigned int index,unsigned int propertyIndex,DataObjectPtr d );
-
+    virtual bool addSDOValue(unsigned int index, unsigned int propertyIndex, const SDOValue& sval);
 
     ///////////////////////////////////////////////////////////////////////////
     // adds a new entry with the specified property and value
@@ -246,7 +250,7 @@ class SequenceImpl : public Sequence
     virtual bool addDouble(    unsigned int index,const Property& property,long double d );
     virtual bool addDate(      unsigned int index,const Property& property,const SDODate t );
     virtual bool addDataObject(unsigned int index,const Property& property,DataObjectPtr d );
-
+    virtual bool addSDOValue(unsigned int index, const Property& property, const SDOValue& sval);
  
     ///////////////////////////////////////////////////////////////////////////
     // removes the entry at the given entry index.
@@ -306,56 +310,79 @@ class SequenceImpl : public Sequence
 
     class seq_item {
        public:
-           seq_item(const Property* p, unsigned int i):
-             the_prop(p)
-            {
-                 index = i;
-                 text = 0;
-            }
-           seq_item(const char* t)
-           {
-               text = new char[strlen(t) + 1];
-               strcpy(text,t);
-               the_prop = 0;
-           }
+          // Constructors
+          seq_item(const Property* p, unsigned int i):
+             the_prop(p), index(i), freeText(0)
+          {
+          }
+          seq_item(const char* t) :
+             the_prop(0)
+          {
+             freeText = new SDOValue(t);
+          }
+          // Copy constructor
+          seq_item(const seq_item& sin) :
+             index(sin.index), freeText(0), the_prop(sin.the_prop)
+          {
+             if (sin.freeText != 0)
+             {
+                freeText = new SDOValue(*sin.freeText);
+             }
+          }
 
-           ~seq_item()
-           {
-                if (text) {
-                    delete text;
-                }
-           }
+          // Copy assignment
+             seq_item& operator=(const seq_item& sin)
+             {
+                 if (this != &sin)
+                 {
+                     if (freeText)
+                     {
+                         delete freeText;
+                     }
+                     if (sin.freeText != 0)
+                     {
+                         freeText = new SDOValue(*sin.freeText);
+                     }
+                 }
+                 return *this;
+             }
+            
+          // Destructor
+          ~seq_item()
+          {
+             if (freeText)
+             {
+                delete freeText;
+             }
+          }
 
-           seq_item(const seq_item& sin)
-           {
-               the_prop = sin.the_prop;
-               index = sin.index;
-               if (sin.text) {
-                   text = new char[strlen(sin.text) +1];
-                   strcpy(text, sin.text);
-               }
-               else
-               {
-                  text =0;
-               }
-           }
 
            const Property* getProp() {return the_prop;}
            unsigned int getIndex() { return index;}
-           char* getText() { return text;}
+
+          const char* getText()
+          {
+             return freeText->getCString();
+          }
+
+          const SDOValue* getFreeText()
+          {
+             return freeText;
+          }
+
            void setProp(Property* p) { the_prop = p;}
-           void setText(const char* intext)
-           {
-               if (intext != 0)
-               {
-                   if (text != 0)
-                   {
-                       delete text;
-                   }
-                   text = new char[strlen(intext) +1];
-                   strcpy(text,intext);
-               }
-           }
+
+          void setText(const char* intext)
+          {
+             if (intext != 0)
+             {
+                if (freeText != 0)
+                {
+                   delete freeText;
+                }
+                freeText = new SDOValue(intext);
+             }
+          }
            void setIndex(unsigned int i)
            {
                index = i;
@@ -363,10 +390,11 @@ class SequenceImpl : public Sequence
        private:
        const Property* the_prop;
        unsigned int index;
-       char* text;
+       SDOValue* freeText;
     };
 
     typedef std::list<seq_item> SEQUENCE_ITEM_LIST;
+    virtual void checkRange(unsigned int index, SEQUENCE_ITEM_LIST::iterator& i);
 
     SEQUENCE_ITEM_LIST the_list;
 

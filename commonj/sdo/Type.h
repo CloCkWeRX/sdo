@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 510951 $ $Date$ */
 
 #ifndef _SDO_TYPE_H_
 #define _SDO_TYPE_H_
@@ -134,6 +134,7 @@ public:
      */
 
     virtual SDO_API PropertyList  getProperties() const = 0;
+    virtual SDO_API const std::list<PropertyImpl*>& getPropertyListReference() const = 0;
 
  
     /**  getProperty returns a property for this type

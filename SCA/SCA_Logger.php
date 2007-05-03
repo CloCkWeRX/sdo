@@ -1,7 +1,7 @@
 <?php
 /*
 +-----------------------------------------------------------------------------+
-| Copyright IBM Corporation 2006.                                             |
+| (c) Copyright IBM Corporation 2006, 2007.                                   |
 | All Rights Reserved.                                                        |
 +-----------------------------------------------------------------------------+
 | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
@@ -25,10 +25,13 @@
 $Id$
 */
 
+require 'SCA/SCA_LogInterface.php' ;
+
 /**
  * Purpose:
  * --------
- * The following class provides methods to be able to log information to a file.
+ * The following class implements, and extends the SCA_LogInterface, to provide
+ * methods that control, and enter log information to a file.
  * Information is given in the form of a message that may be categorised in order
  * to provide a measure of weighting to each message. The weighting mechanism also
  * allows a report to be compiled of the msgs that are categorised with the same
@@ -39,41 +42,46 @@ $Id$
  *
  * Public Methods:
  * ---------------
- * __construct()
+ * singleSCA_Logger()
+ * Return a singleton SCA_Logger.
+ *
+ * SCA_Logger()
  * The construct method accepts 3 optional arguments, the first two are the directory
  * path, and the filename ( without extension ) respectively. The third provides an
- * option to delete the existing log file, or continue updating the file with 
+ * option to delete the existing log file, or continue updating the file with
  * messages.
- * The commands are SCA_Logger::DELETE, or SCA_Logger::UPDATE, and the command is 
+ * The commands are SCA_LOGGER_DELETE, or SCA_LOGGER_UPDATE, and the command is
  * defaulted to DELETE.
  *
- * setCategorisationLevel()
- * The setCategorisationLevel function provides a facility to filter out log messages
- * based on their categorisation level. Valid levels are provided by SCA_Logger 
+ * setLogLevel()
+ * The seetLogLevel function provides a facility to filter out log messages
+ * based on their categorisation level. Valid levels are provided by SCA_Logger
  * constants
- *      SCA_Logger::INFORMATION
- *      SCA_Logger::WARNING
- *      SCA_Logger::RUNTIME
- *      SCA_Logger::BUSINESS
- *      SCA_Logger::ALL
- * The feature allows the log messages to be implanted at strategic points in the 
- * code and 'switched' on or off recording their message.
+ *     SCA_LOGGER_CRITICAL
+ *     SCA_LOGGER_ERROR
+ *     SCA_LOGGER_WARNING
+ *     SCA_LOGGER_INFO
+ *     SCA_LOGGER_DEBUG
+ * The feature allows the log messages to be implanted at strategic points in the
+ * code and 'switched' on or off recording their message level.
+ * NOTE: 'NONE will stop the logger all the others start the logger.
  *
- * toLog()
- * The toLog function does what it suggests and logs a message to the log file. 
+ * log()
+ * The toLog function does what it suggests and logs a message to the log file.
  * An optional parameter allows each message to be categorised with -
- *      SCA_Logger::INFORMATION
- *      SCA_Logger::WARNING
- *      SCA_Logger::RUNTIME
- *      SCA_Logger::BUSINESS
- * the default is SCA_Logger::INFORMATION. Depending on the setting of the 
- * categorisation level ( see setCategorisationLevel() above ) a decision is made 
+ *     SCA_LOGGER_CRITICAL
+ *     SCA_LOGGER_ERROR
+ *     SCA_LOGGER_WARNING
+ *     SCA_LOGGER_INFO
+ *     SCA_LOGGER_DEBUG
+ * the default is SCA_LOGGER_INFO. Depending on the setting of the
+ * categorisation level ( see setLogLevel() above ) a decision is made
  * as to whether the message is logged or not.
  *
  * fromLog()
- * The fromLog function extracts all the contents of the log file to an array 
+ * The fromLog function extracts all the contents of the log file to an array
  * depending on the setting of the optional parameter to select the categorisation of
- * messages that are to be returned. The default setting is SCA_Logger::ALL, 
+ * messages that are to be returned. The default setting is SCA_LOGGER_ALL,
  * and the remainder are the same as toLog() above.
  *
  * stopLog()
@@ -96,6 +104,9 @@ $Id$
  *
  * Private Methods:
  * ----------------
+ * _tolog()
+ * Format the log entry message, and write it to file.
+ *
  * _getMsg()
  * Return all of or the last message in the log.
  *
@@ -103,73 +114,151 @@ $Id$
  * Provides the filter as to whether a message is going to be written to a file
  * or read back out of the file.
  *
- * _decodeCat()
+ * _toLevelString()
  * Puts a string representation of the current category into the status array.
+ *
+ * _fromLevelString()
+ * Interprets a declaration and returns the integer equivelent.
  *
  */
 
-
 /* Service Component Architecture Logger Class                                */
 if ( ! class_exists('SCA_Logger', false) ) {
-    class SCA_Logger
+    /* File Control                                                           */
+    define( 'SCA_LOGGER_DELETE'       , 10 ) ; // Delete the existing log, and start again
+    define( 'SCA_LOGGER_UPDATE'       , 11 ) ; // Append to the existing log
+
+    /* Logging Control                                                        */
+    define( 'SCA_LOGGER_START'        , true  ) ; // Start the logger
+    define( 'SCA_LOGGER_STOP'         , false ) ; // Stop the logger
+
+    /* Log Entry Message Filter Levels                                        */
+    define( 'SCA_LOGGER_CRITICAL'     , 0x01 ) ; // Critical Error SCA Halted
+    define( 'SCA_LOGGER_ERROR'        , 0x02 ) ; // Error - SCA may not react as expected
+    define( 'SCA_LOGGER_WARNING'      , 0x04 ) ; // Warning - Computation error
+    define( 'SCA_LOGGER_INFO'         , 0x08 ) ; // Information message
+    define( 'SCA_LOGGER_DEBUG'        , 0x10 ) ; // Debug message
+
+    define( 'SCA_LOGGER_ALL'          , 0x1f ) ; // all types
+    define( 'SCA_LOGGER_NONE'         , 0x00 ) ; // no types ( stop logging )
+
+    class SCA_Logger implements  iLogInterface
     {
-        /* File Control                                                            */
-        const DELETE              = 10 ;
-        const UPDATE              = 11 ;
+        /* Singleton instance of the logger.                                  */
+        private static $loghandle   = null ;
 
-        /* Logging Control                                                         */
-        const START               = true  ;
-        const STOP                = false ;
+        private        $run         = SCA_LOGGER_STOP ;
+        private        $catlevel    = SCA_LOGGER_ALL  ;
 
-        private      $run         = self::START ;
+        private        $levelindex  = 4 ;
 
-        /* Message Categorisation                                                  */
-        const INFORMATION         = 0x01 ;
-        const WARNING             = 0x02 ;
-        const RUNTIME             = 0x04 ;
-        const BUSINESS            = 0x08 ;
-        const ALL                 = 0x0f ;
-        const MASK                = 0x0f ;
+        /* File path information                                              */
+        const          LASTMSG      = 'EOF' ;
+        private        $dirpath     = "." ;
+        private        $file        = "SCA" ;
+        private        $extn        = "log"    ;
+        private        $logfile     = ""       ;
 
-        private      $catLevel    = self::ALL  ;
-
-        private      $levelText   = array(  '1' => "Info"
-        ,  '2' => "Warning"
-        ,  '4' => "Runtime"
-        ,  '8' => "Business"
-        ,  '15' => "ALL"
-        ) ;
-
-        private      $levelIndex  = 4 ;
-
-        /* File path information                                                   */
-        const        LASTMSG      = 'EOF' ;
-        private      $dirpath     = "." ;
-        private      $file        = "scalog" ;
-        private      $extn        = "log"    ;
-        private      $logfile     = ""       ;
-
-        /* Line count of the log messages                                          */
-        private      $msgIndex    = 0 ;
+        /* Line count of the log messages                                     */
+        private        $msg_index    = 0 ;
 
         /**
-         * Logger constructor to set a directory and filename that is different to 
+         * Create a singleton Logger.
+         *
+         * @param string $dirpath   Optional directory ( uses current directory
+         *                          when not specified )
+         * @param string $file      Optional name of file ( without extension,
+         *                          default is 'scalog' )
+         * @param int    $command   Optional Delete or Update an existing log file.
+         *                          ( default = DELETE )
+         * @return object           handle to the logger.
+         */
+        public static function &singleSCA_Logger()
+        {
+            /* Make only one logger                                           */
+
+            if ( ! (isset( self::$loghandle )) ) {
+                self::$loghandle = new SCA_Logger();
+
+            }/* End of singleton pattern                                      */
+
+            return self::$loghandle ;
+
+        }/* End single scs logger                                             */
+
+        /**
+         * Logger constructor to set a directory and filename that is different to
          * the default values in the file.
          *
-         * @param string $dirpath   Optional directory ( uses current directory 
-         * when not specified )
-         * @param string $file      Optional name of file ( without extension, 
-         * default is 'scalog' )
-         * @param int    $command   Optional Delete or Update an existing log file. 
-         * ( default = DELETE )
+         * @param string $dirpath   Optional directory ( uses current directory
+         *                          when not specified )
+         * @param string $file      Optional name of file ( without extension,
+         *                          default is 'scalog' )
+         * @param int    $command   Optional Delete or Update an existing log file.
+         *                          ( default = DELETE )
          */
-        public function __construct( $dirpath  = null
-        , $file     = null
-        , $command  = self::DELETE
-        )
+        public function SCA_Logger()
         {
+
+        }/* End constructor                                                   */
+
+        /**
+         * Send a line of text to the log file
+         *
+         * @param string $txtentry      entry for the log file
+         * @param string $file          filename containing the line originating
+         *                              the entry.
+         * @param string $line          line at wich the entry is made
+         * @param int    $level         level at which entry is recorded
+         */
+        public function log ( $txtentry
+        , $file     = ""
+        , $line     = ""
+        , $level    = null
+        ) {
+
+            /* Exit quickly when logging has been stopped.                    */
+            if ( $this->run ) {
+                /* After ensuring that the level is valid ...                 */
+                if ( $level !== null ) {
+                    if ( ($categorisation = $this->_isLoggable($level)) !== null ) {
+                        $this->_tolog( $txtentry, $file, $line, $categorisation ) ;
+                    }
+                }else{
+                    /* ... otherwise use the default level                    */
+                    $this->_tolog( $txtentry, $file, $line, $this->_toLevelString( SCA_LOGGER_INFO ) ) ;
+                }
+
+            }/* End logging stopped test                                      */
+
+        }/* End log function                                                  */
+
+        /**
+        * Stop any logging
+        *
+        */
+        public function stopLog() {
+            $this->run = SCA_LOGGER_STOP ;
+
+        }/* End stop log function                                             */
+
+        /**
+        * Start/Restart the logger
+        *
+        */
+        public function startLog() {
+            $dirpath = SCA_Helper::getTempDir().'/log';
+            $file = 'SCA';
+            $command = SCA_LOGGER_UPDATE;
             if ( $dirpath  !== null )
-            $this->dirpath = $dirpath ;
+            {
+                $this->dirpath = $dirpath ;
+                if( ! file_exists( $dirpath ) )
+                {
+                    mkdir( $dirpath ) ;
+                }
+
+            }
 
             if ( $file !== null )
             $this->file = $file ;
@@ -178,138 +267,68 @@ if ( ! class_exists('SCA_Logger', false) ) {
 
             date_default_timezone_set('UTC');
 
-            /* Delete an existing file, or get the last message index              */
-            if ( $command == self::DELETE  ) {
+            /* Delete an existing file, or get the last message index     */
+            if ( $command == SCA_LOGGER_DELETE  ) {
                 $this->deleteLogFile();
 
             } else {
-                $msg      = $this->_getMsg(SCA_Logger::LASTMSG, $this->logfile, SCA_Logger::ALL);
-                $start    = strpos($msg[0], '[') + 1;
-                $end      = strpos($msg[0], ']') - 1;
-                $strIndex = substr($msg[0], $start, $end);
-                $this->msgIndex = (int)$strIndex;
+                $this->msgIndex = 1;
 
-            }/* End delete file                                                    */
+            }/* End delete file                                               */
+            $this->run = SCA_LOGGER_START ;
 
-        }/* End constructor                                                        */
+        }/* End start log function                                            */
 
         /**
-         * Set, or alter the categorisation level the logger to filter messages that
-         * are to be logged to file.
-         * The level can be -
-         *  INFORMATION
-         *  WARNING
-         *  RUNTIME
-         *  BUSINESS
-         *  ALL
-         *
-         * or a combination such as
-         *
-         * (INFORMATION | RUNTIME ) or (BUSINESS | WARNING) ... etc
-         *
-         * @param int $level    The recording level
-         * @return boolean      Success of failure
-         */
-        public function setCategorisationLevel( $level )
-        {
+        * The categorisation of the log level provides a binary filter against
+        * which the 'level' of a logentry can be compared before entry into
+        * the log file. As a numeric value can consist of one or more
+        * binary levels combinations of levels may be built -
+        *
+        *  SCA_LOGGER_CRITICAL | SCA_LOGGER_INFO
+        *
+        * will only log critical and information entries for instance.
+        *
+        * @param int $level    The recording level
+        * @return boolean      Success of failure
+        */
+        public function setLogLevel( $level ) {
             $return = true ;
+            $level =  ( $level & SCA_LOGGER_ALL ) ;
 
-            if ( $level === self::MASK )
-            $level = self::ALL ;
+            if ( $level >= SCA_LOGGER_NONE && $level <= SCA_LOGGER_ALL ) {
+                $this->catlevel = $level ;
 
-            if ( $level >= self::INFORMATION && $level <= self::ALL )
-            $this->catLevel =  ( $level & self::MASK ) ;
-            else
-            $return = false ;
+            }else{
+                $return = false ;
+
+            }
 
             return $return ;
 
-        }/* End set level function                                                 */
-
-        /**
-         * Enter a message into the log file
-         *
-         * @param string $msg (Required) message string
-         * @param int $level  (Optional) categorisation level of the message
-         */
-        public function toLog( $msg
-        , $level  = null
-        )
-        {
-            /* When logging is underway ...                                        */
-            if ( $this->run ) {
-                if ($level === null)
-                $level = self::INFORMATION  ;
-
-                /*  ... and is this message selected for recording                 */
-                if ( ($categorisation = $this->_isLoggable($level)) !== null ) {
-                    $callingFile = "" ;
-                    $backtrace   = debug_backtrace();
-                    if ( count($backtrace) > 0 )
-                    $callingFile = $backtrace[ 0 ][ 'file' ] ;
-
-                    ++$this->msgIndex ;
-                    $index = "[{$this->msgIndex}]" ;
-
-                    $time  = getDate();
-                    $mSecs = gettimeofday();
-
-                    $timeMsg = "{$time[ 'mday' ]}/{$time[ 'mon' ]}/{$time[ 'year' ]} "
-                    . "{$time[ 'hours' ]}:{$time[ 'minutes' ]}:{$time[ 'seconds' ]}"
-                    . "::{$mSecs[ 'usec' ]} " ;
-
-                    $logMsg = "{$index} {$categorisation} {$timeMsg} {$callingFile} - {$msg}\n" ;
-                    file_put_contents($this->logfile, $logMsg, FILE_APPEND);
-
-                }/* End record this                                                */
-
-            }/* End running                                                        */
-
-        }/* End to log function                                                   */
+        }/* End set level function                                            */
 
         /**
          * Return the contents of the log file in an array.
          *
-         * @param  int $categorisation   (Optional) The message categorisation to be 
-         * selected
+         * @param  int $categorisation   (Optional) The message categorisation to be
+         *                               selected
          * @return array                 Contains the contents of the log file
          */
-        public function fromLog( $categorisation = null )
-        {
-            $this->stopLog();
+        public function fromLog( $categorisation = null ) {
+            $this->stopLog(); //lock
             $logList = array() ;
 
             if ( $categorisation === null )
-            $categorisation = self::ALL ;
+            $categorisation = SCA_LOGGER_ALL ;
 
-            $logList = $this->_getMsg(null, $this->logfile, $categorisation);
+            $logList = $this->_getMsg(null, $this->logfile, $categorisation );
 
-            $this->startLog();
+            $this->startLog(); //unlock
 
             return $logList ;
 
-        }/* End from log function                                                  */
-
-
-        /**
-        * Stop any logging
-        *
-        */
-        public function stopLog()
-        {
-            $this->run = self::STOP ;
-
-        }/* End stop log function                                                  */
-
-        /**
-        * Start/Restart the logger
-        *
-        */
-        public function startLog()
-        {
-            $this->run = self::START ;
-
-        }/* End start log function                                                 */
+        }/* End from log function                                             */
 
         /**
          * Return the internal setup of the logger in an indexed array
@@ -321,34 +340,78 @@ if ( ! class_exists('SCA_Logger', false) ) {
          *
          * @return array    Containing the current log settings
          */
-        public function logStatus()
-        {
+        public function logStatus() {
             $this->run ? $runState = "Running" : $runState = "Stopped";
 
             $status    = array() ;
             $status[ 'run'    ] = $runState ;
             $status[ 'dir'    ] = $this->dirpath ;
             $status[ 'file'   ] = $this->file ;
-            $status[ 'catgry' ] = $this->_decodeCat($this->catLevel);
-            $status[ 'count'  ] = $this->msgIndex ;
+            $status[ 'catgry' ] = $this->_toLevelString($this->catlevel);
+            $status[ 'count'  ] = $this->msg_index ;
 
             return $status ;
 
-        }/* End log status                                                         */
+        }/* End log status                                                    */
 
         /**
           * Delete the current log file
           *
           */
-        public function deleteLogFile()
-        {
+        public function deleteLogFile() {
             if ( realpath($this->logfile) ) {
                 unlink($this->logfile);
-            }/* End file exists                                                    */
+                $this->msg_index = 0 ;
 
-        }/* End delete log file function                                           */
+            }/* End file exists                                               */
 
-        /*-------------------------------------------------------------------------*/
+        }/* End delete log file function                                      */
+
+        /*--------------------------------------------------------------------*/
+
+        /**
+         * Enter a message into the log file
+         *
+         * @param string $msg (Required) message string
+         * @param string $level  (Optional) categorisation level of the message
+         */
+        private function _tolog( $msg , $filename = "", $line = "",  $level  = null ) {
+
+            $this->stopLog() ; //lock
+            $stack_depth    = substr('....', 1, 2 ) ;
+            $calling_class  = $filename ;
+            $calling_method = $line ;
+
+            /* Assumption - a line on is own is no good with out a filename   */
+            if ( $filename === ""  ) {
+                $backtrace      = debug_backtrace() ;
+                $this->_findCallingInfo( $backtrace, $calling_class, $calling_method ) ;
+                $stack_depth = substr('........................................',1,count($backtrace)) ;
+
+            }
+
+            ++$this->msg_index ;
+            $index  = "[{$this->msg_index}]" ;
+            $time   =  date('d/m/Y H:i:s') ;
+            $u_secs = gettimeofday() ;
+            $m_secs = $u_secs[ 'usec' ]/1000 ;
+
+            $log_msg = sprintf( "[%3d] %s %s::%3d %s%s::%s - %s\n"
+            ,  $this->msg_index
+            ,  $level
+            ,  $time
+            ,  $m_secs
+            ,  $stack_depth
+            ,  $calling_class
+            ,  $calling_method
+            ,  $msg
+            );
+
+            file_put_contents($this->logfile, $log_msg, FILE_APPEND );
+
+            $this->startLog() ; //unlock
+
+        }/* End to log function                                               */
 
         /**
          * Get the last message or an array of messages from the log file
@@ -356,66 +419,66 @@ if ( ! class_exists('SCA_Logger', false) ) {
          * @param int $command        null = from the top 'EndOf' the last msg
          * @param string $from        path name of the file to be read
          * @param int $categorisation level of categorisation to be filtered
-         * @return array              Containing the Messages, the last message 
+         * @return array              Containing the Messages, the last message
          * or an error.
          */
         private function _getMsg( $command
         , $from
         , $categorisation
-        )
-        {
+        ) {
             $logList = array() ;
             $i       = 0 ;
 
-            /* Ensure that the file exists                                         */
+            /* Ensure that the file exists                                    */
             if ( realpath($from) ) {
-                if ( ($logHandle = fopen($from, "rb"))  !== false ) {
-                    fflush($logHandle);  // make sure everything is writ.
+                if ( ($loghandle = fopen($from, "rb"))  !== false ) {
+                    fflush($loghandle);  // make sure everything is writ.
                     $cat = $this->_isLoggable($categorisation);
 
-                    /* Walk through the file ...                                   */
-                    while ( !feof($logHandle) ) {
-                        $msg = trim(fgets($logHandle));
+                    /* Walk through the file ...                              */
+                    while ( !feof($loghandle) ) {
+                        $msg = trim(fgets($loghandle));
 
-                        /* Jump out when the there is no message ( normally EOF )  */
+                        /* Jump out when the there is no message (normally    */
+                        /* EOF)                                               */
                         if ( (strlen($msg)) === 0 )
                         break ;
 
-                        /* Save all the messages to an array or just the last one  */
+                        /* Save all the messages to an array or just the last */
+                        /* one                                                */
                         if ( $command === null ) {
-                            /* To save it or not ... that is the question          */
-                            if ( $categorisation === self::ALL )
-                            $logList[ $i++ ] = $msg ;
+                            /* To save it or not ... that is the question     */
+                            if ( $categorisation === SCA_LOGGER_ALL ) {
+                                $logList[ $i++ ] = $msg ;
 
-                            else
-                            {
+                            } else {
                                 if ( (strpos($msg, $cat)) !== false )
                                 $logList[ $i++ ] = $msg ;
 
-                            }/* End save it                                        */
+                            }/* End save it                                   */
 
                         } else {
                             // ... or just monitor to the last message.
                             $logList[ $i ] = $msg ;
 
-                        }/* End all of the messages                                */
+                        }/* End all of the messages                           */
 
-                    }/*End until end of file                                       */
+                    }/*End until end of file                                  */
 
-                    fclose($logHandle);
+                    fclose($loghandle);
 
                 } else {
                     $logList[ $i ] = " ERROR:: Unable to open the {$this->logfile} file" ;
 
-                }/* End files opened ok                                            */
+                }/* End files opened ok                                       */
             } else {
                 $logList[ $i ] = "ERROR:: {$this->logfile} file does not exist" ;
 
-            }/* End does the file exist                                            */
+            }/* End does the file exist                                       */
 
             return $logList ;
 
-        }/* End get message function                                               */
+        }/* End get message function                                          */
 
         /**
          * Check that the level of log message is recordable.
@@ -423,52 +486,85 @@ if ( ! class_exists('SCA_Logger', false) ) {
          * @param int $level  Level of log message
          * @return string     Printable categorisation, or null
          */
-        private function _isLoggable( $level )
-        {
-            /* When the level of categorisation is within the categrosation range  */
-            if ( !($level < self::INFORMATION) && !($level > self::BUSINESS) ) {
-                /*  ... and when the current level accepts that category ...       */
-                $x = $this->catLevel & $level ;
-                if ( $x != 0 ) {
-                    return $this->levelText[ "$level" ] ;
+        private function _isLoggable( $level ) {
+            /* When the level of categorisation is within the categrosation   */
+            /* range send the string equivalent back                          */
+            $inset = ($level & $this->catlevel) ;
+            return ($inset ? $this->_toLevelString( $inset ) : null) ;
 
-                }/* End within current level                                       */
-
-            }/* End in range                                                       */
-
-            return  null ;
-
-        }/* End is loggable function                                               */
+        }/* End is loggable function                                          */
 
         /**
-         * Return a string showing the level of categorisation of the recorded msgs
+         * Find the calling class and method name
+         * NB 'class' is more reliable than 'file', which is sometimes just plain wrong
          *
-         * @param int $level    Current categorisation level
-         * @return string       Containing the settings
+         * @param int $backtracelngth     size of outer array of backtrace data
+         * @param array  $tracedata       backtrace data
+         * @param string $class     [i/o] Reference for class name
+         * @param string $method    [i/o] Reference for method name
          */
-        private function _decodeCat( $level )
-        {
-            $levelString = 'ALL' ;
+        private function _findCallingInfo( $tracedata, &$class, &$method ) {
+            if ( array_key_exists( 'class', $tracedata[ 2 ] ) ) {
+                $class = $tracedata[ 2 ][ 'class' ] ;
+            } else {
+                $temp = str_replace( '\\', '/', $tracedata[ 2 ][ 'file' ] ) ;
+                $class =   substr( $temp, (strrpos( $temp, '/' )), (strlen( $temp )) ) ;
+            }
 
-            if ( $level < self::ALL  ) {
-                $levelString = "" ;
-                if ( $level & self::BUSINESS )
-                $levelString .= "Business " ;
-                if ( $level  & self::RUNTIME )
-                $levelString .= "Runtime " ;
-                if ( $level & self::WARNING )
-                $levelString .= "Warning " ;
-                if ( $level & self::INFORMATION )
-                $levelString .= "Information" ;
+            $method = $tracedata[ 2 ][ 'function' ] ;
 
-            }/* End when not the default                                           */
+        }/* End find calling info function                                    */
 
-            return $levelString ;
+        /**
+         * Find the string value of the defined constant
+         *
+         * @param int $keyvalue
+         * @return string              null if not found
+         */
+        private function _toLevelString( $keyvalue ) {
+            $leveltext   = array(  SCA_LOGGER_CRITICAL => 'Critical'
+            ,  SCA_LOGGER_ERROR    => 'Error'
+            ,  SCA_LOGGER_WARNING  => 'Warning'
+            ,  SCA_LOGGER_INFO     => 'Info'
+            ,  SCA_LOGGER_DEBUG    => 'Debug'
+            ,  SCA_LOGGER_ALL      => 'AllLevels'
+            ,  SCA_LOGGER_NONE     => 'NoLevels'
+            ) ;
 
-        }/* End decode categorisation level                                        */
+            if ( key_exists( $keyvalue, $leveltext ) ) {
+                return $leveltext[ $keyvalue ] ;
+            } else {
+                return null ;
+            }
 
-    }/* End SCA Class                                                              */
+        }/* End to level string function                                      */
 
-}/* End instance check                                                             */
+        /**
+         * Find the defined constant value associated with a string
+         *
+         * @param string $keyvalue
+         * @return int                   null if not found
+         */
+        private function _fromLevelString( $keyvalue ) {
+            $textlevel   = array( 'Critical'  => SCA_LOGGER_CRITICAL
+            , 'Error'     => SCA_LOGGER_ERROR
+            , 'Warning'   => SCA_LOGGER_WARNING
+            , 'Info'      => SCA_LOGGER_INFO
+            , 'Debug'     => SCA_LOGGER_DEBUG
+            , 'AllLevels' => SCA_LOGGER_ALL
+            , 'NoLevels'  => SCA_LOGGER_NONE
+            ) ;
+
+            if ( key_exists( $keyvalue, $textlevel ) ) {
+                return $textlevel[ $keyvalue ] ;
+            } else {
+                return null ;
+            }
+
+        }/* End from level string function                                    */
+
+    }/* End SCA Class                                                         */
+
+}/* End instance check                                                        */
 
 ?>

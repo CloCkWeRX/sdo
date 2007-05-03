@@ -52,11 +52,20 @@ static sdo_das_setting_object *sdo_das_setting_get_instance(zval *me TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ debug macro functions
+ */
+SDO_DEBUG_ADDREF(das_setting)
+SDO_DEBUG_DELREF(das_setting)
+SDO_DEBUG_DESTROY(das_setting)
+/* }}} */
+
 /* {{{ sdo_das_setting_object_free_storage
  */
 static void sdo_das_setting_object_free_storage(void *object TSRMLS_DC)
 {
 	sdo_das_setting_object *my_object;
+
+	SDO_DEBUG_FREE(object);
 
 	my_object = (sdo_das_setting_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
@@ -86,8 +95,9 @@ static zend_object_value sdo_das_setting_object_create(zend_class_entry *ce TSRM
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
 		(void *)&tmp, sizeof(zval *));
-	retval.handle = zend_objects_store_put(my_object, NULL, sdo_das_setting_object_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(my_object, SDO_FUNC_DESTROY(das_setting), sdo_das_setting_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &sdo_das_setting_object_handlers;
+	SDO_DEBUG_ALLOCATE(retval.handle, my_object);
 
 	return retval;
 }
@@ -340,6 +350,8 @@ void sdo_das_setting_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	sdo_das_setting_class_entry = zend_register_internal_class(tmp_ce TSRMLS_CC);
 
 	memcpy(&sdo_das_setting_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sdo_das_setting_object_handlers.add_ref = SDO_FUNC_ADDREF(das_setting);
+	sdo_das_setting_object_handlers.del_ref = SDO_FUNC_DELREF(das_setting);
 	sdo_das_setting_object_handlers.clone_obj = NULL;
 	sdo_das_setting_object_handlers.get_properties = sdo_das_setting_get_properties;
 	sdo_das_setting_object_handlers.cast_object = sdo_das_setting_cast_object;

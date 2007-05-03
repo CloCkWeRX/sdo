@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 524004 $ $Date$ */
 
 #include "commonj/sdo/TypeDefinitionsImpl.h"
 namespace commonj
@@ -30,6 +30,16 @@ namespace commonj
         
         TypeDefinitionsImpl::~TypeDefinitionsImpl()
         {
+        }
+
+        void TypeDefinitionsImpl::addTypeDefinitions(const TypeDefinitionsImpl& typedefs)
+        {
+            XMLDAS_TypeDefs::const_iterator iter;
+            for (iter=typedefs.types.begin(); iter != typedefs.types.end(); iter++)
+            {
+                types.insert(*iter);
+            }
+
         }
 
         SDOXMLString TypeDefinitionsImpl::getTypeQName(const SDOXMLString& typeUri, const SDOXMLString& typeName)

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /*
 +----------------------------------------------------------------------+
@@ -73,7 +73,7 @@ class SDOAPITest extends PHPUnit_Framework_TestCase {
 
         // are we using the matched extension version?
         $version = phpversion('sdo');
-        $this->assertTrue(($version >= '0.7.1'), 'Incompatible version of php_sdo extension.');
+        $this->assertTrue(($version >= '1.1.2'), 'Incompatible version of php_sdo extension.');
 
         // We don''t want to force direct type comparison (e.g. we want (int)100 to be the same as "100")
         //		$this->setLooselyTyped(true);
@@ -1280,41 +1280,21 @@ class SDOAPITest extends PHPUnit_Framework_TestCase {
         $seq->insert('OpenSeqName', NULL, 'name');
         $this->assertEquals('OpenSeqName', $open->name, 'sequence and property access not equal;');
 
-        // FAILED: can't yet set open type through sequence interface
-        //		/* now add an unknown property to the open type */
-        //		$seq->insert(' stringA=>');
-        //		$seq->insert('StringValue', NULL, 'stringA');
-        //		$this->assertEquals('StringValue', $open->stringA, 'sequence and property access for open type not equal;');
-        //
-        //		$seq->insert(' numberA=>');
-        //		$seq->insert(42, NULL, 'numberA');
-        //		$this->assertEquals(42, $open->numberA, 'sequence and property access for open type not equal;');
-        //
-        //		/* add an unknown data object property */
+        /* now add an unknown string property to the open type */
+        $seq->insert(' stringA=>');
+        $seq->insert('StringValue', NULL, 'stringA');
+        $this->assertEquals('StringValue', $open->stringA, 'sequence and property access for open string type not equal;');
+
+        /*  ... an unknown number property ... */
+        $seq->insert(' numberA=>');
+        $seq->insert(42, NULL, 'numberA');
+        $this->assertEquals(42, $open->numberA, 'sequence and property access for open int type not equal;');
+
+        /* ... and an unknown data object property */
         $employee = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
-        //		$seq->insert($employee, NULL, 'object');
-        //		$index = $seq->count() - 1;
-        $employee->name = 'Alien';
-        //		$this->assertEquals('Alien', $seq[$index]->name, 'sequence and property access for open type not equal;');
-
-        /* bypass the above problem by pre-initializing the open types through the DataObject interface.
-        * Then we can test setting them through the sequence
-        */
-        $open->stringB = 'BAD';
-        $open->numberB = -1;
-        $open->object = $this->dmsDf->create(COMPANY_NS, EMPLOYEE_TYPE);
-
-        $seq->insert(' numberB=>');
-        $seq->insert(42, NULL, 'numberB');
-        $this->assertEquals(42, $open->numberB, 'sequence and property access for open type not equal;');
-
-        $seq->insert(' stringB=>');
-        $seq->insert('StringValue', NULL, 'stringB');
-        $this->assertEquals('StringValue', $open->stringB, 'sequence and property access for open type not equal;');
-
-        $seq->insert(' object=>');
         $seq->insert($employee, NULL, 'object');
-        $this->assertEquals('Alien', $open->object->name, 'sequence and property access for open type not equal;');
+        $employee->name = 'Alien';
+        $this->assertEquals('Alien', $open->object->name, 'sequence and property access for open object type not equal;');
     }
 
     public function testDerivedType() {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 482588 $ $Date$ */
+/* $Rev: 511929 $ $Date$ */
 
 #include "commonj/sdo/SDOSAX2Parser.h"
 
@@ -384,7 +384,7 @@ namespace commonj
                             {
                                 // remember this value to resolve later
                                 IDRef ref(currentDataObject, attributes[i].getName(), propValue);
-                                IDRefs.insert(IDRefs.end(), ref);
+                                IDRefs.push_back(ref);
                             }
                             else
                             {    
@@ -941,7 +941,7 @@ namespace commonj
                                         sprintf(msg,"Parser found unknown element %s",
                                             (const char*)localname);
                                         setter->setError( msg );
-                                        delete msg;
+                                        delete[] msg;
                                     }
                                 }
                              }
@@ -1050,7 +1050,7 @@ namespace commonj
                             sprintf(msg,"Parser found unknown element %s",
                             (const char*)localname);
                             setter->setError( msg );
-                            delete msg;
+                            delete[] msg;
                         }
                     }
                     LOGEXIT(INFO,"SDOSAX2Parser: startElementNs - exit7");
@@ -1226,7 +1226,7 @@ namespace commonj
                                 IDRef ref(currentPropertySetting.dataObject,
                                     currentPropertySetting.name,
                                     currentPropertySetting.value );
-                                IDRefs.insert(IDRefs.end(), ref);
+                                IDRefs.push_back(ref);
                             }
                             else
                             {
@@ -1370,7 +1370,7 @@ namespace commonj
                    start_point = end_point + 1;
                 } while(1);
 
-                delete buf;
+                delete[] buf;
                 return;
             }
 
@@ -1410,7 +1410,7 @@ namespace commonj
                                     strcpy(combi,s);
                                     strcat(combi,str);
                                     seq->setText(k,(const char*)combi);
-                                    delete combi;
+                                    delete[] combi;
                                 }
                                 else
                                 {
@@ -1466,10 +1466,15 @@ namespace commonj
             }
             */
 
-            PropertyList pl = type.getProperties();
-            for (unsigned int i = 0; i < pl.size(); i++)
+            const std::list<PropertyImpl*> pl = type.getPropertyListReference();
+
+            for (std::list<PropertyImpl*>::const_iterator i = pl.begin();
+                 i != pl.end();
+                 i++)
             {
-                XSDPropertyInfo* pi = (XSDPropertyInfo*)((DASProperty*)&pl[i])->getDASValue("XMLDAS::PropertyInfo");
+                XSDPropertyInfo* pi = (XSDPropertyInfo*)
+                ((DASProperty*) (*i))->getDASValue("XMLDAS::PropertyInfo");
+
                 if (pi)
                 {
                     const PropertyDefinitionImpl&  propdef = pi->getPropertyDefinition();

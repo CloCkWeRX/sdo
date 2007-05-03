@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 485591 $ $Date$ */
+/* $Rev: 510951 $ $Date$ */
 
 #ifndef _TYPEIMPL_H_
 #define _TYPEIMPL_H_
@@ -30,6 +30,7 @@
 #include "commonj/sdo/DASType.h"
 #include "commonj/sdo/PropertyImpl.h"
 #include "commonj/sdo/SDODate.h"
+#include "commonj/sdo/SDOValue.h"
 
 
 #define MAX_LONG_SIZE 20 
@@ -97,22 +98,36 @@ public:
      unsigned int convert(            void ** value,DataObject* dob) const; 
 
      const char*          convertToCString(    void* value , char** inbuf, unsigned int len) const; 
+     const char*          convertToCString(const SDOValue& sdoValue) const; 
      const bool           convertToBoolean(   void* value, unsigned int len) const; 
+     const bool           convertToBoolean(const SDOValue& sdoValue) const; 
      const char           convertToByte(      void* value,unsigned int len ) const; 
+     const char           convertToByte(const SDOValue& sdoValue) const; 
      unsigned int         convertToString( void* value , wchar_t* val, unsigned int len,
                             unsigned int max) const; 
+     unsigned int         convertToString(const SDOValue& sdoValue,
+                                          wchar_t* val,
+                                          unsigned int max) const; 
      unsigned int         convertToBytes(     void* value , char* val, unsigned int len,
                             unsigned int max) const; 
+     unsigned int         convertToBytes(const SDOValue& sdoValue , char* val, unsigned int max) const; 
      unsigned int         convertToBytes(     const void* value , SDOString& val, unsigned int len,
                             unsigned int max) const; 
      const wchar_t        convertToCharacter(  void* value ,unsigned int len) const; 
+     const wchar_t        convertToCharacter(const SDOValue& sdoValue) const; 
      const short          convertToShort(     void* value ,unsigned int len) const; 
+     const short          convertToShort(const SDOValue& sdoValue) const; 
      const long           convertToInteger(   void* value ,unsigned int len) const; 
+     const long           convertToInteger(const SDOValue& sdoValue) const; 
      const int64_t        convertToLong(      void* value ,unsigned int len) const; 
+     const int64_t        convertToLong(const SDOValue& sdoValue) const; 
      const float          convertToFloat(     void* value ,unsigned int len) const; 
+     const float          convertToFloat(const SDOValue& sdoValue) const;
      const long double    convertToDouble(void* value ,unsigned int len) const; 
+     const long double    convertToDouble(const SDOValue& sdoValue) const; 
      DataObject*          convertToDataObject(void* value ,unsigned int len) const; 
      const SDODate         convertToDate      (void* value ,unsigned int len) const; 
+     const SDODate         convertToDate      (const SDOValue& sdoValue) const; 
 
      /**  equals - compares
      *
@@ -145,6 +160,7 @@ public:
     // Returns the list of the properties of this type.
     ///////////////////////////////////////////////////////////////////////////
     PropertyList  getProperties() const;
+    const std::list<PropertyImpl*>&  getPropertyListReference() const;
 
      ///////////////////////////////////////////////////////////////////////////
     //  add a property to a Type whilst building - this is for DAS 

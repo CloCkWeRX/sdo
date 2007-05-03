@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 524004 $ $Date$ */
 
 #ifndef _TYPEDefinitionsImpl_H_
 #define _TYPEDefinitionsImpl_H_
@@ -25,7 +25,7 @@
 #include "commonj/sdo/disable_warn.h"
 
 #include "commonj/sdo/TypeDefinitionImpl.h"
-#include "map"
+#include <map>
 
 namespace commonj
 {
@@ -43,6 +43,7 @@ namespace commonj
         public:
             TypeDefinitionsImpl();
             virtual ~TypeDefinitionsImpl();
+            void addTypeDefinitions(const TypeDefinitionsImpl& types);
             static SDOXMLString getTypeQName(const SDOXMLString& typeUri, const SDOXMLString& typeName);
 
 

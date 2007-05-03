@@ -68,10 +68,18 @@ function_entry sdo_das_xml_document_methods[] = {
 };
 /* }}} */
 
-/* {{{ sdo_das_xml_document_free_storage
+/* {{{ debug macro functions
+ */
+SDO_DEBUG_ADDREF(das_xml_document)
+SDO_DEBUG_DELREF(das_xml_document)
+SDO_DEBUG_DESTROY(das_xml_document)
+/* }}} */
+
+/* {{{ sdo_das_xml_document_object_free_storage
  */
 void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC) 
 {
+	SDO_DEBUG_FREE(object);
 
     xmldocument_object *xmldocument = (xmldocument_object *) object;
     zend_hash_destroy(xmldocument->zo.properties);
@@ -107,10 +115,11 @@ zend_object_value sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS
     zend_hash_copy(xmldocument->zo.properties, &ce->default_properties,
 		(copy_ctor_func_t) zval_add_ref, (void *) &tmp,
 		sizeof(zval *));
-    retval.handle = zend_objects_store_put(xmldocument, NULL,
+    retval.handle = zend_objects_store_put(xmldocument, SDO_FUNC_DESTROY(das_xml_document),
 		sdo_das_xml_document_object_free_storage,
 		NULL TSRMLS_CC);
     retval.handlers = &sdo_das_xml_doc_object_handlers;
+	SDO_DEBUG_ALLOCATE(retval.handle, xmldocument);
     return retval;
 }
 /* }}} */
@@ -129,6 +138,8 @@ void sdo_das_xml_document_minit(TSRMLS_D)
 
     memcpy(&sdo_das_xml_doc_object_handlers, zend_get_std_object_handlers(),
            sizeof(zend_object_handlers));
+	sdo_das_xml_doc_object_handlers.add_ref = SDO_FUNC_ADDREF(das_xml_document);
+	sdo_das_xml_doc_object_handlers.del_ref = SDO_FUNC_DELREF(das_xml_document);
     sdo_das_xml_doc_object_handlers.clone_obj = NULL;
 }
 /* }}} */

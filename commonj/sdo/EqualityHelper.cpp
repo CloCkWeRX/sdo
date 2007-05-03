@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 509676 $ $Date$ */
 
 #include "commonj/sdo/Property.h"
 #include "commonj/sdo/Type.h"
@@ -78,8 +78,8 @@ namespace sdo{
                             return false;
                         }
                     }
-                    delete buff;
-                    delete buft;
+                    delete[] buff;
+                    delete[] buft;
                 }
                 return true;
             }

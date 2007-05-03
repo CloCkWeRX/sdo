@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 506932 $ $Date$ */
 
 #ifndef _SEQUENCE_H_
 #define _SEQUENCE_H_
@@ -28,6 +28,7 @@
 #include "commonj/sdo/RefCountingPointer.h"
 #include "commonj/sdo/SDODate.h"
 #include "commonj/sdo/Type.h"
+#include "commonj/sdo/SDOValue.h"
 
 
 namespace commonj{
@@ -123,6 +124,7 @@ class Sequence : public RefCountingObject
     SDO_API virtual long double getDoubleValue(unsigned int index) = 0;
     SDO_API virtual const SDODate      getDateValue(unsigned int index) = 0;
     SDO_API virtual DataObjectPtr getDataObjectValue(unsigned int index) = 0;
+    SDO_API virtual const SDOValue&    getSDOValue(unsigned int index) = 0;
 
     /**
      *
@@ -178,6 +180,7 @@ class Sequence : public RefCountingObject
     SDO_API virtual bool addDouble(const char* propertyName,long double d ) = 0;
     SDO_API virtual bool addDate(const char* propertyName,const SDODate t ) = 0;
     SDO_API virtual bool addDataObject(const char* propertyName,DataObjectPtr d ) = 0;
+    SDO_API virtual bool addSDOValue(const char* propertyName, const SDOValue& sval) = 0;
 
  
     SDO_API virtual bool addCString(   unsigned int propertyIndex,const char* s ) = 0;
@@ -193,6 +196,7 @@ class Sequence : public RefCountingObject
     SDO_API virtual bool addDouble(unsigned int propertyIndex,long double d ) = 0;
     SDO_API virtual bool addDate(unsigned int propertyIndex,const SDODate t ) = 0;
     SDO_API virtual bool addDataObject(unsigned int propertyIndex,DataObjectPtr d ) = 0;
+    SDO_API virtual bool addSDOValue(unsigned int propertyIndex, const SDOValue& sval) = 0;
 
 
 
@@ -209,6 +213,7 @@ class Sequence : public RefCountingObject
     SDO_API virtual bool addDouble(const Property& property,long double d ) = 0;
     SDO_API virtual bool addDate(const Property& property,const SDODate t ) = 0;
     SDO_API virtual bool addDataObject(const Property& property,DataObjectPtr d ) = 0;
+    SDO_API virtual bool addSDOValue(const Property& property, const SDOValue& sval) = 0;
 
 
     /**
@@ -235,6 +240,7 @@ class Sequence : public RefCountingObject
     SDO_API virtual bool addDouble(unsigned int index,const char* propertyName,long double d ) = 0;
     SDO_API virtual bool addDate(unsigned int index,const char* propertyName,const SDODate t ) = 0;
     SDO_API virtual bool addDataObject(unsigned int index,const char* propertyName,DataObjectPtr d ) = 0;
+    SDO_API virtual bool addSDOValue(unsigned int index, const char* propertyName, const SDOValue& sval) = 0;
 
 
     SDO_API virtual bool addCString(   unsigned int index,unsigned int propertyIndex,const char* s ) = 0;
@@ -250,6 +256,7 @@ class Sequence : public RefCountingObject
     SDO_API virtual bool addDouble(unsigned int index,unsigned int propertyIndex,long double d ) = 0;
     SDO_API virtual bool addDate(unsigned int index,unsigned int propertyIndex,const SDODate t ) = 0;
     SDO_API virtual bool addDataObject(unsigned int index,unsigned int propertyIndex,DataObjectPtr d ) = 0;
+    SDO_API virtual bool addSDOValue(unsigned int index, unsigned int propertyIndex, const SDOValue& sval) = 0;
 
 
     SDO_API virtual bool addCString(   unsigned int index,const Property& property,const char* s ) = 0;
@@ -265,6 +272,7 @@ class Sequence : public RefCountingObject
     SDO_API virtual bool addDouble(unsigned int index,const Property& property,long double d ) = 0;
     SDO_API virtual bool addDate(unsigned int index,const Property& property,const SDODate t ) = 0;
     SDO_API virtual bool addDataObject(unsigned int index,const Property& property,DataObjectPtr d ) = 0;
+    SDO_API virtual bool addSDOValue(unsigned int index, const Property& property, const SDOValue& sval) = 0;
 
  
     /**  remove() removes an item.

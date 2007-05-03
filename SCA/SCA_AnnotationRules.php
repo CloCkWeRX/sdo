@@ -1,7 +1,7 @@
 <?php
 /*
 +-----------------------------------------------------------------------------+
-| Copyright IBM Corporation 2006.                                             |
+| (c) Copyright IBM Corporation 2006.                                         |
 | All Rights Reserved.                                                        |
 +-----------------------------------------------------------------------------+
 | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
@@ -19,8 +19,9 @@
 | Author: Graham Charters,                                                    |
 |         Matthew Peters,                                                     |
 |         Megan Beynon,                                                       |
-|         Chris Miller.                                                       |
-|                                                                             |
+|         Chris Miller,                                                       |
+|         Caroline Maynard,                                                   |
+|         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id$
 */
@@ -35,10 +36,11 @@ $Id$
 *
 */
 
-if ( ! class_exists('SCA_AnnotationRules', false) ) {
+if ( ! class_exists('SCA_AnnotationRules', false)) {
     class SCA_AnnotationRules {
         const PARAM            = "@param"  ;
         const RETRN            = "@return" ;
+        const NAME             = "@name" ;
         const TYPES            = "@types" ;
         const AT               = "@" ;
         const DOLLAR           = "\$" ;
@@ -84,7 +86,8 @@ if ( ! class_exists('SCA_AnnotationRules', false) ) {
          */
         public function isMethodAnnotation( $line )
         {
-            return ( $this->isParameter($line) || $this->isReturn($line) ) ? 
+            return ( $this->isParameter($line) || $this->isReturn($line) ||
+                     $this->isName($line)) ? 
                 true : false ;
 
         }/* End is parameter function                                              */
@@ -110,6 +113,17 @@ if ( ! class_exists('SCA_AnnotationRules', false) ) {
         {
             return ( strpos($line, self::RETRN) != false ) ? true : false ;
         }/* End is return function                                                 */
+
+        /**
+         * Is the name annotation at the beginning of the line
+         *
+         * @param string $line
+         * @return boolean
+         */
+        public function isName( $line )
+        {
+            return ( strpos($line, self::NAME) != false ) ? true : false ;
+        }/* End is name function                                                   */
 
         /**
          * Is the data type defined as an object.

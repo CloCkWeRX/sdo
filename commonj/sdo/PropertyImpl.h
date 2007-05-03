@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 509991 $ $Date$ */
 
 #ifndef _PROPERTYIMPL_H_
 #define _PROPERTYIMPL_H_
@@ -263,6 +263,7 @@ class PropertyImpl :public DASProperty
     bool bisContainer;
     bool bisReference;
     bool bisMany;
+    bool bisArray;
 
     bool bDefaulted;
       

@@ -15,10 +15,10 @@ class SCA_TabsAndSpacesTest extends PHPUnit_Framework_TestCase {
         $instance            = new TabsAndSpaces();
         $reader              = new SCA_AnnotationReader($instance);
         $service_description = $reader->reflectService();
-        $this->assertTrue(key_exists('spaces',$service_description['operations']));
-        $this->assertTrue(key_exists('tabs',$service_description['operations']));
+        $this->assertTrue(key_exists('spaces',$service_description->operations));
+        $this->assertTrue(key_exists('tabs',$service_description->operations));
         
-        $spaces_op = $service_description['operations']['spaces'];
+        $spaces_op = $service_description->operations['spaces'];
         $parm = $spaces_op['parameters'][0];
         $this->assertEquals(
         array(
@@ -29,7 +29,7 @@ class SCA_TabsAndSpacesTest extends PHPUnit_Framework_TestCase {
         ),
         $parm);
         
-        $tabs_op = $service_description['operations']['tabs'];
+        $tabs_op = $service_description->operations['tabs'];
         $parm = $tabs_op['parameters'][0];
         $this->assertEquals(
         array(

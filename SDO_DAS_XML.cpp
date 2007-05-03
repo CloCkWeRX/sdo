@@ -136,10 +136,20 @@ void sdo_temporary_exception_test(SDORuntimeException &e, char *file_name TSRMLS
 }
 /* }}} */
 
+/* {{{ debug macro functions
+ */
+SDO_DEBUG_ADDREF(das_xml)
+SDO_DEBUG_DELREF(das_xml)
+SDO_DEBUG_DESTROY(das_xml)
+/* }}} */
+
 /* {{{ sdo_das_xml_object_free_storage
  */
 void sdo_das_xml_object_free_storage(void *object TSRMLS_DC)
 {
+
+	SDO_DEBUG_FREE(object);
+
     /*
      * Frees up the SDO_DAS_XML object also decrements reference to
      * PHP version of SDO_DAS_DataFactory
@@ -177,9 +187,10 @@ zend_object_value sdo_das_xml_object_create(zend_class_entry *ce TSRMLS_DC)
     zend_hash_init(xmldas->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
     zend_hash_copy(xmldas->zo.properties, &ce->default_properties,
 		(copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-    retval.handle = zend_objects_store_put(xmldas, NULL, 
+    retval.handle = zend_objects_store_put(xmldas, SDO_FUNC_DESTROY(das_xml), 
 		sdo_das_xml_object_free_storage, NULL TSRMLS_CC);
     retval.handlers = &sdo_das_xml_object_handlers;
+	SDO_DEBUG_ALLOCATE(retval.handle, xmldas);
     return retval;
 }
 /* }}} */
@@ -206,8 +217,8 @@ static int sdo_das_xml_cast_object(zval *readobj, zval *writeobj, int type, int 
 			dataFactoryPtr = sdo_das_df_get(&xmldas->z_df TSRMLS_CC);
 			TypeList tl = dataFactoryPtr->getTypes();
 			print_buf << indent << "object(" << "SDO_DAS_XML" << ")#" <<
-				readobj->value.obj.handle << " {";
-			print_buf << indent << tl.size() << " types have been defined. The types and their properties are::";
+				readobj->value.obj.handle << " {" << indent << tl.size() << 
+				" types have been defined. The types and their properties are::";
 			
 			for (int ix = 0; ix < tl.size(); ix++) {
 				if (tl[ix].getURI() == NULL || strlen(tl[ix].getURI()) == 0) {
@@ -218,7 +229,8 @@ static int sdo_das_xml_cast_object(zval *readobj, zval *writeobj, int type, int 
 				PropertyList pl = tl[ix].getProperties();
 				for (int px = 0; px < pl.size() ; px++) {
 					print_buf << indent << "    - " << pl[px].getName() << " (" ;
-					if (pl[px].getType().getURI() == NULL || strlen(pl[px].getType().getURI()) == 0) {
+					if (pl[px].getType().getURI() == NULL || 
+					    strlen(pl[px].getType().getURI()) == 0) {
 						print_buf << "{no namespace}" << "#" << pl[px].getType().getName(); 
 					} else {
 						print_buf <<  pl[px].getType().getURI() << "#" << pl[px].getType().getName(); 
@@ -243,6 +255,80 @@ static int sdo_das_xml_cast_object(zval *readobj, zval *writeobj, int type, int 
 }
 /* }}} */
 
+/* {{{ sdo_das_xml_add_types
+ * Add types defined in a schema to the XML DAS
+ */
+static int sdo_das_xml_add_types(xmldas_object *xmldas, char *file_name TSRMLS_DC) 
+{
+	char *class_name, *space;
+	int error_count;
+
+	try {
+		/*
+		 * The second (boolean) parameter tells Tuscany whether to try loading
+		 * imported schema from the namespaceURI if the schemaLocation attribute
+		 * is omitted. I've turned this on to support some dodgy schema out 
+		 * there, but if it causes problems, perhaps a phpini setting may be 
+		 * required.
+		 */
+        xmldas->xsdHelperPtr->defineFile(file_name, true);
+
+        error_count = xmldas->xsdHelperPtr->getErrorCount();
+        if (error_count > 0) { 
+			ostringstream print_buf;
+			
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			
+			print_buf << class_name << space << get_active_function_name(TSRMLS_C) << 
+				" - Unable to parse the supplied xsd file\n";
+			print_buf << error_count << 
+			    " parse error(s) occurred when parsing the file '" << file_name << "'"; 
+			if (error_count > MAX_ERRORS) {
+				print_buf << " (only the first " << MAX_ERRORS << " shown)";
+			} 
+			print_buf << ":\n";
+			for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
+				print_buf << error_ix + 1 << ". " << 
+				    xmldas->xsdHelperPtr->getErrorMessage(error_ix) << endl;
+			}
+			std::string print_string = print_buf.str();
+			sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
+			return FAILURE;
+        }            
+    } catch (SDOFileNotFoundException e) {
+        sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
+		return FAILURE;
+    } catch (SDOXMLParserException e) {
+        sdo_das_xml_throw_parserexception((char *)e.getMessageText() TSRMLS_CC);
+		return FAILURE;
+    } catch (SDORuntimeException e) {
+ 		// The exceptions caught here have been thrown across the 
+		// boundary between two shared libraries (sdo_das_xml.so and sdo.so)
+		// In some build environments this has been shown to not work. 
+		// The symptom is that the exception hierachy is ignored and the
+		// exception arrives here as a runtime exception.
+		// We have added this extra test of the stored classname
+		// just to be sure
+        sdo_temporary_exception_test ( e, file_name TSRMLS_CC);
+		return FAILURE;
+    }
+	return SUCCESS;
+}
+/* }}} */
+
+#undef CACHE_DATA_FACTORY
+#ifdef CACHE_DATA_FACTORY
+#define SAVED_DATA_FACTORY_TABLE_SIZE 100
+#define MAX_KEY_SIZE 400
+
+typedef struct {
+  char           	key[MAX_KEY_SIZE];
+  DataFactoryPtr   	data_factory_ptr;
+} saved_data_factory_table_entry;
+
+static saved_data_factory_table_entry data_factory_table[SAVED_DATA_FACTORY_TABLE_SIZE];
+#endif
+
 /* {{{ sdo_das_xml_minit
  */
 void sdo_das_xml_minit(TSRMLS_D) 
@@ -255,8 +341,17 @@ void sdo_das_xml_minit(TSRMLS_D)
 	
     memcpy(&sdo_das_xml_object_handlers, zend_get_std_object_handlers(),
 		sizeof(zend_object_handlers));
+	sdo_das_xml_object_handlers.add_ref = SDO_FUNC_ADDREF(das_xml);
+	sdo_das_xml_object_handlers.del_ref = SDO_FUNC_DELREF(das_xml);
 	sdo_das_xml_object_handlers.cast_object = sdo_das_xml_cast_object;
     sdo_das_xml_object_handlers.clone_obj = NULL;
+    
+#ifdef CACHE_DATA_FACTORY
+    for (int i = 0 ; i < SAVED_DATA_FACTORY_TABLE_SIZE ; i++) {
+        strcpy(data_factory_table[i].key,"");
+        data_factory_table[i].data_factory_ptr    = NULL;
+    }
+#endif
 }
 /* }}} */
 
@@ -272,6 +367,51 @@ PHP_METHOD(SDO_DAS_XML, __construct)
 }
 /* }}} */
 
+
+#ifdef CACHE_DATA_FACTORY
+void dump_table()
+{
+	for (int i = 0 ; 
+	     i < SAVED_DATA_FACTORY_TABLE_SIZE && 
+	         strcmp(data_factory_table[i].key, "") != 0; 
+	     i++) {
+		php_printf("Entry at %i is %s\n",i,data_factory_table[i].key);
+	}
+}
+
+void add_to_table(char *key, DataFactoryPtr data_factory_ptr)
+{
+	// TODO find the equivalent of making this a synchronised method
+	for (int i = 0 ; i  < SAVED_DATA_FACTORY_TABLE_SIZE ; i++) {
+		if (strncmp(data_factory_table[i].key, key, MAX_KEY_SIZE) == 0) {
+//			php_printf("We were asked to add %s but it is already there\n",key);
+			return; // it's already there
+		}
+		if (strcmp(data_factory_table[i].key, "") == 0) {
+//			php_printf("Adding %s -> %p\n",file_name,data_factory_ptr);
+			strncpy(data_factory_table[i].key,key, MAX_KEY_SIZE);
+			data_factory_table[i].data_factory_ptr = data_factory_ptr;
+			return; // we added it
+		}
+	}
+}
+
+DataFactoryPtr retrieve_from_table(char *key)
+{
+	// TODO find the equivalent of making this a synchronised method
+//	php_printf("Looking for %s\n",key);
+	for (int i = 0 ; i  < SAVED_DATA_FACTORY_TABLE_SIZE ; i++) {
+		if (strncmp(data_factory_table[i].key, key, MAX_KEY_SIZE) == 0) {
+//			php_printf("Found %s -> %p\n",key, data_factory_table[i].data_factory_ptr);
+			return data_factory_table[i].data_factory_ptr;
+		}
+	}
+//	php_printf("Sadly, did not find %s\n",file_name);
+	return NULL;
+}	
+
+#endif
+
 /* {{{ proto SDO_DAS_XML SDO_DAS_XML::create(string xsd_file)
  */
 PHP_METHOD(SDO_DAS_XML, create) 
@@ -284,15 +424,22 @@ PHP_METHOD(SDO_DAS_XML, create)
      *****************************************************************************/
     xmldas_object	*xmldas;
     char			*file_name;
-    int 			 file_name_len;
-    DataFactoryPtr   dataFactoryPtr;
+    int 			 file_name_len = 0;
+    char			*key;
+    int 			 key_len = 0;
+    DataFactoryPtr   dataFactoryPtr = NULL;
 	char			*class_name, *space;
-	bool			exception_thrown = false;
+	int              rc = SUCCESS;
+	zval            *args = NULL;
+	zval	         z_tmp;
 
-    if (ZEND_NUM_ARGS() > 1) {
+    if (ZEND_NUM_ARGS() > 2) {
         WRONG_PARAM_COUNT;
     }
-    
+       
+    /**
+     * Create a data factory object
+     */    
     Z_TYPE_P(return_value) = IS_OBJECT;
     if (object_init_ex(return_value, sdo_das_xml_class_entry) == FAILURE) {
 		class_name = get_active_class_name(&space TSRMLS_CC);
@@ -301,71 +448,114 @@ PHP_METHOD(SDO_DAS_XML, create)
         return;
     }    
     xmldas = (xmldas_object *) zend_object_store_get_object(return_value TSRMLS_CC);
+	INIT_ZVAL(xmldas->z_df);
+    
+    /**
+     * If no arguments, plug in a new and empty data factory
+     */
+    if (ZEND_NUM_ARGS() == 0) {
+	    dataFactoryPtr = DataFactory::getDataFactory();
+
+		sdo_das_df_new(&xmldas->z_df, dataFactoryPtr TSRMLS_CC);
+	    xmldas->xsdHelperPtr = HelperProvider::getXSDHelper((DataFactory *)dataFactoryPtr);
+	    xmldas->xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr);
+
+	    return;
+    }
+
+	/**
+	 * Extract arguments when only one, in which case it will be a filename or array of filenames
+	 */
+	if (ZEND_NUM_ARGS() == 1) {
+
+		/* parameter is an array of strings, but also accept a single string 
+		 * for backward compatibility 
+		 */
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, 
+		        "s", &file_name, &file_name_len) == FAILURE &&
+			zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &args) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+
+	/**
+	 * Extract arguments when there are two, in which case the first will be a filename or array of filenames
+	 * and the second will be a key with which to save or restore it
+	 */
+	if (ZEND_NUM_ARGS() == 2) {
+		
+		/* parameter is an array of strings, but also accept a single string 
+		 * for backward compatibility 
+		 */
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, 
+		        "ss", &file_name, &file_name_len, &key, &key_len) == FAILURE &&
+			zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as", &args, &key, &key_len) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+		
+#ifdef CACHE_DATA_FACTORY
+	if (ZEND_NUM_ARGS() == 2) {
+		/* Check to see if we can use a cached data factory */
+		dataFactoryPtr = retrieve_from_table(key);
+		if (dataFactoryPtr) {
+//			php_printf("!!! retrieving from cache !!!\n");
+			sdo_das_df_new(&xmldas->z_df, dataFactoryPtr TSRMLS_CC);
+		    xmldas->xsdHelperPtr = HelperProvider::getXSDHelper((DataFactory *)dataFactoryPtr);
+		    xmldas->xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr);
+	
+		    return;
+		}
+	}
+#endif  
 
 	/* Create a C++ DataFactory and an SDO_DAS_DataFactory wrapper for it */
     dataFactoryPtr = DataFactory::getDataFactory();
-	INIT_ZVAL(xmldas->z_df);
-	sdo_das_df_new(&xmldas->z_df, dataFactoryPtr TSRMLS_CC);
 
+	sdo_das_df_new(&xmldas->z_df, dataFactoryPtr TSRMLS_CC);
     xmldas->xsdHelperPtr = HelperProvider::getXSDHelper((DataFactory *)dataFactoryPtr);
     xmldas->xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr);
-
-	if (ZEND_NUM_ARGS() == 1) {
-	    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name, &file_name_len) == FAILURE) {
-	        RETURN_FALSE;
-	    }
-	    if(!file_name_len) {
-	        RETURN_FALSE;
-	    }	
 	
-	    try {
-	        xmldas->xsdHelperPtr->defineFile(file_name);
-	
-	        int error_count = xmldas->xsdHelperPtr->getErrorCount();
-	        if (error_count > 0) {
-				ostringstream	 print_buf;
-
-				print_buf << "SDO_DAS_XML::create - Unable to parse the supplied xsd file\n";
-				print_buf << error_count << " parse error(s) occurred when parsing the file '" << file_name << "'"; 
-				if (error_count > MAX_ERRORS) {
-					print_buf << " (only the first " << MAX_ERRORS << " shown)";
-				} 
-				print_buf << ":\n";
-				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
-					print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix) << endl;
+	if (file_name_len) {
+		rc = sdo_das_xml_add_types (xmldas, file_name TSRMLS_CC);
+		if (rc == FAILURE) {
+			RETURN_FALSE;
+		}
+		
+	} else if (args) {
+		HashTable *arrht = Z_ARRVAL_P(args);
+		for (zend_hash_internal_pointer_reset(arrht);
+		     zend_hash_has_more_elements(arrht) == SUCCESS && rc == SUCCESS;
+		     zend_hash_move_forward(arrht)) {
+			zval **current;
+			if (zend_hash_get_current_data(arrht, (void **)&current) == FAILURE) {
+				continue;
+			}
+			/* duplicate the zval in case it needs converting */			
+			z_tmp = **current;
+			zval_copy_ctor(&z_tmp);
+			INIT_PZVAL(&z_tmp);
+			convert_to_string(&z_tmp);
+			file_name = Z_STRVAL(z_tmp);
+			file_name_len = Z_STRLEN(z_tmp);
+			if (file_name_len) {
+				rc = sdo_das_xml_add_types (xmldas, file_name TSRMLS_CC);
+				if (rc == FAILURE) {
+					RETURN_FALSE;
 				}
-				std::string print_string = print_buf.str();
-				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
-				exception_thrown = true;
-	        }            
-	    } catch (SDOFileNotFoundException e) {
-	        sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
-			exception_thrown = true;
-	    } catch (SDOXMLParserException e) {
-	        sdo_das_xml_throw_parserexception((char *)e.getMessageText() TSRMLS_CC);
-			exception_thrown = true;
-	    } catch (SDORuntimeException e) {
- 			// The exceptions caught here have been thrown across the 
-			// boundary between two shared libraries (sdo_das_xml.so and sdo.so)
-			// In some build environments this has been shown to not work. 
-			// The symptom is that the exception hierachy is ignored and the
-			// exception arrives here as a runtime exception.
-			// We have added this extra test of the stored classname
-			// just to be sure
-            sdo_temporary_exception_test ( e, file_name TSRMLS_CC);
-			exception_thrown = true;
-	    }
+			}
+			zval_dtor(&z_tmp);
+		}
 	}
-	if (exception_thrown) {
-		/** 
-		 * we set a flag and then do the return from here, because returning out of the catch block 
-		 * (i.e. doing RETURN_NULL() inside the catch block) would cause a crash in PHP or MSCVRT soon
-		 * after. Matthew saw this but not Caroline, and only with optimised build, so perhaps something
-		 * specific to particular level of compiler.  
-		 */
-		RETURN_NULL();
+	/* it's valid to call this method with no args, hence the dangling else */
+
+#ifdef CACHE_DATA_FACTORY
+	if (ZEND_NUM_ARGS() == 2) {
+			// store the data factory in the table
+			add_to_table(key, dataFactoryPtr);
 	}
-    
+#endif  
+	        
 }
 /* }}} end SDO_DAS_XML::create */
 
@@ -376,70 +566,23 @@ PHP_METHOD(SDO_DAS_XML, addTypes)
     xmldas_object *xmldas;
     char          *file_name;
     int 		   file_name_len;
-	bool			exception_thrown = false;
-
-	// TODO lots of code duplicated with create()
 	
     if (ZEND_NUM_ARGS() != 1) {
         WRONG_PARAM_COUNT;
     }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name, &file_name_len) == FAILURE) {
-        RETURN_FALSE;
-    }
-    if (!file_name_len) {
-    	RETURN_FALSE;
-    }
-    
-    xmldas = (xmldas_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	 if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, 
+	         "s", &file_name, &file_name_len) == FAILURE) {
+		 RETURN_FALSE;
+	 }
+	 if (!file_name_len) {
+		 RETURN_FALSE;
+	 }
+	 
+	 xmldas = (xmldas_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-    try {
-        xmldas->xsdHelperPtr->defineFile(file_name);
-
-        int error_count = xmldas->xsdHelperPtr->getErrorCount();
-        if (error_count > 0) { 
-			ostringstream	 print_buf;
-			
-			print_buf << "SDO_DAS_XML::addTypes - Unable to parse the supplied xsd file\n";
-			print_buf << error_count << " parse error(s) occurred when parsing the file '" << file_name << "'"; 
-			if (error_count > MAX_ERRORS) {
-				print_buf << " (only the first " << MAX_ERRORS << " shown)";
-			} 
-			print_buf << ":\n";
-			for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
-				print_buf << error_ix + 1 << ". " << xmldas->xsdHelperPtr->getErrorMessage(error_ix) << endl;
-			}
-			std::string print_string = print_buf.str();
-			sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
-	        RETURN_NULL();
-        }            
-    } catch (SDOFileNotFoundException e) {
-        sdo_das_xml_throw_fileexception(file_name TSRMLS_CC);
-		exception_thrown = true;
-    } catch (SDOXMLParserException e) {
-        sdo_das_xml_throw_parserexception((char *)e.getMessageText() TSRMLS_CC);
-		exception_thrown = true;
-    } catch (SDORuntimeException e) {
- 		// The exceptions caught here have been thrown across the 
-		// boundary between two shared libraries (sdo_das_xml.so and sdo.so)
-		// In some build environments this has been shown to not work. 
-		// The symptom is that the exception hierachy is ignored and the
-		// exception arrives here as a runtime exception.
-		// We have added this extra test of the stored classname
-		// just to be sure
-        sdo_temporary_exception_test ( e, file_name TSRMLS_CC);
-		exception_thrown = true;
-    }
-	if (exception_thrown) {
-		/** 
-		 * we set a flag and then do the return from here, because returning out of the catch block 
-		 * (i.e. doing RETURN_NULL() inside the catch block) would cause a crash in PHP or MSCVRT soon
-		 * after. Matthew saw this but not Caroline, and only with optimised build, so perhaps something
-		 * specific to particular level of compiler.  
-		 */
-		RETURN_NULL();
-	}
-
-}
+	 sdo_das_xml_add_types(xmldas, file_name TSRMLS_CC);
+	 	 
+ }
 /* }}} */
 
 /* {{{ proto SDO_XMLDocument SDO_DAS_XML::loadFile(string xml_file)
@@ -460,7 +603,8 @@ PHP_METHOD(SDO_DAS_XML, loadFile)
     if (ZEND_NUM_ARGS() != 1) {
         WRONG_PARAM_COUNT;
     }
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file_name, &file_name_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, 
+            "s", &file_name, &file_name_len) == FAILURE) {
         RETURN_FALSE;
     }
         
@@ -490,14 +634,18 @@ PHP_METHOD(SDO_DAS_XML, loadFile)
 				(!xmldocument->xmlDocumentPtr->getRootDataObject())) {
 				ostringstream	 print_buf;
 
-				print_buf << "SDO_DAS_XML::loadFile - Unable to parse the supplied xml file\n";
-				print_buf << error_count << " parse error(s) occurred when parsing the file '" << file_name << "'"; 
+				print_buf << "SDO_DAS_XML::loadFile - Unable to parse the supplied xml file\n" <<
+				    error_count << 
+				    " parse error(s) occurred when parsing the file '" << 
+				    file_name << "'"; 
 				if (error_count > MAX_ERRORS) {
 					print_buf << " (only the first " << MAX_ERRORS << " shown)";
 				} 
 				print_buf << ":\n";
-				for (int error_ix = 0; error_ix < min(error_count, MAX_ERRORS); error_ix++) {
-					print_buf << error_ix + 1 << ". " << xmldas->xmlHelperPtr->getErrorMessage(error_ix) << endl;
+				for (int error_ix = 0; 
+				        error_ix < min(error_count, MAX_ERRORS); error_ix++) {
+					print_buf << error_ix + 1 << ". " << 
+					    xmldas->xmlHelperPtr->getErrorMessage(error_ix) << endl;
 				}
 				std::string print_string = print_buf.str();
 				sdo_das_xml_throw_parserexception((char *)print_string.c_str() TSRMLS_CC);
@@ -553,7 +701,8 @@ PHP_METHOD(SDO_DAS_XML, loadString)
         WRONG_PARAM_COUNT;
     }
 	
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &xml_string, &xml_string_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, 
+            "s", &xml_string, &xml_string_len) == FAILURE) {
         RETURN_FALSE;
     }
 	
@@ -765,11 +914,13 @@ PHP_METHOD(SDO_DAS_XML, createDocument)
 				&namespace_uri, &namespace_uri_len, &element_name, &element_name_len) == FAILURE) {
 				RETURN_FALSE;
 			}
-			xmldocument->xmlDocumentPtr = xmldas->xmlHelperPtr->createDocument(element_name, namespace_uri);
+			xmldocument->xmlDocumentPtr = 
+			    xmldas->xmlHelperPtr->createDocument(element_name, namespace_uri);
 			break;
 
 		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &element_name, &element_name_len) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, 
+			        "s", &element_name, &element_name_len) == FAILURE) {
 				RETURN_FALSE;
 			}
 			xmldocument->xmlDocumentPtr = xmldas->xmlHelperPtr->createDocument(element_name);

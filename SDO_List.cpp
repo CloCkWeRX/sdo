@@ -50,6 +50,7 @@ enum sdo_list_type {
 typedef struct {
 	zend_object		 zo;			/* the standard zend_object */
 	sdo_list_type	 list_type;		/* discriminator for the list type */
+	DataObjectPtr    dop;           /* the containing DataObject */
 	union {
 		void						*listp;
 		DataObjectList				*dolp;
@@ -81,11 +82,20 @@ static sdo_list_object *sdo_list_get_instance(zval *me TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ sdo_list_free_storage
+/* {{{ debug macro functions
+ */
+SDO_DEBUG_ADDREF(list)
+SDO_DEBUG_DELREF(list)
+SDO_DEBUG_DESTROY(list)
+/* }}} */
+
+/* {{{ sdo_list_object_free_storage
  */
 static void sdo_list_object_free_storage(void *object TSRMLS_DC)
 {
 	sdo_list_object *my_object;
+
+	SDO_DEBUG_FREE(object);
 
 	my_object = (sdo_list_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
@@ -97,6 +107,8 @@ static void sdo_list_object_free_storage(void *object TSRMLS_DC)
 	}
 
 	my_object->listp = NULL;
+	if (my_object->dop)
+		my_object->dop = NULL;
 	efree(object);
 }
 /* }}} */
@@ -117,8 +129,9 @@ static zend_object_value sdo_list_object_create(zend_class_entry *ce TSRMLS_DC)
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
 		(void *)&tmp, sizeof(zval *));
-	retval.handle = zend_objects_store_put(my_object, NULL, sdo_list_object_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(my_object, SDO_FUNC_DESTROY(list), sdo_list_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &sdo_list_object_handlers;
+	SDO_DEBUG_ALLOCATE(retval.handle, my_object);
 
 	return retval;
 }
@@ -147,13 +160,20 @@ static sdo_list_object *sdo_list_new(zval *me, zend_class_entry *ce TSRMLS_DC)
 
 /* {{{ sdo_dataobjectlist_new
  */
-void sdo_dataobjectlist_new(zval *me, const Type& type, DataObjectList *dolp TSRMLS_DC)
+void sdo_dataobjectlist_new(zval *me, const Type& type, DataObjectPtr dop, DataObjectList *dolp TSRMLS_DC)
 {
 	sdo_list_object *my_object;
 
 	my_object = sdo_list_new(me, sdo_dataobjectlist_class_entry TSRMLS_CC);
 
 	my_object->list_type = TYPE_DataObjectList;
+	/* 
+	 * We copy the DataObjectPtr to the php SDO_List object because the DataObjectList 
+	 * itself is not reference-counted. So if the containing DataObject is cleared, 
+	 * the list data becomes invalid. Saving the reference-counted pointer here
+	 * protects it while the list is in use.
+	 */
+	my_object->dop = dop;
 	my_object->dolp = dolp;
 }
 /* }}} */
@@ -361,6 +381,7 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 	zval temp_zval;
 	char *class_name, *space;
 
+	ZVAL_NULL(&temp_zval);
 	DataObjectList& dol = *my_object->dolp;
 
 	try {
@@ -542,10 +563,10 @@ static void sdo_dataobjectlist_write_value(sdo_list_object *my_object, long inde
 			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s'",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, type.getName());
 			}
-	    zval_dtor(&temp_zval);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
+	zval_dtor(&temp_zval);
 }
 /* }}} */
 
@@ -1273,6 +1294,8 @@ void sdo_list_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	zend_class_implements(sdo_list_class_entry TSRMLS_CC, 1, zend_ce_traversable);
 
 	memcpy(&sdo_list_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sdo_list_object_handlers.add_ref = SDO_FUNC_ADDREF(list);
+	sdo_list_object_handlers.del_ref = SDO_FUNC_DELREF(list);
 	sdo_list_object_handlers.clone_obj = NULL;
 	sdo_list_object_handlers.read_dimension = sdo_list_read_dimension;
 	sdo_list_object_handlers.write_dimension = sdo_list_write_dimension;

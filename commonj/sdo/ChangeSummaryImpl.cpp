@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 509659 $ $Date$ */
 
 #include "commonj/sdo/ChangeSummaryImpl.h"
 
@@ -1551,7 +1551,7 @@ namespace sdo{
         if (theSequence) delete theSequence;
         if (theOldXpath != 0) 
         {
-            delete theOldXpath;
+            delete[] theOldXpath;
         }
     }
 

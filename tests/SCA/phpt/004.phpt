@@ -4,8 +4,10 @@ Call a remote component
 <?php
 
 require "SCA/SCA.php";
+require "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
 $component_file = str_replace('004.php', 'Component.php', __FILE__);
-$wsdl = SCA::generateWSDL($component_file);
+$service_description = SCA::constructServiceDescription($component_file);
+$wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
 echo substr($wsdl,0,strpos($wsdl,'location'));
 
 ?>

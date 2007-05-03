@@ -5,7 +5,8 @@ require_once "PHPUnit/Framework/TestSuite.php";
 
 require_once 'SCA/SCA_AnnotationRules.php';
 require_once 'SCA/SCA.php';
-
+require_once 'SCA/Bindings/soap/ServiceDescriptionGenerator.php';
+require_once 'SCA/Bindings/soap/Proxy.php';
 
 class SCA_SoapProxyTest extends PHPUnit_Framework_TestCase {
 
@@ -18,7 +19,7 @@ include_once "SCA/SCA.php";
 
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  * @types PersonNamespace person.xsd
  */
 class SoapProxyTest
@@ -28,8 +29,9 @@ class SoapProxyTest
 ?>
 PHP;
         file_put_contents(dirname(__FILE__) . '/SoapProxyTest.php',$php);
+        $service_description = SCA::constructServiceDescription(dirname(__FILE__) . '/SoapProxyTest.php');
 
-        $wsdl = SCA::generateWSDL(dirname(__FILE__) . '/SoapProxyTest.php');
+        $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
         file_put_contents(dirname(__FILE__) . '/SoapProxyTest.wsdl',$wsdl);
 
         $xsd = <<<EOF

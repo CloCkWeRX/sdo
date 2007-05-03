@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 511929 $ $Date$ */
 
 #include "commonj/sdo/ChangedDataObjectListImpl.h"
 
@@ -201,7 +201,7 @@ namespace sdo {
 
     void ChangedDataObjectListImpl::append (DataObject *d, ChangedDataObjectList::ChangeType type)
     {
-        plist.insert(plist.end(),CDOListElement((DataObject*)d, type));
+        plist.push_back(CDOListElement((DataObject*)d, type));
     }
 
    /**  clear()

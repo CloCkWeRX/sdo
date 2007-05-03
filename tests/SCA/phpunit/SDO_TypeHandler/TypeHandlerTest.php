@@ -2,7 +2,9 @@
 
 require_once "PHPUnit/Framework/TestCase.php";
 require_once "PHPUnit/Framework/TestSuite.php";
-require_once 'SCA/SCA.php';
+
+require_once 'SCA/Bindings/soap/ServiceDescriptionGenerator.php';
+require_once 'SCA/Bindings/soap/SDO_TypeHandler.php';
 
 class SDO_TypeHandlerTest extends PHPUnit_Framework_TestCase
 {
@@ -28,7 +30,7 @@ EOF;
 <?php
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class TypeHandlerTest1 {
     /**
@@ -42,16 +44,17 @@ class TypeHandlerTest1 {
 }
 ?>
 EOF;
-        $class_file = SCA_Helper::getTempDir().'/TypeHandlerTest1.php';
+        $class_file = './TypeHandlerTest1.php';
         file_put_contents($class_file, $php);
-        $wsdl = SCA::generateWSDL($class_file);
+        $service_description = SCA::constructServiceDescription($class_file);
+        $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
         file_put_contents('TypeHandlerTest1.wsdl', $wsdl);
 
         $php = <<<EOF
 <?php
 /**
  * @service
- * @binding.ws
+ * @binding.soap
  * @types PersonNamespace person.xsd
  */
 class TypeHandlerTest2 {
@@ -63,24 +66,25 @@ class TypeHandlerTest2 {
 }
 ?>
 EOF;
-        $class_file = SCA_Helper::getTempDir().'/TypeHandlerTest2.php';
+        $class_file = './TypeHandlerTest2.php';
         file_put_contents($class_file, $php);
-        $wsdl = SCA::generateWSDL($class_file);
+        $service_description = SCA::constructServiceDescription($class_file);
+        $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);
         file_put_contents('TypeHandlerTest2.wsdl', $wsdl);
 }
 
 public function tearDown()
 {
-    unlink(SCA_Helper::getTempDir().'/TypeHandlerTest1.php');
+    unlink('./TypeHandlerTest1.php');
     unlink('TypeHandlerTest1.wsdl');
-    unlink(SCA_Helper::getTempDir().'/TypeHandlerTest2.php');
+    unlink('./TypeHandlerTest2.php');
     unlink('TypeHandlerTest2.wsdl');
     unlink('person.xsd');
 }
 
 public function testToXmlGeneratesGoodXmlFromSdoWithScalars()
 {
-    $th = new SDO_TypeHandler('SoapClient');
+    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapClient');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $request = $th->createDataObject('http://TypeHandlerTest1','fourargs');
     $request->a = 'hello';
@@ -101,7 +105,7 @@ public function testToXmlGeneratesGoodXmlFromSdoWithScalars()
 
 public function testToXmlGeneratesGoodXmlFromSdoWithSdos()
 {
-    $th = new SDO_TypeHandler('SoapClient');
+    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapClient');
     $th->setWSDLTypes('TypeHandlerTest2.wsdl');
     $request = $th->createDataObject('http://TypeHandlerTest2','myMethod');
     $person = $request->createDataObject('p1');
@@ -123,7 +127,7 @@ public function testToXmlGeneratesGoodXmlFromSdoWithSdos()
 
 public function testToXmlHandlesNullsInSdo()
 {
-    $th = new SDO_TypeHandler('SoapClient');
+    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapClient');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $request = $th->createDataObject('http://TypeHandlerTest1','fourargs');
     $request->a = null;
@@ -155,7 +159,7 @@ public function testFromXmlGeneratesGoodSdoFromXml()
 
 XML;
 
-    $th = new SDO_TypeHandler('SoapServer');
+    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapServer');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $sdo = $th->fromXML($xml);
     $this->assertEquals('fourargs',$sdo->getTypename());
@@ -179,7 +183,7 @@ public function testToXmlHandlesNullInXml()
 
 XML;
 
-    $th = new SDO_TypeHandler('SoapServer');
+    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapServer');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $sdo = $th->fromXML($xml);
     $this->assertEquals('fourargs',$sdo->getTypename());

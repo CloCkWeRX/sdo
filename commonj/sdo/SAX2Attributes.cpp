@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 511929 $ $Date$ */
 
 #include "commonj/sdo/SAX2Attributes.h"
 
@@ -36,7 +36,8 @@ namespace commonj
         {
             for (int i=0; i < nb_attributes*5; i+=5)
             {
-                attributes.insert(attributes.end(), SAX2Attribute(&attrs[i]));
+               // attributes.insert(attributes.end(), SAX2Attribute(&attrs[i]));
+               attributes.push_back(SAX2Attribute(&attrs[i]));
             }
         }
         
@@ -84,8 +85,8 @@ namespace commonj
                         return;
                     }
                 }
-            }           
-            attributes.insert(attributes.end(), attr);
+            }
+            attributes.push_back(attr);
         }
 
 

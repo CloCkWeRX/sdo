@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 524004 $ $Date$ */
 
 #ifndef _XSDHELPER_H_
 #define _XSDHELPER_H_
@@ -139,6 +139,11 @@ namespace commonj
 
             SDO_API virtual void defineTypes(TypeDefinitions& types) = 0;
 
+            /**
+             *
+             * returns the types parsed from the schemas
+             */
+            SDO_API virtual TypeDefinitions& getDefinedTypes() = 0;
 
         };
     }//End - namespace sdo

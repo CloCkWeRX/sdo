@@ -21,49 +21,159 @@
 $Id$
 -->
 <html>
-<title>Service Component Architecture Samples</title>
+<title>Service Component Architecture Examples</title>
 <body>
 
-<h2>Service Component Architecture Samples</h2>
+<h2>Service Component Architecture Examples</h2>
 
-<h3>Setting up the samples</h3>
+<h3>Setup</h3>
+<table>
+<tr>
+<td>Check that you have the SDO extension loaded - <a href="phpinfo.php">PHP Info</a></td>
+</tr>
+<tr>
+<td>
+<br/>
+Extract the examples into the root of your Web server eg. C:\Program Files\Apache Group\Apache2\htdocs.  All the examples are contained in the examples directory, e.g. C:\Program Files\Apache Group\Apache2\htdocs\examples. 
+A number of samples are provided, which illustrate different aspects of the Service Component Architecture.  For example, how to call SCA components from a PHP script or another SCA Component, how to expose SCA components as Web services, how to consume them as a Web service, and so on.
+</td>
+</tr>
+</table>
 
-<p>Extract the samples into the root of your Web server eg. C:\Program Files\Apache Group\Apache2\htdocs.  All the samples are contained in the Samples directory, e.g. C:\Program Files\Apache Group\Apache2\htdocs\Samples. </p>
-<p>Five samples are provided, which illustrate different aspects of the Service Component Architecture.  For example, how to call SCA components from a PHP script or another SCA Component, how to expose SCA components as Web services, how to consume them as a Web service, and so on.</p>
-<p>All the samples are based around a simple "Hello" service.  The hello services takes a string name and responds with the text "Hello &lt;name&gt;".</p>
+<h3>Local Binding - A script making a local call to an SCA Component</h3>
+<table>
+<tr>
+<td><a href="./Local/ScriptCallingLocalSCAComponent/HelloClient.php">ScriptCallingLocalSCAComponent</a></td>
+</tr>
+<tr>
+<td>
+HelloClient.php - PHP script: This script gets a proxy to the local SCA component (HelloService.php), and calls its sayHello() method, passing in the name 'Bertie'.<br/>
+HelloService.php - local SCA component: This component implements one method, sayHello($name), which takes in a name and returns the string "Hello $name".
+</td>
+</tr>
+</table>
 
-<h4>1. A script making a local call to an SCA Component</h4>
-<p>HelloClient.php - PHP script: This script gets a proxy to the local SCA component (HelloService.php), and calls its sayHello() method, passing in the name 'Bertie'.</p>
-<p>HelloService.php - local SCA component: This component implements one method, sayHello($name), which takes in a name and returns the string "Hello $name".</p>
-<p>Run the sample: <a href="./ScriptCallingLocalSCAComponent/HelloClient.php">ScriptCallingLocalSCAComponent</a></p>
+<h3>Local Binding - An SCA Component making a local call to another SCA Component</h3>
+<table>
+<tr>
+<td><a href="./Local/SCAComponentCallingLocalSCAComponent/HelloClient.php">SCAComponentCallingLocalSCAComponent</a></td>
+</tr>
+<tr>
+<td>
+HelloClient.php - PHP script: This script gets a proxy to a local SCA Component (SurnameService.php), and calls its sayHello() method, passing in the name 'Bertie'.<br/>
+SurnameService.php - local SCA component: This component implements one method sayHello($name) which takes in a name, adds the surname 'Beetle', and calls the sayHello() method on the local SCA component HelloService.php, passing in the new name.<br/>
+HelloService.php - local SCA component: This component implements one method sayHello($name) which takes in a name and returns the string 'Hello $name'.
+</td>
+</tr>
+</table>
 
-<h4>2. A script making a remote (Web service) call to an SCA Component</h4>
-<p>HelloClient.php - PHP script: This script calls a remote SCA Component (HelloService.php) to cause it to generate its WSDL definition. It then gets a proxy to the remote SCA Component and calls its sayHello() method, passing in the name 'Freddie'.</p>
-<p>Note: The default location used for calling the service is http://localhost/Samples/ScriptCallingRemoteSCAComponent/*.php. Please edit this location in HelloClient.php to point to the correct location in your environment if necessary, for example to add a port number.</p>
-<p>HelloService.php - remote SCA component: This component implements one method, sayHello($name), which takes in a name and returns the string 'Hello $name'.  It makes itself available as a Web service using the @binding.ws annotation.</p>
-<p>Run the sample: <a href="./ScriptCallingRemoteSCAComponent/HelloClient.php">ScriptCallingRemoteSCAComponent</a></p>
+<h3>Soap Binding -  A script making a remote (Web service) call to an SCA Component</h3>
+<table>
+<tr>
+<td><a href="./Soap/ScriptCallingRemoteSCAComponent/HelloClient.php">ScriptCallingRemoteSCAComponent</a></td>
+</tr>
+<tr>
+<td>
+HelloClient.php - PHP script: This script calls a remote SCA Component (HelloService.php) to cause it to generate its WSDL definition. It then gets a proxy to the remote SCA Component and calls its sayHello() method, passing in the name 'Freddie'.<br/>
+Note: The default location used for calling the service is http://localhost/examples/SCA/Soap/ScriptCallingRemoteSCAComponent/*.php. Please edit this location in HelloClient.php to point to the correct location in your environment if necessary, for example to add a port number.<br/>
+HelloService.php - remote SCA component: This component implements one method, sayHello($name), which takes in a name and returns the string 'Hello $name'.  It makes itself available as a Web service using the @binding.soap annotation.
+</td>
+</tr>
+</table>
 
-<h4>3. An SCA Component making a local call to another SCA Component</h4>
-<p>HelloClient.php - PHP script: This script gets a proxy to a local SCA Component (SurnameService.php), and calls its sayHello() method, passing in the name 'Bertie'.</p>
-<p>SurnameService.php - local SCA component: This component implements one method sayHello($name) which takes in a name, adds the surname 'Beetle', and calls the sayHello() method on the local SCA component HelloService.php, passing in the new name.</p>
-<p>HelloService.php - local SCA component: This component implements one method sayHello($name) which takes in a name and returns the string 'Hello $name'.</p>
-<p>Run the sample: <a href="./SCAComponentCallingLocalSCAComponent/HelloClient.php">SCAComponentCallingLocalSCAComponent</a></p>
+<h3>Soap Binding -  An SCA Component making a remote (Web service) call to another SCA Component</h3>
+<table>
+<tr>
+<td><a href="./Soap/SCAComponentCallingRemoteSCAComponent/HelloClient.php">SCAComponentCallingRemoteSCAComponent</a></td>
+</tr>
+<tr>
+<td>
+HelloClient.php - PHP script: This script gets a proxy to a local SCA Component (SurnameService.php), and calls its sayHello() method, passing in the name 'Freddie'.<br/>
+Note: The default location used for calling the service is http://localhost/examples/SCA/Soap/SCAComponentCallingRemoteSCAComponent/*.php. Please edit this location in HelloClient.php to point to the correct location in your environment if necessary, for example to add a port number.<br/>
+SurnameService.php - local SCA component: This component implements one method sayHello($name) which takes in a name, adds the surname 'Fish', and calls the sayHello() method on the remote SCA component HelloService.php, passing in the new name.<br/>
+HelloService.php - remote SCA component: This component implements one method sayHello($name) which takes in a name and returns the string 'Hello $name'.
+</td>
+</tr>
+</table>
 
-<h4>4. An SCA Component making a remote (Web service) call to another SCA Component</h4>
-<p>HelloClient.php - PHP script: This script gets a proxy to a local SCA Component (SurnameService.php), and calls its sayHello() method, passing in the name 'Freddie'.</p>
-<p>Note: The default location used for calling the service is http://localhost/Samples/SCAComponentCallingRemoteSCAComponent/*.php. Please edit this location in HelloClient.php to point to the correct location in your environment if necessary, for example to add a port number.</p>
-<p>SurnameService.php - local SCA component: This component implements one method sayHello($name) which takes in a name, adds the surname 'Fish', and calls the sayHello() method on the remote SCA component HelloService.php, passing in the new name.</p>
-<p>HelloService.php - remote SCA component: This component implements one method sayHello($name) which takes in a name and returns the string 'Hello $name'.</p>
-<p>Run the sample: <a href="./SCAComponentCallingRemoteSCAComponent/HelloClient.php">SCAComponentCallingRemoteSCAComponent</a></p>
+<h3>Soap Binding - A simple script making a remote (Web service) call to an SCA Component using data structures</h3>
+<table>
+<tr>
+<td><a href="./Soap/SCAComponentUsingDataStructures/HelloClient.php">SCAComponentUsingDataStructures</a></td>
+</tr>
+<tr>
+<td>
+HelloClient.php - PHP script: This script gets a proxy to the local SCA Component (SurnameService.php), and calls its sayHello() method, passing in a list of names.<br/>
+Note: The default location used for calling the service is http://localhost/examples/SCA/Soap/SCAComponentUsingDataStructures/*.php. Please edit this location in HelloClient.php to point to the correct location in your environment if necessary, for example to add a port number.<br/>
+BatchService.php - remote SCA component: This component implement one method sayHello($names) which takes in a Service Data Object containing a number of names, and returns a new Service Data Object of the same format containing the string 'Hello $name' for each name.<br/>
+names.xsd - data structure schema: This file is a simple XML Schema containing one complex type, called 'people'. This contains a many-valued element called 'name' for holding the names of people.
+</td>
+</tr>
+</table>
 
-<h4>5. A simple script making a remote (Web service) call to an SCA Component using data structures</h4>
-<p>HelloClient.php - PHP script: This script gets a proxy to the local SCA Component (SurnameService.php), and calls its sayHello() method, passing in a list of names.</p>
-<p>Note: The default location used for calling the service is http://localhost/Samples/SCAComponentUsingDataStructures/*.php. Please edit this location in HelloClient.php to point to the correct location in your environment if necessary, for example to add a port number.</p>
-<p>BatchService.php - remote SCA component: This component implement one method sayHello($names) which takes in a Service Data Object containing a number of names, and returns a new Service Data Object of the same format containing the string 'Hello $name' for each name.</p>
-<p>names.xsd - data structure schema: This file is a simple XML Schema containing one complex type, called 'people'. This contains a many-valued element called 'name' for holding the names of people.</p>
-<p>Run the sample: <a href="./SCAComponentUsingDataStructures/HelloClient.php">SCAComponentUsingDataStructures</a></p>
+<h3>First Steps With Soap, RestRpc and JsonRpc - HelloWorld</h3>
+<table>
+<tr>
+<td><a href="./helloworldphp/helloworld.html">helloworld with PHP scripts</a></td>
+<td>Using only PHP scripts</td>
+</tr>
+<tr>
+<td><a href="./helloworldscalocalservice/helloworld.html">helloworld with local SCA service binding</a></td>
+<td>An SCA Service accessed from a PHP script locally </td>
+</tr>
+<tr>
+<td><a href="./helloworldscalocalreference/helloworld.html">helloworld with local SCA service and reference binding</a></td>
+<td>An SCA service access from another SCA service locally</td>
+</tr>
+<tr>
+<td><a href="./helloworldscawsservice/Greeting.php?wsdl">Greeting Service WSDL Generation</a></td>
+<td>Generating WSDL</td>
+</tr>
+<tr>
+<td><a href="./helloworldscawsservice/Reversing.php?wsdl">Reversing Service WSDL Generation</a></td>
+<td>Generating WSDL</td>
+</tr>
+<tr>
+<td><a href="./helloworldscawsservice/helloworld.html">helloworld with ws SCA service and binding</a></td>
+<td>Local binding replaced with a web services (SOAP) binding</td>
+</tr>
+<tr>
+<td><a href="./helloworldscawsreference/helloworld.html">helloworld with ws SCA service and reference binding </a></td>
+<td>Local binding replaced with a web services (SOAP) binding</td>
+</tr>
+<tr>
+<td><a href="./helloworldscajsonrpc/helloworldrest.html">helloworld with REST RPC SCA service binding and SDO message</a></td>
+<td>Complex types and REST binding</td>
+</tr>
+<tr>
+<td><a href="./helloworldscajsonrpc/HelloWorld.php?smd">HelloWorld Service SMD Generation</a></td>
+<td>Generating a JSON-RPC Service Method Description</td>
+</tr>
+</table>
 
-
+<h3>Incremental Adoption - SCA Email</h3>
+<table>
+<tr>
+<td><a href="./emailsimple/EmailService.php?wsdl">Generating EmailService WSDL</a></td>
+<td>Automatic WSDL generation</td>
+</tr>
+<tr>
+<td><a href="./emailsimple/email_form.html">Email with ws SCA service binding </a></td>
+<td>PHP script locally accessing SCA Service</td>
+</tr>
+<tr>
+<td><a href="./emailsimpleref/email_form.html">Email with ws SCA service and reference binding</a></td>
+<td>An SCA service accessing another SCA service</td>
+</tr>
+<tr>
+<td><a href="./emailcontact/ContactService.php?smd">Generate ContactService SMD</a></td>
+<td>Automatic SMD Generation</td>
+</tr>
+<tr>
+<td><a href="./emailcontact/email_form.html">Email with SDOs</a></td>
+<td>Complex types. Note this sample is written to work with DB2. Create a datable called email and apply contacts.sql before running</td>
+</tr>
+</table>
 
 </body>
 </html>

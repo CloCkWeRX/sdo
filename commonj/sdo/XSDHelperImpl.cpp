@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 492974 $ $Date$ */
+/* $Rev: 524004 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLFileWriter.h"   // Include first to avoid libxml compile problems!
 #include "commonj/sdo/SDOXMLStreamWriter.h" // Include first to avoid libxml compile problems!
@@ -147,35 +147,36 @@ namespace commonj
                 const char* typeUri = prop.substituteUri.isNull() ? 
                             prop.typeUri : prop.substituteUri; 
                 const Type& rootType = dataFactory->getType(typeUri, entryName);
-                PropertyList pl = rootType.getProperties();
-                for (unsigned int j = 0; j < pl.size(); j++)
+                const std::list<PropertyImpl*>& pl = rootType.getPropertyListReference();
+
+                for (std::list<PropertyImpl*>::const_iterator j = pl.begin();
+                     j != pl.end();
+                     j++)
                 {
-                    if (!pl[j].getType().isDataType()
-                        && strcmp(pl[j].getType().getURI(),Type::SDOTypeNamespaceURI.c_str()))
+                    if (!(*j)->getType().isDataType()
+                        && strcmp((*j)->getType().getURI(),Type::SDOTypeNamespaceURI.c_str()))
                     {
                         // recurse the tree..
-                        newSubstitute(pl[j].getType().getName(),
-                                    prop);
+                       newSubstitute((*j)->getType().getName(), prop);
 
-                        if (!strcmp(pl[j].getName(),prop.substituteName))
+                       if (!strcmp((*j)->getName(), prop.substituteName))
                         {
                             dataFactory->setPropertySubstitute(rootType.getURI(),
                                                            rootType.getName(),
-                                                        pl[j].getName(), 
+                                                        (*j)->getName(), 
                                                         prop.name,
                                                         typeUri,
                                                         prop.typeName);
                             XSDPropertyInfo* pi = (XSDPropertyInfo*)
-                            ((DASProperty*)&pl[j])->getDASValue("XMLDAS::PropertyInfo");
+                            ((DASProperty*) (*j))->getDASValue("XMLDAS::PropertyInfo");
+
                             if (pi)
                             {
                                 PropertyDefinitionImpl& propdef = (PropertyDefinitionImpl&)pi->getPropertyDefinition();
                                 propdef.substituteNames.push_back(prop.name);
                                 propdef.substituteLocalNames.push_back(prop.localname);
                             }
-
                         }
-                        
                     }
                 }
             }
@@ -194,11 +195,16 @@ namespace commonj
                 DataFactoryImpl* df = (DataFactoryImpl*)(DataFactory*)dataFactory;
                 const Type* rootType = df->findType(typeUri,"RootType");
                 if (rootType == 0) return;
-                PropertyList pl = rootType->getProperties();
-                for (unsigned int j = 0; j < pl.size(); j++)
+
+                const std::list<PropertyImpl*>& pl = rootType->getPropertyListReference();
+
+                for (std::list<PropertyImpl*>::const_iterator j = pl.begin();
+                     j != pl.end();
+                     j++)
                 {
-                    XSDPropertyInfo* pi = (XSDPropertyInfo*)
-                    ((DASProperty*)&pl[j])->getDASValue("XMLDAS::PropertyInfo");
+                   XSDPropertyInfo* pi = (XSDPropertyInfo*)
+                      ((DASProperty*) (*j))->getDASValue("XMLDAS::PropertyInfo");
+
                     if (pi)
                     {
                         PropertyDefinitionImpl& propdef = (PropertyDefinitionImpl&)pi->getPropertyDefinition();
@@ -209,8 +215,8 @@ namespace commonj
 
                             dataFactory->setPropertySubstitute(typeUri,ty.name,
                                        prop.name, propdef.name,
-                                       pl[j].getType().getURI(),
-                                       pl[j].getType().getName());
+                                       (*j)->getType().getURI(),
+                                       (*j)->getType().getName());
                             prop.substituteNames.push_back(propdef.name);
                             prop.substituteLocalNames.push_back(propdef.localname);
                         }
@@ -245,11 +251,8 @@ namespace commonj
         {
             DataFactoryImpl* df = (DataFactoryImpl*)(DataFactory*)dataFactory;
             
-            XMLDAS_TypeDefs types = typedefs.types;
             XMLDAS_TypeDefs::iterator iter;
-
-
-            for (iter=types.begin(); iter != types.end(); iter++)
+            for (iter=typedefs.types.begin(); iter != typedefs.types.end(); iter++)
             {
                 TypeDefinitionImpl& ty = iter->second;
                 try
@@ -318,7 +321,7 @@ namespace commonj
                     SDO_RETHROW_EXCEPTION("defineTypes", e);
                 }
             }
-            for (iter=types.begin(); iter != types.end(); iter++)
+            for (iter=typedefs.types.begin(); iter != typedefs.types.end(); iter++)
             {
                 TypeDefinitionImpl& ty = iter->second;
                 if (!ty.parentTypeName.isNull())
@@ -374,11 +377,11 @@ namespace commonj
 
                         
                         XMLDAS_TypeDefs::iterator refTypeIter = 
-                            types.find(TypeDefinitionsImpl::getTypeQName(prop.typeUri, "RootType"));
-                        if(refTypeIter != types.end())
+                            typedefs.types.find(TypeDefinitionsImpl::getTypeQName(prop.typeUri, "RootType"));
+                        if(refTypeIter != typedefs.types.end())
                         {
 
-                            TypeDefinitionImpl rootTy = refTypeIter->second;
+                            TypeDefinitionImpl& rootTy = refTypeIter->second;
                             
                             // find the property on the root type
                             XmlDasPropertyDefs::iterator refPropsIter;
@@ -397,32 +400,33 @@ namespace commonj
                         {
 
                                 // Check if this type is already defined to the data factory
-                            try
-                            {
-                                const Type& rootType = dataFactory->getType(prop.typeUri, "RootType");
-                                PropertyList pl = rootType.getProperties();
+                           try
+                           {
+                              const Type& rootType = dataFactory->getType(prop.typeUri, "RootType");
 
-                                for (unsigned int j = 0; j < pl.size(); j++)
-                                {
+                              const std::list<PropertyImpl*> pl = rootType.getPropertyListReference();
+
+                              for (std::list<PropertyImpl*>::const_iterator j = pl.begin();
+                                   j != pl.end();
+                                   j++)
+                              {
                                     
-                                    XSDPropertyInfo* pi = (XSDPropertyInfo*)
-                                        ((DASProperty*)&pl[j])->getDASValue("XMLDAS::PropertyInfo");
+                                 XSDPropertyInfo* pi = (XSDPropertyInfo*)
+                                    ((DASProperty*) (*j))->getDASValue("XMLDAS::PropertyInfo");
                                     
-
-
-                                    if (prop.typeName.equals(pl[j].getName())
-                                        || (pi && prop.typeName.equals(pi->getPropertyDefinition().localname)))
-                                    {
-                                        prop.typeUri = pl[j].getType().getURI();
-                                        prop.typeName = pl[j].getType().getName();
-                                        refFound = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            catch (const SDORuntimeException&)
-                            {
-                            }
+                                 if (prop.typeName.equals((*j)->getName())
+                                     || (pi && prop.typeName.equals(pi->getPropertyDefinition().localname)))
+                                 {
+                                    prop.typeUri = (*j)->getType().getURI();
+                                    prop.typeName = (*j)->getType().getName();
+                                    refFound = true;
+                                    break;
+                                 }
+                              }
+                           }
+                           catch (const SDORuntimeException&)
+                           {
+                           }
                         }
                         // If we haven't been able to resolve this reference we should ignore it
                         if (!refFound)
@@ -438,8 +442,8 @@ namespace commonj
                         continue;
                     }
                     XMLDAS_TypeDefs::iterator propTypeIter = 
-                        types.find(TypeDefinitionsImpl::getTypeQName(prop.typeUri, prop.typeName));
-                    if(propTypeIter != types.end())
+                        typedefs.types.find(TypeDefinitionsImpl::getTypeQName(prop.typeUri, prop.typeName));
+                    if(propTypeIter != typedefs.types.end())
                     {
                         prop.typeName = propTypeIter->second.name;
                     }
@@ -496,7 +500,11 @@ namespace commonj
                         }
                         else
                         {
-                            addSubstitutes(prop,ty);
+                            // subtitutes can only reference global types
+                            if (ty.name.equals("RootType"))
+                            {
+                                addSubstitutes(prop,ty);
+                            }
                         }
                         
                         // Do not add DASValue to ChangeSummary
@@ -517,6 +525,11 @@ namespace commonj
                 }
                 
             }
+
+            // The addition of the new types was succesful so adding these
+            // types to the defined types should succeed (no duplicates)
+            definedTypes.getTypeDefinitions().addTypeDefinitions(typedefs);
+
         } // End - defineTypes
         
         /**  getDataFactory returns the factory
@@ -648,7 +661,7 @@ namespace commonj
             {
                 if (*parseErrors.begin() != 0)
                 {
-                    delete (char*)(*parseErrors.begin());
+                    delete[] (char*)(*parseErrors.begin());
                 }
                 parseErrors.erase(parseErrors.begin());
             }

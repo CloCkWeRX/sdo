@@ -14,18 +14,106 @@ if (PHP_SDO != "no") {
         
         /* first build the sdo core extension ... */
         EXTENSION('sdo', 
-            'sdo.cpp SDO_DAS_ChangeSummary.cpp  SDO_DAS_DataFactory.cpp  SDO_DAS_Setting.cpp  SDO_DataObject.cpp  SDO_List.cpp  SDO_Model_Type.cpp SDO_Model_Property.cpp SDO_Model_ReflectionDataObject.cpp SDO_Sequence.cpp sdo_utils.cpp SDO_Exception.cpp SDO_CPPException.cpp',
+            'sdo.cpp ' +
+            'SDO_DAS_ChangeSummary.cpp ' +  
+            'SDO_DAS_DataFactory.cpp ' +  
+            'SDO_DAS_Setting.cpp ' +  
+            'SDO_DataObject.cpp ' +  
+            'SDO_List.cpp ' +  
+            'SDO_Model_Type.cpp ' + 
+            'SDO_Model_Property.cpp ' + 
+            'SDO_Model_ReflectionDataObject.cpp ' + 
+            'SDO_Sequence.cpp ' + 
+            'sdo_utils.cpp ' + 
+            'SDO_Exception.cpp ' + 
+            'SDO_CPPException.cpp ' +
+            'xmldas_utils.cpp ' +
+            'SDO_DAS_XML.cpp ' +
+            'SDO_DAS_XML_Document.cpp ', 
             PHP_SDO_SHARED,
-            '/GX /I' + configure_module_dirname);
-            
-        /* ... add the XML DAS ... */
-        ADD_SOURCES(configure_module_dirname,
-            'xmldas_utils.cpp SDO_DAS_XML.cpp SDO_DAS_XML_Document.cpp', 
-            'sdo');
+            '/GX /I' + configure_module_dirname);            
             
         /* ... add local copy of the Tuscany SDO library ... */        
         ADD_SOURCES(configure_module_dirname + '\\commonj\\sdo', 
-            'ChangedDataObjectListImpl.cpp ChangeSummary.cpp ChangeSummaryBuilder.cpp ChangeSummaryImpl.cpp CopyHelper.cpp DASProperty.cpp DASType.cpp DASValue.cpp DASValues.cpp DataFactory.cpp DataFactoryImpl.cpp DataGraph.cpp DataGraphImpl.cpp DataObject.cpp DataObjectImpl.cpp DataObjectInstance.cpp DataObjectList.cpp DataObjectListImpl.cpp DefaultLogWriter.cpp EqualityHelper.cpp GroupDefinition.cpp GroupEvent.cpp HelperProvider.cpp Logger.cpp LogWriter.cpp ParserErrorSetter.cpp Property.cpp PropertyDefinition.cpp PropertyDefinitionImpl.cpp PropertyImpl.cpp PropertyList.cpp PropertySetting.cpp RefCountingObject.cpp RefCountingPointer.cpp SAX2Attribute.cpp SAX2Attributes.cpp SAX2Namespaces.cpp SAX2Parser.cpp SchemaInfo.cpp SDOCheck.cpp SDODate.cpp SDORuntime.cpp SDORuntimeException.cpp SDOSax2Parser.cpp SDOSchemaSAX2Parser.cpp SDOUtils.cpp SDOXMLBufferWriter.cpp SDOXMLFileWriter.cpp SDOXMLStreamWriter.cpp SDOXMLString.cpp SDOXMLWriter.cpp SDOXSDBufferWriter.cpp SDOXSDFileWriter.cpp SDOXSDStreamWriter.cpp SDOXSDWriter.cpp Sequence.cpp SequenceImpl.cpp Setting.cpp SettingList.cpp Type.cpp TypeDefinition.cpp TypeDefinitionImpl.cpp TypeDefinitions.cpp TypeDefinitionsImpl.cpp TypeImpl.cpp TypeList.cpp XMLDocument.cpp XMLDocumentImpl.cpp XMLHelper.cpp XMLHelperImpl.cpp XMLQName.cpp XpathHelper.cpp XSDHelper.cpp XSDHelperImpl.cpp XSDPropertyInfo.cpp XSDTypeInfo.cpp', 
+            'ChangedDataObjectListImpl.cpp ' +
+            'ChangeSummary.cpp ' +
+            'ChangeSummaryBuilder.cpp ' +
+            'ChangeSummaryImpl.cpp ' +
+            'CopyHelper.cpp ' +
+            'DASProperty.cpp ' +
+            'DASType.cpp ' +
+            'DASValue.cpp ' +
+            'DASValues.cpp ' +
+            'DataFactory.cpp ' + 
+            'DataFactoryImpl.cpp ' +
+            'DataGraph.cpp ' +
+            'DataGraphImpl.cpp ' +
+            'DataObject.cpp ' +
+            'DataObjectImpl.cpp ' +
+            'DataObjectInstance.cpp ' +
+            'DataObjectList.cpp ' +
+            'DataObjectListImpl.cpp ' +
+            'DataTypeInfo.cpp ' +
+            'DefaultLogWriter.cpp ' +
+            'EqualityHelper.cpp ' +
+            'GroupDefinition.cpp ' +
+            'GroupEvent.cpp ' +
+            'HelperProvider.cpp ' +
+            'Logger.cpp ' +
+            'LogWriter.cpp ' +
+            'ParserErrorSetter.cpp ' +
+            'Property.cpp ' +
+            'PropertyDefinition.cpp ' +
+            'PropertyDefinitionImpl.cpp ' +
+            'PropertyImpl.cpp ' +
+            'PropertyList.cpp ' +
+            'PropertySetting.cpp ' +
+            'RefCountingObject.cpp ' + 
+            'RefCountingPointer.cpp ' +
+            'SAX2Attribute.cpp ' +
+            'SAX2Attributes.cpp ' +
+            'SAX2Namespaces.cpp ' +
+            'SAX2Parser.cpp ' +
+            'SchemaInfo.cpp ' +
+            'SDOCheck.cpp ' +
+            'SDODataConverter.cpp ' +
+            'SDODate.cpp ' +
+            'SDORuntime.cpp ' +
+            'SDORuntimeException.cpp ' +
+            'SDOSax2Parser.cpp ' +
+            'SDOSchemaSAX2Parser.cpp ' +
+            'SDOUtils.cpp ' +
+            'SDOValue.cpp ' +
+            'SDOXMLBufferWriter.cpp ' +
+            'SDOXMLFileWriter.cpp ' +
+            'SDOXMLStreamWriter.cpp ' + 
+            'SDOXMLString.cpp ' +
+            'SDOXMLWriter.cpp ' +
+            'SDOXSDBufferWriter.cpp ' +
+            'SDOXSDFileWriter.cpp ' +
+            'SDOXSDStreamWriter.cpp ' +
+            'SDOXSDWriter.cpp ' +
+            'Sequence.cpp ' +
+            'SequenceImpl.cpp ' +
+            'Setting.cpp ' +
+            'SettingList.cpp ' +
+            'Type.cpp ' +
+            'TypeDefinition.cpp ' +
+            'TypeDefinitionImpl.cpp ' +
+            'TypeDefinitions.cpp ' +
+            'TypeDefinitionsImpl.cpp ' +
+            'TypeImpl.cpp ' +
+            'TypeList.cpp ' +
+            'XMLDocument.cpp ' +
+            'XMLDocumentImpl.cpp ' +
+            'XMLHelper.cpp ' +
+            'XMLHelperImpl.cpp ' +
+            'XMLQName.cpp ' +
+            'XpathHelper.cpp ' +
+            'XSDHelper.cpp ' +
+            'XSDHelperImpl.cpp ' +
+            'XSDPropertyInfo.cpp ' + 
+            'XSDTypeInfo.cpp ', 
             'sdo');        
             
         AC_DEFINE('HAVE_PHP_SDO', 1, "SDO support");

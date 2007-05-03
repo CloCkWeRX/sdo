@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 524004 $ $Date$ */
 
 #ifndef _XSDHELPERIMPL_H_
 #define _XSDHELPERIMPL_H_
@@ -138,6 +138,8 @@ namespace commonj
             }
  
             virtual void defineTypes(TypeDefinitions& types);
+ 
+            virtual TypeDefinitions& getDefinedTypes() {return definedTypes;}
 
         private:
             virtual void clearErrors();
@@ -157,6 +159,7 @@ namespace commonj
 
             std::vector<char*> parseErrors;
             
+            TypeDefinitions definedTypes;            
         };
         
     } // End - namespace sdo

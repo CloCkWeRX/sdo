@@ -6,6 +6,10 @@ require_once 'SCA/SCA_AnnotationRules.php';
 require_once 'SCA/SCA_AnnotationReader.php';
 
 require_once 'AnnotationTestClasses.php';
+// careful - have to include SCA because the location of SCA.php
+// is used to find the Bindings directory, and that is used in 
+// checking valid bindings
+require_once 'SCA/SCA.php';
 
 /**
  * Test the annotations
@@ -25,7 +29,7 @@ class SCA_Annotation_BindingTest extends PHPUnit_Framework_TestCase {
             $service_description = $reader->reflectService();
         }
         catch (SCA_RuntimeException $e) {
-            $this->assertContains("You need to include '@binding.ws'",$e->getMessage());
+            $this->assertContains("No valid @binding",$e->getMessage());
             return;
         }
         $this->fail();
@@ -39,12 +43,28 @@ class SCA_Annotation_BindingTest extends PHPUnit_Framework_TestCase {
             $service_description = $reader->reflectService();
         }
         catch (SCA_RuntimeException $e) {
-            $this->assertContains("You need to include '@binding.ws'",$e->getMessage());
+            $this->assertContains("No valid @binding",$e->getMessage());
             return;
         }
         $this->fail();
     }
 
+    public function testOneValidBindingAnnotationIsOk()
+    {
+        $instance            = new OneValidBindingAnnotation();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        $this->assertContains("soap",$service_description->binding);
+    }
+
+    public function testTwoValidBindingAnnotationsIsOk()
+    {
+        $instance            = new TwoValidBindingAnnotations();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        $this->assertContains("soap",$service_description->binding);
+        $this->assertContains("jsonrpc",$service_description->binding);
+    }
 
     public static function main()
     {

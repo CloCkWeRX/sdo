@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 511929 $ $Date$ */
 
 #include "commonj/sdo/SDORuntimeException.h"
 
@@ -85,7 +85,7 @@ void SettingList::insert (unsigned int index,  Setting* d)
 
 void SettingList::append ( Setting* d)
 {
-    slist.insert(slist.end(),d);
+    slist.push_back(d);
 }
 
 void SettingList::remove(unsigned int index)

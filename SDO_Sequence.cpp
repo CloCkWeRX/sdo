@@ -250,6 +250,7 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 	zval temp_zval;
 	char *class_name, *space;
 
+	ZVAL_NULL(&temp_zval);
 	try {
 		Sequence& seq = *my_object->seqp;
 
@@ -433,10 +434,10 @@ static void sdo_sequence_write_value(sdo_seq_object *my_object, char *xpath, lon
 			php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type %i",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__, type_enum);
 		}
-		zval_dtor(&temp_zval);
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 	}
+	zval_dtor(&temp_zval);
 }
 /* }}} */
 
@@ -789,11 +790,20 @@ static int sdo_sequence_count_elements (zval *me, long *count TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ debug macro functions
+ */
+SDO_DEBUG_ADDREF(sequence)
+SDO_DEBUG_DELREF(sequence)
+SDO_DEBUG_DESTROY(sequence)
+/* }}} */
+
 /* {{{ sdo_sequence_object_free_storage
  */
 static void sdo_sequence_object_free_storage(void *object TSRMLS_DC)
 {
 	sdo_seq_object *my_object;
+
+	SDO_DEBUG_FREE(object);
 
 	my_object = (sdo_seq_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
@@ -817,7 +827,7 @@ static zend_object_value sdo_sequence_object_create(zend_class_entry *ce TSRMLS_
 	zend_object_value retval;
 	zval *tmp; /* this must be passed to hash_copy, but doesn't seem to be used */
 	sdo_seq_object *my_object;
-
+	
 	my_object = (sdo_seq_object *)emalloc(sizeof(sdo_seq_object));
 	memset(my_object, 0, sizeof(sdo_seq_object));
 	my_object->zo.ce = ce;
@@ -826,8 +836,9 @@ static zend_object_value sdo_sequence_object_create(zend_class_entry *ce TSRMLS_
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
 		(void *)&tmp, sizeof(zval *));
-	retval.handle = zend_objects_store_put(my_object, NULL, sdo_sequence_object_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(my_object, SDO_FUNC_DESTROY(sequence), sdo_sequence_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &sdo_sequence_object_handlers;
+	SDO_DEBUG_ALLOCATE(retval.handle, my_object);
 
 	return retval;
 }
@@ -865,6 +876,8 @@ void sdo_sequence_minit(zend_class_entry *tmp_ce TSRMLS_DC)
 	zend_class_implements(sdo_sequenceimpl_class_entry TSRMLS_CC, 1, sdo_sequence_class_entry);
 
 	memcpy(&sdo_sequence_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	sdo_sequence_object_handlers.add_ref = SDO_FUNC_ADDREF(sequence);
+	sdo_sequence_object_handlers.del_ref = SDO_FUNC_DELREF(sequence);
 	sdo_sequence_object_handlers.clone_obj = NULL;
 	sdo_sequence_object_handlers.read_dimension = sdo_sequence_read_dimension;
 	sdo_sequence_object_handlers.write_dimension = sdo_sequence_write_dimension;

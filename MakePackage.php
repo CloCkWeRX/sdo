@@ -12,9 +12,10 @@
        'summary' => 'Service Component Architecture (SCA) and Service Data Objects (SDO) for PHP',
        'description' => 
             'Service Data Objects (SDOs) enable PHP applications to work with data from different sources ' .
-            '(like a database query, an XML file, or a spreadsheet) using a single interface. ' .
+            '(typically a database query or an XML file) using a single interface. ' .
             'SCA for PHP allows a PHP programmer to write reusable components (classes) in PHP, which can be called ' .
-            'either locally, or remotely via Web Services, with an identical interface. ' ,
+            'either locally, or in a a variety of ways remotely (soap web services, xml-rpc, json-rpc, REST, etc), ' .
+            'but always with the same interface. ' ,
 //       'notes' => 
 //            'This is the first release of SDO for PHP. It contains the core SDO extension and two Data' .
 //            ' Access Services: an XML DAS written in C and a Relational DAS to work with relational databases,' .
@@ -111,11 +112,46 @@
 //       'notes' => " Fix for bug #9498 - invalid WSDL generation\n" 
 //           . "Fix for bug 9426 - printing open types\n" 
 //           . "Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes for sequenced and open data types.\n",
-       'notes' => "Fix for bug #9845 - Relational DAS is failing when one parent and two children\n"
-           . "Changed from namespaceURI.type to namespaceURI#type (conform to spec)\n"
-           . "Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)\n",
+//       'notes' => "Fix for bug #9845 - Relational DAS is failing when one parent and two children\n"
+//           . "Changed from namespaceURI.type to namespaceURI#type (conform to spec)\n"
+//           . "Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)\n",
+  'notes' =>
+     "* Pluggable bindings support\n"
+  .  "    This support is all in the core. There are now fewer files in the SCA directory and all code specific to"
+  .  " a given binding (local, soap, jsonrpc etc.) goes in a subdirectory under the Bindings subdirectory."
+  .  " The SCA core code now just knows how to use the SCA_BindingsFactory object to pull in the classes it"
+  .  " needs to service an incoming request. The names of the desired classes are derived from the annotations"
+  .  " e.g. if a component has an @binding.soap annotation, the SCA core code will look in SCA/Bindings/soap for"
+  .  " the classes it needs. This is probably of limited interest unless you plan to write a binding of your own."
+  .  " We plan an article to describe how this works.\n"
+  .  "\n"
+  .  "* Refactored bindings based on the pluggable binding support:\n"
+  .  "    o jsonrpc\n"
+  .  "    o local (php to php binding)\n"
+  .  "    o restrpc (RPC based on HTTP GET or POST)\n"
+  .  "    o soap (SOAP web services)\n"
+  .  "    o xmlrpc \n"
+  .  "\n"
+  .  "* Latest drop of SDO code from Tuscany (currently revision level 532769) including:\n"
+  .  "    o performance enhancements\n"
+  .  "    o set of fixes to DataObject destructor to eliminate crashes when the graph is not freed in the default order\n"
+  .  "\n"
+  .  "* Updates to SDO extension:\n"
+  .  "    o fix memory leak from SDO_DataObject (depends on Tuscany fixes above)\n"
+  .  "    o add debug trace macros for debugging memory allocation\n"
+  .  "    o new signature for SDO_DAS_XML::create() allows an array of schema files to be passed in\n"
+  .  "\n"
+  .  "* Bug fixes \n"
+  .  "    o http://pecl.php.net/bugs/bug.php?id=8428\n"
+  .  "    o http://pecl.php.net/bugs/bug.php?id=9243\n"
+  .  "    o http://pecl.php.net/bugs/bug.php?id=9487\n"
+  .  "    o http://pecl.php.net/bugs/bug.php?id=9991\n"
+  .  "    o http://pecl.php.net/bugs/bug.php?id=10049\n"
+  .  "             \n"
+  .  "* Examples\n"
+  .  "    o More SCA examples that exercise some of the new bindings, and some of the old, including HelloWorlds and Email scenarios.\n",
        'simpleoutput' => true,
-       'version' => '1.1.2',
+       'version' => '1.2.0',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',

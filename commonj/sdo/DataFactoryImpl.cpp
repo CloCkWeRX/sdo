@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 484703 $ $Date$ */
+/* $Rev: 510951 $ $Date$ */
 
 //////////////////////////////////////////////////////////////////////
 // DataFactoryImpl.cpp: implementation of the DataFactory class.
@@ -175,34 +175,37 @@ void DataFactoryImpl::copyTypes(const DataFactoryImpl& inmdg)
 
         
         // Now add all the properties
-        PropertyList props = typeIter->second->getProperties();
-        for (unsigned int i=0; i < props.size(); i++)
+        const std::list<PropertyImpl*> props = typeIter->second->getPropertyListReference();
+
+        for (std::list<PropertyImpl*>::const_iterator i = props.begin();
+             i != props.end();
+             i++)
         {
             // Ensure the properties type is added
-            const Type& propType = props[i].getType();
+            const Type& propType = (*i)->getType();
             addType(propType.getURI(), propType.getName());
 
             // Now add the property
             addPropertyToType((typeIter->second)->getURI(),
                               (typeIter->second)->getName(),
-                              props[i].getName(),
+                              (*i)->getName(),
                               propType.getURI(), 
                               propType.getName(),
-                              props[i].isMany(),
-                              props[i].isReadOnly(),
-                              props[i].isContainment());
+                              (*i)->isMany(),
+                              (*i)->isReadOnly(),
+                              (*i)->isContainment());
 
             // copy the aliases if there are any.
-            if (props[i].getAliasCount() > 0) 
+            if ((*i)->getAliasCount() > 0) 
             {
 
                 PropertyImpl* p = (typeIter2->second)->
-                    getPropertyImpl(props[i].getName());
+                    getPropertyImpl((*i)->getName());
                 if (p != 0)
                 {
                     for (unsigned int j=0;j<p->getAliasCount();j++)
                     {
-                        p->setAlias(props[i].getAlias(j));
+                        p->setAlias((*i)->getAlias(j));
                     }
                 }
 
@@ -292,11 +295,13 @@ bool DataFactoryImpl::recursiveCheck(TypeImpl* cs, TypeImpl* t)
         return true;
     }
 
-    PropertyList pl = cs->getProperties();
+    const std::list<PropertyImpl*> pl = cs->getPropertyListReference();
     
-    for (unsigned int i=0 ; i < pl.size() ; i++ )
+    for (std::list<PropertyImpl*>::const_iterator j = pl.begin();
+         j != pl.end();
+         j++)
     {
-        if (recursiveCheck((TypeImpl*)&(pl[i].getType()), t)) return true;
+        if (recursiveCheck((TypeImpl*)&((*j)->getType()), t)) return true;
     }
     return false;
 }

@@ -55,6 +55,8 @@ static sdo_das_changesummary_object *sdo_das_changesummary_get_instance(zval *me
 static void sdo_das_changesummary_object_free_storage(void *object TSRMLS_DC)
 {
 	sdo_das_changesummary_object *my_object;
+
+	SDO_DEBUG_FREE(object);
 	
 	my_object = (sdo_das_changesummary_object *)object;
 	zend_hash_destroy(my_object->zo.properties);
@@ -69,6 +71,13 @@ static void sdo_das_changesummary_object_free_storage(void *object TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ debug macro functions
+ */
+SDO_DEBUG_ADDREF(das_changesummary)
+SDO_DEBUG_DELREF(das_changesummary)
+SDO_DEBUG_DESTROY(das_changesummary)
+/* }}} */
+
 /* {{{ sdo_das_changesummary_object_create
  */
 static zend_object_value sdo_das_changesummary_object_create(zend_class_entry *ce TSRMLS_DC)
@@ -76,7 +85,7 @@ static zend_object_value sdo_das_changesummary_object_create(zend_class_entry *c
 	zend_object_value retval;
 	zval *tmp; /* this must be passed to hash_copy, but doesn't seem to be used */
 	sdo_das_changesummary_object *my_object;
-	
+		
 	my_object = (sdo_das_changesummary_object *)emalloc(sizeof(sdo_das_changesummary_object));
 	memset(my_object, 0, sizeof(sdo_das_changesummary_object));
 	my_object->zo.ce = ce;
@@ -85,9 +94,11 @@ static zend_object_value sdo_das_changesummary_object_create(zend_class_entry *c
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
 		(void *)&tmp, sizeof(zval *));
-	retval.handle = zend_objects_store_put(my_object, NULL, sdo_das_changesummary_object_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(my_object, SDO_FUNC_DESTROY(das_changesummary), sdo_das_changesummary_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = zend_get_std_object_handlers();
-	
+	retval.handlers->add_ref = SDO_FUNC_ADDREF(das_changesummary);
+	retval.handlers->del_ref = SDO_FUNC_DELREF(das_changesummary);
+	SDO_DEBUG_ALLOCATE(retval.handle, my_object);
 	return retval;
 }
 /* }}} */

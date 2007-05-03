@@ -1,7 +1,7 @@
 <?php
 
 /*******************************************************************************
- * SERVICE and BINDING.WS
+ * SERVICE and BINDING.soap
  ********************************************************************************/
 
 
@@ -27,6 +27,23 @@ class NoBindingAnnotation {
 class RubbishBindingAnnotation {
 }
 
+/**
+ * class with two binding annotations
+ * @service
+ * @binding.soap
+ */
+class OneValidBindingAnnotation {
+}
+
+/**
+ * class with two binding annotations
+ * @service
+ * @binding.soap
+ * @binding.jsonrpc
+ */
+class TwoValidBindingAnnotations {
+}
+
 /*******************************************************************************
  * METHODS
  ********************************************************************************/
@@ -34,7 +51,7 @@ class RubbishBindingAnnotation {
 /**
  * class with no methods
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class NoMethods {
 }
@@ -42,7 +59,7 @@ class NoMethods {
 /**
  * class with no public methods
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class NoPublicMethods {
     private function CannotSeeMe() {
@@ -52,7 +69,7 @@ class NoPublicMethods {
 /**
  * class with one public method and no annotations
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class MethodHasNoAnnotations {
     public function myPublicMethod() {
@@ -67,7 +84,7 @@ class MethodHasNoAnnotations {
 /**
  * param is empty
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class EmptyParam {
     /**
@@ -82,7 +99,7 @@ class EmptyParam {
 /**
  * param has no name
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class ParamWithOnlyType {
     /**
@@ -97,7 +114,7 @@ class ParamWithOnlyType {
 /**
  * param has invalid type and no name
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class ParamWithOnlyInvalidType {
     /**
@@ -112,7 +129,7 @@ class ParamWithOnlyInvalidType {
 /**
  * param has type and name
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class ParamWithValidTypeAndName {
     /**
@@ -127,7 +144,7 @@ class ParamWithValidTypeAndName {
 /**
  * param has the four valid scalar types
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class ParamWithFourValidScalarTypes {
     /**
@@ -146,7 +163,7 @@ class ParamWithFourValidScalarTypes {
 /**
  * param has type and name
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class ParamWithInvalidTypeAndValidName {
     /**
@@ -160,7 +177,7 @@ class ParamWithInvalidTypeAndValidName {
 /**
  * param has type and name
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class ParamWithValidTypeAndInvalidName {
     /**
@@ -175,7 +192,7 @@ class ParamWithValidTypeAndInvalidName {
 /**
  * return is empty
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class EmptyReturn {
     /**
@@ -189,7 +206,7 @@ class EmptyReturn {
 /**
  * return has invalid type
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class returnWithInvalidType {
     /**
@@ -203,7 +220,7 @@ class returnWithInvalidType {
 /**
  * return has valid type
  * @service
- * @binding.ws
+ * @binding.soap
  */
 class returnWithValidType {
     /**
@@ -221,7 +238,7 @@ class returnWithValidType {
 /**
  * empty types
  * @service
- * @binding.ws
+ * @binding.soap
  * @types
  */
 class EmptyTypes 
@@ -232,7 +249,7 @@ class EmptyTypes
 /**
  * types with only namespace
  * @service
- * @binding.ws
+ * @binding.soap
  * @types http://Namespace
  */
 class TypesWithOnlyNamespace 
@@ -243,7 +260,7 @@ class TypesWithOnlyNamespace
 /**
  * types with valid namespace and xsd
  * @service
- * @binding.ws
+ * @binding.soap
  * @types http://Namespace Anything.xsd
  */
 class TypesWithValidNamespaceAndXsd 
@@ -254,7 +271,7 @@ class TypesWithValidNamespaceAndXsd
 /**
  * Two types with same namespace and different xsds
  * @service
- * @binding.ws
+ * @binding.soap
  * @types http://Namespace Anything.xsd
  * @types http://Namespace More.xsd
  */
@@ -266,7 +283,7 @@ class TwoTypesWithSameNamespaceAndDifferentXsds
 /**
  * param has type and namespace but wrong
  * @service
- * @binding.ws
+ * @binding.soap
  * @types http://Namespace Anything.xsd
  */
 class ParamWithInvalidNamespace {
@@ -282,7 +299,7 @@ class ParamWithInvalidNamespace {
 /**
  * return has type and namespace but wrong
  * @service
- * @binding.ws
+ * @binding.soap
  * @types http://Namespace Anything.xsd
  */
 class ReturnWithInvalidNamespace {
@@ -358,7 +375,7 @@ class ReferenceWithAnEmptyWsBinding
 {
     /**
      * @reference
-     * @binding.ws 
+     * @binding.soap 
      */
     public $service;
 }

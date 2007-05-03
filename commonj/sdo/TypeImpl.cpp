@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 485591 $ $Date$ */
+/* $Rev: 511929 $ $Date$ */
 
 #include "commonj/sdo/Logger.h"
 
@@ -207,11 +207,18 @@ namespace sdo{
              }
              count++;
          }
-         if (name != 0)delete name;
-         if (typeURI != 0) delete typeURI;
+         if (name != 0)
+         {
+            delete[] name;
+         }
+         
+         if (typeURI != 0)
+         {
+            delete[] typeURI;
+         }
          for (unsigned int j = 0; j < aliases.size();j++)
          {
-             delete aliases[j];
+             delete[] aliases[j];
          }
     }
 
@@ -462,6 +469,11 @@ namespace sdo{
         return props;
     }
 
+    const std::list<PropertyImpl*>& TypeImpl::getPropertyListReference() const
+    {
+        return props;
+    }
+
     unsigned int TypeImpl::getPropertiesSize() const
     {
         return props.size();
@@ -484,7 +496,7 @@ namespace sdo{
     }
   const Property& TypeImpl::getProperty(const SDOString& propertyName) const 
   {
-    PropertyImpl* pi = getPropertyImpl(propertyName); // ??? GMW
+    PropertyImpl* pi = getPropertyImpl(propertyName);
     if (pi == 0)
       {
         string msg("Property not found:");
@@ -748,10 +760,14 @@ namespace sdo{
     {
         // do not add duplicate properties
         if (!getPropertyImplPure(propname))
-        {   
-            props.insert(props.end(),new PropertyImpl(*this, 
-                propname, t, many,rdonly, cont));
-            localPropsSize++;
+        {
+           props.push_back(new PropertyImpl(*this,
+                                            propname,
+                                            t,
+                                            many,
+                                            rdonly,
+                                            cont));
+           localPropsSize++;
         }
     }
 
@@ -2128,6 +2144,43 @@ namespace sdo{
     return 0;
     }
 
+unsigned int TypeImpl::convertToString(const SDOValue& sdoValue,
+                                       wchar_t* outval,
+                                       unsigned int max) const
+{
+   switch (typeEnum) 
+   {
+      case BigDecimalType: 
+      case BigIntegerType: 
+      case UriType:
+      case StringType:
+      case BytesType:
+      case BooleanType:
+      case ByteType:
+      case CharacterType:
+      case ShortType:
+      case IntegerType: 
+      case LongType:
+      case DateType:
+      case DoubleType:
+      case FloatType:
+         return sdoValue.getString(outval, max);
+
+      case OtherTypes:
+      case DataObjectType:
+      default:
+      {
+         string msg("Cannot get String from object of type:");
+         msg += getName();
+         SDO_THROW_EXCEPTION("getString" ,
+                             SDOInvalidConversionException,
+                             msg.c_str());
+         break;
+      }
+   }
+   return 0;
+}
+
     unsigned int TypeImpl::convertToBytes(void* value, char* outval, unsigned int len,
         unsigned int max) const
     {
@@ -2260,6 +2313,40 @@ namespace sdo{
         }
     return 0;
     }
+
+    unsigned int TypeImpl::convertToBytes(const SDOValue& sdoValue, char* outptr, unsigned int max) const
+    {
+    unsigned int i;
+    switch (typeEnum) 
+        {
+        case BytesType:
+        case BigDecimalType: 
+        case BigIntegerType: 
+        case UriType:
+        case StringType:
+        case BooleanType:
+        case CharacterType:
+        case ByteType:
+        case ShortType:
+        case IntegerType:
+        case LongType:
+        case DateType:
+        case DoubleType:
+        case FloatType:
+           return sdoValue.getBytes(outptr, max);
+
+        case DataObjectType:
+        case OtherTypes:
+        default:
+           string msg("Cannot get Bytes from object of type:");
+           msg += getName();
+           SDO_THROW_EXCEPTION("getBytes" ,
+                               SDOInvalidConversionException,
+                               msg.c_str());
+        }
+    return 0;
+    }
+
 
   // +++
 
@@ -2594,6 +2681,42 @@ namespace sdo{
         return 0;
     }
 
+   const char* TypeImpl::convertToCString(const SDOValue& sdoValue) const
+   {
+
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getCString();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get CString from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getCString" ,
+                                SDOInvalidConversionException,
+                                msg.c_str());
+         }
+         return 0;
+      }
+   }
+   
+
     const bool TypeImpl::convertToBoolean(void* value, unsigned int len) const
     {
     switch (typeEnum) 
@@ -2688,6 +2811,41 @@ namespace sdo{
         }
 
     }
+
+   const bool TypeImpl::convertToBoolean(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getBoolean();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get Boolean from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getBoolean" ,
+                                SDOInvalidConversionException,
+                                msg.c_str());
+            break;
+         }
+      }
+   }
+   
 
     const char TypeImpl::convertToByte(void* value , unsigned int len) const
     {
@@ -2784,6 +2942,41 @@ namespace sdo{
         }
     }
 
+   const char TypeImpl::convertToByte(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getByte();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get Byte from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getByte",
+                                SDOInvalidConversionException,
+                                msg.c_str());
+            break;
+         }
+      }
+   }
+
+
     const wchar_t TypeImpl::convertToCharacter(void* value, unsigned int len) const
     {
     switch (typeEnum) 
@@ -2859,6 +3052,43 @@ namespace sdo{
             }
         }
     }
+
+
+   const wchar_t TypeImpl::convertToCharacter(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getCharacter();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get Character from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getCharacter" ,
+                                SDOInvalidConversionException, msg.c_str());
+            break;
+         }
+      }
+   }
+
+
+
     const short TypeImpl::convertToShort(void* value, unsigned int len) const
     {
 #if ! defined(WIN32)  && !defined (_WINDOWS)
@@ -2948,6 +3178,40 @@ namespace sdo{
             }
         }
     }
+
+   const short TypeImpl::convertToShort(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getShort();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get Short from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getShort" ,
+                                SDOInvalidConversionException,
+                                msg.c_str());
+            break;
+         }
+      }
+   }
 
     
 /*    const int TypeImpl::convertToInt(void* value, unsigned int len) const
@@ -3143,6 +3407,42 @@ namespace sdo{
             }
         }
     }
+
+   const long TypeImpl::convertToInteger(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getInteger();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get Long from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getLong" ,
+                                SDOInvalidConversionException,
+                                msg.c_str());
+            break;
+         }
+      }
+   }
+
+
     const int64_t TypeImpl::convertToLong(void* value, unsigned int len) const 
     {
 #if ! defined(WIN32)  && ! defined (_WINDOWS)
@@ -3245,6 +3545,41 @@ namespace sdo{
             }
         }
     }
+
+    const int64_t TypeImpl::convertToLong(const SDOValue& sdoValue) const
+    {
+    switch (typeEnum) 
+        {
+        case BooleanType:
+        case CharacterType:
+        case ByteType:
+        case IntegerType: 
+        case ShortType:
+        case DoubleType:
+        case FloatType:
+        case LongType:
+        case DateType:
+        case BigDecimalType: 
+        case BigIntegerType: 
+        case StringType:    
+        case UriType:
+        case BytesType:
+           return sdoValue.getLong();
+
+        case OtherTypes:
+        case DataObjectType:
+        default:
+            {
+            string msg("Cannot get Long Long from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getLongLong" ,
+              SDOInvalidConversionException, msg.c_str());
+            break;
+            }
+        }
+    }
+
+
     const float TypeImpl::convertToFloat(void* value, unsigned int len) const
     {
     switch (typeEnum) 
@@ -3524,6 +3859,74 @@ namespace sdo{
             }
         }
     }
+
+   const long double TypeImpl::convertToDouble(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getDouble();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get double from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getDouble" ,
+                                SDOInvalidConversionException, msg.c_str());
+            break;
+         }
+      }
+   }
+
+   const float TypeImpl::convertToFloat(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case BooleanType:
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case StringType:    
+         case UriType:
+         case BytesType:
+            return sdoValue.getFloat();
+
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get float from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getFloat" ,
+                                SDOInvalidConversionException, msg.c_str());
+            break;
+         }
+      }
+   }
+
+
     const SDODate TypeImpl::convertToDate(void* value, unsigned int len) const
     {
     switch (typeEnum) 
@@ -3589,6 +3992,42 @@ namespace sdo{
             }
         }
     }
+
+   const SDODate TypeImpl::convertToDate(const SDOValue& sdoValue) const
+   {
+      switch (typeEnum) 
+      {
+         case ByteType:
+         case CharacterType:
+         case IntegerType: 
+         case ShortType:
+         case DoubleType:
+         case FloatType:
+         case LongType:
+         case DateType:
+         case BooleanType:     
+         case BytesType:
+         case StringType:    
+            return sdoValue.getDate();
+
+         case BigDecimalType: 
+         case BigIntegerType: 
+         case UriType:
+         case OtherTypes:
+         case DataObjectType:
+         default:
+         {
+            string msg("Cannot get Date from object of type:");
+            msg += getName();
+            SDO_THROW_EXCEPTION("getDate" ,
+                                SDOInvalidConversionException,
+                                msg.c_str());
+            break;
+         }
+      }
+   }
+
+
 
     DataObject* TypeImpl::convertToDataObject(void* value, unsigned int len) const
     {

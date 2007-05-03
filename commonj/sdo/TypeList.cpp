@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 511929 $ $Date$ */
 
 #ifndef SDO_EXPORTS
     #define SDO_EXPORTS
@@ -78,7 +78,7 @@ std::vector<const Type*> TypeList::getVec() const
 
 SDO_API void TypeList::insert (const Type* t) 
 {
-    plist.insert(plist.end(),t);
+    plist.push_back(t);
 }
 
 };

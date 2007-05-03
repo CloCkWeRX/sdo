@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 492974 $ $Date$ */
+/* $Rev: 534152 $ $Date$ */
 
 #include "libxml/uri.h"
 #include "commonj/sdo/SDOSchemaSAX2Parser.h"
@@ -67,9 +67,11 @@ namespace commonj
             // copy the event to as list for replay.
             if (currentGroup)
             {
-                currentGroup->events.insert( currentGroup->events.end(),
-                    GroupEvent(
-                    localname,prefix,URI,namespaces,attributes));
+                currentGroup->events.push_back(GroupEvent(localname,
+                                                          prefix,
+                                                          URI,
+                                                          namespaces,
+                                                          attributes));
             }
 
         }
@@ -82,8 +84,7 @@ namespace commonj
             // copy the event to as list for replay.
             if (currentGroup)
             {
-                 currentGroup->events.insert(currentGroup->events.end(),
-                     GroupEvent(localname,prefix,URI));
+               currentGroup->events.push_back(GroupEvent(localname, prefix, URI));
             }
 
         }
@@ -173,7 +174,7 @@ namespace commonj
                     sprintf(msg,"Use of undefined group %s",
                                             (const char*)name);
                     setter->setError( msg );
-                    delete msg;
+                    delete[] msg;
                 }
             }
          }
@@ -643,8 +644,7 @@ namespace commonj
                         }
                         if (!found) 
                         {
-                            currentType.properties.insert(
-                                currentType.properties.end(),*propit);
+                           currentType.properties.push_back(*propit);
                         }
                     }
                 }
@@ -1100,9 +1100,8 @@ namespace commonj
             // work when serializing a sequence containing a single-valued property and
             // then deserializing.
             // currentProperty.isMany = currentProperty.isMany || currentType.isMany;
-            
-            
-            currentType.properties.insert(currentType.properties.end(), currentProperty);
+
+            currentType.properties.push_back(currentProperty);
             if (propertyStack.size() != 0)
             {
                 currentProperty = propertyStack.top();                
@@ -1248,14 +1247,27 @@ namespace commonj
             const SAX2Attributes& attributes,
             const SAX2Namespaces& namespaces)
         {
-            std::map<SDOXMLString,SDOXMLString>::iterator it;
             setName(attributes, type.name, type.localname);
+
+
             // If localname is not set it is anonymous so use the enclosing element name
-
-
             if (type.localname.isNull())
             {
                 type.localname = currentProperty.name;
+
+                // ensure anonymous type name does not clash with existing type
+                for (int suffix = 1; ; suffix++)
+                {
+                    SDOXMLString typeUri = TypeDefinitionsImpl::getTypeQName(type.uri, type.localname);
+                    XMLDAS_TypeDefs::iterator it = typeDefinitions.types.find(typeUri);
+                    if(it == typeDefinitions.types.end())
+                    {
+                        break;
+                    }
+                    char buff[32];
+                    sprintf(buff, "%d", suffix);
+                    type.localname += buff;
+                }
             }
             else
             {

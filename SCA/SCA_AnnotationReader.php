@@ -1,7 +1,7 @@
 <?php
 /*
 +-----------------------------------------------------------------------------+
-| Copyright IBM Corporation 2006.                                             |
+| (c) Copyright IBM Corporation 2006.                                         |
 | All Rights Reserved.                                                        |
 +-----------------------------------------------------------------------------+
 | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
@@ -19,30 +19,38 @@
 | Author: Graham Charters,                                                    |
 |         Matthew Peters,                                                     |
 |         Megan Beynon,                                                       |
-|         Chris Miller.                                                       |
-|                                                                             |
+|         Chris Miller,                                                       |
+|         Caroline Maynard,                                                   |
+|         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id$
 */
 
+require 'SCA/SCA_ServiceDescription.php';
 require 'SCA/SCA_CommentReader.php';
-require 'SCA/SCA_RuntimeException.php';
+require 'SCA/SCA_Exceptions.php';
 require 'SCA/SCA_Helper.php';
 
-if ( ! class_exists('SCA_AnnotationReader', false) ) {
+if ( ! class_exists('SCA_AnnotationReader', false)) {
     class SCA_AnnotationReader
     {
 
-        protected $instance_of_the_component;
+        protected $instance_of_the_component = null;
+        protected $class_name = null;
 
         /**
          * Create the Annotation Reader for this component
          *
          * @param string $component_instance
          */
-        public function __construct($component_instance)
+        public function __construct($component_instance_or_class_name)
         {
-            $this->instance_of_the_component = $component_instance;
+            if (gettype($component_instance_or_class_name) == 'string') {
+                $this->class_name = $component_instance_or_class_name;
+            } else {
+                $this->instance_of_the_component = $component_instance_or_class_name;
+            }
+
         }
 
         /**
@@ -81,130 +89,206 @@ if ( ! class_exists('SCA_AnnotationReader', false) ) {
             return $references;
         }
 
+        /**
+         * A new version of reflectReferences that reads all of the data that 
+         * may appear 
+         *
+         * @return array
+         */
+        public function reflectReferencesFull()
+        {
+
+            $references = array();
+            $reflection = new ReflectionObject($this->instance_of_the_component);
+            $ref_props  = $reflection->getProperties();
+
+            try {
+                foreach ( $ref_props as $ref_prop ) {
+                    $reader = new SCA_CommentReader($ref_prop->getDocComment());
+                    if ($reader->isReference()) {
+                        $reference_type = $reader->getReferenceFull();                        
+                        $references[$ref_prop->getName()] = $reference_type;
+                    }
+                }
+            } catch ( Exception $e ) {
+                throw new SCA_RuntimeException(
+                "The following error occured while examining the comment block for instance variable " 
+                . $ref_prop->getName() . ": " .
+                $e->getMessage()) ;
+            }
+
+            return $references;
+        }
+
         public function reflectXsdTypes()
         {
 
-            $reflection = new ReflectionObject($this->instance_of_the_component);
+            $reflection = $this->__getReflection();
             $reader     = new SCA_CommentReader($reflection->getDocComment());
-            $xsds       = $reader -> getXSDTypes();
+            $xsds       = $reader -> getXSDTypes(); // may be an emptry array if none to be found
             return      $xsds;
         }
 
+        private function __getReflection()
+        {
+            if ($this->instance_of_the_component !== null) {
+                $sca_name   = get_class($this->instance_of_the_component);
+                $reflection = new ReflectionObject($this->instance_of_the_component);
+            } else {
+                $reflection = new ReflectionClass($this->class_name);
+            }
+            return $reflection;
+        }
+
+        private function __getMethods()
+        {
+            if ($this->instance_of_the_component !== null) {
+                return get_class_methods($this->instance_of_the_component);
+            } else {
+                return get_class_methods($this->class_name);
+            }
+        }
+
+        private function __getClassName()
+        {
+            if ($this->instance_of_the_component !== null) {
+                return get_class($this->instance_of_the_component);
+            } else {
+                return $this->class_name;
+            }
+        }
+
+        public function reflectAllXsdTypes()
+        {
+            $xsd_types_array = null;
+
+            // get xsds from the class level doc comment
+            $reflection = $this->__getReflection();
+            //            new ReflectionObject($this->instance_of_the_component);
+            $reader          = new SCA_CommentReader($reflection->getDocComment());
+            $xsd_types_array = $reader->getXSDTypes();
+
+            // get xsds from any reference doc comments
+
+
+            return $xsd_types_array;
+        }
+
         /**
-         * Checks the doc comment of each method to find annotations that can be used
-         * to generated a WSDL from the php script.
          *
-         * @return array  (Containing the annotations in the doc comment.)
+         * @return object SCA_ServiceDescription
          * @throws SCA_RuntimeException
          */
         public function reflectService()
         {
 
-            $service = null ;
+            $reflection = $this->__getReflection();
 
-            $sca_name   = get_class($this->instance_of_the_component);
-            $reflection = new ReflectionObject($this->instance_of_the_component);
             $reader     = new SCA_CommentReader($reflection->getDocComment());
+            $sca_name = $this->__getClassName();
 
             /**
-             * Check that this object is defining a web service that will require a 
-             * WSDL file to be generated.
+             * Check that this object is defining a service that will be
+             * exposed to callers
+             * [TODO] - this check needs converting to if ( ! local service )
              */
             if (!$reader->isService()) {
                 throw new SCA_RuntimeException("Class $sca_name does not contain an @service annotation.");
             }
-            
-            if ($reader->isWebService()) {
 
-                $service              = array();
-                $service['binding']   = 'ws';
-                $service['xsd_types'] = $this->reflectXsdTypes();
+            $service = new SCA_ServiceDescription();
 
-                /* Filter reflected method array to show 'public' functions only   */
-                $public_methods =
-                SCA_Helper::filterMethods(get_class_methods($this->instance_of_the_component),
-                $reflection->getMethods());
+            if ($reader->isService())
+                $service->binding = $reader->getBindings();
 
-                $operations = array();
-                $comment    = null ;
+            if (count($service->binding) == 0) {
+                throw new SCA_RuntimeException("No valid @binding annotation could be found for '{$sca_name}.php'.");
+            }
 
-                /* Check the comment of each method to find any annotations so that
-                * a wsdl can be generated from the .php file.
-                */
-                foreach ( $public_methods as $public_method ) {
-                    $methodAnnotations =
-                    SCA_AnnotationRules::createEmptyAnnotationArray();
-                    $comment           = $public_method->getDocComment();
+            $service->xsd_types = $this->reflectXsdTypes();
 
-                    /* When the method has a doc comment ....                             */
-                    if ( $comment != false ) {
-                        $method_reader = new SCA_CommentReader($comment);
+            /* Filter reflected method array to show 'public' functions only   */
+            $public_methods =
+            SCA_Helper::filterMethods($this->__getMethods(),
+            $reflection->getMethods());
 
-                        /* ... and the method a web service method ....                     */
-                        if ($method_reader->isWebMethod()) {
-                            /* ... decode any method annotations.                             */
-                            $methodAnnotations =
-                            $method_reader->getMethodAnnotations();
+            $operations = array();
+            $comment    = null ;
 
-                            if ( $methodAnnotations != null ) {
-                                $thisElement = 0 ;
+            /* Check the comment of each method to find any annotations so that
+            * a wsdl can be generated from the .php file.
+            */
+            foreach ( $public_methods as $public_method ) {
+                $methodAnnotations =
+                SCA_AnnotationRules::createEmptyAnnotationArray();
+                $comment = $public_method->getDocComment();
 
-                                /* Each set of method annotations contain a set of 1
-                                * or more  parameter annotations, and 1 return
-                                * annotation.
-                                */
-                                foreach ( $methodAnnotations as $annotationSet ) {
+                /* When the method has a doc comment ....                     */
+                if ( $comment != false ) {
+                    $method_reader = new SCA_CommentReader($comment);
 
-                                    // check that $annotationSet is not null to
-                                    // take account of the situation where no
-                                    // @return or @param annotation is specified
+                    /* ... and the method a web service method ....           */
+                    if ($method_reader->isWebMethod()) {
+                        /* ... decode any method annotations.                 */
+                        $methodAnnotations =
+                        $method_reader->getMethodAnnotations();
 
-                                    if ( $annotationSet ) {
-                                        /* Clean off the dollar sign from the variable name, and do */
-                                        /* a namespace check as appropriate.                        */
-                                        foreach ( $annotationSet as $annotation ) {
-                                            if ( strcmp($annotation['annotationType' ], SCA_AnnotationRules::PARAM) === 0 ) {
-                                                if ( strpos($annotation[ 'name' ], SCA_AnnotationRules::DOLLAR) === false ) {
-                                                    throw new SCA_RuntimeException("Invalid syntax '{$annotation[ 'name' ]}' is not a php variable name");
-                                                } else {
-                                                    $methodAnnotations[ 'parameters' ][ $thisElement ][ 'name' ] = trim($annotation[ 'name' ], SCA_AnnotationRules::DOLLAR);
+                        if ( $methodAnnotations != null ) {
+                            $thisElement = 0 ;
 
-                                                }/* End variable name check                             */
+                            /* Each set of method annotations contain a set of 1
+                            * or more  parameter annotations, and 1 return
+                            * annotation.
+                            */
+                            foreach ( $methodAnnotations as $annotationSet ) {
 
-                                            }/* End parameter annotation test                         */
+                                // check that $annotationSet is not null to
+                                // take account of the situation where no
+                                // @return or @param annotation is specified
 
-                                            /* When the array is formatted for SDO objects            */
-                                            if ( array_key_exists('namespace', $annotation) ) {
-                                                /* .... check that the xsd is defined for the namespace */
-                                                if ( ! $this->_matchXsds($service[ 'xsd_types' ], $annotation[ 'namespace' ]) ) {
-                                                    throw new SCA_RuntimeException("Namespace defined in {$annotation[ 'annotationType' ]} not found in @type annotation: '{$annotation[ 'namespace' ]}'");
+                                if ( $annotationSet ) {
+                                    /* Clean off the dollar sign from the variable name, and do */
+                                    /* a namespace check as appropriate.                        */
+                                    foreach ( $annotationSet as $annotation ) {
+                                        if ( strcmp($annotation['annotationType' ], SCA_AnnotationRules::PARAM) === 0 ) {
+                                            if ( strpos($annotation[ 'name' ], SCA_AnnotationRules::DOLLAR) === false ) {
+                                                throw new SCA_RuntimeException("Invalid syntax '{$annotation[ 'name' ]}' is not a php variable name");
+                                            } else {
+                                                $methodAnnotations[ 'parameters' ][ $thisElement ][ 'name' ] = trim($annotation[ 'name' ], SCA_AnnotationRules::DOLLAR);
+                                            }/* End variable name check                             */
 
-                                                }/* End xsd - namespace exists         */
+                                        }/* End parameter annotation test                         */
 
-                                            }/* End only for object descriptions       */
+                                        /* When the array is formatted for SDO objects            */
+                                        if ( array_key_exists('namespace', $annotation) ) {
+                                            /* .... check that the xsd is defined for the namespace */
+                                            if ( ! $this->_matchXsds($service->xsd_types, $annotation[ 'namespace' ]) ) {
+                                                //TODO: noticed potential defect that if a method A has no @param, the @param of another method is being picked up instead and this error being thrown for method A
 
-                                            $thisElement++ ; // next annotation
-                                        }/* End all of the sub-sets                */
-                                    }
-                                }/* End all of method annotation set               */
-                            }/* End annotations check                              */
-                        }/* End is a web method                                    */
-                    }/* End comment has value                                      */
+                                                throw new SCA_RuntimeException("Namespace defined in {$annotation[ 'annotationType' ]} not found in @types annotation: '{$annotation[ 'namespace' ]}'");
 
-                    /* Save the annotation set indexed by the method name.         */
-                    $operations[$public_method->getName()] = $methodAnnotations ;
+                                            }/* End xsd - namespace exists     */
 
-                }/* End every method                                               */
+                                        }/* End only for object descriptions   */
 
-                if ( is_array($service) ) {
-                    $service['operations'] = $operations;
-                }
+                                        $thisElement++ ; // next annotation
+                                    }/* End all of the sub-sets                */
+                                }
+                            }/* End all of method annotation set               */
+                        }/* End annotations check                              */
+                    }/* End is a web method                                    */
+                }/* End comment has value                                      */
 
-            } else {
-                throw new SCA_RuntimeException("You need to include '@binding.ws' if you want to use '{$sca_name}.php' as a web service.\nRefer to the User-Spec");
+                /* Save the annotation set indexed by the method name.         */
+                $operations[$public_method->getName()] = $methodAnnotations ;
 
-            }/* End this is not bound to a 'ws'                                    */
+            }/* End every method                                               */
+
+            $service->operations = $operations;
+            $service->binding_config = $reader->getNameValuePairs();
+
             return $service;
+
 
         }
 

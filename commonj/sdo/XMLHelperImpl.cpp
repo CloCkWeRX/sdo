@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 509659 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLFileWriter.h"   // Include first to avoid libxml compile problems!
 #include "commonj/sdo/SDOXMLStreamWriter.h" // Include first to avoid libxml compile problems!
@@ -478,7 +478,7 @@ namespace commonj
             {
                 if (*parseErrors.begin() != 0)
                 {
-                    delete (char*)(*parseErrors.begin());
+                    delete[] (char*)(*parseErrors.begin());
                 }
                 parseErrors.erase(parseErrors.begin());
             }
