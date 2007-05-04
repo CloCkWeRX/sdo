@@ -1,0 +1,1 @@
+{"SMDVersion":".1","serviceType":"JSON-RPC","serviceURL":"http://localhost/examples/SCA/JsonRpc/HelloService.php","methods":[{"name":"sayHello","parameters":[{"name":"name","type":"string"}],"return":{"type":"string"}}]}

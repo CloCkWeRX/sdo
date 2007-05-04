@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.5.3">
+<package version="1.0" packagerversion="1.4.11">
  <name>SCA_SDO</name>
  <summary>Service Component Architecture (SCA) and Service Data Objects (SDO) for PHP</summary>
- <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (typically a database query or an XML file) using a single interface. SCA for PHP allows a PHP programmer to write reusable components (classes) in PHP, which can be called either locally, or in a a variety of ways remotely (soap web services, xml-rpc, json-rpc, REST, etc), but always with the same interface.
+ <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (like a database query, an XML file, or a spreadsheet) using a single interface. SCA for PHP allows a PHP programmer to write reusable components (classes) in PHP, which can be called either locally, or remotely via Web Services, with an identical interface.
  </description>
  <maintainers>
   <maintainer>
@@ -32,38 +32,13 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.2.0</version>
-  <date>2007-05-03</date>
+  <version>1.1.2</version>
+  <date>2007-02-07</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>* Pluggable bindings support
-    This support is all in the core. There are now fewer files in the SCA directory and all code specific to a given binding (local, soap, jsonrpc etc.) goes in a subdirectory under the Bindings subdirectory. The SCA core code now just knows how to use the SCA_BindingsFactory object to pull in the classes it needs to service an incoming request. The names of the desired classes are derived from the annotations e.g. if a component has an @binding.soap annotation, the SCA core code will look in SCA/Bindings/soap for the classes it needs. This is probably of limited interest unless you plan to write a binding of your own. We plan an article to describe how this works.
-
-* Refactored bindings based on the pluggable binding support:
-    o jsonrpc
-    o local (php to php binding)
-    o restrpc (RPC based on HTTP GET or POST)
-    o soap (SOAP web services)
-    o xmlrpc 
-
-* Latest drop of SDO code from Tuscany (currently revision level 532769) including:
-    o performance enhancements
-    o set of fixes to DataObject destructor to eliminate crashes when the graph is not freed in the default order
-
-* Updates to SDO extension:
-    o fix memory leak from SDO_DataObject (depends on Tuscany fixes above)
-    o add debug trace macros for debugging memory allocation
-    o new signature for SDO_DAS_XML::create() allows an array of schema files to be passed in
-
-* Bug fixes 
-    o http://pecl.php.net/bugs/bug.php?id=8428
-    o http://pecl.php.net/bugs/bug.php?id=9243
-    o http://pecl.php.net/bugs/bug.php?id=9487
-    o http://pecl.php.net/bugs/bug.php?id=9991
-    o http://pecl.php.net/bugs/bug.php?id=10049
-             
-* Examples
-    o More SCA examples that exercise some of the new bindings, and some of the old, including HelloWorlds and Email scenarios.
+  <notes>Fix for bug #9845 - Relational DAS is failing when one parent and two children
+Changed from namespaceURI.type to namespaceURI#type (conform to spec)
+Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -82,19 +57,12 @@
      <file role="php" name="SCA.php"/>
      <file role="php" name="SCA_AnnotationReader.php"/>
      <file role="php" name="SCA_AnnotationRules.php"/>
-     <file role="php" name="SCA_BindingFactory.php"/>
      <file role="php" name="SCA_CommentReader.php"/>
-     <file role="php" name="SCA_Exceptions.php"/>
      <file role="php" name="SCA_GenerateWsdl.php"/>
      <file role="php" name="SCA_Helper.php"/>
-     <file role="php" name="SCA_HttpHeaderCatcher.php"/>
      <file role="php" name="SCA_LocalProxy.php"/>
-     <file role="php" name="SCA_LogFactory.php"/>
      <file role="php" name="SCA_Logger.php"/>
-     <file role="php" name="SCA_LogInterface.php"/>
-     <file role="php" name="SCA_ReferenceType.php"/>
      <file role="php" name="SCA_RuntimeException.php"/>
-     <file role="php" name="SCA_ServiceDescription.php"/>
      <file role="php" name="SCA_ServiceUnavailableException.php"/>
      <file role="php" name="SCA_ServiceWrapper.php"/>
      <file role="php" name="SCA_SoapProxy.php"/>
@@ -140,8 +108,6 @@
       <file role="src" name="DataObjectList.h"/>
       <file role="src" name="DataObjectListImpl.cpp"/>
       <file role="src" name="DataObjectListImpl.h"/>
-      <file role="src" name="DataTypeInfo.cpp"/>
-      <file role="src" name="DataTypeInfo.h"/>
       <file role="src" name="DefaultLogWriter.cpp"/>
       <file role="src" name="DefaultLogWriter.h"/>
       <file role="src" name="disable_warn.h"/>
@@ -190,8 +156,6 @@
       <file role="src" name="SDO.h"/>
       <file role="src" name="SdoCheck.cpp"/>
       <file role="src" name="SdoCheck.h"/>
-      <file role="src" name="SDODataConverter.cpp"/>
-      <file role="src" name="SDODataConverter.h"/>
       <file role="src" name="SDODate.cpp"/>
       <file role="src" name="SDODate.h"/>
       <file role="src" name="SdoRuntime.cpp"/>
@@ -207,8 +171,6 @@
       <file role="src" name="SDOUserMacros.h"/>
       <file role="src" name="SDOUtils.cpp"/>
       <file role="src" name="SDOUtils.h"/>
-      <file role="src" name="SDOValue.cpp"/>
-      <file role="src" name="SDOValue.h"/>
       <file role="src" name="SDOXMLBufferWriter.cpp"/>
       <file role="src" name="SDOXMLBufferWriter.h"/>
       <file role="src" name="SDOXMLFileWriter.cpp"/>
@@ -349,17 +311,6 @@
       </dir> <!-- /examples/DAS/XML -->
      </dir> <!-- /examples/DAS -->
      <dir name="SCA">
-      <dir name="JsonRpc">
-       <file role="test" name="email.xsd"/>
-       <file role="test" name="emailresponse.xsd"/>
-       <file role="test" name="emailresponselist.xsd"/>
-       <file role="test" name="EmailService.php"/>
-       <file role="test" name="HelloService.php"/>
-       <file role="test" name="LocalService.php"/>
-       <file role="test" name="MailApplicationClient.php"/>
-       <file role="test" name="MailApplicationService.php"/>
-       <file role="test" name="WebService.php"/>
-      </dir> <!-- /examples/SCA/JsonRpc -->
       <dir name="SCAComponentCallingLocalSCAComponent">
        <file role="test" name="HelloClient.php"/>
        <file role="test" name="HelloService.php"/>
@@ -384,7 +335,6 @@
        <file role="test" name="HelloService.php"/>
       </dir> <!-- /examples/SCA/ScriptCallingRemoteSCAComponent -->
       <file role="test" name="index.html"/>
-      <file role="test" name="phpinfo.php"/>
      </dir> <!-- /examples/SCA -->
      <dir name="SDO">
       <dir name="contacts">
@@ -490,7 +440,6 @@
        <file role="test" name="002.phpt"/>
        <file role="test" name="003.phpt"/>
        <file role="test" name="004.phpt"/>
-       <file role="test" name="bug8428.phpt"/>
        <file role="test" name="Component.php"/>
        <file role="test" name="Component.wsdl"/>
        <file role="test" name="person.xsd"/>
@@ -539,16 +488,11 @@
        <file role="test" name="001.phpt"/>
        <file role="test" name="002.phpt"/>
        <file role="test" name="003.phpt"/>
+       <file role="test" name="004.phpt"/>
        <file role="test" name="005.phpt"/>
        <file role="test" name="006.phpt"/>
        <file role="test" name="007.phpt"/>
        <file role="test" name="008.phpt"/>
-       <file role="test" name="bug8694.phpt"/>
-       <file role="test" name="bug9243.phpt"/>
-       <file role="test" name="bug9487.phpt"/>
-       <file role="test" name="bug9991.phpt"/>
-       <file role="test" name="bug10049.phpt"/>
-       <file role="test" name="bug10842.phpt"/>
        <file role="test" name="company.xml"/>
        <file role="test" name="company.xsd"/>
        <file role="test" name="test.inc"/>
@@ -559,9 +503,6 @@
      </dir> <!-- /tests/SDO -->
      <file role="test" name="AllTests.php"/>
      <file role="test" name="AllTestsSetup.php"/>
-     <file role="test" name="run.bat"/>
-     <file role="test" name="runreport.bat"/>
-     <file role="test" name="runv.bat"/>
      <file role="test" name="TestSuite.php"/>
     </dir> <!-- /tests -->
     <file role="src" name="CLA"/>
@@ -791,41 +732,6 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
     <notes>Fix for bug #9845 - Relational DAS is failing when one parent and two children
 Changed from namespaceURI.type to namespaceURI#type (conform to spec)
 Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)
-    </notes>
-   </release>
-   <release>
-    <version>1.2.0</version>
-    <date>2007-05-03</date>
-    <license>Apache 2.0</license>
-    <state>stable</state>
-    <notes>* Pluggable bindings support
-    This support is all in the core. There are now fewer files in the SCA directory and all code specific to a given binding (local, soap, jsonrpc etc.) goes in a subdirectory under the Bindings subdirectory. The SCA core code now just knows how to use the SCA_BindingsFactory object to pull in the classes it needs to service an incoming request. The names of the desired classes are derived from the annotations e.g. if a component has an @binding.soap annotation, the SCA core code will look in SCA/Bindings/soap for the classes it needs. This is probably of limited interest unless you plan to write a binding of your own. We plan an article to describe how this works.
-
-* Refactored bindings based on the pluggable binding support:
-    o jsonrpc
-    o local (php to php binding)
-    o restrpc (RPC based on HTTP GET or POST)
-    o soap (SOAP web services)
-    o xmlrpc 
-
-* Latest drop of SDO code from Tuscany (currently revision level 532769) including:
-    o performance enhancements
-    o set of fixes to DataObject destructor to eliminate crashes when the graph is not freed in the default order
-
-* Updates to SDO extension:
-    o fix memory leak from SDO_DataObject (depends on Tuscany fixes above)
-    o add debug trace macros for debugging memory allocation
-    o new signature for SDO_DAS_XML::create() allows an array of schema files to be passed in
-
-* Bug fixes 
-    o http://pecl.php.net/bugs/bug.php?id=8428
-    o http://pecl.php.net/bugs/bug.php?id=9243
-    o http://pecl.php.net/bugs/bug.php?id=9487
-    o http://pecl.php.net/bugs/bug.php?id=9991
-    o http://pecl.php.net/bugs/bug.php?id=10049
-             
-* Examples
-    o More SCA examples that exercise some of the new bindings, and some of the old, including HelloWorlds and Email scenarios.
     </notes>
    </release>
  </changelog>

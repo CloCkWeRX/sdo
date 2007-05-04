@@ -1,0 +1,61 @@
+/*
++-----------------------------------------------------------------------------+
+| (c) Copyright IBM Corporation 2006.                                         |
+| All Rights Reserved.                                                        |
++-----------------------------------------------------------------------------+
+| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+| use this file except in compliance with the License. You may obtain a copy  |
+| of the License at -                                                         |
+|                                                                             |
+|                   http://www.apache.org/licenses/LICENSE-2.0                |
+|                                                                             |
+| Unless required by applicable law or agreed to in writing, software         |
+| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+| See the License for the specific language governing  permissions and        |
+| limitations under the License.                                              |
++-----------------------------------------------------------------------------+
+| Author: Graham Charters,                                                    |
+|         Matthew Peters,                                                     |
+|         Megan Beynon,                                                       |
+|         Chris Miller,                                                       |
+|         Caroline Maynard,                                                   |
+|         Simon Laws                                                          |
++-----------------------------------------------------------------------------+
+*/
+
+The rest.rpc Binding
+====================
+
+This binding supports the rather poorly defined mechanism whereby server actions are
+performed as a result of an HTTP request. The action performed does not necessarily relate 
+to the verbs defined by HTTP and parameters for the action may be passes either in the 
+URL (when GET is used) or in the body (when POST) is used.
+
+In computing calling remote procedures with parameters has been called a Remote Procedure 
+Call (hence rpc) and lately this has become a popular approach to implementing services 
+in the REST oriented world of HTTP (hence rest.rpc).
+
+In this binding the convention is that the name of the action to be performed is provided 
+on the URL as path info directly following the name of the target php script. Parameters
+for the action are provide as required by the verb used, i.e, 
+
+
+GET /phpscripts/HelloWorld.php/someaction?parama=1&paramb=2 HTTP/1.1
+Accept: text/xml,application/xml,application/xhtml+xml,text/html etc.
+
+
+POST /phpscripts/HelloWorld.php/someaction HTTP/1.1
+Accept: text/xml,application/xml,application/xhtml+xml,text/html etc.
+parama=1&paramb=2
+
+A POST request is expected to have a content-type of application/x-www-form-urlencoded 
+or text/xml. The implication of this is that a method in a service is expected to have
+zero or more simple typed parameters or zero or 1 SDO typed parameter. A GET 
+request only provides simple types parameters.
+
+Issues
+======
+
+1/ The wrapper allows any content to be returned but the proxy is only able to 
+   deal with xml on the return 

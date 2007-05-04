@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema version="1.1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:annotation>
+    <xs:documentation>
+    XML Schema for the RSS protocol v 2.0
++-----------------------------------------------------------------------------+
+| Copyright IBM Corporation 2006.                                             |
+| All Rights Reserved.                                                        |
++-----------------------------------------------------------------------------+
+| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+| use this file except in compliance with the License. You may obtain a copy  |
+| of the License at -                                                         |
+|                                                                             |
+|                   http://www.apache.org/licenses/LICENSE-2.0                |
+|                                                                             |
+| Unless required by applicable law or agreed to in writing, software         |
+| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+| See the License for the specific language governing  permissions and        |
+| limitations under the License.                                              |
++-----------------------------------------------------------------------------+
+| Author: Matthew Peters                                                      |
+|         Graham Charters                                                     |
++-----------------------------------------------------------------------------+
+    $Id$
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="rss">
+    <xs:complexType>
+      <xs:attribute name="version" default="2.0" />
+      <xs:sequence>
+        <xs:element name="channel" type="channelType" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="channelType">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string" />
+      <xs:element name="link" type="urlType" />
+      <xs:element name="description" type="xs:string" />
+      <xs:element name="language" type="xs:string"/>
+      <xs:element name="copyright" type="xs:string" minOccurs="0" />
+      <xs:element name="managingEditor" type="emailType" minOccurs="0" />
+      <xs:element name="webMaster" type="emailType" minOccurs="0" />
+      <xs:element name="pubDate" type="xs:string" minOccurs="0" /> <!-- TODO: date of format: Sat, 07 Sep 2002 09:42:31 GMT -->
+      <xs:element name="lastBuildDate" type="xs:string" minOccurs="0" /> <!-- TODO: date of format: Sat, 07 Sep 2002 09:42:31 GMT -->
+      <xs:element name="category" type="categoryType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="generator" type="xs:string" minOccurs="0" />
+      <xs:element name="docs" type="urlType" minOccurs="0" />
+      <xs:element name="cloud" type="cloudType" minOccurs="0" /> <!-- TODO: proper cloud support -->
+      <xs:element name="ttl" type="xs:positiveInteger" minOccurs="0" />
+      <xs:element name="image" type="imageType" minOccurs="0" />
+      <xs:element name="rating" type="picsType" minOccurs="0" />
+      <xs:element name="textInput" type="textInputType" minOccurs="0" />
+      <xs:element name="skipHours" type="skipHoursType" minOccurs="0" />
+      <xs:element name="skipDays" type="skipDaysType" minOccurs="0" />
+      <xs:element name="item" type="itemType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="itemType">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string" minOccurs="0" />
+      <xs:element name="link" type="urlType" minOccurs="0" />
+      <xs:element name="description" type="xs:string" minOccurs="0" />
+      <xs:element name="author" type="emailType" minOccurs="0" />
+      <xs:element name="category" type="categoryType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="comments" type="urlType" minOccurs="0" />
+      <xs:element name="enclosure" type="enclosureType" minOccurs="0" />
+      <xs:element name="guid" type="guidType" minOccurs="0" />
+      <xs:element name="pubDate" type="xs:string" minOccurs="0" />
+      <xs:element name="source" type="sourceType" />
+      <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="guidType">
+    <xs:simpleContent>
+	  <xs:extension base="xs:string">
+		<xs:attribute name="isPermaLink" use="optional" type="xs:boolean"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+    
+  <xs:complexType name="enclosureType">
+      <xs:attribute name="url" type="xs:string"/>
+      <xs:attribute name="length" type="xs:positiveInteger"/>
+      <xs:attribute name="type" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:simpleType name="emailType">
+      <xs:restriction base="xs:string">
+          <xs:pattern value=".+@.+" />
+      </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="categoryType">
+    <xs:simpleContent>
+	  <xs:extension base="xs:string">
+		<xs:attribute name="domain" use="optional" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="sourceType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="url" type="urlType"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- TODO: restrict to values 0 to 23 -->
+  <xs:complexType name="skipHoursType">
+    <xs:sequence>
+        <xs:element name="hour" minOccurs="0" maxOccurs="24" type="xs:positiveInteger" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- TODO: restrict to values Monday, Tuesday, etc.. -->
+  <xs:complexType name="skipDaysType">
+    <xs:sequence>
+        <xs:element name="day" minOccurs="0" maxOccurs="7" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="imageType">
+    <xs:sequence>
+      <xs:element name="url" type="urlType" />
+      <xs:element name="title" type="xs:string" />
+      <xs:element name="link" type="urlType" />
+      <xs:element name="width" type="xs:positiveInteger" minOccurs="0" />
+      <xs:element name="height" type="xs:positiveInteger" minOccurs="0" />
+      <xs:element name="description" type="xs:string" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="textInputType">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string" />
+      <xs:element name="description" type="xs:string" />
+      <xs:element name="name" type="xs:string" />
+      <xs:element name="link" type="urlType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="urlType" >
+      <xs:restriction base="xs:string" /> <!-- schema uri type? May want to tighten def'n in future -->
+  </xs:simpleType>
+
+  <!-- TODO: PICS ratings -->
+  <xs:complexType name="picsType" mixed="true">
+      <xs:sequence>
+          <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+      <xs:anyAttribute />
+  </xs:complexType>	
+
+  <!-- TODO: clound type -->
+  <xs:complexType name="cloudType" mixed="true">
+      <xs:sequence>
+          <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+      <xs:anyAttribute />
+  </xs:complexType>	
+
+</xs:schema>

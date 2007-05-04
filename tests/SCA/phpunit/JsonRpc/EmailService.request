@@ -1,0 +1,1 @@
+{"id":0,"method":"sendComplexMessage","params":[{"address":"fred@somewhere.org","message":"some message"}],"version":"1.0"}

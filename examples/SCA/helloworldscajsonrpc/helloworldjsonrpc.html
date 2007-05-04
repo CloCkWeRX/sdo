@@ -1,0 +1,88 @@
+<html>
+<!--
++----------------------------------------------------------------------+
+| Copyright IBM Corporation 2007.                                      || (c) Copyright IBM Corporation 2007.                                  |
+| All Rights Reserved.                                                 |
++----------------------------------------------------------------------+
+|                                                                      |
+| Licensed under the Apache License, Version 2.0 (the "License"); you  |
+| may not use this file except in compliance with the License. You may |
+| obtain a copy of the License at                                      |
+| http://www.apache.org/licenses/LICENSE-2.0                           |
+|                                                                      |
+| Unless required by applicable law or agreed to in writing, software  |
+| distributed under the License is distributed on an "AS IS" BASIS,    |
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+| implied. See the License for the specific language governing         |
+| permissions and limitations under the License.                       |
++----------------------------------------------------------------------+
+| Author: SL                                                           |
++----------------------------------------------------------------------+
+$Id$
+-->
+
+<script type="text/javascript" src="../../../dojo/dojo.js">
+</script>
+
+<script language="javascript">
+  dojo.require("dojo.event.*");
+  dojo.require("dojo.rpc.JsonService");
+  dojo.require("dojo.rpc.Deferred");
+  dojo.require("dojo.widget.*");
+  dojo.require("dojo.widget.Button");
+  
+  var request;
+  
+  function helloCallback(result) {
+    if ( result.error != null ) {
+        document.getElementById('responsetext').innerHTML = result.error;
+    } else {
+        var html    = "<table>" +
+                      "<tr>" +
+                      "<td>name</td>" +
+                      "<td>" + result.name + "</td>" +
+                      "</tr>" +
+                      "<tr>" +
+                      "<td>greeting</td>" +
+                      "<td>" + result.greeting + "</td>" +
+                      "</tr>" +  
+                      "<tr>" +
+                      "<td>reversed</td>" +
+                      "<td>" + result.reversed + "</td>" +
+                      "</tr>" +                                           
+                      "</table>";
+                      
+        document.getElementById('responsetext').innerHTML = html;    
+    }
+  }   
+ 
+  function sendText ()
+  {    
+    //var helloworld = new dojo.rpc.JsonService({smdUrl: "helloworld.php?smd"});
+    var helloworld = new dojo.rpc.JsonService({smdUrl: "HelloWorld.smd"});
+    var inputfield = document.getElementById("inputtext").value;  	
+    helloworld.hello(inputfield).addCallback(helloCallback);                                
+  }
+  
+  function init()
+  {
+    var sendButton = dojo.widget.byId('sendButton');
+    dojo.event.connect(sendButton, 'onClick', 'sendText')
+  }
+    
+  dojo.addOnLoad(init);  
+</script>
+
+<head>
+    <title>Hello World</title>
+</head>
+<body>
+
+<form id="myForm" method="POST">
+    Please enter some text: <input type="text" id="inputtext" size="80" value="some text"">
+</form> 
+<button dojoType="Button" widgetId="sendButton">Send</button>
+<p/>
+<div id="responsetext"/>
+</body>
+</html>
