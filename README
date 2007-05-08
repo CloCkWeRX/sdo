@@ -1,28 +1,27 @@
 $Id$
 
 See http://www.php.net/sdo/ for API documentation, or
-http://livedocs.phpdoc.info/index.php?q=ref.sdo for the very 
-latest version.
+http://livedocs.php.net/livedocs/en/ref.sdo.php for the very latest version.
 
 See INSTALL (in this directory) for installation instructions.
 
 Report bugs in the PECL bug tracking system at http://pecl.php.net/bugs/.
 
-There is a project homepage at http://www.osoa.org/display/PHP/SOA%2BPHP%2BHomepage
-which holds any FAQ and wish list type information that can't find a home
-on the PECL page. 
-
+There is a project homepage at http://www.osoa.org/display/PHP/ which holds 
+any FAQ and wish list type information that can't find a home on the PECL page. 
+There is also a Google mail list http://www.groups.google.com/group/phpsoa 
+for the extension where you can ask questions and make suggestions. 
 We're very interested in getting your comments or any feedback that 
-you may have.  Please feel free to email any of the project leads.
-There is also a Google mail list for the extension where you can ask questions 
-and make suggestions. See the the extension homepage at
-http://www.osoa.org/display/PHP/SOA%2BPHP%2BHomepage. 
-You may also use the php.pecl.dev mailing list at
-http://news.php.net/group.php?group=php.pecl.dev.
+you may have, either on the mailing list, or if you prefer, directly to any of 
+the project leads. 
 
 If you'd like to contribute to this project, we ask you to complete
 a Contributor License Agreement. The file CLA (in this directory)
 contains the agreement and instructions for returning it.
+
+In this project, active development for each release takes place in a CVS branch. 
+The name of the current development branch is maintained in the file 
+DEVELOPMENT_BRANCH (in this directory).
 
 For further information about SDO, visit the Apache Tuscany Project at
 http://incubator.apache.org/tuscany/.
