@@ -159,6 +159,7 @@
        'roles' => array('*.php' => 'php', '*.cpp' => 'src'),
        'ignore' => array(
            'ajax-rss/',
+           'ebaysoap/',
            'autom4te.cache/',
            'build/',
            'CVS/',
