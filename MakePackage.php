@@ -181,7 +181,6 @@
            'configure.in',
            'install.sh',
            'install-sh',
-           'Json.php',
            'libtool',
            'ltmain.sh',
            'Makefile',
