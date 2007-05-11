@@ -193,6 +193,7 @@
            'run-tests.php',
            'SCA.txt',
            'wsdl-all.xsd',
+           'DEV_BRANCH',
                         // packaging
            'MakePackage.php',
            'package.xml',                      
