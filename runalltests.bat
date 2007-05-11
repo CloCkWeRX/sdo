@@ -17,7 +17,7 @@ rem | permissions and limitations under the License.                       |
 rem +----------------------------------------------------------------------+
 rem | Author: SL                                                           |
 rem +----------------------------------------------------------------------+
-rem $Id: runalltests.bat,v 1.4 2007-02-07 11:25:35 cem Exp $
+rem $Id: runalltests.bat,v 1.5 2007-05-11 09:03:12 slaws Exp $
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo This script runs all of the PHP SDO tests that can
@@ -30,7 +30,7 @@ echo PHP_HOME - the root directory for the php build
 echo PHP_BIN_HOME - the directory holding the binary to be tested
 scho TMP - the directory where temporary files will be written during testing
 
-set PHP_HOME=C:\simon\Projects\Tuscany\php\php-5.2.0
+set PHP_HOME=c:\php-5.2.0
 set PHP_BIN_HOME=%PHP_HOME%\Debug_TS
 set TMP=C:\temp
 
@@ -52,7 +52,7 @@ echo PHPT Tests
 call %TEST_PHP_EXECUTABLE% %PHP_HOME%\run-tests.php tests
 
 echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-echo PHPUnit2 Tests
+echo PHPUnit Tests
 cd tests
 call %TEST_PHP_EXECUTABLE% AllTests.php
 cd ..
