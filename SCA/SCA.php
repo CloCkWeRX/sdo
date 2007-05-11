@@ -124,7 +124,7 @@ if (! class_exists('SCA', false)) {
             self::$logger = SCA_LogFactory::create();
 
             // Turn on logging here by removing the comment from the following line
-//                 self::$logger->startLog();
+                 self::$logger->startLog();
 
             self::$logger->log('Entering');
             self::$logger->log("Called from $calling_component_filename");
@@ -221,7 +221,7 @@ if (! class_exists('SCA', false)) {
               */
             self::$logger->log('Request was not ATOM, JSON, SOAP, or a request for a .smd or .wsdl file.');
         }
-
+        
         private static function _includedByAClientScriptThatIsNotAComponent($calling_component_filename)
         {
             $class_name = SCA_Helper::guessClassName($calling_component_filename);
@@ -452,15 +452,16 @@ if (! class_exists('SCA', false)) {
          * @return array  ( Containing the service decscriptions )
          * @throws SCA_RuntimeException ... when things go wrong
          */
-        public static function constructServiceDescription( $class_file )
+        public static function constructServiceDescription($class_file)
         {
             $class_name = SCA_Helper::guessClassName($class_file);
 
-            if ( ! class_exists($class_name, false))
-            // The code analyzer marks the following include with a variable name as
-            // unsafe. It is safde, however as the class file name can only come from
-            // a getService call or an annotation.
-            include "$class_file";
+            if ( ! class_exists($class_name, false)){
+                // The code analyzer marks the following include with a variable name as
+                // unsafe. It is safe, however as the class file name can only come from
+                // a getService call or an annotation.
+                include "$class_file";
+            }
 
             if ( class_exists($class_name) ) {
                 $instance            = new $class_name;
@@ -533,6 +534,22 @@ if (! class_exists('SCA', false)) {
         //            $type_name, $class_name);
         //        }
 
+        /**
+         * This function can be called directly by a php script to dispatch a request to 
+         * an SCA service. You only need to use this operation when you organize your
+         * code so that the service implementation (and SCA/SCA.php include) are included
+         * by in a script that is just a wrapper script and is not acting as a client for 
+         * the service. This can happen if you want keep php files that define service 
+         * outside of the htdocs directory
+         *
+         * @param       string  $class_name     The class_name that implements the target service
+         */
+        public static function dispatch($class_name)
+        {
+            $file_name = SCA_Helper::getFileContainingClass($class_name);                    
+            $_SERVER['SCRIPT_FILENAME'] = $file_name;
+            SCA::initComponent($file_name);            
+        }
     }/* End SCA Class                                                         */
 
 

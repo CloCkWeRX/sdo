@@ -6,8 +6,8 @@ display_errors=off
 <?php 
 if (!extension_loaded("sdo")) 
     echo "skip sdo not loaded"; 
-else if (phpversion('sdo') <= '1.2.0')
-    echo "skip test requires version > 1.2.0";
+else if (phpversion('sdo') <= '1.2.1')
+    echo "skip test requires version > 1.2.1";
 ?>
 --FILE--
 <?php

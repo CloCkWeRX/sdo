@@ -89,6 +89,8 @@ if ( ! class_exists('SCA_Bindings_restrpc_Proxy', false)) {
          */
         public function __call($method_name, $arguments)
         {
+            SCA::$logger->log("Entering");
+            SCA::$logger->log("method name is $method_name");
             // construct the request URL
             $url = $this->target_url."/".$method_name;
 

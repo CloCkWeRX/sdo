@@ -37,7 +37,7 @@ using std::ostringstream;
 
 
 
-#define SDO_VERSION "1.2.0"
+#define SDO_VERSION "1.2.1"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"

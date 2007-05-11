@@ -94,9 +94,9 @@ if ( ! class_exists('SCA_Bindings_soap_ServiceDescriptionGenerator', false) ) {
             * Work out the location for the generated php file
             ***********************************************************************/
             if (array_key_exists('location', $service_desc->binding_config)) {
-                $location = $service_desc->binding_config['location'];
+                $location = str_replace(' ', '%20', $service_desc->binding_config['location']);
             } else {
-                $location = 'http://' . $service_desc->http_host . $service_desc->script_name;
+                $location = str_replace(' ', '%20', 'http://' . $service_desc->http_host . $service_desc->script_name);
             }
 
 

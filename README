@@ -21,7 +21,7 @@ contains the agreement and instructions for returning it.
 
 In this project, active development for each release takes place in a CVS branch. 
 The name of the current development branch is maintained in the file 
-DEVELOPMENT_BRANCH (in this directory).
+DEV_BRANCH (in this directory).
 
 For further information about SDO, visit the Apache Tuscany Project at
 http://incubator.apache.org/tuscany/.

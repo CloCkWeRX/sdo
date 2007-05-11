@@ -35,8 +35,32 @@ if ( ! class_exists('SCA_Helper', false) ) {
 
         public static function guessClassName($class_file)
         {
-            $basename = basename($class_file, '.php');
-            return $basename;
+            // TODO - How do we handle the case where the classname
+            // follows PEAR coding standards? For the time being
+            // just keep extending the class name with parts of the 
+            // directory path until we find a class that exists or we 
+            // run out of directory path
+            
+            $class_name = basename($class_file, '.php');
+            if (class_exists($class_name)){
+                return $class_name;
+            }
+            
+            // walk back up the dir path trying to find a class
+            // that has already been loaded
+            $pear_class_name = $class_name;
+            $class_file = str_replace('\\', '/', $class_file);
+            $dir_array = explode('/', dirname($class_file));
+            foreach( array_reverse($dir_array) as $dir){                     
+                $pear_class_name = $dir . '_' . $pear_class_name;                           
+                if (class_exists($pear_class_name)){
+                    return $pear_class_name;
+                }
+            }
+            
+            // Don't throw an error if nothing is found as other code
+            // in SCA does file inclusion in an attempt to resolve classes
+            return $class_name;
         }
 
         public static function isARelativePath($path)
@@ -76,14 +100,35 @@ if ( ! class_exists('SCA_Helper', false) ) {
 
         public static function getFileContainingClass($class_name)
         {
+            SCA::$logger->log("Entering");
+            SCA::$logger->log("Looking for file that contains class=$class_name");           
             foreach (get_included_files() as $file) {
-
-                if ($class_name == basename($file, ".php")) {
-
+                // try to find an include using the full class name
+                if (strcasecmp($class_name,basename($file, ".php")) === 0) {
+                    SCA::$logger->log("found a match with file $file");
                     return $file;
                 }
-
+                
+                // try to find an include using PEAR coding standards. In this
+                // case a class name A_Class_Name is considered to be found in the
+                // file A/Class/Name.php   
+                
+                // TODO - I'm cheating here as I'm only checking the last part
+                // of the PEAR class name with the basename of the file. I could
+                // pick up the wrong filename if there is another file with the 
+                // same name in a directory that doesn't match the PEAR classname
+                // need to walk back through the file name checking that the 
+                // directory path matched as well. This is just a test to 
+                // see if I have the right idea about PEAR class names so leave
+                // this until later. 
+                $parts = explode('_', $class_name);
+                $pear_class_name = array_pop($parts);
+                if ($pear_class_name == basename($file, ".php")) {
+                    SCA::$logger->log("found a match with file $file");                
+                    return $file;
+                }
             }
+
             throw new SCA_RuntimeException("Unable to determine which file contains class $class_name \n");
         }
 

@@ -71,7 +71,7 @@ if ( ! class_exists('SCA_GenerateSmd', false) ) {
             $smd              = new stdClass;
             $smd->SMDVersion  = ".1";
             $smd->serviceType = "JSON-RPC";
-            $smd->serviceURL  = "http://" . $http_host . $_SERVER['SCRIPT_NAME'];
+            $smd->serviceURL  = str_replace(' ', '%20', "http://" . $http_host . $_SERVER['SCRIPT_NAME']);
             $smd->methods     = array();
 
             foreach ( $service_desc->operations as $operation_name => $operation ) {

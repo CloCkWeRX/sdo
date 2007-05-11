@@ -31,6 +31,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'SDO/phpunit/SDOAPITest.php';
 require_once 'DAS/Relational/phpunit/TestSuite.php';
 require_once 'DAS/XML/phpunit/XMLDASTest.php';
+require_once 'DAS/Json/phpunit/JsonDASTest.php';
 require_once 'SCA/phpunit/TestSuite.php';
 
 class SCA_SDO_TestSuite {
@@ -46,6 +47,7 @@ class SCA_SDO_TestSuite {
 
         $suite->addTest(new PHPUnit_Framework_TestSuite("SDOAPITest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("XMLDASTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("JsonDASTest"));        
         $suite->addTest(SCA_TestSuite::suite());
         $suite->addTest(SDO_DAS_Relational_TestSuite::suite());
         return $suite;
