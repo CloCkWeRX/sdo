@@ -156,7 +156,7 @@
   .  " * Experimental support for a manual service request dispatching interface on SCA.php\n"
   ,
        'simpleoutput' => true,
-       'version' => '1.2.0',
+       'version' => '1.2.1',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',

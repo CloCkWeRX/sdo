@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.11">
+<package version="1.0" packagerversion="1.5.3">
  <name>SCA_SDO</name>
  <summary>Service Component Architecture (SCA) and Service Data Objects (SDO) for PHP</summary>
- <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (like a database query, an XML file, or a spreadsheet) using a single interface. SCA for PHP allows a PHP programmer to write reusable components (classes) in PHP, which can be called either locally, or remotely via Web Services, with an identical interface.
+ <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (typically a database query or an XML file) using a single interface. SCA for PHP allows a PHP programmer to write reusable components (classes) in PHP, which can be called either locally, or in a a variety of ways remotely (soap web services, xml-rpc, json-rpc, REST, etc), but always with the same interface.
  </description>
  <maintainers>
   <maintainer>
@@ -32,13 +32,13 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.1.2</version>
-  <date>2007-02-07</date>
+  <version>1.2.1</version>
+  <date>2007-05-11</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>Fix for bug #9845 - Relational DAS is failing when one parent and two children
-Changed from namespaceURI.type to namespaceURI#type (conform to spec)
-Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)
+  <notes>* Fix for spaces in service description URLs (pecl defect #11006).
+ * Experimental support for service names following the PEAR coding standard
+ * Experimental support for a manual service request dispatching interface on SCA.php
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -46,10 +46,62 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
   </deps>
   <filelist>
     <dir name="SCA">
-     <dir name="soap">
-      <file role="php" name="2003-02-11.xsd"/>
-     </dir> <!-- /SCA/soap -->
-     <file role="php" name="2003-02-11.xsd"/>
+     <dir name="Bindings">
+      <dir name="jsonrpc">
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="SCA_GenerateSmd.php"/>
+       <file role="php" name="SCA_JsonRpcClient.php"/>
+       <file role="php" name="SCA_JsonRpcServer.php"/>
+       <file role="php" name="SCA_ServiceWrapperJson.php"/>
+       <file role="php" name="ServiceDescriptionGenerator.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+      </dir> <!-- /SCA/Bindings/jsonrpc -->
+      <dir name="local">
+       <file role="php" name="Proxy.php"/>
+      </dir> <!-- /SCA/Bindings/local -->
+      <dir name="restrpc">
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="README"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="Server.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+       <file role="php" name="Wrapper.php"/>
+      </dir> <!-- /SCA/Bindings/restrpc -->
+      <dir name="rss">
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="rss2.0.xsd"/>
+       <file role="php" name="RssDas.php"/>
+       <file role="php" name="RssTypes.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+      </dir> <!-- /SCA/Bindings/rss -->
+      <dir name="soap">
+       <dir name="soap">
+        <file role="php" name="2003-02-11.xsd"/>
+       </dir> <!-- /SCA/Bindings/soap/soap -->
+       <file role="php" name="2003-02-11.xsd"/>
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="SDO_TypeHandler.php"/>
+       <file role="php" name="ServiceDescriptionGenerator.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+       <file role="php" name="Wrapper.php"/>
+      </dir> <!-- /SCA/Bindings/soap -->
+      <dir name="tuscany">
+       <file role="php" name="SCA_TuscanyProxy.php"/>
+       <file role="php" name="SCA_TuscanyWrapper.php"/>
+      </dir> <!-- /SCA/Bindings/tuscany -->
+      <dir name="xmlrpc">
+       <file role="php" name="Das.php"/>
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="Server.php"/>
+       <file role="php" name="ServiceDescriptionGenerator.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+       <file role="php" name="Wrapper.php"/>
+      </dir> <!-- /SCA/Bindings/xmlrpc -->
+     </dir> <!-- /SCA/Bindings -->
      <file role="php" name="CREDITS"/>
      <file role="php" name="EXPERIMENTAL"/>
      <file role="php" name="INSTALL"/>
@@ -57,16 +109,16 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
      <file role="php" name="SCA.php"/>
      <file role="php" name="SCA_AnnotationReader.php"/>
      <file role="php" name="SCA_AnnotationRules.php"/>
+     <file role="php" name="SCA_BindingFactory.php"/>
      <file role="php" name="SCA_CommentReader.php"/>
-     <file role="php" name="SCA_GenerateWsdl.php"/>
+     <file role="php" name="SCA_Exceptions.php"/>
      <file role="php" name="SCA_Helper.php"/>
-     <file role="php" name="SCA_LocalProxy.php"/>
+     <file role="php" name="SCA_HttpHeaderCatcher.php"/>
+     <file role="php" name="SCA_LogFactory.php"/>
      <file role="php" name="SCA_Logger.php"/>
-     <file role="php" name="SCA_RuntimeException.php"/>
-     <file role="php" name="SCA_ServiceUnavailableException.php"/>
-     <file role="php" name="SCA_ServiceWrapper.php"/>
-     <file role="php" name="SCA_SoapProxy.php"/>
-     <file role="php" name="SDO_TypeHandler.php"/>
+     <file role="php" name="SCA_LogInterface.php"/>
+     <file role="php" name="SCA_ReferenceType.php"/>
+     <file role="php" name="SCA_ServiceDescription.php"/>
     </dir> <!-- /SCA -->
    <dir name="/" baseinstalldir="SDO">
     <dir name="commonj">
@@ -108,6 +160,8 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
       <file role="src" name="DataObjectList.h"/>
       <file role="src" name="DataObjectListImpl.cpp"/>
       <file role="src" name="DataObjectListImpl.h"/>
+      <file role="src" name="DataTypeInfo.cpp"/>
+      <file role="src" name="DataTypeInfo.h"/>
       <file role="src" name="DefaultLogWriter.cpp"/>
       <file role="src" name="DefaultLogWriter.h"/>
       <file role="src" name="disable_warn.h"/>
@@ -156,6 +210,8 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
       <file role="src" name="SDO.h"/>
       <file role="src" name="SdoCheck.cpp"/>
       <file role="src" name="SdoCheck.h"/>
+      <file role="src" name="SDODataConverter.cpp"/>
+      <file role="src" name="SDODataConverter.h"/>
       <file role="src" name="SDODate.cpp"/>
       <file role="src" name="SDODate.h"/>
       <file role="src" name="SdoRuntime.cpp"/>
@@ -171,6 +227,8 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
       <file role="src" name="SDOUserMacros.h"/>
       <file role="src" name="SDOUtils.cpp"/>
       <file role="src" name="SDOUtils.h"/>
+      <file role="src" name="SDOValue.cpp"/>
+      <file role="src" name="SDOValue.h"/>
       <file role="src" name="SDOXMLBufferWriter.cpp"/>
       <file role="src" name="SDOXMLBufferWriter.h"/>
       <file role="src" name="SDOXMLFileWriter.cpp"/>
@@ -258,6 +316,7 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
       <file role="php" name="UpdateAction.php"/>
       <file role="php" name="UpdateNonContainmentReferenceAction.php"/>
      </dir> <!-- /DAS/Relational -->
+     <file role="php" name="Json.php"/>
      <file role="php" name="Relational.php"/>
     </dir> <!-- /DAS -->
     <dir name="examples">
@@ -311,30 +370,122 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
       </dir> <!-- /examples/DAS/XML -->
      </dir> <!-- /examples/DAS -->
      <dir name="SCA">
-      <dir name="SCAComponentCallingLocalSCAComponent">
-       <file role="test" name="HelloClient.php"/>
+      <dir name="emailcontact">
+       <file role="test" name="ContactEmailService.php"/>
+       <file role="test" name="contacts.sql"/>
+       <file role="test" name="contacts.xsd"/>
+       <file role="test" name="ContactService.php"/>
+       <file role="test" name="ContactService.smd"/>
+       <file role="test" name="db_config.inc.php"/>
+       <file role="test" name="EmailClient.php"/>
+       <file role="test" name="EmailService.php"/>
+       <file role="test" name="EmailService.wsdl"/>
+       <file role="test" name="email_form.html"/>
+      </dir> <!-- /examples/SCA/emailcontact -->
+      <dir name="emailsimple">
+       <file role="test" name="EmailClient.php"/>
+       <file role="test" name="EmailService.php"/>
+       <file role="test" name="EmailService.wsdl"/>
+       <file role="test" name="email_form.html"/>
+      </dir> <!-- /examples/SCA/emailsimple -->
+      <dir name="emailsimpleref">
+       <file role="test" name="ContactEmailService.php"/>
+       <file role="test" name="EmailClient.php"/>
+       <file role="test" name="EmailService.php"/>
+       <file role="test" name="EmailService.wsdl"/>
+       <file role="test" name="email_form.html"/>
+      </dir> <!-- /examples/SCA/emailsimpleref -->
+      <dir name="helloworldphp">
+       <file role="test" name="greeting.php"/>
+       <file role="test" name="helloworld.html"/>
+       <file role="test" name="helloworld.php"/>
+       <file role="test" name="reversing.php"/>
+      </dir> <!-- /examples/SCA/helloworldphp -->
+      <dir name="helloworldscajsonrpc">
+       <dir name="wsdl">
+        <file role="test" name="Greeting.wsdl"/>
+        <file role="test" name="Reversing.wsdl"/>
+       </dir> <!-- /examples/SCA/helloworldscajsonrpc/wsdl -->
+       <file role="test" name="Greeting.php"/>
+       <file role="test" name="Greeting.xsd"/>
+       <file role="test" name="Hello.xsd"/>
+       <file role="test" name="helloworld.php"/>
+       <file role="test" name="helloworldjsonrpc.html"/>
+       <file role="test" name="helloworldrest.html"/>
+       <file role="test" name="Reversing.php"/>
+      </dir> <!-- /examples/SCA/helloworldscajsonrpc -->
+      <dir name="helloworldscalocalreference">
+       <file role="test" name="Greeting.php"/>
+       <file role="test" name="helloworld.html"/>
+       <file role="test" name="HelloWorld.php"/>
+       <file role="test" name="Reversing.php"/>
+      </dir> <!-- /examples/SCA/helloworldscalocalreference -->
+      <dir name="helloworldscalocalservice">
+       <file role="test" name="Greeting.php"/>
+       <file role="test" name="helloworld.html"/>
+       <file role="test" name="helloworld.php"/>
+       <file role="test" name="Reversing.php"/>
+      </dir> <!-- /examples/SCA/helloworldscalocalservice -->
+      <dir name="helloworldscawsreference">
+       <dir name="wsdl">
+        <file role="test" name="Greeting.wsdl"/>
+        <file role="test" name="Reversing.wsdl"/>
+       </dir> <!-- /examples/SCA/helloworldscawsreference/wsdl -->
+       <file role="test" name="Greeting.php"/>
+       <file role="test" name="helloworld.html"/>
+       <file role="test" name="HelloWorld.php"/>
+       <file role="test" name="Reversing.php"/>
+      </dir> <!-- /examples/SCA/helloworldscawsreference -->
+      <dir name="helloworldscawsservice">
+       <dir name="wsdl">
+        <file role="test" name="Greeting.wsdl"/>
+        <file role="test" name="Reversing.wsdl"/>
+       </dir> <!-- /examples/SCA/helloworldscawsservice/wsdl -->
+       <file role="test" name="Greeting.php"/>
+       <file role="test" name="helloworld.html"/>
+       <file role="test" name="helloworld.php"/>
+       <file role="test" name="Reversing.php"/>
+      </dir> <!-- /examples/SCA/helloworldscawsservice -->
+      <dir name="JsonRpc">
+       <file role="test" name="email.xsd"/>
+       <file role="test" name="emailresponse.xsd"/>
+       <file role="test" name="emailresponselist.xsd"/>
+       <file role="test" name="EmailService.php"/>
        <file role="test" name="HelloService.php"/>
-       <file role="test" name="SurnameService.php"/>
-      </dir> <!-- /examples/SCA/SCAComponentCallingLocalSCAComponent -->
-      <dir name="SCAComponentCallingRemoteSCAComponent">
-       <file role="test" name="HelloClient.php"/>
-       <file role="test" name="HelloService.php"/>
-       <file role="test" name="SurnameService.php"/>
-      </dir> <!-- /examples/SCA/SCAComponentCallingRemoteSCAComponent -->
-      <dir name="SCAComponentUsingDataStructures">
-       <file role="test" name="BatchService.php"/>
-       <file role="test" name="HelloClient.php"/>
-       <file role="test" name="names.xsd"/>
-      </dir> <!-- /examples/SCA/SCAComponentUsingDataStructures -->
-      <dir name="ScriptCallingLocalSCAComponent">
-       <file role="test" name="HelloClient.php"/>
-       <file role="test" name="HelloService.php"/>
-      </dir> <!-- /examples/SCA/ScriptCallingLocalSCAComponent -->
-      <dir name="ScriptCallingRemoteSCAComponent">
-       <file role="test" name="HelloClient.php"/>
-       <file role="test" name="HelloService.php"/>
-      </dir> <!-- /examples/SCA/ScriptCallingRemoteSCAComponent -->
+       <file role="test" name="LocalService.php"/>
+       <file role="test" name="MailApplicationClient.php"/>
+       <file role="test" name="MailApplicationService.php"/>
+       <file role="test" name="WebService.php"/>
+      </dir> <!-- /examples/SCA/JsonRpc -->
+      <dir name="Local">
+       <dir name="SCAComponentCallingLocalSCAComponent">
+        <file role="test" name="HelloClient.php"/>
+        <file role="test" name="HelloService.php"/>
+        <file role="test" name="SurnameService.php"/>
+       </dir> <!-- /examples/SCA/Local/SCAComponentCallingLocalSCAComponent -->
+       <dir name="ScriptCallingLocalSCAComponent">
+        <file role="test" name="HelloClient.php"/>
+        <file role="test" name="HelloService.php"/>
+       </dir> <!-- /examples/SCA/Local/ScriptCallingLocalSCAComponent -->
+      </dir> <!-- /examples/SCA/Local -->
+      <dir name="Soap">
+       <dir name="SCAComponentCallingRemoteSCAComponent">
+        <file role="test" name="HelloClient.php"/>
+        <file role="test" name="HelloService.php"/>
+        <file role="test" name="SurnameService.php"/>
+       </dir> <!-- /examples/SCA/Soap/SCAComponentCallingRemoteSCAComponent -->
+       <dir name="SCAComponentUsingDataStructures">
+        <file role="test" name="BatchService.php"/>
+        <file role="test" name="HelloClient.php"/>
+        <file role="test" name="names.xsd"/>
+       </dir> <!-- /examples/SCA/Soap/SCAComponentUsingDataStructures -->
+       <dir name="ScriptCallingRemoteSCAComponent">
+        <file role="test" name="HelloClient.php"/>
+        <file role="test" name="HelloService.php"/>
+       </dir> <!-- /examples/SCA/Soap/ScriptCallingRemoteSCAComponent -->
+      </dir> <!-- /examples/SCA/Soap -->
       <file role="test" name="index.html"/>
+      <file role="test" name="phpinfo.php"/>
      </dir> <!-- /examples/SCA -->
      <dir name="SDO">
       <dir name="contacts">
@@ -378,6 +529,18 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
     </dir> <!-- /examples -->
     <dir name="tests">
      <dir name="DAS">
+      <dir name="Json">
+       <dir name="phpunit">
+        <file role="test" name="EmailResponse.xsd"/>
+        <file role="test" name="EmailResponseList.xsd"/>
+        <file role="test" name="JsonDASTest.php"/>
+        <file role="test" name="MailApplicationService.smd"/>
+        <file role="test" name="Portfolio.xsd"/>
+        <file role="test" name="Response.smd"/>
+        <file role="test" name="Response.xsd"/>
+        <file role="test" name="SchemaFree.xsd"/>
+       </dir> <!-- /tests/DAS/Json/phpunit -->
+      </dir> <!-- /tests/DAS/Json -->
       <dir name="Relational">
        <dir name="phpunit">
         <file role="test" name="TestContainmentReference.php"/>
@@ -430,6 +593,7 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
         </dir> <!-- /tests/DAS/XML/phpunit/restrictedComplexType -->
         <file role="test" name="company.xml"/>
         <file role="test" name="company.xsd"/>
+        <file role="test" name="SDOWSDLProcessingTest.php"/>
         <file role="test" name="XMLDASTest.php"/>
        </dir> <!-- /tests/DAS/XML/phpunit -->
       </dir> <!-- /tests/DAS/XML -->
@@ -440,6 +604,7 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
        <file role="test" name="002.phpt"/>
        <file role="test" name="003.phpt"/>
        <file role="test" name="004.phpt"/>
+       <file role="test" name="bug8428.phpt"/>
        <file role="test" name="Component.php"/>
        <file role="test" name="Component.wsdl"/>
        <file role="test" name="person.xsd"/>
@@ -458,15 +623,44 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
        <dir name="GetService">
         <file role="test" name="PathsTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/GetService -->
+       <dir name="JsonRpc">
+        <file role="test" name="email.xsd"/>
+        <file role="test" name="emailresponse.xsd"/>
+        <file role="test" name="emailresponselist.xsd"/>
+        <file role="test" name="EmailService.php"/>
+        <file role="test" name="EmailService.request"/>
+        <file role="test" name="EmailService.response"/>
+        <file role="test" name="EmailService.smd"/>
+        <file role="test" name="HelloService.php"/>
+        <file role="test" name="HelloService.smd"/>
+        <file role="test" name="JsonRpcTest.php"/>
+        <file role="test" name="TestService.php"/>
+        <file role="test" name="TestService.request"/>
+        <file role="test" name="TestService.response"/>
+        <file role="test" name="TestService.smd"/>
+       </dir> <!-- /tests/SCA/phpunit/JsonRpc -->
        <dir name="LocalProxy">
         <file role="test" name="LocalProxyTestSDOReverser.php"/>
         <file role="test" name="LocalProxyTestStringReverser.php"/>
         <file role="test" name="person.xsd"/>
         <file role="test" name="SCA_LocalProxyTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/LocalProxy -->
+       <dir name="LogTests">
+        <file role="test" name="SCALogFilterTest.php"/>
+        <file role="test" name="SCALoggerTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/LogTests -->
+       <dir name="RestRpc">
+        <file role="test" name="Hello.xsd"/>
+        <file role="test" name="RestRpcTest.php"/>
+        <file role="test" name="RestRpcTestService.php"/>
+        <file role="test" name="RestRpcTestService.response"/>
+       </dir> <!-- /tests/SCA/phpunit/RestRpc -->
        <dir name="SDO_TypeHandler">
         <file role="test" name="TypeHandlerTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/SDO_TypeHandler -->
+       <dir name="SoapHandler">
+        <file role="test" name="SCA_SoapHandlerTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/SoapHandler -->
        <dir name="SoapProxy">
         <file role="test" name="SCA_SoapProxyTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/SoapProxy -->
@@ -477,6 +671,9 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
        <dir name="WSDLGeneration">
         <file role="test" name="SCA_WSDLTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/WSDLGeneration -->
+       <dir name="XmlRpc">
+        <file role="test" name="XmlRpcTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/XmlRpc -->
        <file role="test" name="run.bat"/>
        <file role="test" name="runv.bat"/>
        <file role="test" name="TestSuite.php"/>
@@ -488,11 +685,16 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
        <file role="test" name="001.phpt"/>
        <file role="test" name="002.phpt"/>
        <file role="test" name="003.phpt"/>
-       <file role="test" name="004.phpt"/>
        <file role="test" name="005.phpt"/>
        <file role="test" name="006.phpt"/>
        <file role="test" name="007.phpt"/>
        <file role="test" name="008.phpt"/>
+       <file role="test" name="bug8694.phpt"/>
+       <file role="test" name="bug9243.phpt"/>
+       <file role="test" name="bug9487.phpt"/>
+       <file role="test" name="bug9991.phpt"/>
+       <file role="test" name="bug10049.phpt"/>
+       <file role="test" name="bug10842.phpt"/>
        <file role="test" name="company.xml"/>
        <file role="test" name="company.xsd"/>
        <file role="test" name="test.inc"/>
@@ -503,6 +705,9 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
      </dir> <!-- /tests/SDO -->
      <file role="test" name="AllTests.php"/>
      <file role="test" name="AllTestsSetup.php"/>
+     <file role="test" name="run.bat"/>
+     <file role="test" name="runreport.bat"/>
+     <file role="test" name="runv.bat"/>
      <file role="test" name="TestSuite.php"/>
     </dir> <!-- /tests -->
     <file role="src" name="CLA"/>
@@ -732,6 +937,16 @@ Update to Apache Tuscany C++ SDO revision level 483149 - includes various fixes 
     <notes>Fix for bug #9845 - Relational DAS is failing when one parent and two children
 Changed from namespaceURI.type to namespaceURI#type (conform to spec)
 Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, performance improvements)
+    </notes>
+   </release>
+   <release>
+    <version>1.2.1</version>
+    <date>2007-05-11</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>* Fix for spaces in service description URLs (pecl defect #11006).
+ * Experimental support for service names following the PEAR coding standard
+ * Experimental support for a manual service request dispatching interface on SCA.php
     </notes>
    </release>
  </changelog>
