@@ -1,8 +1,0 @@
-siteid = 1
-version = 495
-appid = ""
-routing = "default"
-authtoken = ""
-devid = ""
-authcert = ""
-location = "https://api.sandbox.ebay.com/wsapi"
