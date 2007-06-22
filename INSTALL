@@ -1,12 +1,35 @@
 $Id$
 
+Overview
+========
+
+The SCA_SDO package comprises a PECL extension, called sdo, that provides a 
+Service Data Object (SDO) implementation and a set of php files that, together 
+with SDO, provide a Service Component Architecture (SCA) implementation for PHP.
+
+Generally you can install the latest version of the package using the command
+
+pecl install SCA_SDO
+
+The details vary depending on whether you are using Linux or Windows, see below.
+
+Once installed there are a set of examples that you can use to try out SCA and
+SDO. The location of the examples depend on where you have PHP installed but
+generally you will find them in.
+
+php_install_dir\PEAR\tests\SCA_SDO\examples - on windows
+/usr/local/lib/php/tests/SCA_SDO/examples - on linux
+
+If you copy this directory to the document directory (htdocs) of your web server
+you can access most of the examples by pointing your browser at the 
+examples/index.html file.
+
 Linux installation steps
 ========================
 
-The sdo extension is supplied as a PECL module, which
-you should be able to download and install in one step as follows:
+You should be able to download and install SCA_SDO in one step as follows:
 
-pear install sdo
+pear install SCA_SDO
 
 (Depending on your php environment, you may need to be root to do this.)
 
@@ -16,14 +39,15 @@ extension=sdo.so
 
 to your php.ini file.
 
-The PEAR installer will also install the Relational DAS in your PEAR directory.
+The PEAR installer will also install the SCA and Relational DAS php files into your 
+PEAR directory.
 
 If you cannot use the PEAR installer, you can download the extension and build
 it manually:
 
-pear download sdo          #downloads sdo-<version>.tgz
-tar -xzf sdo-<version>.tgz
-cd sdo-<version>
+pear download SCA_SDO          #downloads SCA_SDO-<version>.tgz
+tar -xzf SCA_SDO-<version>.tgz
+cd SCA_SDO-<version>
 phpize
 ./configure
 make 
@@ -48,7 +72,10 @@ extension=php_sdo.dll
 
 to your php.ini file.
 
-To install the Relational DAS in your PEAR directory, use:
-pear install -B sdo
+To install the SCA and Relational DAS PHP files in your PEAR directory, use:
+
+pecl install -B SCA_SDO
+
+The -B option here cause the command to miss out the compile step. 
 
 If you have any problems, you are welcome to contact the maintainers.

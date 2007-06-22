@@ -27,8 +27,14 @@ $Id$
 */
 
 include "SCA/Bindings/soap/Wrapper.php";
-include "SCA/Bindings/soap/SDO_TypeHandler.php";
+include "SCA/Bindings/soap/Mapper.php";
 include "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
+
+if ( ! extension_loaded('soap')) {
+    trigger_error("Cannot use SCA soap binding as soap extension is not loaded",E_USER_WARNING);
+    return;
+}
+
 
 if (! class_exists('SCA_Bindings_soap_ServiceRequestHandler', false)) {
     class SCA_Bindings_soap_ServiceRequestHandler
@@ -47,7 +53,7 @@ if (! class_exists('SCA_Bindings_soap_ServiceRequestHandler', false)) {
                 SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description));
             }
 
-            $handler = new SCA_Bindings_soap_SDO_TypeHandler("SoapServer");
+            $handler = new SCA_Bindings_soap_Mapper("SoapServer");
             try {
                 SCA::$logger->log("Wsdl Type = {$wsdl_filename}");
                 $handler->setWSDLTypes($wsdl_filename);

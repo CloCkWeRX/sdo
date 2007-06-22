@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:ev="urn::eventNS" 
+        xmlns:ord="urn::orderNS" 
+        targetNamespace="urn::eventNS">
+
+  <annotation>
+    <documentation>
++-----------------------------------------------------------------------------+
+| (c) Copyright IBM Corporation 2006, 2007                                    |
+| All Rights Reserved.                                                        |
++-----------------------------------------------------------------------------+
+| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+| use this file except in compliance with the License. You may obtain a copy  |
+| of the License at -                                                         |
+|                                                                             |
+|                   http://www.apache.org/licenses/LICENSE-2.0                |
+|                                                                             |
+| Unless required by applicable law or agreed to in writing, software         |
+| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+| See the License for the specific language governing  permissions and        |
+| limitations under the License.                                              |
++-----------------------------------------------------------------------------+
+| Authors: Graham Charters, Matthew Peters                                    |
+|                                                                             |
++-----------------------------------------------------------------------------+
+$Id$
+    </documentation>
+  </annotation>  
+
+  <include schemaLocation="Order.xsd"/>
+
+  <element name="events" type="ev:EventsType"/>
+
+  <element name="event" type="ev:EventType"/>
+
+  <complexType name="EventsType">
+    <sequence>
+      <element name="event" maxOccurs="unbounded" type="ev:EventType"/>
+    </sequence>
+  </complexType>
+
+  <complexType name="EventType">
+  	<sequence>
+      <element name="eventId" type="string"/>
+      <element name="orderId" type="string"/>
+      <element name="customerId" type="string"/>
+      <element name="timeStamp" type="dateTime"/>
+      <element name="description" type="string"/>
+      <element name="status" type="ord:OrderStatus"/>
+    </sequence>
+  </complexType>
+</schema>

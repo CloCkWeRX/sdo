@@ -1,7 +1,7 @@
 <?php
 /*
 +-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                         |
+| (c) Copyright IBM Corporation 2007.                                         |
 | All Rights Reserved.                                                        |
 +-----------------------------------------------------------------------------+
 | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
@@ -17,11 +17,8 @@
 | limitations under the License.                                              |
 +-----------------------------------------------------------------------------+
 | Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
 |         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
+|         Caroline Maynard                                                    |
 +-----------------------------------------------------------------------------+
 $Id$
 */
@@ -48,12 +45,12 @@ if ( ! class_exists('SCA_Bindings_rss_Proxy', false) ) {
          */
         private $received_headers;
 
-        public function __construct($absolute_url_to_rss_feed,
-                                    $immediate_caller_directory, 
+        public function __construct($target,
+                                    $base_path_for_relative_paths, 
                                     $binding_config)
         {
             SCA::$logger->log("Entering constructor");
-            $this->target = $absolute_url_to_rss_feed;
+            $this->target = $target;
             SCA::$logger->log("Exiting constructor");
         }
 

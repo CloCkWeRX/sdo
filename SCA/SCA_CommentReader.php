@@ -66,18 +66,18 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                 $words = explode(" ", $line);
                 for ($i=0; $i<count($words); $i++) {
                     if (($pos = strpos($words[$i], '@') !== false)
-                         && isset($words[$i+1])) {
-                        // If it's come from an annotation we need to get rid of the 
+                    && isset($words[$i+1])) {
+                        // If it's come from an annotation we need to get rid of the
                         // newlines.
-/*
+                        /*
                         $temp  = str_replace("\r", "", substr($words[$i], 1, strlen($words[$i])-1));
                         $name  = str_replace("\n", "", $temp);
                         $temp  = str_replace("\r", "", $words[$i+1]);
                         $value = str_replace("\n", "", $temp);
                         $binding_config[$name] = $value;
-*/
+                        */
                         $binding_config[trim(substr($words[$i], 1,
-                                         strlen($words[$i])-1))] = trim($words[$i+1]);
+                        strlen($words[$i])-1))] = trim($words[$i+1]);
                     }
                 }
             }
@@ -125,15 +125,15 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                     if ( SCA_AnnotationRules::enoughPieces($words) === true ) {
                         if ( strcmp($words[ 0 ], SCA_AnnotationRules::PARAM) === 0 ) {
                             $this->methodAnnotations[ self::PARAM_ANNOTATION ][$i++] =
-                                $this->setParameterValues($words);
+                            $this->setParameterValues($words);
                         } else if ( strcmp($words[ 0 ], SCA_AnnotationRules::NAME) === 0 ) {
                             $this->methodAnnotations[ self::NAME_ANNOTATION ] =
-                                $this->setMethodAlias($words);
+                            $this->setMethodAlias($words);
                         } else {
                             /* Ensure that no syntax error has been detected       */
                             if ( ($checkValue = $this->setReturnValues($words)) != null ) {
                                 $this->methodAnnotations[ self::RETRN_ANNOTATION ][ 0 ] =
-                                    $checkValue;
+                                $checkValue;
                             } else {
                                 $reason = "Invalid return annotation syntax in '{$line}' " ;
                                 throw new SCA_RuntimeException($reason);
@@ -186,6 +186,18 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                 throw new SCA_RuntimeException('The variable name in an @param annotation must begin with a $');
             }
 
+            $paramValue['nillable'] = false;
+            $pos_pipe = strpos($type,'|');
+            if ($pos_pipe !== false) {
+                $after_pipe = substr($type,$pos_pipe+1);
+                $type = substr($type,0,$pos_pipe);
+                if ($after_pipe == 'null') {
+                    $paramValue['nillable'] = true;
+                } else {
+                    throw new SCA_RuntimeException('@param with a type containing the pipe symbol may only have null as the second type');
+                }
+            }
+
             /* When the type is an object the format of the line is different      */
             if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
                 $paramValue[ 'type' ]          = 'object' ;
@@ -232,6 +244,18 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                 throw new SCA_RuntimeException('@return must be followed by a type');
             }
             $type                          = $words[ 1 ] ;
+
+            $returnValue['nillable'] = false;
+            $pos_pipe = strpos($type,'|');
+            if ($pos_pipe !== false) {
+                $after_pipe = substr($type,$pos_pipe+1);
+                $type = substr($type,0,$pos_pipe);
+                if ($after_pipe == 'null') {
+                    $returnValue['nillable'] = true;
+                } else {
+                    throw new SCA_RuntimeException('@return with a type containing the pipe symbol may only have null as the second type');
+                }
+            }
 
             /* When the type is an object the format of the line is different      */
             if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
@@ -324,7 +348,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         // when scanning bindings for services.
         //
         // Return only valid bindings which are identified by the subdirectories under SCA/Bindings
-        // 
+        //
         private function getBinding($ignoreLocal=false, &$pos = 0) {
 
             $binding = null;
@@ -333,7 +357,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             $bindingAnnotation = "@" . self::BINDING . ".";
             $pos = strpos($this->docComment, $bindingAnnotation, $pos);
             if ($pos !== false) {
-                
+
                 $targetLine = substr($this->docComment, $pos);
                 $pos = $pos + strlen($bindingAnnotation);
 
@@ -348,27 +372,27 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                 }
             }
 
-            // binding.php is local binding 
-            if ($binding == "php") 
-                $binding = $ignoreLocal? null: "local";
+            // binding.php is local binding
+            if ($binding == "php")
+            $binding = $ignoreLocal? null: "local";
 
-            // Check if this is a known binding - all known bindings have a Binding/<binding> 
+            // Check if this is a known binding - all known bindings have a Binding/<binding>
             // subdirectory under the directory containing SCA.php
             if ($binding != null) {
 
-                 foreach (get_included_files() as $file) {
-                     if (basename($file, ".php") == "SCA") {
-                         $scaDir     = dirname($file);
-                         $bindingDir = realpath("$scaDir/Bindings/$binding");
-                         break;
-                     }
-                 }
-                 if (!isset($bindingDir)||$bindingDir === false)
-                     $binding = null;
+                foreach (get_included_files() as $file) {
+                    if (basename($file, ".php") == "SCA") {
+                        $scaDir     = dirname($file);
+                        $bindingDir = realpath("$scaDir/Bindings/$binding");
+                        break;
+                    }
+                }
+                if (!isset($bindingDir)||$bindingDir === false)
+                $binding = null;
             }
 
             return $binding;
-            
+
         }
 
         // Find all valid bindings under following a service annotation
@@ -387,7 +411,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             }
 
             return $bindings;
-            
+
         }
 
 
@@ -437,7 +461,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             }
 
             $reference_type->addBinding($binding);
-            
+
             $reference_type->setBindingConfig($this->getNameValuePairs());
 
             // get any extra type info from the reference comment

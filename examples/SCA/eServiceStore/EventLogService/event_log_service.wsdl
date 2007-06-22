@@ -1,0 +1,62 @@
+<?xml version ="1.0" encoding ="UTF-8" ?> 
+<definitions name="EventLog" 
+  targetNamespace="http://xmasshop.com/EventLog" 
+  xmlns:calc="http://xmasshop.com/EventLogTypes" 
+  xmlns:tns="http://xmasshop.com/EventLog" 
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+  xmlns="http://schemas.xmlsoap.org/wsdl/"> 
+
+<message name="getEventLogRequest"> 
+  <part name="arguments" type="xsd:string"/> 
+</message> 
+<message name="getEventLogResponse"> 
+  <part name="result" type="xsd:string"/> 
+</message> 
+
+<portType name="EventLogPortType"> 
+  <operation name="logEvent"> 
+    <input message="tns:getEventLogRequest"/> 
+    <output message="tns:getEventLogResponse"/> 
+  </operation> 
+  <operation name="getEvents"> 
+    <input message="tns:getEventLogRequest"/> 
+    <output message="tns:getEventLogResponse"/> 
+  </operation> 
+</portType> 
+
+<binding name="EventLogBinding" type="tns:EventLogPortType"> 
+  <soap:binding style="rpc" 
+    transport="http://schemas.xmlsoap.org/soap/http"/> 
+  <operation name="logEvent"> 
+    <soap:operation soapAction="urn:example-org-calculator#logEvent"/> 
+    <input> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-event_log" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </input> 
+    <output> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-event_log" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </output> 
+  </operation> 
+  <operation name="getEvents"> 
+    <soap:operation soapAction="urn:example-org-calculator#getEvents"/> 
+    <input> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-event_log" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </input> 
+    <output> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-event_log" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </output> 
+  </operation> 
+</binding> 
+
+<service name="EventLogService"> 
+  <port name="EventLogPort" binding="EventLogBinding"> 
+    <soap:address location="http://localhost/eServiceStore/EventLog/event_log_service.php"/> 
+  </port> 
+</service> 
+</definitions> 

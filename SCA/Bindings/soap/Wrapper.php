@@ -73,13 +73,16 @@ if (! class_exists('SCA_Bindings_soap_Wrapper', false)) {
             foreach ($arguments[0] as $arg) {
                 $new_arguments_array[] = $arg;
             }
+
             try {
                 $return = call_user_func_array(array(&$this->instance_of_the_base_class,
                 $method_name), $new_arguments_array);
             } catch ( Exception $e ) {
-                $serialized_exception =  base64_encode(serialize($e));
-                throw new SoapFault("Client", $e->__toString(), null,
-                SCA_Bindings_soap_Proxy::SERIALIZED_EXCEPTION_HEADER . $serialized_exception);
+                if ($e instanceof SoapFault) {
+                    throw $e;
+                } else {
+                    throw new SoapFault('Client', $e->getMessage());
+                }
             }
 
             $xdoc = $this->xmldas->createDocument($method_name . "Response");

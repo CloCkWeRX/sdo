@@ -23,22 +23,22 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id: SDO_TypeHandler.php,v 1.1.2.3.4.1 2007/04/05 14:15:58 mfp Exp $
+$Id$
 */
 
-if ( ! class_exists('SCA_Bindings_soap_SDO_TypeHandler', false) ) {
-    class SCA_Bindings_soap_SDO_TypeHandler /*implements TypeHandler*/ {
+if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
+    class SCA_Bindings_soap_Mapper {
 
         const   SERVER     = "SoapServer" ;
         const   CLIENT     = "SoapClient" ;
 
         private $association  = null ;
-        private $xmldas       = null ;
+        protected $xmldas       = null ;
 
         public function __construct( $association )
         {
             if ($association != self::CLIENT && $association != self::SERVER )
-            throw new SoapFault('Client', 'SCA_Bindings_soap_SDO_TypeHandler should be initialised with an association of SoapServer or SoapClient');
+            throw new SoapFault('Client', 'SCA_Bindings_soap_Mapper should be initialised with an association of SoapServer or SoapClient');
             $this->association = $association ;
 
         }
@@ -63,9 +63,7 @@ if ( ! class_exists('SCA_Bindings_soap_SDO_TypeHandler', false) ) {
             SCA::$logger->log('Entering');
             SCA::$logger->log("wsdl is $wsdl");
             try {
-                $this->xmldas = SDO_DAS_XML::create($wsdl,$wsdl);
-                // looks crazy, I know. The first $wsdl is the file to
-                // be parsed, the second is using the filename as a key
+                $this->xmldas = @SDO_DAS_XML::create($wsdl);
             } catch ( Exception $e ) {
                 $problem = $e->getMessage();
                 SCA::$logger->log("exception thrown from create(): $problem");
@@ -137,6 +135,10 @@ if ( ! class_exists('SCA_Bindings_soap_SDO_TypeHandler', false) ) {
             {
                 $xdoc   = $this->xmldas->createDocument('', 'BOGUS', $sdo);
                 $xmlstr = $this->xmldas->saveString($xdoc, 0);
+                
+                // remove the xsi:type="<type of the top level element>" and its preceding blank
+                $xmlstr = preg_replace('/ xsi:type=".*"/','',$xmlstr);
+                
                 SCA::$logger->log("xml = $xmlstr");
                 return         $xmlstr;
             }
@@ -265,6 +267,6 @@ if ( ! class_exists('SCA_Bindings_soap_SDO_TypeHandler', false) ) {
         }
 
     }/* End instance check                                                         */
-}/* End SCA_Bindings_soap_SDO_TypeHandler class                                                      */
+}/* End SCA_Bindings_soap_Mapper class                                                      */
 
 ?>

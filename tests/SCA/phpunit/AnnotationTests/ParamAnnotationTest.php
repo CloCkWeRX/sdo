@@ -3,6 +3,7 @@
 require_once "PHPUnit/Framework/TestCase.php";
 require_once "PHPUnit/Framework/TestSuite.php";
 
+require_once 'SCA/SCA.php';
 require_once 'SCA/SCA_AnnotationRules.php';
 require_once 'SCA/SCA_AnnotationReader.php';
 
@@ -23,7 +24,7 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
 //        'We should give a helpful message, not just "Invalid syntax ...'
 //        );
         try {
-            $instance            = new EmptyParam();
+            $instance            = new ParamWithNoTypeOrName();
             $reader              = new SCA_AnnotationReader($instance);
             $service_description = $reader->reflectService();
         }
@@ -36,13 +37,10 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
 
     }
 
-    public function testParamWithOnlyTypeIsInvalid()
+    public function testParamWithValidTypeButNoNameIsInvalid()
     {
-//        $this->markTestSkipped(
-//        'We should give a helpful message, not just "Invalid syntax ...'
-//        );
         try {
-            $instance            = new ParamWithOnlyType();
+            $instance            = new ParamWithValidTypeButNoName();
             $reader              = new SCA_AnnotationReader($instance);
             $service_description = $reader->reflectService();
         }
@@ -66,43 +64,6 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
             return;
         }
         $this->fail();
-    }
-
-    public function testParamWithValidTypeAndNameIsValid()
-    {
-        $instance            = new ParamWithValidTypeAndName();
-        $reader              = new SCA_AnnotationReader($instance);
-        $service_description = $reader->reflectService();
-        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
-        $op_array = $service_description->operations;
-        $method = $op_array['myPublicMethod'];
-
-        $this->assertEquals(
-        array(
-        'parameters' => array(0=>array('annotationType'=>'@param','type'=>'string','name' => 'a')),
-        'return' => null),
-        $method);
-    }
-
-    public function testParamWithFourValidScalarTypesIsValid()
-    {
-        $instance            = new ParamWithFourValidScalarTypes();
-        $reader              = new SCA_AnnotationReader($instance);
-        $service_description = $reader->reflectService();
-        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
-        $op_array = $service_description->operations;
-        $method = $op_array['myPublicMethod'];
-
-        $this->assertEquals(
-        array(
-        'parameters' => array(
-        0=>array('annotationType'=>'@param','type'=>'string','name' => 'a'),
-        1=>array('annotationType'=>'@param','type'=>'real','name' => 'b'),
-        2=>array('annotationType'=>'@param','type'=>'boolean','name' => 'c'),
-        3=>array('annotationType'=>'@param','type'=>'integer','name' => 'd')
-        ),
-        'return' => null),
-        $method);
     }
 
     public function testParamWithInvalidTypeAndValidNameIsInvalid()
@@ -134,6 +95,77 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
         $this->fail();
     }
 
+    public function testParamWithValidTypeAndNameIsValid()
+    {
+        $instance            = new ParamWithValidTypeAndName();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
+        $op_array = $service_description->operations;
+        $method = $op_array['myPublicMethod'];
+
+        $this->assertEquals(
+        array(
+        'parameters' => array(0=>array('annotationType'=>'@param','nillable'=>false,'type'=>'string','name' => 'a')),
+        'return' => null),
+        $method);
+    }
+
+    public function testParamWithChoiceOfTwoValidTypesAndNameIsInvalid()
+    {
+        // we do not allow e.g. string|float because we do not know which to allow in the wsdl
+        // TODO we could permit this, generating a choice in the wsdl
+        try {
+        $instance            = new ParamWithChoiceOfTwoValidTypesAndName();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        }
+        catch (SCA_RuntimeException $e) {
+            $this->assertContains("param",$e->getMessage());
+            $this->assertContains("may only have null",$e->getMessage());
+            return;
+        }
+        $this->fail();
+    }
+
+    public function testParamWithChoiceOfValidTypeOrNullAndNameIsValid()
+    {
+        $instance            = new ParamWithChoiceOfValidTypeOrNullAndName();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
+        $op_array = $service_description->operations;
+        $method = $op_array['myPublicMethod'];
+
+        $this->assertEquals(
+        array(
+        'parameters' => array(0=>array('annotationType'=>'@param','type'=>'string',
+        'name' => 'a', 'nillable'=>true)),
+        'return' => null),
+        $method);
+    }
+
+    public function testParamWithFourValidScalarTypesIsValid()
+    {
+        $instance            = new ParamWithFourValidScalarTypes();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
+        $op_array = $service_description->operations;
+        $method = $op_array['myPublicMethod'];
+
+        $this->assertEquals(
+        array(
+        'parameters' => array(
+        0=>array('annotationType'=>'@param','nillable'=>false,'type'=>'string','name' => 'a'),
+        1=>array('annotationType'=>'@param','nillable'=>false,'type'=>'real','name' => 'b'),
+        2=>array('annotationType'=>'@param','nillable'=>false,'type'=>'boolean','name' => 'c'),
+        3=>array('annotationType'=>'@param','nillable'=>false,'type'=>'integer','name' => 'd')
+        ),
+        'return' => null),
+        $method);
+    }
+    
     public static function main()
     {
         require_once "PHPUnit/TextUI/TestRunner.php";

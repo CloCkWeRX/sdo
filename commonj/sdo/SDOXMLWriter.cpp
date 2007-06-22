@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 509991 $ $Date$ */
+/* $Rev: 546760 $ $Date$ */
 
 #include "commonj/sdo/SDOXMLWriter.h"
 #include "commonj/sdo/SDOXMLString.h"
@@ -47,7 +47,12 @@ namespace commonj
         const SDOXMLString SDOXMLWriter::s_xsiNS("http://www.w3.org/2001/XMLSchema-instance");
         const SDOXMLString SDOXMLWriter::s_xmlns("xmlns");
         const SDOXMLString SDOXMLWriter::s_commonjsdo("commonj.sdo");
-
+        const SDOXMLString SDOXMLWriter::s_wsdluri("http://schemas.xmlsoap.org/wsdl/");
+        const SDOXMLString SDOXMLWriter::s_wsdl("wsdl");
+        const SDOXMLString SDOXMLWriter::s_soapuri("http://schemas.xmlsoap.org/wsdl/soap/");
+        const SDOXMLString SDOXMLWriter::s_soap("soap");
+        const SDOXMLString SDOXMLWriter::s_httpuri("http://schemas.xmlsoap.org/wsdl/http/");
+        const SDOXMLString SDOXMLWriter::s_http("http");
         
         
         SDOXMLWriter::SDOXMLWriter(
@@ -567,7 +572,36 @@ namespace commonj
             }
             rc = xmlTextWriterEndElement(writer);
         }
-        
+
+        void SDOXMLWriter::addNamespace(const SDOXMLString& uri, bool tns)
+        {
+            std::map<SDOXMLString,SDOXMLString>::iterator it = namespaceMap.find(uri);
+            if (it == namespaceMap.end())
+            {
+                SDOXMLString prefix = "tns";
+                // Handle some common namespaces
+                if (uri.equals(s_wsdluri))
+                {
+                    prefix = s_wsdl;
+                }
+                else if (uri.equals(s_soapuri))
+                {
+                    prefix = s_soap;
+                }
+                else if (uri.equals(s_httpuri))
+                {
+                    prefix = s_http;
+                }
+                else if (!tns)
+                {
+                    char buf[20];
+                    sprintf(buf,"%d", namespaceMap.size());
+                    prefix += buf;
+                }
+                namespaceMap[uri] = prefix;
+            }
+
+        }
         //////////////////////////////////////////////////////////////////////////
         // Add to namespaces
         //////////////////////////////////////////////////////////////////////////
@@ -579,14 +613,7 @@ namespace commonj
             SDOXMLString typeName = dob->getType().getName();
             if (!(uri.equals("commonj.sdo") && typeName.equals("OpenDataObject")))
             {
-                it = namespaceMap.find(uri);
-                if (it == namespaceMap.end())
-                {
-                    char buf[20];
-                    sprintf(buf,"%d",++spacescount);
-                    SDOXMLString s = SDOXMLString("tns") + buf;
-                    namespaceMap.insert(make_pair(uri,s));
-                }
+                addNamespace(uri);
             }
 
             PropertyList pl = dob->getInstanceProperties();
@@ -635,10 +662,7 @@ namespace commonj
                             it = namespaceMap.find(qnameuri);
                             if (it == namespaceMap.end())
                             {
-                                char buf[20];
-                                sprintf(buf,"%d",++spacescount);
-                                SDOXMLString s = SDOXMLString("tns") + buf;
-                                namespaceMap.insert(make_pair(qnameuri,s));
+                                addNamespace(qnameuri);
                             }
                         }
                     }
@@ -699,13 +723,12 @@ namespace commonj
                 }
 
                 // For the root element we will now gather all the namespace information
-                namespaceMap[elementURI] = SDOXMLString("tns");
+                addNamespace(elementURI, true);
 
                 // We always add the xsi namespace. TODO we should omit if we can
                 namespaceMap[s_xsiNS] = s_xsi;
 
                 DataObjectImpl* d = (DataObjectImpl*)(DataObject*)dataObject;
-                spacescount = 1;
                 addToNamespaces(d);
             }
             else
@@ -807,7 +830,7 @@ namespace commonj
                     rc = xmlTextWriterWriteAttributeNS(writer, s_xmlns, (*it).second, NULL, (*it).first);
                 }
             }
-            // End - namespave information is written
+            // End - namespace information is written
             // --------------------------------------
 
 
@@ -1001,112 +1024,26 @@ namespace commonj
             // Non-sequenced DataObject
             else
             {
-                // ------------------------------------------------
-                // Iterate over all the properties to find elements
-                for (i = 0; i < pl.size(); i++)
+                // Write elements for this DataObject
+
+                PropertyList definedProps = dataObjectType.getProperties();
+                unsigned int nDefinedProps = typeImpl.getPropertiesSize();
+                unsigned int nOpenProps = pl.size() - nDefinedProps;
+                unsigned int openPropIndex = nDefinedProps;
+
+                const TypeImpl* doTypeImpl = &typeImpl;
+                if (nOpenProps != 0)
                 {
-                    if (dataObject->isSet(pl[i]))
+                    while(doTypeImpl->isOpenTypeImplicitly())
                     {
-                        SDOXMLString propertyName;
-                        SDOXMLString propertyTypeURI;
-
-                        // This call sets the property name and type URI and returns if xsi:type= is required
-                        bool xsiTypeNeeded = determineNamespace(dataObject, pl[i], propertyTypeURI, propertyName);
-                       
-                        const Type& propertyType = pl[i].getType();
-						XSDPropertyInfo* pi = getPropertyInfo(pl[i]);
-                        PropertyDefinitionImpl propdef;
-                        if (pi)
-                        {
-                            propdef = pi->getPropertyDefinition();
-                            if (!(propdef.isElement))
-                            {
-                                continue;
-                            }
-                        }
-
-                        // -------------------------------------------------
-                        // For a many-valued property get the list of values
-                        if (pl[i].isMany())
-                        {
-                            DataObjectList& dol = dataObject->getList(pl[i]);
-                            for (unsigned int j = 0; j <dol.size(); j++)
-                            {
-                                // Handle non-containment reference to DataObject
-                                if (pl[i].isReference() )
-                                {
-                                    writeReference(propertyName, dataObject, pl[i], true, dol[j]);
-                                }
-                                else
-                                {    
-                                    writeDO(dol[j], propertyTypeURI, propertyName, xsiTypeNeeded);
-                                }
-                            }
-                        } 
-                        // End - write many valued property
-                        // --------------------------------
-
-                        
-                        // -----------------------------
-                        // For a dataobject write the do
-                        else if (!propertyType.isDataType())
-                        {
-                            // Handle non-containment reference to DataObject
-                            if (pl[i].isReference())
-                            {
-                                if (pi)
-                                    writeReference(propertyName, dataObject, pl[i], true);
-                            }
-                            else
-                            {
-                                DataObjectPtr propDO = dataObject->getDataObject(pl[i]);                
-                                writeDO(propDO, propertyTypeURI, propertyName, xsiTypeNeeded);
-                            }
-                        }
-                        // End - write DataObject
-                        // ----------------------
-
-                        
-                        // ---------------
-                        // For a primitive
-                        else
-                        {
-                            // Only write a primitive as an element if defined by the XSD
-                            if (pi)
-                            {
-                                const Type& tp = dataObject->getType();
-                                XSDTypeInfo* typeInfo = (XSDTypeInfo*)
-                                    ((DASType*)&tp)->getDASValue("XMLDAS::TypeInfo");
-                                if (typeInfo && typeInfo->getTypeDefinition().isExtendedPrimitive)
-                                {
-                                    xmlTextWriterWriteRaw(
-                                    writer,
-                                    SDOXMLString(dataObject->getCString(pl[i])));
-                                }
-                                else
-                                {
-                                    rc = xmlTextWriterStartElementNS(writer, NULL, propertyName, NULL);
-                                    if (dataObject->isNull(pl[i]))
-                                    {
-                                        rc = xmlTextWriterWriteAttributeNS(writer, s_xsi, s_nil, NULL, s_true);
-                                    }
-                                    else
-                                    {
-                                        writeXMLElement(writer,
-                                            propertyName,
-                                            dataObject->getCString(pl[i]));
-                                    }
-                                    rc = xmlTextWriterEndElement(writer);
-                                }
-                            }
-                        }
-                        // End - handle primitive
-                        // ----------------------
-
-                    } // end isSet
+                        doTypeImpl = doTypeImpl->getBaseTypeImpl();
+                    }
+                    openPropIndex = doTypeImpl->getPropertiesSize();
                 }
-                // End - elements are written
-                // --------------------------
+
+                writeDOElements(dataObject, pl, 0, openPropIndex);
+                writeDOElements(dataObject, pl, nDefinedProps, nOpenProps );
+                writeDOElements(dataObject, pl, openPropIndex, nDefinedProps - openPropIndex);
 
             }
             // End - non-sequenced DO
@@ -1117,8 +1054,119 @@ namespace commonj
 
         } // End - writeDO
 
+        void SDOXMLWriter::writeDOElements(DataObjectPtr dataObject,
+                                 const PropertyList& pl,
+                                 unsigned int start,
+                                 unsigned int number)
+        {
+            for (unsigned int pi = 0; pi < number; pi++)
+            {
+                unsigned int i = start + pi;
+                if (dataObject->isSet(pl[i]))
+                {
+                    SDOXMLString propertyName;
+                    SDOXMLString propertyTypeURI;
 
-        
+                    // This call sets the property name and type URI and returns if xsi:type= is required
+                    bool xsiTypeNeeded = determineNamespace(dataObject, pl[i], propertyTypeURI, propertyName);
+
+                    const Type& propertyType = pl[i].getType();
+                    XSDPropertyInfo* pi = getPropertyInfo(pl[i]);
+                    PropertyDefinitionImpl propdef;
+                    if (pi)
+                    {
+                        propdef = pi->getPropertyDefinition();
+                        if (!(propdef.isElement))
+                        {
+                            continue;
+                        }
+                    }
+
+                    // -------------------------------------------------
+                    // For a many-valued property get the list of values
+                    if (pl[i].isMany())
+                    {
+                        DataObjectList& dol = dataObject->getList(pl[i]);
+                        for (unsigned int j = 0; j <dol.size(); j++)
+                        {
+                            // Handle non-containment reference to DataObject
+                            if (pl[i].isReference() )
+                            {
+                                writeReference(propertyName, dataObject, pl[i], true, dol[j]);
+                            }
+                            else
+                            {    
+                                writeDO(dol[j], propertyTypeURI, propertyName, xsiTypeNeeded);
+                            }
+                        }
+                    } 
+                    // End - write many valued property
+                    // --------------------------------
+
+
+                    // -----------------------------
+                    // For a dataobject write the do
+                    else if (!propertyType.isDataType())
+                    {
+                        // Handle non-containment reference to DataObject
+                        if (pl[i].isReference())
+                        {
+                            if (pi)
+                                writeReference(propertyName, dataObject, pl[i], true);
+                        }
+                        else
+                        {
+                            DataObjectPtr propDO = dataObject->getDataObject(pl[i]);                
+                            writeDO(propDO, propertyTypeURI, propertyName, xsiTypeNeeded);
+                        }
+                    }
+                    // End - write DataObject
+                    // ----------------------
+
+
+                    // ---------------
+                    // For a primitive
+                    else
+                    {
+                        // Only write a primitive as an element if defined by the XSD
+                        if (pi)
+                        {
+                            const Type& tp = dataObject->getType();
+                            XSDTypeInfo* typeInfo = (XSDTypeInfo*)
+                                ((DASType*)&tp)->getDASValue("XMLDAS::TypeInfo");
+                            if (typeInfo && typeInfo->getTypeDefinition().isExtendedPrimitive)
+                            {
+                                xmlTextWriterWriteRaw(
+                                    writer,
+                                    SDOXMLString(dataObject->getCString(pl[i])));
+                            }
+                            else
+                            {
+                                xmlTextWriterStartElementNS(writer, NULL, propertyName, NULL);
+                                if (dataObject->isNull(pl[i]))
+                                {
+                                    xmlTextWriterWriteAttributeNS(writer, s_xsi, s_nil, NULL, s_true);
+                                }
+                                else
+                                {
+                                    writeXMLElement(writer,
+                                        propertyName,
+                                        dataObject->getCString(pl[i]));
+                                }
+                                xmlTextWriterEndElement(writer);
+                            }
+                        }
+                    }
+                    // End - handle primitive
+                    // ----------------------
+
+                } // end isSet
+            }
+            // End - elements are written
+            // --------------------------
+
+        }
+
         XSDPropertyInfo* SDOXMLWriter::getPropertyInfo(const Property& property)
         {
             return (XSDPropertyInfo*)((DASProperty*)&property)->getDASValue("XMLDAS::PropertyInfo");       
@@ -1291,6 +1339,10 @@ namespace commonj
                               && propiTypeURI.equals(propTypeURI) )
                           {
                               // We have a match
+
+                              // it's a global element so we do not need xsi:type
+                              xsiTypeNeeded = false;
+
                               XSDPropertyInfo* ppi = getPropertyInfo(*propi);
                               PropertyDefinitionImpl propdef;
                               if (ppi)

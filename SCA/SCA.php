@@ -124,7 +124,7 @@ if (! class_exists('SCA', false)) {
             self::$logger = SCA_LogFactory::create();
 
             // Turn on logging here by removing the comment from the following line
-                 self::$logger->startLog();
+            //            self::$logger->startLog();
 
             self::$logger->log('Entering');
             self::$logger->log("Called from $calling_component_filename");
@@ -221,7 +221,7 @@ if (! class_exists('SCA', false)) {
               */
             self::$logger->log('Request was not ATOM, JSON, SOAP, or a request for a .smd or .wsdl file.');
         }
-        
+
         private static function _includedByAClientScriptThatIsNotAComponent($calling_component_filename)
         {
             $class_name = SCA_Helper::guessClassName($calling_component_filename);
@@ -253,51 +253,42 @@ if (! class_exists('SCA', false)) {
             self::$logger->log("Target is $target , Type is $type");
 
             // automatically create a tuscany proxy if SCA is embedded in tuscany C++ SCA
-            // there isn;t really a sound reason for doing this but the following
+            // there isn't really a sound reason for doing this but the following
             // path manipulation code crashes with php running in embedded mode.
             // needs further investigation
             if (self::$is_embedded ) {
                 return new SCA_TuscanyProxy($target);
             }
-            $backtrace                 = debug_backtrace();
+
+            /**
+             * Calculate the directory against which we will resolve relative paths
+             * If getService has been called directly from a client script, 
+             * this is the immediate caller, just one step back up the call stack
+             */
+            $backtrace = debug_backtrace();
             $immediate_caller_filename = $backtrace[0]['file'];
+
             if ($target === null) {
                 $msg = "SCA::getService was called from $immediate_caller_filename with a null argument";
                 throw new SCA_RuntimeException($msg);
             }
+
             if (strlen($target) == 0) {
                 $msg = "SCA::getService was called from $immediate_caller_filename with an empty argument";
                 throw new SCA_RuntimeException($msg);
             }
 
-            $immediate_caller_directory = '';
-
             SCA::$logger->log("immediate caller = $immediate_caller_filename");
 
-            if (SCA_Helper::isARelativePath($target)) {
-                $immediate_caller_directory = dirname($immediate_caller_filename);
-                $absolute_path = realpath("$immediate_caller_directory/$target");
-                if ($absolute_path === false) {
-                    $msg = "file '$immediate_caller_directory/$target' could not be found";
-                    throw new SCA_RuntimeException($msg);
-                }
-                $target = $absolute_path;
-            }
-
-            /* If the target is a local file, check it exists      */
-            if (!strstr($target, 'http:') && !strstr($target,'https:')) {
-                if (!file_exists($target)) {
-                    $msg = "file '$target' could not be found";
-                    throw new SCA_RuntimeException($msg);
-                }
-            }
-
-
             // set up the type in the case where getService has been
-            // call from a client script and the type has defaulted to null
+            // called from a client script and the type has defaulted to null
+
+            if ($type == null && (strstr($target, '.php') == '.php') &&  (strstr($target, 'http:') || strstr($target,'https:'))) {
+                throw new SCA_RuntimeException("The target $target appears to be for a remote component, but needs a binding to be specified");
+            }
+
             if ($type == null) {
-                if (strstr($target, '.wsdl') == '.wsdl'
-                || strstr($target, '?wsdl') == '?wsdl') { // end with .wsdl or ?wsdl
+                if (strstr($target, '.wsdl') == '.wsdl' || strstr($target, '?wsdl') == '?wsdl') { // end with .wsdl or ?wsdl
                     SCA::$logger->log("Inferring from presence of .wsdl or ?wsdl that a soap proxy is required for this target.");
                     $type = 'soap';
                 } else if (strstr($target, '.smd') == '.smd' || strstr($target,'?smd') == '?smd') {
@@ -306,24 +297,19 @@ if (! class_exists('SCA', false)) {
                 } else if (strstr($target, '.php') == '.php') { // .php on the end
                     SCA::$logger->log("A local proxy is required for this target.");
                     $type = 'local';
-                    // better be local
-                    if (strstr($target, 'http:') || strstr($target,'https:')) {
-                        throw new SCA_RuntimeException("The target $target appears to be for a remote component, but needs a binding to be specified");
-                    }
                 }
-            } else {
-                // type remains null and the error message at the bottom will
-                // kick in
             }
-
 
             if (isset($type) && $type !== null) {
                 if (!isset($binding_config)) {
                     $binding_config = null;
                 }
                 SCA::$logger->log("A $type proxy is required for target $target.");
-                return SCA_Binding_Factory::createProxy($type, $target,
-                $immediate_caller_directory, $binding_config);
+                $base_path_for_relative_paths = dirname($immediate_caller_filename);
+                return SCA_Binding_Factory::createProxy($type,
+                $target,
+                $base_path_for_relative_paths,
+                $binding_config);
             }
 
             $file = basename($target);
@@ -334,6 +320,12 @@ if (! class_exists('SCA', false)) {
 
             self::$logger->log("Exiting");
         }
+
+        /**
+         * the following method has not been kept up to date with recent changes to the 
+         * way fill in references works, and there are no unit tests to keep it running
+         * Allow it to molder here for a while. 
+         */
 
         /**
          * THE OLD VERSION OF createInstanceAndFillInReferences(). INCLUDES
@@ -387,7 +379,6 @@ if (! class_exists('SCA', false)) {
             return $instance;
         }
 
-
         /**
          * Instantiate the component
          */
@@ -401,19 +392,22 @@ if (! class_exists('SCA', false)) {
 
         /**
          * Examine the annotations, find the dependencies,
-         * call getService to create a proxy for each one, and assign to the
+         * create a proxy for each one, and assign to the
          * instance variables. The call(s) to getService may recurse back through here
          * if those dependencies also have dependencies
          *
-         * @param  instance of a class
+         * @param  instance of a class which may or may not contain references to other components
          * @return class instance
          * @throws SCA_Exeption
          */
         public static function fillInReferences($instance)
         {
             self::$logger->log("Entering");
-            // When I run PHP complains about converting $instance to a string
-            //self::$logger->log("The instance of the class that will be used in the construction of the annotation reader: $instance");
+
+            $class_name = get_class($instance);
+            $file = SCA_Helper::getFileContainingClass($class_name);
+            $path_to_resolve_relative_paths_against = dirname($file);
+
             $reader     = new SCA_AnnotationReader($instance);
             $references = $reader->reflectReferencesFull();
             self::$logger->log("Number of references to be filled in: ".count($references));
@@ -422,14 +416,14 @@ if (! class_exists('SCA', false)) {
             foreach ($references as $ref_name => $ref_type) {
                 self::$logger->log("Reference name = $ref_name, ref_type = " . print_r($ref_type,true));
                 $ref_value = $ref_type->getBinding();
-                if (SCA_Helper::isARelativePath($ref_value)) {
-                    $ref_value = SCA_Helper::constructAbsolutePath($ref_value,
-                    get_class($instance));
-                }
                 $prop            = $reflection->getProperty($ref_name);
-                $reference_proxy = SCA::getService($ref_value,
+
+                $reference_proxy = SCA_Binding_Factory::createProxy(
                 $ref_type->getBindingType(),
-                $ref_type->getBindingConfig());
+                $ref_value,
+                $path_to_resolve_relative_paths_against,
+                $ref_type->getBindingConfig()); // NB recursion here
+
 
                 // add the reference information to the proxy
                 // this is added just in case there are any
@@ -438,7 +432,7 @@ if (! class_exists('SCA', false)) {
                 $ref_type->addClassName(get_class($instance));
                 $reference_proxy->addReferenceType($ref_type);
 
-                $prop->setValue($instance, $reference_proxy); // NB recursion here
+                $prop->setValue($instance, $reference_proxy);
             }
 
             self::$logger->log("Exiting");
@@ -546,9 +540,9 @@ if (! class_exists('SCA', false)) {
          */
         public static function dispatch($class_name)
         {
-            $file_name = SCA_Helper::getFileContainingClass($class_name);                    
+            $file_name = SCA_Helper::getFileContainingClass($class_name);
             $_SERVER['SCRIPT_FILENAME'] = $file_name;
-            SCA::initComponent($file_name);            
+            SCA::initComponent($file_name);
         }
     }/* End SCA Class                                                         */
 

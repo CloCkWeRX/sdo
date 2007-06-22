@@ -62,9 +62,7 @@ if ( ! class_exists('SCA_Bindings_soap_ServiceDescriptionGenerator', false) ) {
             array(
             dirname(__FILE__) . '/2003-02-11.xsd',
             dirname(__FILE__) . '/soap/2003-02-11.xsd'
-            ),
-            '__SCA_WSDL_AND_SOAP_XSDS__'
-            );
+            )            );
             // expect to find xsds along with the SCA code
             $wsdl_doc = $xmldas->createDocument();
             $wsdl     = $wsdl_doc->getRootDataObject();
@@ -246,7 +244,11 @@ if ( ! class_exists('SCA_Bindings_soap_ServiceDescriptionGenerator', false) ) {
                     ? $namespace_to_prefix_map[$parameter[ 'namespace']] . self::COLON . $parameter['objectType']
                     : self::XS . self::COLON . $parameter['type'];
                     $parameter_type_in_quotes   = self::QUOTES . $parameter_type . self::QUOTES;
-                    $element_line               = "            <xs:element name=$parameter_name_in_quotes type=$parameter_type_in_quotes $nillable_attribute/>\n";
+                    if ($parameter['nillable']) {
+                        $element_line               = "            <xs:element name=$parameter_name_in_quotes type=$parameter_type_in_quotes $nillable_attribute/>\n";
+                    } else {
+                        $element_line               = "            <xs:element name=$parameter_name_in_quotes type=$parameter_type_in_quotes/>\n";
+                    }
                     $wrapped_operation_element .= $element_line;
                 }
 
@@ -264,7 +266,12 @@ if ( ! class_exists('SCA_Bindings_soap_ServiceDescriptionGenerator', false) ) {
                     ? $namespace_to_prefix_map[$return[0]['namespace']] . self::COLON . $return[0]['objectType']
                     : self::XS . self::COLON . $return[0]['type'];
                     $return_type_in_quotes     = self::QUOTES . $return_type . self::QUOTES;
-                    $wrapped_response_element .= "            <xs:element name=\"{$op_name}Return\" type=$return_type_in_quotes $nillable_attribute/>\n";
+                    if ($return[0]['nillable']) {
+                        $wrapped_response_element .= "            <xs:element name=\"{$op_name}Return\" type=$return_type_in_quotes $nillable_attribute/>\n";
+                    } else {
+                        $wrapped_response_element .= "            <xs:element name=\"{$op_name}Return\" type=$return_type_in_quotes/>\n";
+                    }
+
                 }
 
                 $wrapped_response_element .= '          </xs:sequence>'                     . "\n";

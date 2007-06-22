@@ -1,0 +1,47 @@
+<?xml version ="1.0" encoding ="UTF-8" ?> 
+<definitions name="Payment" 
+  targetNamespace="http://xmasshop.com/Payment" 
+  xmlns:calc="http://xmasshop.com/PaymentTypes" 
+  xmlns:tns="http://xmasshop.com/Payment" 
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+  xmlns="http://schemas.xmlsoap.org/wsdl/"> 
+
+<message name="getPaymentRequest"> 
+  <part name="arguments" type="xsd:string"/> 
+</message> 
+<message name="getPaymentResponse"> 
+  <part name="result" type="xsd:string"/> 
+</message> 
+
+<portType name="PaymentPortType"> 
+  <operation name="directPayment"> 
+    <input message="tns:getPaymentRequest"/> 
+    <output message="tns:getPaymentResponse"/> 
+  </operation> 
+</portType> 
+
+<binding name="PaymentBinding" type="tns:PaymentPortType"> 
+  <soap:binding style="rpc" 
+    transport="http://schemas.xmlsoap.org/soap/http"/> 
+  <operation name="directPayment"> 
+    <soap:operation soapAction="urn:example-org-calculator#directPayment"/> 
+    <input> 
+      <soap:body use="encoded" namespace="urn:example-org-calculator" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </input> 
+    <output> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-payment" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </output> 
+  </operation> 
+</binding> 
+
+<service name="PaymentService"> 
+  <port name="PaymentPort" binding="PaymentBinding"> 
+    <soap:address location="http://localhost/eServiceStore/Payment/payment_service.php"/> 
+  </port> 
+</service> 
+</definitions> 

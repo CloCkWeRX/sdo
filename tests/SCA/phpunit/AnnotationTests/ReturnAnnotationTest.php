@@ -6,6 +6,7 @@ require_once "PHPUnit/Framework/TestSuite.php";
 require_once 'SCA/SCA_AnnotationRules.php';
 require_once 'SCA/SCA_AnnotationReader.php';
 
+require_once 'SCA/SCA.php';
 require_once 'AnnotationTestClasses.php';
 
 /**
@@ -59,10 +60,45 @@ class SCA_Annotation_ReturnTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals(
         array(
-        0 => array('annotationType'=>'@return','type'=>'string')
+        0 => array('annotationType'=>'@return','nillable'=>false,'type'=>'string')
         ),
         $return_array);
     }
+
+    public function testReturnWithChoiceOfTwoValidTypesAndNameIsInvalid()
+    {
+        // we do not allow e.g. string|float because we do not know which to allow in the wsdl
+        // TODO we could permit this, generating a choice in the wsdl
+        try {
+        $instance            = new ReturnWithChoiceOfTwoValidTypes();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        }
+        catch (SCA_RuntimeException $e) {
+            $this->assertContains("return",$e->getMessage());
+            $this->assertContains("may only have null",$e->getMessage());
+            return;
+        }
+        $this->fail();
+    }
+
+    public function testReturnWithChoiceOfValidTypeOrNullIsValid()
+    {
+        $instance            = new ReturnWithChoiceOfValidTypeOrNull();
+        $reader              = new SCA_AnnotationReader($instance);
+        $service_description = $reader->reflectService();
+        $this->assertTrue(key_exists('myPublicMethod',$service_description->operations));
+        $op_array = $service_description->operations;
+        $method = $op_array['myPublicMethod'];
+        $return_array = $method['return'];
+
+        $this->assertEquals(
+        array(
+        0 => array('annotationType'=>'@return','type'=>'string','nillable'=>true)
+        ),
+        $return_array);
+    }
+
 
     public static function main()
     {

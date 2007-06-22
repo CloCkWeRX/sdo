@@ -1,0 +1,77 @@
+<?xml version ="1.0" encoding ="UTF-8" ?> 
+<definitions name="Warehouse" 
+  targetNamespace="http://xmasshop.com/Warehouse" 
+  xmlns:calc="http://xmasshop.com/WarehouseTypes" 
+  xmlns:tns="http://xmasshop.com/Warehouse" 
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
+  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+  xmlns="http://schemas.xmlsoap.org/wsdl/"> 
+
+<message name="getWarehouseRequest"> 
+  <part name="arguments" type="xsd:string"/> 
+</message> 
+<message name="getWarehouseResponse"> 
+  <part name="result" type="xsd:string"/> 
+</message> 
+
+<portType name="WarehousePortType"> 
+  <operation name="fulfillOrder"> 
+    <input message="tns:getWarehouseRequest"/> 
+    <output message="tns:getWarehouseResponse"/> 
+  </operation> 
+  <operation name="getOrder"> 
+    <input message="tns:getWarehouseRequest"/> 
+    <output message="tns:getWarehouseResponse"/> 
+  </operation> 
+  <operation name="getOrdersByStatus"> 
+    <input message="tns:getWarehouseRequest"/> 
+    <output message="tns:getWarehouseResponse"/> 
+  </operation> 
+</portType> 
+
+<binding name="WarehouseBinding" type="tns:WarehousePortType"> 
+  <soap:binding style="rpc" 
+    transport="http://schemas.xmlsoap.org/soap/http"/> 
+  <operation name="fulfillOrder"> 
+    <soap:operation soapAction="urn:xmasshop-com-warehouse#fulfillOrder"/> 
+    <input> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-warehouse" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </input> 
+    <output> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-warehouse" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </output> 
+  </operation> 
+  <operation name="getOrder"> 
+    <soap:operation soapAction="urn:xmasshop-com-warehouse#getOrder"/> 
+    <input> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-warehouse" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </input> 
+    <output> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-warehouse" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </output> 
+  </operation> 
+  <operation name="getOrdersByStatus"> 
+    <soap:operation soapAction="urn:xmasshop-com-warehouse#getOrdersByStatus"/> 
+    <input> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-warehouse" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </input> 
+    <output> 
+      <soap:body use="encoded" namespace="urn:xmasshop-com-warehouse" 
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/> 
+    </output> 
+  </operation> 
+</binding> 
+
+<service name="WarehouseService"> 
+  <port name="WarehousePort" binding="WarehouseBinding"> 
+    <soap:address location="http://localhost/eServiceStore/Warehouse/warehouse_service.php"/> 
+  </port> 
+</service> 
+</definitions> 

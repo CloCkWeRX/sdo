@@ -52,11 +52,11 @@ if ( ! class_exists('SCA_Bindings_restrpc_Proxy', false)) {
         private $received_headers;
 
         public function __construct($target,
-                                    $immediate_caller_directory, 
+                                    $base_path_for_relative_paths, 
                                     $binding_config)
         {
             SCA::$logger->log("Entering constructor");
-            $this->target_url = $target;
+            $this->target_url = SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
             SCA::$logger->log("Exiting constructor");
         }
 

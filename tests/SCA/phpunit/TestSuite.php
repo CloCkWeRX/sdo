@@ -41,14 +41,16 @@ require_once 'AnnotationTests/TypesAnnotationTest.php';
 require_once 'AnnotationTests/ReferenceAnnotationTest.php';
 require_once 'TabsAndSpaces/SCA_TabsAndSpacesTest.php';
 require_once 'LocalProxy/SCA_LocalProxyTest.php';
-require_once 'SoapProxy/SCA_SoapProxyTest.php';
-require_once 'SoapHandler/SCA_SoapHandlerTest.php';
-require_once 'WSDLGeneration/SCA_WSDLTest.php';
-require_once 'SDO_TypeHandler/TypeHandlerTest.php';
+require_once 'SoapBinding/ProxyTest.php';
+require_once 'SoapBinding/HandlerTest.php';
+require_once 'SoapBinding/WSDLTest.php';
+require_once 'SoapBinding/MapperTest.php';
 require_once 'GetService/PathsTest.php';
 require_once 'JsonRpc/JsonRpcTest.php';
 require_once 'XmlRpc/XmlRpcTest.php';
 require_once 'RestRpc/RestRpcTest.php';
+require_once 'eBaySoap/eBaySoapTest.php';
+require_once 'TargetTests/SCA_TargetTest.php';
 //require_once 'LogTests/SCALoggerTest.php' ;
 //require_once 'LogTests/SCALogFilterTest.php' ;
 
@@ -70,14 +72,16 @@ class SCA_TestSuite {
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Annotation_ReferenceTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_TabsAndSpacesTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_LocalProxyTest"));
-        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_SoapProxyTest"));
-        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_SoapHandlerTest"));
-        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_WSDLTest"));
-        $suite->addTest(new PHPUnit_Framework_TestSuite("SDO_TypeHandlerTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Bindings_soap_ProxyTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Bindings_soap_HandlerTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Bindings_soap_WSDLTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Bindings_soap_MapperTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_GetServicePathsTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_XmlRpcTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_RestRpcTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_eBaySoapTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_JsonRpcTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_TargetTest"));
         // TODO
         // interface to logger has changed - rework the tests
         //        $suite->addTest( new PHPUnit_Framework_TestSuite("SCALoggerTest"));

@@ -37,7 +37,7 @@ using std::ostringstream;
 
 
 
-#define SDO_VERSION "1.2.1"
+#define SDO_VERSION "1.2.2"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
@@ -148,7 +148,7 @@ extern PHP_SDO_API Type::Types sdo_map_zval_type (zval *z_value);
 
 #define SDO_FUNC_ADDREF(prefix) sdo_##prefix##_add_ref
 #define SDO_FUNC_DELREF(prefix) sdo_##prefix##_del_ref
-#define SDO_FUNC_DESTROY(prefix) sdo_##prefix##_destroy_object 
+#define SDO_FUNC_DESTROY(prefix) sdo_##prefix##_destroy_object
 
 #define SDO_DEBUG_ADDREF(prefix) \
 static void sdo_##prefix##_add_ref(zval *object TSRMLS_DC) { \
@@ -173,14 +173,14 @@ static void sdo_##prefix##_destroy_object(void *object, zend_object_handle handl
 
 #else
 
-#define SDO_DEBUG_ALLOCATE(handle,object) 
+#define SDO_DEBUG_ALLOCATE(handle,object)
 #define SDO_FUNC_ADDREF(prefix) zend_objects_store_add_ref
 #define SDO_FUNC_DELREF(prefix) zend_objects_store_del_ref
 #define SDO_FUNC_DESTROY(prefix) NULL
 #define SDO_DEBUG_ADDREF(prefix)
 #define SDO_DEBUG_DELREF(prefix)
-#define SDO_DEBUG_DESTROY(prefix) 
-#define SDO_DEBUG_FREE(object) 
+#define SDO_DEBUG_DESTROY(prefix)
+#define SDO_DEBUG_FREE(object)
 
 #endif
 /* }}} */

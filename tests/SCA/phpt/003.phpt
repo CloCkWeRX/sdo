@@ -1,5 +1,12 @@
 --TEST--
-Call a remote component
+Call a remote component with a structured type
+--SKIPIF--
+<?php 
+if (!extension_loaded("sdo")) 
+    echo "skip sdo not loaded"; 
+else if (phpversion('sdo') <= '1.2.2')
+    echo "skip test until pecl bug 11388 resolved";
+?>
 --FILE--
 <?php
 
@@ -40,4 +47,4 @@ include "$component_file";
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><tns:addResponse xmlns="http://Component" xmlns:tns="http://Component" xmlns:tns2="http://www.test.com/info" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="addResponse"><addReturn><tns2:name><first>William</first><last>Shakespeare</last></tns2:name><tns2:phone><type>home</type><number>123-456</number></tns2:phone><tns2:address><street>456 Evergreen</street><city>Austin</city><state>TX</state></tns2:address></addReturn></tns:addResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://Component"><SOAP-ENV:Body><ns1:addResponse xmlns="http://Component"><addReturn><name><first>William</first><last>Shakespeare</last></name><phone><type>home</type><number>123-456</number></phone><address><street>456 Evergreen</street><city>Austin</city><state>TX</state></address></addReturn></ns1:addResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>

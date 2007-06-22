@@ -37,32 +37,66 @@ if ( ! class_exists('SCA_Helper', false) ) {
         {
             // TODO - How do we handle the case where the classname
             // follows PEAR coding standards? For the time being
-            // just keep extending the class name with parts of the 
-            // directory path until we find a class that exists or we 
+            // just keep extending the class name with parts of the
+            // directory path until we find a class that exists or we
             // run out of directory path
-            
+
             $class_name = basename($class_file, '.php');
             if (class_exists($class_name)){
                 return $class_name;
             }
-            
+
             // walk back up the dir path trying to find a class
             // that has already been loaded
             $pear_class_name = $class_name;
             $class_file = str_replace('\\', '/', $class_file);
             $dir_array = explode('/', dirname($class_file));
-            foreach( array_reverse($dir_array) as $dir){                     
-                $pear_class_name = $dir . '_' . $pear_class_name;                           
+            foreach( array_reverse($dir_array) as $dir){
+                $pear_class_name = $dir . '_' . $pear_class_name;
                 if (class_exists($pear_class_name)){
                     return $pear_class_name;
                 }
             }
-            
+
             // Don't throw an error if nothing is found as other code
             // in SCA does file inclusion in an attempt to resolve classes
             return $class_name;
         }
 
+        /**
+         * Takes the configuration passed into a binding and looks for a 'config'
+         * entry which should point to an ini file with additiional configuration.
+         * Loads the ini file configuration and then 'overlays' the other
+         * configuration values
+         *
+         * @param array $binding_config The unmerged binding configuration
+         * @param string $base_path_for_relative_paths Used to locate the ini file.
+         * @return string The merged config
+         */
+        public static function mergeBindingIniAndConfig($binding_config, $base_path_for_relative_paths) {
+            // Merge values from a config file and annotations
+            if (key_exists('config', $binding_config)) {
+
+                if (SCA_Helper::isARelativePath($binding_config['config'])) {
+                    $msg = $binding_config['config'];
+                    if (!empty($base_path_for_relative_paths)) {
+                        $msg = $base_path_for_relative_paths . '/' . $msg;
+                    }
+                    $absolute_path = realpath($msg);
+                }
+                else {
+                    $absolute_path = $binding_config['config'];
+                }
+                if ($absolute_path === false) {
+                    throw new SCA_RuntimeException("File '$msg' could not be found");
+                }
+                SCA::$logger->log('Loading external configuration from: ' . $absolute_path);
+                $config = @parse_ini_file($absolute_path, true);
+                $binding_config = array_merge($config, $binding_config);
+            }
+            return $binding_config;           
+        }
+        
         public static function isARelativePath($path)
         {
             /**
@@ -85,6 +119,29 @@ if ( ! class_exists('SCA_Helper', false) ) {
             return true;
         }
 
+        public static function constructAbsoluteTarget($target, $base_path_for_relative_paths) {
+            $absolute_target = $target;
+            if (SCA_Helper::isARelativePath($target)) {
+                $absolute_path = realpath("$base_path_for_relative_paths/$target");
+                if ($absolute_path === false) {
+                    $msg = "file '$base_path_for_relative_paths/$target' could not be found";
+                    throw new SCA_RuntimeException($msg);
+                }
+                $absolute_target = $absolute_path;
+            }
+
+            /* If the target is a local file, check it exists      */
+            if (!strstr($absolute_target, 'http:')
+                 && !strstr($absolute_target,'https:')) {
+                if (!file_exists($absolute_target)) {
+                    $msg = "file '$absolute_target' could not be found";
+                    throw new SCA_RuntimeException($msg);
+                }
+            }
+            
+            return $absolute_target;
+        }
+
         public static function constructAbsolutePath($relative_path, $class_name)
         {
 
@@ -101,30 +158,30 @@ if ( ! class_exists('SCA_Helper', false) ) {
         public static function getFileContainingClass($class_name)
         {
             SCA::$logger->log("Entering");
-            SCA::$logger->log("Looking for file that contains class=$class_name");           
+            SCA::$logger->log("Looking for file that contains class=$class_name");
             foreach (get_included_files() as $file) {
                 // try to find an include using the full class name
                 if (strcasecmp($class_name,basename($file, ".php")) === 0) {
                     SCA::$logger->log("found a match with file $file");
                     return $file;
                 }
-                
+
                 // try to find an include using PEAR coding standards. In this
                 // case a class name A_Class_Name is considered to be found in the
-                // file A/Class/Name.php   
-                
+                // file A/Class/Name.php
+
                 // TODO - I'm cheating here as I'm only checking the last part
                 // of the PEAR class name with the basename of the file. I could
-                // pick up the wrong filename if there is another file with the 
+                // pick up the wrong filename if there is another file with the
                 // same name in a directory that doesn't match the PEAR classname
-                // need to walk back through the file name checking that the 
-                // directory path matched as well. This is just a test to 
+                // need to walk back through the file name checking that the
+                // directory path matched as well. This is just a test to
                 // see if I have the right idea about PEAR class names so leave
-                // this until later. 
+                // this until later.
                 $parts = explode('_', $class_name);
                 $pear_class_name = array_pop($parts);
                 if ($pear_class_name == basename($file, ".php")) {
-                    SCA::$logger->log("found a match with file $file");                
+                    SCA::$logger->log("found a match with file $file");
                     return $file;
                 }
             }
@@ -223,38 +280,41 @@ if ( ! class_exists('SCA_Helper', false) ) {
          * ( which only lists public methods ) the filter removes any protected, or
          * private functions.
          *
-         * @param array $public_list 1dim array of public methods
-         * @param unknown_type $allMethodsArray 2dim array of all methods
-         * @return array     modified 2dim array of all methods
+         * @param  array        $public_list     1dim array of public methods
+         * @param  unknown_type $allMethodsArray 2dim array of all methods
+         * @return array                         modified 2dim array of all methods
          */
-        public static function filterMethods( $public_list        //PHP Class list
-        , $allMethodsArray    //reflectionObject list
-        )
+        public static function filterMethods($public_list,       //PHP Class list
+        $allMethodsArray)   //reflectionObject list
         {
             $editedArray = array() ;
             $elements    = count($public_list);
             $j           = 0 ;
 
-            /* Check every public method ....                                      */
+            /* For all of the public methods of the service class */
             for ( $i = 0 ; $i < $elements ; $i++ ) {
-                /*  ... has a reflection object ....                               */
-                foreach ( $allMethodsArray as $allMethod ) {
-                    $objArray = get_object_vars($allMethod);
 
-                    /* ... and copy the object when it does                        */
+                /* Ignore the method if it's a magic method as defined by */
+                /* http://www.php.net/manual/en/language.oop5.magic.php   */
+                if ((substr($public_list[ $i ], 0, 2) != '__')) {
 
-                    if ( strcmp($objArray[ 'name' ], $public_list[ $i ]) === 0 ) {
-                        $editedArray[ $j++ ] = $allMethod ;
+                    /*  Check each method has a reflection object */
+                    foreach ( $allMethodsArray as $allMethod ) {
 
-                    }/* End it does                                                */
+                        $objArray = get_object_vars($allMethod);
 
-                }/* End each reflection object                                     */
+                        /* copy the relfection object to the filitered list if it does */
+                        if ( strcmp($objArray[ 'name' ], $public_list[ $i ]) === 0 ) {
+                            $editedArray[ $j++ ] = $allMethod ;
 
-            }/* end all public methods                                             */
+                        }
+                    }
+                }
+            }/* end all public methods */
 
             return $editedArray ;
 
-        }/* End filter methods function                                            */
+        }/* End filter methods function */
 
         /**
         * Find the system's temporary directory.
@@ -278,11 +338,11 @@ if ( ! class_exists('SCA_Helper', false) ) {
             SCA::$logger->log("class_name = $class_name, namespace_uri = $namespace_uri");
             $reader                     = new SCA_AnnotationReader($class_name);
             $namespace_and_xsd_pairs    = $reader->reflectXsdTypes(); // may be an empty array if none to be found
-           
+
             if (count($namespace_and_xsd_pairs) == 0 ) {
                 return SDO_DAS_XML::create();
             }
-            
+
             foreach ($namespace_and_xsd_pairs as $index => $one_namespace_and_xsd_pair) {
                 list($namespace, $xsdfile) = $one_namespace_and_xsd_pair;
                 if (SCA_Helper::isARelativePath($xsdfile)) {
@@ -291,7 +351,7 @@ if ( ! class_exists('SCA_Helper', false) ) {
                     $xsd_list[] = $xsdfile;
                 }
             }
-            $xmldas = SDO_DAS_XML::create($xsd_list,$class_name);
+            $xmldas = SDO_DAS_XML::create($xsd_list);
             return $xmldas;
         }
 
@@ -331,7 +391,7 @@ if ( ! class_exists('SCA_Helper', false) ) {
          * A problematic method for the time being as the
          * XML DAS doesn't provide an easy way of retrieving
          * a list of the types that it knows about. This is
-         * slightly different from the one in SDO_TypeHandler in
+         * slightly different from the one in Mapper in
          * that it finds top level types
          */
         const EOL = "\n" ;

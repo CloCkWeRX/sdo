@@ -3,13 +3,19 @@
 require_once "PHPUnit/Framework/TestCase.php";
 require_once "PHPUnit/Framework/TestSuite.php";
 
-require_once 'SCA/Bindings/soap/ServiceDescriptionGenerator.php';
-require_once 'SCA/Bindings/soap/SDO_TypeHandler.php';
 
-class SDO_TypeHandlerTest extends PHPUnit_Framework_TestCase
+include_once "SCA/SCA.php";
+require_once 'SCA/Bindings/soap/ServiceDescriptionGenerator.php';
+require_once 'SCA/Bindings/soap/Mapper.php';
+
+class SCA_Bindings_soap_MapperTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
+        if ( ! class_exists('SCA_Bindings_soap_Proxy')) {
+            $this->markTestSkipped("Cannot execute any SCA soap tests as the SCA soap binding is not loaded");
+            return;
+        }
         $xsd = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema"
@@ -84,7 +90,7 @@ public function tearDown()
 
 public function testToXmlGeneratesGoodXmlFromSdoWithScalars()
 {
-    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapClient');
+    $th = new SCA_Bindings_soap_Mapper('SoapClient');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $request = $th->createDataObject('http://TypeHandlerTest1','fourargs');
     $request->a = 'hello';
@@ -94,7 +100,7 @@ public function testToXmlGeneratesGoodXmlFromSdoWithScalars()
     $xml = $th->toXML($request);
 
     $this->assertContains('<?xml version="1.0" encoding="UTF-8"?>',$xml);
-    $this->assertContains('<BOGUS xmlns="http://TypeHandlerTest1" xsi:type="fourargs" xmlns:tns="http://TypeHandlerTest1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',$xml);
+    $this->assertContains('<BOGUS xmlns="http://TypeHandlerTest1">',$xml);
     $this->assertContains('<a>hello</a>',$xml);
     /* there's a difference in the number of trailing zeros which seems to be platform-specific */
     $this->assertRegExp('?<b>1\.100e\+0*</b>?', $xml);
@@ -105,7 +111,7 @@ public function testToXmlGeneratesGoodXmlFromSdoWithScalars()
 
 public function testToXmlGeneratesGoodXmlFromSdoWithSdos()
 {
-    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapClient');
+    $th = new SCA_Bindings_soap_Mapper('SoapClient');
     $th->setWSDLTypes('TypeHandlerTest2.wsdl');
     $request = $th->createDataObject('http://TypeHandlerTest2','myMethod');
     $person = $request->createDataObject('p1');
@@ -115,7 +121,7 @@ public function testToXmlGeneratesGoodXmlFromSdoWithSdos()
     $xml = $th->toXML($request);
 
     $this->assertContains('<?xml version="1.0" encoding="UTF-8"?>',$xml);
-    $this->assertContains('<BOGUS xmlns="http://TypeHandlerTest2" xsi:type="myMethod" xmlns:tns2="PersonNamespace" xmlns:tns="http://TypeHandlerTest2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',$xml);
+    $this->assertContains('<BOGUS xmlns="http://TypeHandlerTest2">',$xml);
     $this->assertContains('<p1>',$xml);
     $this->assertContains('<name>William Shakespeare</name>',$xml);
     $this->assertContains('<dob>April 1564, most likely 23rd</dob>',$xml);
@@ -127,7 +133,7 @@ public function testToXmlGeneratesGoodXmlFromSdoWithSdos()
 
 public function testToXmlHandlesNullsInSdo()
 {
-    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapClient');
+    $th = new SCA_Bindings_soap_Mapper('SoapClient');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $request = $th->createDataObject('http://TypeHandlerTest1','fourargs');
     $request->a = null;
@@ -137,7 +143,7 @@ public function testToXmlHandlesNullsInSdo()
     $xml = $th->toXML($request);
 
     $this->assertContains('<?xml version="1.0" encoding="UTF-8"?>',$xml);
-    $this->assertContains('<BOGUS xmlns="http://TypeHandlerTest1" xsi:type="fourargs" xmlns:tns="http://TypeHandlerTest1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',$xml);
+    $this->assertContains('<BOGUS xmlns="http://TypeHandlerTest1">',$xml);
     $this->assertContains('<a xsi:nil="true"/>',$xml);
     $this->assertContains('<b xsi:nil="true"/>',$xml);
     $this->assertContains('<c xsi:nil="true"/>',$xml);
@@ -159,7 +165,7 @@ public function testFromXmlGeneratesGoodSdoFromXml()
 
 XML;
 
-    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapServer');
+    $th = new SCA_Bindings_soap_Mapper('SoapServer');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $sdo = $th->fromXML($xml);
     $this->assertEquals('fourargs',$sdo->getTypename());
@@ -183,7 +189,7 @@ public function testToXmlHandlesNullInXml()
 
 XML;
 
-    $th = new SCA_Bindings_soap_SDO_TypeHandler('SoapServer');
+    $th = new SCA_Bindings_soap_Mapper('SoapServer');
     $th->setWSDLTypes('TypeHandlerTest1.wsdl');
     $sdo = $th->fromXML($xml);
     $this->assertEquals('fourargs',$sdo->getTypename());
@@ -197,7 +203,7 @@ public static function main()
 {
     require_once "PHPUnit/TextUI/TestRunner.php";
 
-    $suite  = new PHPUnit_Framework_TestSuite("SDO_TypeHandlerTest");
+    $suite  = new PHPUnit_Framework_TestSuite("SCA_Bindings_soap_MapperTest");
     $result = PHPUnit_TextUI_TestRunner::run($suite);
 }
 
@@ -205,8 +211,8 @@ public static function main()
 
 // Call SCA_AnnotationRulesTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
-    define("PHPUnit_MAIN_METHOD", "SDO_TypeHandlerTest::main");
-    SDO_TypeHandlerTest::main();
+    define("PHPUnit_MAIN_METHOD", "SCA_Bindings_soap_MapperTest::main");
+    SCA_Bindings_soap_MapperTest::main();
 }
 
 ?>

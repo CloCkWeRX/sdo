@@ -62,34 +62,21 @@ if ( ! class_exists('SCA_Bindings_local_Proxy', false) ) {
           *
           * @param string $absolute_path_to_component
           */
-        public function __construct($absolute_path_to_component,
-                                    $immediate_caller_directory, 
-                                    $binding_config)
+        public function __construct($target, $base_path_for_relative_paths, $binding_config)
         {
-            try
-            {
-                $this->component_class_name =
-                    SCA_Helper::guessClassName($absolute_path_to_component);
+            $absolute_path_to_component =
+            SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
 
-                if  ( ! class_exists($this->component_class_name, false) )
-                // ZS Code Analyzer marks this include with a variable value as unsafe
-                // but in fact the value is either from an annotation or a
-                // call to getService
+            $this->component_class_name =
+            SCA_Helper::guessClassName($absolute_path_to_component);
 
-                if ( ! class_exists($this->component_class_name, false)) {
-                    include "$absolute_path_to_component" ;
-                }
-
-                $this->instance_of_the_component = SCA::createInstance($this->component_class_name);
-                SCA::fillInReferences($this->instance_of_the_component);
-
+            if ( ! class_exists($this->component_class_name, false)) {
+                include "$absolute_path_to_component" ;
             }
-            catch ( SCA_RuntimeException $se )
-            {
-                $this->instance_of_the_component = null ;
-                $this->component_class_name      = null ;
-                throw $se ;
-            }
+
+            $this->instance_of_the_component = SCA::createInstance($this->component_class_name);
+            SCA::fillInReferences($this->instance_of_the_component);
+
 
         }/* End local proxy constructor */
 
@@ -120,7 +107,7 @@ if ( ! class_exists('SCA_Bindings_local_Proxy', false) ) {
 
             if ($this->instance_of_the_component === null) {
                 $this->instance_of_the_component = SCA::createInstance($this->component_class_name);
-                    SCA::fillInReferences($this->instance_of_the_component);
+                SCA::fillInReferences($this->instance_of_the_component);
             }
 
             if ( SCA_Helper::checkMethods($method_name, $this->instance_of_the_component) ) {

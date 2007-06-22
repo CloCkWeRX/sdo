@@ -1,5 +1,12 @@
 --TEST--
-Call a remote component
+Call a remote component with a simple scalar type (string)
+--SKIPIF--
+<?php 
+if (!extension_loaded("sdo")) 
+    echo "skip sdo not loaded"; 
+else if (phpversion('sdo') <= '1.2.2')
+    echo "skip test until pecl bug 11388 resolved";
+?>
 --FILE--
 <?php
 
@@ -26,4 +33,4 @@ require_once "$component_file";
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><tns:reverseResponse xmlns="http://Component" xmlns:tns="http://Component" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="reverseResponse"><reverseReturn>MBI</reverseReturn></tns:reverseResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://Component"><SOAP-ENV:Body><ns1:reverseResponse xmlns="http://Component"><reverseReturn>MBI</reverseReturn></ns1:reverseResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>

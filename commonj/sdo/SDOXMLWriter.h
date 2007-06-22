@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 489336 $ $Date$ */
+/* $Rev: 546667 $ $Date$ */
 
 #ifndef _SDOXMLWRITER_H_
 #define _SDOXMLWRITER_H_
@@ -84,13 +84,20 @@ namespace commonj
                 ChangeSummaryPtr cs);
 
             void addToNamespaces(DataObjectImpl* dob);
- 
+
+            void addNamespace(const SDOXMLString& uri, bool tns=false);
+
             int writeDO(
                 DataObjectPtr dataObject,
                 const SDOXMLString& elementURI,
                 const SDOXMLString& elementName,
                 bool writeXSIType = false,
                 bool isRoot = false);
+
+            void writeDOElements(DataObjectPtr dataObject,
+                                 const PropertyList& pl,
+                                 unsigned int start,
+                                 unsigned int number);
 
             /**
              * A wrapper for the libxml2 function xmlTextWriterWriteElement
@@ -105,7 +112,6 @@ namespace commonj
 
             XSDPropertyInfo* getPropertyInfo(const Property& property);
             
-            int spacescount;
             std::map<SDOXMLString,SDOXMLString> namespaceMap;
             SDOXMLString tnsURI;
            
@@ -126,6 +132,12 @@ namespace commonj
             static const SDOXMLString s_xsiNS;
             static const SDOXMLString s_xmlns;
             static const SDOXMLString s_commonjsdo;
+            static const SDOXMLString s_wsdl;
+            static const SDOXMLString s_wsdluri;
+            static const SDOXMLString s_soap;
+            static const SDOXMLString s_soapuri;
+            static const SDOXMLString s_http;
+            static const SDOXMLString s_httpuri;
 
         };
     } // End - namespace sdo

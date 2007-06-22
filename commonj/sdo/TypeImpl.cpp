@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 511929 $ $Date$ */
+/* $Rev: 546667 $ $Date$ */
 
 #include "commonj/sdo/Logger.h"
 
@@ -117,8 +117,7 @@ namespace sdo{
          bool isRestriction) 
      {
         init(uri,inname,isSeq,isOp, isAbs, isData);
-        baseType = (TypeImpl*)base;
-        brestriction = isRestriction;
+        setBaseType(base, isRestriction);
         bFromList = false;
      }
 
@@ -149,6 +148,7 @@ namespace sdo{
         changeSummaryType = false;
         isSequenced = isSeq;
         isOpen = isOp;
+        isOpenImplicitly = false;
         isAbstract = isAbs;
         isPrimitive = isData;
         name = new char[strlen(inname)+1];
@@ -238,6 +238,7 @@ namespace sdo{
     void TypeImpl::setOpen(bool set) 
     {
           isOpen = set;
+          isOpenImplicitly = false; // explicitly set as open
     }
 
     bool TypeImpl::isBaseTypeOf(const Type* type) const
@@ -289,9 +290,10 @@ namespace sdo{
         isSequenced = baseType->isSequenced; 
 
         // if the base is open then this type must be open too.
-        if (baseType->isOpenType())
+        if (baseType->isOpenType() && !isOpen)
         {
             isOpen = true;
+            isOpenImplicitly = true;
         }
     }
 
@@ -307,6 +309,11 @@ namespace sdo{
     const Type* TypeImpl::getBaseType() const 
     {
         return (Type*)baseType;
+    }
+
+    const TypeImpl* TypeImpl::getBaseTypeImpl() const 
+    {
+        return baseType;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -794,6 +801,11 @@ namespace sdo{
     {
         /* TODO - handle open types */
           return isOpen;
+    }
+ 
+    bool TypeImpl::isOpenTypeImplicitly() const
+    {
+        return isOpenImplicitly;
     }
 
     ///////////////////////////////////////////////////////////////////////////

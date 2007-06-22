@@ -27,7 +27,7 @@ $Id$
 */
 
 require "SCA/SCA_Exceptions.php";
-require "SCA/Bindings/soap/SDO_TypeHandler.php";
+require "SCA/Bindings/soap/Mapper.php";
 
 /**
  *
@@ -36,7 +36,7 @@ require "SCA/Bindings/soap/SDO_TypeHandler.php";
  * remote target.
  * Also acts as a data factory for complex data types.
  * Note the script has a error handler to trap 'trigger_error' responses
- * from the SDO_TypeHandler.
+ * from the Mapper.
  *
  * Public Methods:
  *
@@ -81,6 +81,11 @@ require "SCA/Bindings/soap/SDO_TypeHandler.php";
  *
  */
 
+if ( ! extension_loaded('soap')) {
+    trigger_error("Cannot use SCA soap binding as soap extension is not loaded",E_USER_WARNING);
+    return;
+}
+
 if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
     /**
       * Callback Error Handler to trap trigger_error calls from the SDO_TypHandler
@@ -112,17 +117,20 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
         private $handler;
         private $location = null;
         protected $config = null;
+        protected $sdo_type_handler_class_name = "SCA_Bindings_soap_Mapper";
 
         //TODO Chris says error handler does not work any longer ....
         private $previousErrorHandler ;
 
-        public function __construct($absolute_path_to_target_wsdl,
-        $immediate_caller_directory,
+        public function __construct($target, $base_path_for_relative_paths,
         $binding_config)
         {
             SCA::$logger->log('Entering');
 
             SCA_Helper::checkSoapExtensionLoaded();
+
+            $absolute_path_to_target_wsdl =
+            SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
 
             // Store the location now see subsequent sets will override it
             $this->config = $binding_config;
@@ -130,11 +138,11 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
                 $this->__setLocation($this->config['location']);
             }
 
-            /* Catch trigger_errors from SDO_TypeHandler                           */
+            /* Catch trigger_errors from Mapper                           */
             $this->previousErrorHandler = set_error_handler('errorHandler');
 
             //TODO recast these two lines into a call to the constructor.
-            $this->handler = new SCA_Bindings_soap_SDO_TypeHandler("SoapClient");
+            $this->handler = new $this->sdo_type_handler_class_name("SoapClient");
 
             try {
                 $this->handler->setWSDLTypes($absolute_path_to_target_wsdl);
@@ -152,7 +160,7 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
 
             }
             try {
-                parent::__construct($absolute_path_to_target_wsdl,
+                @parent::__construct($absolute_path_to_target_wsdl,
                 array ( "trace" => 1, "exceptions" => 1,
                 'typemap' => $this->handler->getTypeMap()));
             }catch (Exception $e) {

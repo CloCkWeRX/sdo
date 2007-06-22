@@ -21,13 +21,16 @@ contains the agreement and instructions for returning it.
 
 In this project, active development for each release takes place in a CVS branch. 
 The name of the current development branch is maintained in the file 
-DEV_BRANCH (in this directory).
+DEV_BRANCH in the root directory of the project in the CVS repository. 
+You can see it at 
+http://cvs.php.net/viewvc.cgi/pecl/sdo/DEV_BRANCH?view=markup
 
-For further information about SDO, visit the Apache Tuscany Project at
-http://incubator.apache.org/tuscany/.
+For further information about the C++ SDO implementation that we use, visit the 
+Apache Tuscany Project at http://incubator.apache.org/tuscany/.
 
 We've published an introductory article about using SDO for PHP at 
 http://www.ibm.com/developerworks/opensource/library/os-sdophp/.
 
 There is also an article about working with XML using SDO at
 http://www.ibm.com/developerworks/opensource/library/os-php-sdo/.
+

@@ -28,7 +28,9 @@ require_once 'AllTestsSetup.php';
 require_once 'TestSuite.php';
 
 // interop testing
-require_once 'interop/interop-xml.php';
+// Commented out for the time being as the 
+// tests need tidying up
+//require_once 'interop/interop-xml.php';
 
 /*
 echo "You may like to run the Relational samples now which " . 

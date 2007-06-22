@@ -8,10 +8,16 @@ require_once 'SCA/SCA.php';
 require_once 'SCA/Bindings/soap/ServiceDescriptionGenerator.php';
 require_once 'SCA/Bindings/soap/Proxy.php';
 
-class SCA_SoapProxyTest extends PHPUnit_Framework_TestCase {
+class SCA_Bindings_soap_ProxyTest extends PHPUnit_Framework_TestCase {
 
     public function setUp()
     {
+        if ( ! class_exists('SCA_Bindings_soap_Proxy')) {
+            $this->markTestSkipped("Cannot execute any SCA soap tests as the SCA soap binding is not loaded");
+            return;
+        }
+
+
         $php = <<<PHP
 <?php
 
@@ -78,8 +84,8 @@ public static function main()
 
 // Call SCA_AnnotationRulesTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
-    define("PHPUnit_MAIN_METHOD", "SCA_SoapProxyTest::main");
-    SCA_SoapProxyTest::main();
+    define("PHPUnit_MAIN_METHOD", "SCA_Bindings_soap_ProxyTest::main");
+    SCA_Bindings_soap_ProxyTest::main();
 }
 
 ?>

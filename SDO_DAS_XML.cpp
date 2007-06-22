@@ -271,7 +271,16 @@ static int sdo_das_xml_add_types(xmldas_object *xmldas, char *file_name TSRMLS_D
 		 * there, but if it causes problems, perhaps a phpini setting may be 
 		 * required.
 		 */
-        xmldas->xsdHelperPtr->defineFile(file_name, true);
+		 /* Turned this off, for the soap and wsdl schema, on 21 June 07. 
+		  * Every load of the wsdl and soap schema was 
+		  * taking at least a second, sometimes more than 30, when run from the
+		  * other end of a broadband link. Matthew Peters 
+		  */
+		if (strstr(file_name,"2003-02-11.xsd")) {
+        	xmldas->xsdHelperPtr->defineFile(file_name, false);
+		} else {
+            xmldas->xsdHelperPtr->defineFile(file_name, true);
+		}
 
         error_count = xmldas->xsdHelperPtr->getErrorCount();
         if (error_count > 0) { 
@@ -316,9 +325,19 @@ static int sdo_das_xml_add_types(xmldas_object *xmldas, char *file_name TSRMLS_D
 }
 /* }}} */
 
-#undef CACHE_DATA_FACTORY
+//turn on caching of the data factory for a very special case only
+//it should only operate when the two-argument version of create() is used,
+//and that should only happen in one place in the SCA code, which is in the 
+//SDO type handler for the ebaysoap binding.
+//This is just a bit of a quickfix to allow the ebay binding to run at a 
+//decent speed.  
+//In due course I think the cache should be a PHP hashmap and not a 
+//hidden C entity as it is here
+//Matthew Peters 31st May 2007
+
+#define CACHE_DATA_FACTORY
 #ifdef CACHE_DATA_FACTORY
-#define SAVED_DATA_FACTORY_TABLE_SIZE 100
+#define SAVED_DATA_FACTORY_TABLE_SIZE 1
 #define MAX_KEY_SIZE 400
 
 typedef struct {
@@ -384,11 +403,11 @@ void add_to_table(char *key, DataFactoryPtr data_factory_ptr)
 	// TODO find the equivalent of making this a synchronised method
 	for (int i = 0 ; i  < SAVED_DATA_FACTORY_TABLE_SIZE ; i++) {
 		if (strncmp(data_factory_table[i].key, key, MAX_KEY_SIZE) == 0) {
-//			php_printf("We were asked to add %s but it is already there\n",key);
+			//php_printf("We were asked to add %s but it is already there\n",key);
 			return; // it's already there
 		}
 		if (strcmp(data_factory_table[i].key, "") == 0) {
-//			php_printf("Adding %s -> %p\n",file_name,data_factory_ptr);
+			//php_printf("Adding %s -> %p\n",key,data_factory_ptr);
 			strncpy(data_factory_table[i].key,key, MAX_KEY_SIZE);
 			data_factory_table[i].data_factory_ptr = data_factory_ptr;
 			return; // we added it
@@ -399,14 +418,14 @@ void add_to_table(char *key, DataFactoryPtr data_factory_ptr)
 DataFactoryPtr retrieve_from_table(char *key)
 {
 	// TODO find the equivalent of making this a synchronised method
-//	php_printf("Looking for %s\n",key);
+	//php_printf("Looking for %s\n",key);
 	for (int i = 0 ; i  < SAVED_DATA_FACTORY_TABLE_SIZE ; i++) {
 		if (strncmp(data_factory_table[i].key, key, MAX_KEY_SIZE) == 0) {
-//			php_printf("Found %s -> %p\n",key, data_factory_table[i].data_factory_ptr);
+			//php_printf("Found %s -> %p\n",key, data_factory_table[i].data_factory_ptr);
 			return data_factory_table[i].data_factory_ptr;
 		}
 	}
-//	php_printf("Sadly, did not find %s\n",file_name);
+	//php_printf("Sadly, did not find %s\n",key);
 	return NULL;
 }	
 
@@ -499,7 +518,7 @@ PHP_METHOD(SDO_DAS_XML, create)
 		/* Check to see if we can use a cached data factory */
 		dataFactoryPtr = retrieve_from_table(key);
 		if (dataFactoryPtr) {
-//			php_printf("!!! retrieving from cache !!!\n");
+			//php_printf("!!! retrieving from cache !!!\n");
 			sdo_das_df_new(&xmldas->z_df, dataFactoryPtr TSRMLS_CC);
 		    xmldas->xsdHelperPtr = HelperProvider::getXSDHelper((DataFactory *)dataFactoryPtr);
 		    xmldas->xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr);
@@ -517,8 +536,12 @@ PHP_METHOD(SDO_DAS_XML, create)
     xmldas->xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr);
 	
 	if (file_name_len) {
+
+		//php_printf("!!! about to add types !!!\n");		
 		rc = sdo_das_xml_add_types (xmldas, file_name TSRMLS_CC);
+		
 		if (rc == FAILURE) {
+			//php_printf("!!! seems to be a bit of a failure !!!\n");
 			RETURN_FALSE;
 		}
 		

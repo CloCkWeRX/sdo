@@ -50,14 +50,14 @@ if (!class_exists('SCA_Binding_Factory')) {
         }
 
         public static function createProxy($binding_string, $target, 
-                                           $immediate_caller_directory, $binding_config)
+                                           $base_path_for_relative_paths, $binding_config)
         {
             SCA::$logger->log('Entering');
             SCA::$logger->log("binding_string = $binding_string, target = $target");
             $proxy_class_name = self::_generateClassNameAndLoadClass(
             $binding_string, 
             'Proxy');
-            return new $proxy_class_name($target, $immediate_caller_directory, $binding_config);
+            return new $proxy_class_name($target, $base_path_for_relative_paths, $binding_config);
         }
 
         private static function _generateClassNameAndLoadClass($binding_string, $class)

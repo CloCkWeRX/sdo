@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 510951 $ $Date$ */
+/* $Rev: 546667 $ $Date$ */
 
 #ifndef _TYPEIMPL_H_
 #define _TYPEIMPL_H_
@@ -214,6 +214,9 @@ public:
     bool isOpenType() const;
     void setOpen(bool set);
 
+    // Returns true if Type is Open only because it's base Type is open
+    bool isOpenTypeImplicitly() const;
+
     ///////////////////////////////////////////////////////////////////////////
     // Indicates if this type may not be instantiated.
     ///////////////////////////////////////////////////////////////////////////
@@ -225,6 +228,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////
     void setBaseType(const Type* tb, bool isRestriction = false);
     const Type* getBaseType() const;
+    const TypeImpl* getBaseTypeImpl() const;
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -242,7 +246,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////
     void addChangeSummary();
 
-    ///////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
     // Say if this type is allowed to have a summary
     ///////////////////////////////////////////////////////////////////////////
     bool isChangeSummaryType() const;
@@ -309,6 +313,7 @@ private:
     bool isPrimitive;
     bool isSequenced;
     bool isOpen;
+    bool isOpenImplicitly;
     bool isAbstract;
 
     // baseType properties included

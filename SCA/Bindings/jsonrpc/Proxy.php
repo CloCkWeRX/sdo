@@ -54,12 +54,14 @@ if (! class_exists('SCA_Bindings_Jsonrpc_Proxy', false)) {
          * Constructor - create a JRON RPC proxy based on the full pathname of
          *               an SMD file
          */
-        public function __construct($path_to_smd,
-                                    $immediate_caller_directory, 
-                                    $binding_config)
+        public function __construct($target, $base_path_for_relative_paths, $binding_config)
         {
-            $this->smd_file_name  = $path_to_smd;
+            SCA::$logger->log('Entering');
+
+            $this->smd_file_name = SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
             $this->jsonrpc_client = new SCA_JsonRpcClient($this->smd_file_name);
+
+            SCA::$logger->log('Exiting');
         }
 
         public function addReferenceType(SCA_ReferenceType $reference_type)

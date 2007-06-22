@@ -48,11 +48,11 @@ if (! class_exists('SCA_Bindings_Xmlrpc_Proxy', false)) {
          *
          * @param string $serviceUrl URL of XMLRPC service
          */
-        public function __construct($serviceUrl,
-                                    $immediate_caller_directory, 
+        public function __construct($target,
+                                    $base_path_for_relative_paths, 
                                     $binding_config)
         {
-
+            $serviceUrl = SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
 
             SCA::$logger->log("Proxy serviceUrl $serviceUrl");
 

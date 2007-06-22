@@ -1,22 +1,18 @@
 <?php
 
-/*******************************************************************************
- * SERVICE and BINDING.soap
- ********************************************************************************/
-
-
-
 /**
  * class with no service annotation
  */
-class NoServiceAnnotation {
+class NoServiceAnnotation 
+{
 }
 
 /**
  * class with no binding annotation
  * @service
  */
-class NoBindingAnnotation {
+class NoBindingAnnotation 
+{
 }
 
 /**
@@ -24,24 +20,27 @@ class NoBindingAnnotation {
  * @service
  * @binding.rubbish
  */
-class RubbishBindingAnnotation {
+class RubbishBindingAnnotation 
+{
 }
 
 /**
- * class with two binding annotations
+ * class with one valid binding annotation
  * @service
  * @binding.soap
  */
-class OneValidBindingAnnotation {
+class OneValidBindingAnnotation 
+{
 }
 
 /**
- * class with two binding annotations
+ * class with two valid binding annotations
  * @service
  * @binding.soap
  * @binding.jsonrpc
  */
-class TwoValidBindingAnnotations {
+class TwoValidBindingAnnotations 
+{
 }
 
 /*******************************************************************************
@@ -53,7 +52,8 @@ class TwoValidBindingAnnotations {
  * @service
  * @binding.soap
  */
-class NoMethods {
+class NoMethods 
+{
 }
 
 /**
@@ -78,7 +78,7 @@ class MethodHasNoAnnotations {
 }
 
 /*******************************************************************************
- * PARAM AND RETURN
+ * PARAM
  ********************************************************************************/
 
 /**
@@ -86,7 +86,7 @@ class MethodHasNoAnnotations {
  * @service
  * @binding.soap
  */
-class EmptyParam {
+class ParamWithNoTypeOrName {
     /**
      * @param
      *
@@ -101,7 +101,7 @@ class EmptyParam {
  * @service
  * @binding.soap
  */
-class ParamWithOnlyType {
+class ParamWithValidTypeButNoName {
     /**
      * @param string
      *
@@ -127,6 +127,35 @@ class ParamWithOnlyInvalidType {
 }
 
 /**
+ * param has an invalid type
+ * @service
+ * @binding.soap
+ */
+class ParamWithInvalidTypeAndValidName {
+    /**
+     * @param rubbish $a
+     *
+     */
+    public function myPublicMethod($a) {
+
+    }
+}
+/**
+ * param has a valid type but an invalid name
+ * @service
+ * @binding.soap
+ */
+class ParamWithValidTypeAndInvalidName {
+    /**
+     * @param string rubbish
+     *
+     */
+    public function myPublicMethod($a) {
+
+    }
+}
+
+/**
  * param has type and name
  * @service
  * @binding.soap
@@ -134,6 +163,36 @@ class ParamWithOnlyInvalidType {
 class ParamWithValidTypeAndName {
     /**
      * @param string $a
+     *
+     */
+    public function myPublicMethod($a) {
+
+    }
+}
+
+/**
+ * param has type and name
+ * @service
+ * @binding.soap
+ */
+class ParamWithChoiceOfTwoValidTypesAndName {
+    /**
+     * @param string|float $a
+     *
+     */
+    public function myPublicMethod($a) {
+
+    }
+}
+
+/**
+ * param has type and name
+ * @service
+ * @binding.soap
+ */
+class ParamWithChoiceOfValidTypeOrNullAndName {
+    /**
+     * @param string|null $a
      *
      */
     public function myPublicMethod($a) {
@@ -159,35 +218,9 @@ class ParamWithFourValidScalarTypes {
     }
 }
 
-
-/**
- * param has type and name
- * @service
- * @binding.soap
- */
-class ParamWithInvalidTypeAndValidName {
-    /**
-     * @param rubbish $a
-     *
-     */
-    public function myPublicMethod($a) {
-
-    }
-}
-/**
- * param has type and name
- * @service
- * @binding.soap
- */
-class ParamWithValidTypeAndInvalidName {
-    /**
-     * @param string rubbish
-     *
-     */
-    public function myPublicMethod($a) {
-
-    }
-}
+/*******************************************************************************
+ * RETURN
+ ********************************************************************************/
 
 /**
  * return is empty
@@ -208,7 +241,7 @@ class EmptyReturn {
  * @service
  * @binding.soap
  */
-class returnWithInvalidType {
+class ReturnWithInvalidType {
     /**
      * @return rubbish
      *
@@ -222,7 +255,7 @@ class returnWithInvalidType {
  * @service
  * @binding.soap
  */
-class returnWithValidType {
+class ReturnWithValidType {
     /**
      * @return string
      *
@@ -230,6 +263,37 @@ class returnWithValidType {
     public function myPublicMethod() {
     }
 }
+
+/**
+ * return has string|float
+ * @service
+ * @binding.soap
+ */
+class ReturnWithChoiceOfTwoValidTypes{
+    /**
+     * @return string|float
+     *
+     */
+    public function myPublicMethod($a) {
+
+    }
+}
+
+/**
+ * return has string|null
+ * @service
+ * @binding.soap
+ */
+class ReturnWithChoiceOfValidTypeOrNull {
+    /**
+     * @return string|null
+     *
+     */
+    public function myPublicMethod($a) {
+
+    }
+}
+
 
 /*******************************************************************************
  * TYPES, NAMESPACE

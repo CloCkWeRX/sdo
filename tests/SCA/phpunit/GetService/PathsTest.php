@@ -33,9 +33,8 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
 
     public function testExceptionThrownForFileNotFound()
     {
-
         try {
-            $service 		= SCA::getService('a_total_load_of_rubbish');
+            $service = SCA::getService('a_total_load_of_rubbish', 'local');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());
@@ -47,9 +46,8 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
 
     public function testExceptionThrownForFileNotFoundByDotRelativePath()
     {
-
         try {
-            $service 		= SCA::getService('./a_total_load_of_rubbish');
+            $service = SCA::getService('./a_total_load_of_rubbish', 'local');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());
@@ -62,7 +60,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     public function testExceptionThrownForFileNotFoundByDotDotRelativePath()
     {
         try {
-            $service 		= SCA::getService('../a_total_load_of_rubbish');
+            $service = SCA::getService('../a_total_load_of_rubbish', 'local');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());
@@ -75,7 +73,7 @@ class SCA_GetServicePathsTest extends PHPUnit_Framework_TestCase {
     public function testExceptionThrownForFileNotFoundByAbsolutePath()
     {
         try {
-            $service 		= SCA::getService('C:\a_total_load_of_rubbish');
+            $service = SCA::getService('C:\a_total_load_of_rubbish', 'local');
         }
         catch (SCA_RuntimeException $e) {
             $this->assertContains("a_total_load_of_rubbish",$e->getMessage());

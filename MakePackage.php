@@ -150,13 +150,28 @@
 //  .  "             \n"
 //  .  "* Examples\n"
 //  .  "    o More SCA examples that exercise some of the new bindings, and some of the old, including HelloWorlds and Email scenarios.\n",
+//  'notes' =>
+//     " * Fix for spaces in service description URLs (pecl defect #11006).\n"
+//  .  " * Experimental support for service names following the PEAR coding standard\n"
+//  .  " * Experimental support for a manual service request dispatching interface on SCA.php\n"
+//  ,
   'notes' =>
-     " * Fix for spaces in service description URLs (pecl defect #11006).\n"
-  .  " * Experimental support for service names following the PEAR coding standard\n"
-  .  " * Experimental support for a manual service request dispatching interface on SCA.php\n"
+     " * Fixes for PECL bugs:\n"
+  .  "   - PECL#10925 - Don't treat magic PHP methods as service operations\n"
+  .  "   - PECL#10989 - don't automatically make all types in the wsdl nillable\n"
+  .  "   - PECL#10994 - Business Exceptions Data Returned to Client\n"
+  .  "   - PECL#11004 - WSDL Generated Does Not Validate\n"
+  .  "   - PECL#11012 - Visual Studio Consumption of SCA Generated WSDL\n"
+  .  " * Other:\n"
+  .  "   - Pick up revision 546761 of Tuscany SDO code.\n"
+  .  "   - Include new eBay soap binding\n"
+  .  "   - Tactical version of the in memory caching of the data model enabled for eBay binding\n"
+  .  "   - Unit tests keep going to conclusion even when extensions are missing\n"
+  .  "   - Added the eServiceStore example - shows several components which can be make local or\n"
+  .  "     remote with only a swift change of the @binding annotations.\n"
   ,
        'simpleoutput' => true,
-       'version' => '1.2.1',
+       'version' => '1.2.2',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
@@ -164,7 +179,8 @@
        'roles' => array('*.php' => 'php', '*.cpp' => 'src'),
        'ignore' => array(
            'ajax-rss/',
-           'ebaysoap/',
+           'simpledb/',
+           'rss/',
            'autom4te.cache/',
            'build/',
            'CVS/',
@@ -226,7 +242,7 @@
     $packagexml->addMaintainer('slaws','lead','Simon Laws','simonslaws@googlemail.com');
     
     $packagexml->addDependency('php', '5.1.0', 'ge', 'php');
-    $packagexml->addDependency('sdo', false, 'not', 'pkg');
+    $packagexml->addDependency('sdo_das_xml', false, 'not', 'ext');
     
     if (PEAR::isError($e)) {
         echo $e->getMessage();

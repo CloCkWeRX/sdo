@@ -1,0 +1,3 @@
+SCA_Bindings_soap_Handler
+ - Soap handler processes correct call correctly
+

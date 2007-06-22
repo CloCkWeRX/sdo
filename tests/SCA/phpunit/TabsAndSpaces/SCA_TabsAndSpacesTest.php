@@ -23,6 +23,7 @@ class SCA_TabsAndSpacesTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(
         array(
         'annotationType' => '@param',
+        'nillable' => false,
         'description' => 'the ticker symbol',
         'name' => 'ticker',
         'type' => 'string'
@@ -34,6 +35,7 @@ class SCA_TabsAndSpacesTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(
         array(
         'annotationType' => '@param',
+        'nillable' => false,
         'description' => 'the ticker symbol',
         'name' => 'ticker',
         'type' => 'string'
