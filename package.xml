@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.5.3">
+<package version="1.0" packagerversion="1.6.0">
  <name>SCA_SDO</name>
  <summary>Service Component Architecture (SCA) and Service Data Objects (SDO) for PHP</summary>
  <description>Service Data Objects (SDOs) enable PHP applications to work with data from different sources (typically a database query or an XML file) using a single interface. SCA for PHP allows a PHP programmer to write reusable components (classes) in PHP, which can be called either locally, or in a a variety of ways remotely (soap web services, xml-rpc, json-rpc, REST, etc), but always with the same interface.
@@ -32,21 +32,36 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.2.1</version>
-  <date>2007-05-11</date>
+  <version>1.2.2</version>
+  <date>2007-06-20</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>* Fix for spaces in service description URLs (pecl defect #11006).
- * Experimental support for service names following the PEAR coding standard
- * Experimental support for a manual service request dispatching interface on SCA.php
+  <notes>* Fixes for PECL bugs:
+   - PECL#10925 - Don&apos;t treat magic PHP methods as service operations
+   - PECL#10989 - don&apos;t automatically make all types in the wsdl nillable
+   - PECL#10994 - Business Exceptions Data Returned to Client
+   - PECL#11004 - WSDL Generated Does Not Validate
+   - PECL#11012 - Visual Studio Consumption of SCA Generated WSDL
+ * Other:
+   - Pick up revision 546761 of Tuscany SDO code.
+   - Include new eBay soap binding
+   - Tactical version of the in memory caching of the data model enabled for eBay binding
+   - Unit tests keep going to conclusion even when extensions are missing
+   - Added the eServiceStore example - shows several components which can be make local or
+     remote with only a swift change of the @binding annotations.
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
    <dep type="pkg" rel="not" optional="no">sdo</dep>
+   <dep type="ext" rel="not" optional="no">sdo_das_xml</dep>
   </deps>
   <filelist>
     <dir name="SCA">
      <dir name="Bindings">
+      <dir name="ebaysoap">
+       <file role="php" name="Mapper.php"/>
+       <file role="php" name="Proxy.php"/>
+      </dir> <!-- /SCA/Bindings/ebaysoap -->
       <dir name="jsonrpc">
        <file role="php" name="Proxy.php"/>
        <file role="php" name="RequestTester.php"/>
@@ -68,22 +83,14 @@
        <file role="php" name="ServiceRequestHandler.php"/>
        <file role="php" name="Wrapper.php"/>
       </dir> <!-- /SCA/Bindings/restrpc -->
-      <dir name="rss">
-       <file role="php" name="Proxy.php"/>
-       <file role="php" name="RequestTester.php"/>
-       <file role="php" name="rss2.0.xsd"/>
-       <file role="php" name="RssDas.php"/>
-       <file role="php" name="RssTypes.php"/>
-       <file role="php" name="ServiceRequestHandler.php"/>
-      </dir> <!-- /SCA/Bindings/rss -->
       <dir name="soap">
        <dir name="soap">
         <file role="php" name="2003-02-11.xsd"/>
        </dir> <!-- /SCA/Bindings/soap/soap -->
        <file role="php" name="2003-02-11.xsd"/>
+       <file role="php" name="Mapper.php"/>
        <file role="php" name="Proxy.php"/>
        <file role="php" name="RequestTester.php"/>
-       <file role="php" name="SDO_TypeHandler.php"/>
        <file role="php" name="ServiceDescriptionGenerator.php"/>
        <file role="php" name="ServiceRequestHandler.php"/>
        <file role="php" name="Wrapper.php"/>
@@ -368,8 +375,14 @@
        <file role="test" name="letter.xml"/>
        <file role="test" name="letter.xsd"/>
       </dir> <!-- /examples/DAS/XML -->
+      <file role="test" name="index.html"/>
      </dir> <!-- /examples/DAS -->
      <dir name="SCA">
+      <dir name="ebaysoap">
+       <file role="test" name="eBayClient.php"/>
+       <file role="test" name="eBayClient2.php"/>
+       <file role="test" name="eBayConsumer.php"/>
+      </dir> <!-- /examples/SCA/ebaysoap -->
       <dir name="emailcontact">
        <file role="test" name="ContactEmailService.php"/>
        <file role="test" name="contacts.sql"/>
@@ -395,6 +408,68 @@
        <file role="test" name="EmailService.wsdl"/>
        <file role="test" name="email_form.html"/>
       </dir> <!-- /examples/SCA/emailsimpleref -->
+      <dir name="eServiceStore">
+       <dir name="EventLogService">
+        <file role="test" name="EventLogService.php"/>
+        <file role="test" name="event_log_service.wsdl"/>
+       </dir> <!-- /examples/SCA/eServiceStore/EventLogService -->
+       <dir name="OrderProcessingService">
+        <file role="test" name="OrderProcessingService.php"/>
+       </dir> <!-- /examples/SCA/eServiceStore/OrderProcessingService -->
+       <dir name="PaymentService">
+        <file role="test" name="PaymentService.php"/>
+        <file role="test" name="PaymentService.wsdl"/>
+        <file role="test" name="payment_service.wsdl"/>
+       </dir> <!-- /examples/SCA/eServiceStore/PaymentService -->
+       <dir name="Schema">
+        <file role="test" name="Cart.xsd"/>
+        <file role="test" name="Customer.xsd"/>
+        <file role="test" name="Event.xsd"/>
+        <file role="test" name="Order.xsd"/>
+       </dir> <!-- /examples/SCA/eServiceStore/Schema -->
+       <dir name="shop">
+        <dir name="Catalog">
+         <file role="test" name="catalog.php"/>
+         <file role="test" name="Catalog.xml"/>
+         <file role="test" name="Catalog.xsd"/>
+         <file role="test" name="create_catalog.php"/>
+        </dir> <!-- /examples/SCA/eServiceStore/shop/Catalog -->
+        <file role="test" name="checkout.php"/>
+        <file role="test" name="customer.php"/>
+        <file role="test" name="display_cart.php"/>
+        <file role="test" name="display_events.php"/>
+        <file role="test" name="order_status.php"/>
+        <file role="test" name="santa.jpg"/>
+        <file role="test" name="santa2.jpg"/>
+        <file role="test" name="submit_order.php"/>
+        <file role="test" name="table.php"/>
+        <file role="test" name="test_submit_and_check_order.php"/>
+        <file role="test" name="view_cart.php"/>
+        <file role="test" name="view_product.php"/>
+        <file role="test" name="welcome.php"/>
+       </dir> <!-- /examples/SCA/eServiceStore/shop -->
+       <dir name="tests">
+        <file role="test" name="catalog_test.php"/>
+        <file role="test" name="customer_test.php"/>
+        <file role="test" name="event_test.php"/>
+        <file role="test" name="order_test.php"/>
+        <file role="test" name="print_model.php"/>
+       </dir> <!-- /examples/SCA/eServiceStore/tests -->
+       <dir name="warehouse">
+        <file role="test" name="display_orders.php"/>
+        <file role="test" name="order_details.php"/>
+        <file role="test" name="table.php"/>
+        <file role="test" name="test_dispatch_order.php"/>
+        <file role="test" name="test_warehouse.php"/>
+        <file role="test" name="warehouse.php"/>
+       </dir> <!-- /examples/SCA/eServiceStore/warehouse -->
+       <dir name="WarehouseService">
+        <file role="test" name="WarehouseDatabase.php"/>
+        <file role="test" name="WarehouseService.php"/>
+        <file role="test" name="warehouse_service.wsdl"/>
+       </dir> <!-- /examples/SCA/eServiceStore/WarehouseService -->
+       <file role="test" name="make_clean.php"/>
+      </dir> <!-- /examples/SCA/eServiceStore -->
       <dir name="helloworldphp">
        <file role="test" name="greeting.php"/>
        <file role="test" name="helloworld.html"/>
@@ -508,17 +583,6 @@
        <file role="test" name="letter.xsd"/>
        <file role="test" name="show_letter.php"/>
       </dir> <!-- /examples/SDO/letter -->
-      <dir name="rss-media">
-       <file role="test" name="additem.php"/>
-       <file role="test" name="base.xml"/>
-       <file role="test" name="blog.xml"/>
-       <file role="test" name="blog.xsd"/>
-       <file role="test" name="handle_upload.inc.php"/>
-       <file role="test" name="newitem.php"/>
-       <file role="test" name="rss.php"/>
-       <file role="test" name="rss.xsd"/>
-       <file role="test" name="showitem.php"/>
-      </dir> <!-- /examples/SDO/rss-media -->
       <dir name="sdo-api">
        <file role="test" name="contacts.xml"/>
        <file role="test" name="contacts.xsd"/>
@@ -526,6 +590,7 @@
       </dir> <!-- /examples/SDO/sdo-api -->
       <file role="test" name="index.html"/>
      </dir> <!-- /examples/SDO -->
+     <file role="test" name="index.html"/>
     </dir> <!-- /examples -->
     <dir name="tests">
      <dir name="DAS">
@@ -620,6 +685,22 @@
         <file role="test" name="ServiceAnnotationTest.php"/>
         <file role="test" name="TypesAnnotationTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/AnnotationTests -->
+       <dir name="eBaySoap">
+        <dir name="config">
+         <file role="test" name="bad_appid.ini"/>
+         <file role="test" name="bad_authcert.ini"/>
+         <file role="test" name="bad_authtoken.ini"/>
+         <file role="test" name="bad_devid.ini"/>
+         <file role="test" name="bad_location.ini"/>
+         <file role="test" name="bad_routing.ini"/>
+         <file role="test" name="bad_siteid.ini"/>
+         <file role="test" name="bad_version.ini"/>
+         <file role="test" name="good.ini"/>
+        </dir> <!-- /tests/SCA/phpunit/eBaySoap/config -->
+        <file role="test" name="bogus.wsdl"/>
+        <file role="test" name="eBayConsumer.php"/>
+        <file role="test" name="eBaySoapTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/eBaySoap -->
        <dir name="GetService">
         <file role="test" name="PathsTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/GetService -->
@@ -655,27 +736,32 @@
         <file role="test" name="RestRpcTestService.php"/>
         <file role="test" name="RestRpcTestService.response"/>
        </dir> <!-- /tests/SCA/phpunit/RestRpc -->
-       <dir name="SDO_TypeHandler">
-        <file role="test" name="TypeHandlerTest.php"/>
-       </dir> <!-- /tests/SCA/phpunit/SDO_TypeHandler -->
-       <dir name="SoapHandler">
-        <file role="test" name="SCA_SoapHandlerTest.php"/>
-       </dir> <!-- /tests/SCA/phpunit/SoapHandler -->
-       <dir name="SoapProxy">
-        <file role="test" name="SCA_SoapProxyTest.php"/>
-       </dir> <!-- /tests/SCA/phpunit/SoapProxy -->
+       <dir name="SoapBinding">
+        <file role="test" name="Class5.php"/>
+        <file role="test" name="HandlerTest.php"/>
+        <file role="test" name="MapperTest.php"/>
+        <file role="test" name="ProxyTest.php"/>
+        <file role="test" name="WSDLTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/SoapBinding -->
        <dir name="TabsAndSpaces">
         <file role="test" name="SCA_TabsAndSpacesTest.php"/>
         <file role="test" name="TabsAndSpaces.php"/>
        </dir> <!-- /tests/SCA/phpunit/TabsAndSpaces -->
-       <dir name="WSDLGeneration">
-        <file role="test" name="SCA_WSDLTest.php"/>
-       </dir> <!-- /tests/SCA/phpunit/WSDLGeneration -->
+       <dir name="TargetTests">
+        <dir name="downone">
+         <file role="test" name="hello4.php"/>
+        </dir> <!-- /tests/SCA/phpunit/TargetTests/downone -->
+        <file role="test" name="hello.php"/>
+        <file role="test" name="hello2.php"/>
+        <file role="test" name="hello3.php"/>
+        <file role="test" name="SCA_TargetTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/TargetTests -->
        <dir name="XmlRpc">
         <file role="test" name="XmlRpcTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/XmlRpc -->
        <file role="test" name="run.bat"/>
        <file role="test" name="runv.bat"/>
+       <file role="test" name="TestService.smd"/>
        <file role="test" name="TestSuite.php"/>
        <file role="test" name="ZDERunner.php"/>
       </dir> <!-- /tests/SCA/phpunit -->
@@ -708,6 +794,7 @@
      <file role="test" name="run.bat"/>
      <file role="test" name="runreport.bat"/>
      <file role="test" name="runv.bat"/>
+     <file role="test" name="TestService.smd"/>
      <file role="test" name="TestSuite.php"/>
     </dir> <!-- /tests -->
     <file role="src" name="CLA"/>
@@ -947,6 +1034,26 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
     <notes>* Fix for spaces in service description URLs (pecl defect #11006).
  * Experimental support for service names following the PEAR coding standard
  * Experimental support for a manual service request dispatching interface on SCA.php
+    </notes>
+   </release>
+   <release>
+    <version>1.2.2</version>
+    <date>2007-06-20</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>* Fixes for PECL bugs:
+   - PECL#10925 - Don&apos;t treat magic PHP methods as service operations
+   - PECL#10989 - don&apos;t automatically make all types in the wsdl nillable
+   - PECL#10994 - Business Exceptions Data Returned to Client
+   - PECL#11004 - WSDL Generated Does Not Validate
+   - PECL#11012 - Visual Studio Consumption of SCA Generated WSDL
+ * Other:
+   - Pick up revision 546761 of Tuscany SDO code.
+   - Include new eBay soap binding
+   - Tactical version of the in memory caching of the data model enabled for eBay binding
+   - Unit tests keep going to conclusion even when extensions are missing
+   - Added the eServiceStore example - shows several components which can be make local or
+     remote with only a swift change of the @binding annotations.
     </notes>
    </release>
  </changelog>
