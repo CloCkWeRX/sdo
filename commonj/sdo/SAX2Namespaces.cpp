@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 549789 $ $Date$ */
 
 #include "commonj/sdo/SAX2Namespaces.h"
 
@@ -88,7 +88,7 @@ namespace commonj
 
         void SAX2Namespaces::empty()
         {
-            namespaceMap.empty();
+            namespaceMap.clear();
         }
 
     } // End - namespace sdo

@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2007.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -64,6 +64,8 @@ function_entry sdo_das_xml_document_methods[] = {
             sdo_xmldoc_setXMLVersion_args, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, setEncoding,
             sdo_xmldoc_setEncoding_args, ZEND_ACC_PUBLIC)
+   	ZEND_ME(SDO_DAS_XML_Document, __toString, 0, 
+   			ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
 /* }}} */
@@ -124,6 +126,45 @@ zend_object_value sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS
 }
 /* }}} */
 
+/* {{{ sdo_das_xml_document_cast_object
+*/ 
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+static int sdo_das_xml_document_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+{
+	int should_free = 0;
+#else
+static int sdo_das_xml_document_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+{
+#endif
+    xmldocument_object *xmldocument;
+	ostringstream	 print_buf;
+	int              rc = SUCCESS;
+	
+    xmldocument = (xmldocument_object *) zend_object_store_get_object(readobj TSRMLS_CC);
+	
+	try {	
+		/* I don't think Tuscany provides a way to get back to the original 
+		 * DataFactory from the XML document, so I'm (expensively and probably
+		 * inaccurately) creating a temporary one.
+		 */
+	    DataFactoryPtr dataFactoryPtr = DataFactory::getDataFactory();
+        XMLHelperPtr xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr); 	
+		print_buf << xmlHelperPtr->save(xmldocument->xmlDocumentPtr);
+		
+		std::string print_string = print_buf.str();
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
+		
+	} catch (SDORuntimeException e) {
+		ZVAL_NULL(writeobj);
+		sdo_throw_runtimeexception(&e TSRMLS_CC);
+		rc = FAILURE;
+	}
+	
+	return rc;
+			
+}
+/* }}} */
+
 /* {{{ sdo_das_xml_document_minit
  *
  * Initializes SDO_DAS_XML_Document class
@@ -140,6 +181,7 @@ void sdo_das_xml_document_minit(TSRMLS_D)
            sizeof(zend_object_handlers));
 	sdo_das_xml_doc_object_handlers.add_ref = SDO_FUNC_ADDREF(das_xml_document);
 	sdo_das_xml_doc_object_handlers.del_ref = SDO_FUNC_DELREF(das_xml_document);
+	sdo_das_xml_doc_object_handlers.cast_object = sdo_das_xml_document_cast_object;
     sdo_das_xml_doc_object_handlers.clone_obj = NULL;
 }
 /* }}} */
@@ -298,6 +340,18 @@ PHP_METHOD(SDO_DAS_XML_Document, setEncoding)
     return;
 }
 /* }}} SDO_DAS_XML_Document::setEncoding */
+
+/* {{{ SDO_DAS_XML_Document::__toString
+ */
+PHP_METHOD(SDO_DAS_XML_Document, __toString)
+{
+#if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
+	sdo_das_xml_document_cast_object(getThis(), return_value, IS_STRING TSRMLS_CC);
+#else	
+	sdo_das_xml_document_cast_object(getThis(), return_value, IS_STRING, 0 TSRMLS_CC);
+#endif
+}
+/* }}} */
 
 /*
  * Local variables:

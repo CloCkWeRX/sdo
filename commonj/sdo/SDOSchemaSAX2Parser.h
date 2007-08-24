@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 492097 $ $Date$ */
+/* $Rev: 549789 $ $Date$ */
 
 #ifndef _SDOSCHEMASAX2PARSER_H_
 #define _SDOSCHEMASAX2PARSER_H_
@@ -37,8 +37,6 @@ namespace commonj
     namespace sdo
     {
 
-
-
 /**
  * SDOSAX2Parser implements SAX2Parser.
  * This class gets called back by the libxml library, and
@@ -49,10 +47,13 @@ namespace commonj
         {
             
         public:
+            typedef std::map<SDOXMLString, SDOXMLString> PARSED_LOCATIONS;
+            typedef std::vector<SDOXMLString> DEFINED_NAMESPACES;
             
             SDOSchemaSAX2Parser(SchemaInfo& schemaInfo,
                 ParserErrorSetter* insetter,
-                bool loadImportNamespace = false);
+                PARSED_LOCATIONS& parsedLocations,
+                DEFINED_NAMESPACES& definedNamepaces);
             
             virtual ~SDOSchemaSAX2Parser();
 
@@ -73,7 +74,6 @@ namespace commonj
             virtual void stream(std::istream& input);
 
             virtual int parse(const char* filename);
- 
             virtual void endDocument();
 
             
@@ -84,7 +84,8 @@ namespace commonj
             friend std::istream& operator>>(std::istream& input, SDOSchemaSAX2Parser& parser);
             friend std::istringstream& operator>>(std::istringstream& input, SDOSchemaSAX2Parser& parser);
 
-            void free(xmlChar* absoluteUri);
+
+            int parseURI(const SDOXMLString& location, const SDOXMLString& base);
 
         private:
 
@@ -223,8 +224,9 @@ namespace commonj
             
             TypeDefinitionsImpl typeDefinitions;
 
-            bool loadImportNamespace;
-            
+            PARSED_LOCATIONS& parsedLocations;
+            DEFINED_NAMESPACES& definedNamespaces;
+          
         };
 
 

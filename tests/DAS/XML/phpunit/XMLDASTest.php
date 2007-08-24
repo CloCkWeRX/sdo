@@ -575,7 +575,7 @@ class XMLDASTest extends PHPUnit_Framework_TestCase {
             $this->assertEquals(SOAP_NAMESPACE, $port->address->getTypeNamespaceURI(), "testSoap - wrong namespace URI for address;");
             
             $stringified = $xmldas->saveString($wsdl_doc);
-            $this->assertFalse(strpos($stringified, '<port><soap:address') === FALSE, "testSoap - wrong namespace prefix for address;");
+            $this->assertFalse(strpos($stringified, '<wsdl:port><soap:address') === FALSE, "testSoap - wrong namespace prefix for address;");
         } catch (SDO_Exception $e) {
             $this->assertTrue(false, "testSoap - Unexpected Exception Caught: " . $e->getMessage());
         }

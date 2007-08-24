@@ -155,23 +155,34 @@
 //  .  " * Experimental support for service names following the PEAR coding standard\n"
 //  .  " * Experimental support for a manual service request dispatching interface on SCA.php\n"
 //  ,
+//  'notes' =>
+//     " * Fixes for PECL bugs:\n"
+//  .  "   - PECL#10925 - Don't treat magic PHP methods as service operations\n"
+//  .  "   - PECL#10989 - don't automatically make all types in the wsdl nillable\n"
+//  .  "   - PECL#10994 - Business Exceptions Data Returned to Client\n"
+//  .  "   - PECL#11004 - WSDL Generated Does Not Validate\n"
+//  .  "   - PECL#11012 - Visual Studio Consumption of SCA Generated WSDL\n"
+//  .  " * Other:\n"
+//  .  "   - Pick up revision 546761 of Tuscany SDO code.\n"
+//  .  "   - Include new eBay soap binding\n"
+//  .  "   - Tactical version of the in memory caching of the data model enabled for eBay binding\n"
+//  .  "   - Unit tests keep going to conclusion even when extensions are missing\n"
+//  .  "   - Added the eServiceStore example - shows several components which can be make local or\n"
+//  .  "     remote with only a swift change of the @binding annotations.\n"
+//  ,  
   'notes' =>
      " * Fixes for PECL bugs:\n"
-  .  "   - PECL#10925 - Don't treat magic PHP methods as service operations\n"
-  .  "   - PECL#10989 - don't automatically make all types in the wsdl nillable\n"
-  .  "   - PECL#10994 - Business Exceptions Data Returned to Client\n"
-  .  "   - PECL#11004 - WSDL Generated Does Not Validate\n"
-  .  "   - PECL#11012 - Visual Studio Consumption of SCA Generated WSDL\n"
+  .  "   - TUSCANY-1362 - Incorrect operation of code that checks whether schema is loaded before going out on the net to retrieve it.\n"
+  .  "   - TUSCANY-1112 - (which is PECL 9867)  Incorrect namespaces in generated XML\n"
+  .  "   - TUSCANY-1564 - (which is PECL 11774) xsi:type not always set for complexType\n"
+  .  "   - TUSCANY-1566 - Elements coming out in wrong namespace (found by Caroline and reported in the phpsoa group under \"Experiences with Atompub\"\n"
   .  " * Other:\n"
-  .  "   - Pick up revision 546761 of Tuscany SDO code.\n"
-  .  "   - Include new eBay soap binding\n"
-  .  "   - Tactical version of the in memory caching of the data model enabled for eBay binding\n"
-  .  "   - Unit tests keep going to conclusion even when extensions are missing\n"
-  .  "   - Added the eServiceStore example - shows several components which can be make local or\n"
-  .  "     remote with only a swift change of the @binding annotations.\n"
+  .  "   - Pick up revision 568244 of Tuscany SDO code.\n"
+  .  "   - There is a new Rest Resource binding, with tests and examples.\n"
+  .  "   - There is a new simpledb binding with examples\n"
   ,
        'simpleoutput' => true,
-       'version' => '1.2.2',
+       'version' => '1.2.3',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',

@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| Copyright IBM Corporation 2005, 2006.                                |
+| Copyright IBM Corporation 2005, 2007.                                |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -827,7 +827,9 @@ static int sdo_do_compare_objects(zval *object1, zval *object2 TSRMLS_DC)
 				/* the property is set, so we must also compare its value */
 				ZVAL_STRING(&offset, (char *)propertyName, 0);
 				zval *value1 = sdo_do_read_dimension(object1, &offset, BP_VAR_R TSRMLS_CC);
+				zval_add_ref(&value1);
 				zval *value2 = sdo_do_read_dimension(object2, &offset, BP_VAR_R TSRMLS_CC);
+				zval_add_ref(&value2);
 				int rc = compare_function(&result, value1, value2 TSRMLS_CC);
 				zval_ptr_dtor(&value1);
 				zval_ptr_dtor(&value2);

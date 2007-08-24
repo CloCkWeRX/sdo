@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 547318 $ $Date$ */
 
 #ifndef _SDOSAX2PARSER_H_
 #define _SDOSAX2PARSER_H_
@@ -106,9 +106,16 @@ namespace commonj
             friend std::istream& operator>>(std::istream& input, SDOSAX2Parser& parser);
             friend std::istringstream& operator>>(std::istringstream& input, SDOSAX2Parser& parser);
 
+            void setRootElementName(const SDOXMLString& name);
+            const SDOXMLString& getRootElementName() const {return rootElementName;}
+            void setRootElementURI(const SDOXMLString& uri);
+            const SDOXMLString& getRootElementURI() const {return rootElementURI;}
+
             
         private:
             SDOXMLString targetNamespaceURI;
+            SDOXMLString rootElementName;
+            SDOXMLString rootElementURI;
             DataFactoryPtr dataFactory;
             DataObjectPtr&  rootDataObject;
 

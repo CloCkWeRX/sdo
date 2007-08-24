@@ -264,24 +264,7 @@ static int sdo_das_xml_add_types(xmldas_object *xmldas, char *file_name TSRMLS_D
 	int error_count;
 
 	try {
-		/*
-		 * The second (boolean) parameter tells Tuscany whether to try loading
-		 * imported schema from the namespaceURI if the schemaLocation attribute
-		 * is omitted. I've turned this on to support some dodgy schema out 
-		 * there, but if it causes problems, perhaps a phpini setting may be 
-		 * required.
-		 */
-		 /* Turned this off, for the soap and wsdl schema, on 21 June 07. 
-		  * Every load of the wsdl and soap schema was 
-		  * taking at least a second, sometimes more than 30, when run from the
-		  * other end of a broadband link. Matthew Peters 
-		  */
-		if (strstr(file_name,"2003-02-11.xsd")) {
-        	xmldas->xsdHelperPtr->defineFile(file_name, false);
-		} else {
-            xmldas->xsdHelperPtr->defineFile(file_name, true);
-		}
-
+        xmldas->xsdHelperPtr->defineFile(file_name);
         error_count = xmldas->xsdHelperPtr->getErrorCount();
         if (error_count > 0) { 
 			ostringstream print_buf;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 511929 $ $Date$ */
+/* $Rev: 547318 $ $Date$ */
 
 #include "commonj/sdo/SDOSAX2Parser.h"
 
@@ -56,7 +56,9 @@ namespace commonj
             ignoreEvents(false),
             dealingWithChangeSummary(false),
             csbuilder(0),
-            SAX2Parser(insetter)
+            SAX2Parser(insetter),
+            rootElementName(""),
+            rootElementURI("")
             
     
         {
@@ -82,9 +84,20 @@ namespace commonj
             changeSummary = false;
             IDMap.empty();
             IDRefs.empty();
+            rootElementURI = "";
+            rootElementName = "";
         }
         
-        
+        void SDOSAX2Parser::setRootElementName(const SDOXMLString& name)
+        {
+            rootElementName = name;
+        }
+
+        void SDOSAX2Parser::setRootElementURI(const SDOXMLString& uri)
+        {
+            rootElementURI = uri;
+        }
+       
         void SDOSAX2Parser::startDocument()
         {
             LOGINFO(INFO,"SDOSAX2Parser: startDocument");
@@ -815,19 +828,31 @@ namespace commonj
                         if (!targetNamespaceURI.isNull() && !targetNamespaceURI.equals(""))
                         {
                             tns = targetNamespaceURI;
+                            rootElementURI = tns;
+                        }
+                        else
+                        {
+                            rootElementURI = URI;
                         }
                         
                         // Check for localname as a property of the RootType
                         // if we do not already know the type
                         if (typeName.isNull())
                         {
-                            const Type& rootType = dataFactory->getType(tns, "RootType");
-                            propertyName = getSDOName(rootType, localname);
-                            const Type& newType = 
-                                ((TypeImpl&)(rootType)).getRealPropertyType(propertyName);
+                            try {
+                                const Type& rootType = dataFactory->getType(tns, "RootType");
+                                propertyName = getSDOName(rootType, localname);
+                                const Type& newType = 
+                                    ((TypeImpl&)(rootType)).getRealPropertyType(propertyName);
 
-                            typeURI = newType.getURI();
-                            typeName = newType.getName();
+                                typeURI = newType.getURI();
+                                typeName = newType.getName();
+                            }
+                            catch (const SDOTypeNotFoundException&)
+                            {
+                                typeURI = Type::SDOTypeNamespaceURI.c_str();
+                                typeName = "OpenDataObject";
+                            }
                         }
                         
                         // Create the root DataObject
@@ -840,7 +865,7 @@ namespace commonj
                         else
                         {
                             DataFactory* df = dataFactory;
-                            ((DataFactoryImpl*)df)->setRootElementName((const char*)localname);
+                            rootElementName = localname;
                         }
                         
                         // NOTE: always creating DO doesn't cater for DataType as top element

@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005, 2006.                            |
+| (c) Copyright IBM Corporation 2005, 2007.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -57,6 +57,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootElementName);
 PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration);
 PHP_METHOD(SDO_DAS_XML_Document, setXMLVersion);
 PHP_METHOD(SDO_DAS_XML_Document, setEncoding);
+PHP_METHOD(SDO_DAS_XML_Document, __toString);
 
 #endif	/* PHP_SDO_DAS_XML_H */
 

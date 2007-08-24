@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 484703 $ $Date$ */
+/* $Rev: 547318 $ $Date$ */
 
 #ifndef _DataFactoryIMPL_H_
 #define _DataFactoryIMPL_H_
@@ -661,8 +661,6 @@ public:
     void removeOpenProperty(const SDOString& name);
     const propertyMap& getOpenProperties();
     virtual const TypeImpl& getTypeImpl(const SDOString& uri, const SDOString& inTypeName) const;
-    virtual const SDOString& getRootElementName() const;
-    virtual void setRootElementName(const SDOString& ren);
 
     virtual bool generateInterface(const char* fileroot, const char* factoryname);
     virtual bool generateInterface(const SDOString& fileroot, const SDOString& factoryname);
@@ -675,8 +673,6 @@ private:
     TYPES_MAP    resolvePending; // Set of types that have not yet been resolved.
 
     std::vector<DataFactory*> compatibleFactories;
-
-	SDOString rootElementName;
 
     propertyMap openProperties;
 

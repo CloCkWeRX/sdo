@@ -13,7 +13,7 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns2="http://Component" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://Component">
+<wsdl:definitions xmlns:tns2="http://Component" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://Component">
   <types>
     <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
       xmlns:ns0="http://www.test.com/info"
@@ -52,49 +52,49 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
     </xs:schema>
   </types>
 
-  <message name="reverseRequest">
-    <part name="reverseRequest" element="tns2:reverse"/>
-  </message>
-  <message name="reverseResponse">
-    <part name="return" element="tns2:reverseResponse"/>
-  </message>
-  <message name="addRequest">
-    <part name="addRequest" element="tns2:add"/>
-  </message>
-  <message name="addResponse">
-    <part name="return" element="tns2:addResponse"/>
-  </message>
-  <portType name="ComponentPortType">
-    <operation name="reverse">
-      <input message="tns2:reverseRequest"/>
-      <output message="tns2:reverseResponse"/>
-    </operation>
-    <operation name="add">
-      <input message="tns2:addRequest"/>
-      <output message="tns2:addResponse"/>
-    </operation>
-  </portType>
-  <binding name="ComponentBinding" type="tns2:ComponentPortType">
+  <wsdl:message name="reverseRequest">
+    <wsdl:part name="reverseRequest" element="tns2:reverse"/>
+  </wsdl:message>
+  <wsdl:message name="reverseResponse">
+    <wsdl:part name="return" element="tns2:reverseResponse"/>
+  </wsdl:message>
+  <wsdl:message name="addRequest">
+    <wsdl:part name="addRequest" element="tns2:add"/>
+  </wsdl:message>
+  <wsdl:message name="addResponse">
+    <wsdl:part name="return" element="tns2:addResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="ComponentPortType">
+    <wsdl:operation name="reverse">
+      <wsdl:input message="tns2:reverseRequest"/>
+      <wsdl:output message="tns2:reverseResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="add">
+      <wsdl:input message="tns2:addRequest"/>
+      <wsdl:output message="tns2:addResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ComponentBinding" type="tns2:ComponentPortType">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-    <operation name="reverse">
+    <wsdl:operation name="reverse">
       <soap:operation soapAction=""/>
-      <input>
+      <wsdl:input>
         <soap:body use="literal"/>
-      </input>
-      <output>
+      </wsdl:input>
+      <wsdl:output>
         <soap:body use="literal"/>
-      </output>
-    </operation>
-    <operation name="add">
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="add">
       <soap:operation soapAction=""/>
-      <input>
+      <wsdl:input>
         <soap:body use="literal"/>
-      </input>
-      <output>
+      </wsdl:input>
+      <wsdl:output>
         <soap:body use="literal"/>
-      </output>
-    </operation>
-  </binding>
-  <service name="ComponentService">
-    <port name="ComponentPort" binding="tns2:ComponentBinding">
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ComponentService">
+    <wsdl:port name="ComponentPort" binding="tns2:ComponentBinding">
       <soap:address

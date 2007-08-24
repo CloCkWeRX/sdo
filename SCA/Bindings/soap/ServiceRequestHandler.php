@@ -72,7 +72,8 @@ if (! class_exists('SCA_Bindings_soap_ServiceRequestHandler', false)) {
             $class_name    = SCA_Helper::guessClassName($calling_component_filename);
             $service_wrapper = new SCA_Bindings_soap_Wrapper($class_name, $handler);
             $server->setObject($service_wrapper);
-            $server->handle();
+            global $HTTP_RAW_POST_DATA;
+            $server->handle($HTTP_RAW_POST_DATA);
         }
 
     }

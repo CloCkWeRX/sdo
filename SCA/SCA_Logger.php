@@ -247,6 +247,10 @@ if ( ! class_exists('SCA_Logger', false) ) {
         *
         */
         public function startLog() {
+            if ($this->run == SCA_LOGGER_START)
+            // we are already started; this is a second or subsequent call to startLog() - do nothing
+            return;
+
             $dirpath = SCA_Helper::getTempDir().'/log';
             $file = 'SCA';
             $command = SCA_LOGGER_UPDATE;
@@ -264,6 +268,9 @@ if ( ! class_exists('SCA_Logger', false) ) {
             $this->file = $file ;
 
             $this->logfile = "{$this->dirpath}/{$this->file}.{$this->extn}" ;
+
+            // turn on if you cannot remember where the log is written to
+//            trigger_error("SCA logging started; logging to $this->logfile");
 
             date_default_timezone_set('UTC');
 
@@ -316,7 +323,7 @@ if ( ! class_exists('SCA_Logger', false) ) {
          * @return array                 Contains the contents of the log file
          */
         public function fromLog( $categorisation = null ) {
-            $this->stopLog(); //lock
+            //            $this->stopLog(); //lock
             $logList = array() ;
 
             if ( $categorisation === null )
@@ -324,7 +331,7 @@ if ( ! class_exists('SCA_Logger', false) ) {
 
             $logList = $this->_getMsg(null, $this->logfile, $categorisation );
 
-            $this->startLog(); //unlock
+            //            $this->startLog(); //unlock
 
             return $logList ;
 
@@ -377,7 +384,7 @@ if ( ! class_exists('SCA_Logger', false) ) {
          */
         private function _tolog( $msg , $filename = "", $line = "",  $level  = null ) {
 
-            $this->stopLog() ; //lock
+            //            $this->stopLog() ; //lock
             $stack_depth    = substr('....', 1, 2 ) ;
             $calling_class  = $filename ;
             $calling_method = $line ;
@@ -409,7 +416,7 @@ if ( ! class_exists('SCA_Logger', false) ) {
 
             file_put_contents($this->logfile, $log_msg, FILE_APPEND );
 
-            $this->startLog() ; //unlock
+            //            $this->startLog() ; //unlock
 
         }/* End to log function                                               */
 

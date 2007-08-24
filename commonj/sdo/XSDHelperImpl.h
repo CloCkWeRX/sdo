@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 524004 $ $Date$ */
+/* $Rev: 549789 $ $Date$ */
 
 #ifndef _XSDHELPERIMPL_H_
 #define _XSDHELPERIMPL_H_
@@ -31,6 +31,7 @@
 #include "commonj/sdo/SchemaInfo.h"
 #include "commonj/sdo/TypeDefinitionsImpl.h"
 #include "commonj/sdo/ParserErrorSetter.h"
+#include "commonj/sdo/SDOSchemaSAX2Parser.h"
 
 namespace commonj
 {
@@ -64,11 +65,11 @@ namespace commonj
              * The return value is the URI of the root Type
              *
              */
-            virtual const char* defineFile(const char* schemaFile, bool loadImportNamespace = false);
-            virtual const char* defineFile(const SDOString& schemaFile, bool loadImportNamespace = false);
-            virtual const char* define(std::istream& schema, bool loadImportNamespace = false);
-            virtual const char* define(const char* schema, bool loadImportNamespace = false);
-            virtual const char* define(const SDOString& schema, bool loadImportNamespace = false);
+            virtual const char* defineFile(const char* schemaFile);
+            virtual const char* defineFile(const SDOString& schemaFile);
+            virtual const char* define(std::istream& schema);
+            virtual const char* define(const char* schema);
+            virtual const char* define(const SDOString& schema);
             
             /** getErrorCount gets number of parse errors
              *
@@ -159,7 +160,10 @@ namespace commonj
 
             std::vector<char*> parseErrors;
             
-            TypeDefinitions definedTypes;            
+            TypeDefinitions definedTypes;  
+            SDOSchemaSAX2Parser::PARSED_LOCATIONS parsedLocations;
+
+            SDOSchemaSAX2Parser::DEFINED_NAMESPACES definedNamespaces;        
         };
         
     } // End - namespace sdo

@@ -106,7 +106,6 @@ class SCA_RestRpcTest extends PHPUnit_Framework_TestCase
 
 }
 
-// Call SCA_JsonRpcTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "SCA_RestRpcTest::main");
     SCA_RestRpcTest::main();

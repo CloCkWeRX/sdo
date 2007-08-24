@@ -2328,7 +2328,6 @@ unsigned int TypeImpl::convertToString(const SDOValue& sdoValue,
 
     unsigned int TypeImpl::convertToBytes(const SDOValue& sdoValue, char* outptr, unsigned int max) const
     {
-    unsigned int i;
     switch (typeEnum) 
         {
         case BytesType:

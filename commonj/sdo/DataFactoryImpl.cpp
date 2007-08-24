@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 510951 $ $Date$ */
+/* $Rev: 547318 $ $Date$ */
 
 //////////////////////////////////////////////////////////////////////
 // DataFactoryImpl.cpp: implementation of the DataFactory class.
@@ -75,10 +75,6 @@ DataFactoryImpl::DataFactoryImpl()
     // abstract
     addType(Type::SDOTypeNamespaceURI,"ChangeSummary");
 
-    rootElementName.erase();
-
- 
-
 }
 
 // ===================================================================
@@ -97,24 +93,6 @@ DataFactoryImpl::~DataFactoryImpl()
             delete typeIter->second;
         }
     }
-
-    rootElementName.erase();
-
-}
-
-// ===================================================================
-// get the root element name 
-// ===================================================================
-// const char* DataFactoryImpl::getRootElementName() const
-const SDOString& DataFactoryImpl::getRootElementName() const
-{
-    return rootElementName;
-}
-
-
-void DataFactoryImpl::setRootElementName(const SDOString& ren)
-{
-  rootElementName = ren;
 }
 
 // ===================================================================
@@ -123,7 +101,6 @@ void DataFactoryImpl::setRootElementName(const SDOString& ren)
 DataFactoryImpl::DataFactoryImpl(const DataFactoryImpl& inmdg)
 {
     isResolved = false;
-    setRootElementName(inmdg.getRootElementName());
     copyTypes(inmdg);
 }
 
@@ -135,7 +112,6 @@ DataFactoryImpl& DataFactoryImpl::operator=(const DataFactoryImpl& inmdg)
     if (this != &inmdg)
     {
         copyTypes(inmdg);
-        setRootElementName(inmdg.getRootElementName());
     }
     return *this;
 }

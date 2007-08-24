@@ -32,23 +32,19 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.2.2</version>
-  <date>2007-06-20</date>
+  <version>1.2.3</version>
+  <date>2007-08-24</date>
   <license>Apache 2.0</license>
   <state>stable</state>
   <notes>* Fixes for PECL bugs:
-   - PECL#10925 - Don&apos;t treat magic PHP methods as service operations
-   - PECL#10989 - don&apos;t automatically make all types in the wsdl nillable
-   - PECL#10994 - Business Exceptions Data Returned to Client
-   - PECL#11004 - WSDL Generated Does Not Validate
-   - PECL#11012 - Visual Studio Consumption of SCA Generated WSDL
+   - TUSCANY-1362 - Incorrect operation of code that checks whether schema is loaded before going out on the net to retrieve it.
+   - TUSCANY-1112 - (which is PECL 9867)  Incorrect namespaces in generated XML
+   - TUSCANY-1564 - (which is PECL 11774) xsi:type not always set for complexType
+   - TUSCANY-1566 - Elements coming out in wrong namespace (found by Caroline and reported in the phpsoa group under &quot;Experiences with Atompub&quot;
  * Other:
-   - Pick up revision 546761 of Tuscany SDO code.
-   - Include new eBay soap binding
-   - Tactical version of the in memory caching of the data model enabled for eBay binding
-   - Unit tests keep going to conclusion even when extensions are missing
-   - Added the eServiceStore example - shows several components which can be make local or
-     remote with only a swift change of the @binding annotations.
+   - Pick up revision 568244 of Tuscany SDO code.
+   - There is a new Rest Resource binding, with tests and examples.
+   - There is a new simpledb binding with examples
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -75,6 +71,25 @@
       <dir name="local">
        <file role="php" name="Proxy.php"/>
       </dir> <!-- /SCA/Bindings/local -->
+      <dir name="message">
+       <file role="php" name="Mapper.php"/>
+       <file role="php" name="MessageProviderDescription.xsd"/>
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="SAM_Client.php"/>
+       <file role="php" name="ServiceDescriptionGenerator.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+       <file role="php" name="Wrapper.php"/>
+      </dir> <!-- /SCA/Bindings/message -->
+      <dir name="restresource">
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="README"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="ResourceTemplate.php"/>
+       <file role="php" name="Server.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+       <file role="php" name="Wrapper.php"/>
+      </dir> <!-- /SCA/Bindings/restresource -->
       <dir name="restrpc">
        <file role="php" name="Proxy.php"/>
        <file role="php" name="README"/>
@@ -543,6 +558,15 @@
         <file role="test" name="HelloService.php"/>
        </dir> <!-- /examples/SCA/Local/ScriptCallingLocalSCAComponent -->
       </dir> <!-- /examples/SCA/Local -->
+      <dir name="RestResource">
+       <file role="test" name="Orders.html"/>
+       <file role="test" name="Orders.php"/>
+       <file role="test" name="Orders.xml"/>
+       <file role="test" name="Orders.xsd"/>
+       <file role="test" name="OrdersClient.html"/>
+       <file role="test" name="OrdersClient.php"/>
+       <file role="test" name="README"/>
+      </dir> <!-- /examples/SCA/RestResource -->
       <dir name="Soap">
        <dir name="SCAComponentCallingRemoteSCAComponent">
         <file role="test" name="HelloClient.php"/>
@@ -730,6 +754,20 @@
         <file role="test" name="SCALogFilterTest.php"/>
         <file role="test" name="SCALoggerTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/LogTests -->
+       <dir name="RegressionTests">
+        <file role="test" name="Bug11774.xsd"/>
+        <file role="test" name="Bug11774Test.php"/>
+        <file role="test" name="SCA_RegressionTestSuite.php"/>
+        <file role="test" name="Tuscany1566Test.php"/>
+       </dir> <!-- /tests/SCA/phpunit/RegressionTests -->
+       <dir name="RestResource">
+        <file role="test" name="enumerate.response"/>
+        <file role="test" name="Orders.php"/>
+        <file role="test" name="Orders.xml"/>
+        <file role="test" name="Orders.xsd"/>
+        <file role="test" name="RestResourceTest.php"/>
+        <file role="test" name="retrieve.response"/>
+       </dir> <!-- /tests/SCA/phpunit/RestResource -->
        <dir name="RestRpc">
         <file role="test" name="Hello.xsd"/>
         <file role="test" name="RestRpcTest.php"/>
@@ -778,6 +816,7 @@
        <file role="test" name="bug8694.phpt"/>
        <file role="test" name="bug9243.phpt"/>
        <file role="test" name="bug9487.phpt"/>
+       <file role="test" name="bug9867.phpt"/>
        <file role="test" name="bug9991.phpt"/>
        <file role="test" name="bug10049.phpt"/>
        <file role="test" name="bug10842.phpt"/>
@@ -1054,6 +1093,22 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
    - Unit tests keep going to conclusion even when extensions are missing
    - Added the eServiceStore example - shows several components which can be make local or
      remote with only a swift change of the @binding annotations.
+    </notes>
+   </release>
+   <release>
+    <version>1.2.3</version>
+    <date>2007-08-24</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes>* Fixes for PECL bugs:
+   - TUSCANY-1362 - Incorrect operation of code that checks whether schema is loaded before going out on the net to retrieve it.
+   - TUSCANY-1112 - (which is PECL 9867)  Incorrect namespaces in generated XML
+   - TUSCANY-1564 - (which is PECL 11774) xsi:type not always set for complexType
+   - TUSCANY-1566 - Elements coming out in wrong namespace (found by Caroline and reported in the phpsoa group under &quot;Experiences with Atompub&quot;
+ * Other:
+   - Pick up revision 568244 of Tuscany SDO code.
+   - There is a new Rest Resource binding, with tests and examples.
+   - There is a new simpledb binding with examples
     </notes>
    </release>
  </changelog>

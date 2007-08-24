@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 553836 $ $Date$ */
 
 #include "commonj/sdo/SchemaInfo.h"
 namespace commonj
@@ -26,7 +26,8 @@ namespace commonj
     {
 
         SchemaInfo::SchemaInfo()
-            : targetNamespaceURI("")
+            : targetNamespaceURI(""),
+              elementFormDefaultQualified(false)
         {
         }
         

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 492097 $ $Date$ */
+/* $Rev: 549789 $ $Date$ */
 
 #ifndef _PARSER_ERROR_SETTER_H_
 #define _PARSER_ERROR_SETTER_H_
@@ -26,28 +26,8 @@
 
 #include "commonj/sdo/disable_warn.h"
 
-#include <vector>
-#include <map>
-#include "libxml/xmlstring.h"
-
 namespace commonj{
 namespace sdo{
-
-template<class _Kty>
-struct HashCompare
-{
-    bool operator()(const _Kty& _Keyval1, const _Kty& _Keyval2) const
-    {
-        return strcmp((char*)_Keyval1, (char*)_Keyval2) < 0;
-    }
-};
-
-class SDOSchemaSAX2Parser;
-typedef std::map<xmlChar*, SDOSchemaSAX2Parser*, HashCompare<xmlChar*> > LocationParserMap;
-struct ParsedLocations: public LocationParserMap
-{
-    virtual ~ParsedLocations();
-};
 
 /**
  * The ParserErrorSetter builds a list of all the errors which 
@@ -62,9 +42,8 @@ public:
     virtual void setError(const char* message) = 0;
     virtual void clearErrors() = 0;
 
-    SDOSchemaSAX2Parser* parseIfNot(const void* location, bool loadImportNamespace = false, const void* base=0);
 protected:
-    ParsedLocations parsedLocations;
+
 };
 };
 };

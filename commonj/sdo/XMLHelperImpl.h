@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 479634 $ $Date$ */
+/* $Rev: 547318 $ $Date$ */
 
 #ifndef _XMLHELPERIMPL_H_
 #define _XMLHELPERIMPL_H_
@@ -172,12 +172,8 @@ namespace commonj
             DataFactoryPtr    dataFactory;
             SDOXMLString targetNamespaceURI;
 
-            XMLDocumentPtr createDocument(DataObjectPtr dataObject);
-
-//               const TypeImpl* findRoot(DataFactory* df,
-//                                         const char* rootElementURI);
-              const TypeImpl* findRoot(DataFactory* df,
-                                           const SDOString& rootElementURI);
+            const TypeImpl* findRoot(DataFactory* df,
+                const SDOString& rootElementURI);
 
             DataFactoryPtr getDataFactory();
         };

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 452786 $ $Date$ */
+/* $Rev: 553836 $ $Date$ */
 
 #ifndef _SCHEMAINFO_H_
 #define _SCHEMAINFO_H_
@@ -49,9 +49,12 @@ namespace commonj
             SDO_SPI const SDOXMLString& getTargetNamespaceURI() const {return targetNamespaceURI;}
             SDO_SPI void setTargetNamespaceURI(const SDOXMLString& URI) {targetNamespaceURI = URI;}            
             
+            SDO_SPI bool isElementFormDefaultQualified() {return elementFormDefaultQualified;}            
+            SDO_SPI void setElementFormDefaultQualified(bool qualified) {elementFormDefaultQualified = qualified;}            
         private:
             SAX2Namespaces    schemaNamespaces;
-            SDOXMLString    targetNamespaceURI;            
+            SDOXMLString    targetNamespaceURI;           
+            bool elementFormDefaultQualified;
             
         };
     } // End - namespace sdo

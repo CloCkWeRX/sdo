@@ -76,7 +76,7 @@ public static function main()
 {
     require_once "PHPUnit/TextUI/TestRunner.php";
 
-    $suite  = new PHPUnit_Framework_TestSuite("SCA_SoapProxyTest");
+    $suite  = new PHPUnit_Framework_TestSuite("SCA_Bindings_soap_ProxyTest");
     $result = PHPUnit_TextUI_TestRunner::run($suite);
 }
 
