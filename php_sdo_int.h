@@ -35,9 +35,7 @@
 using namespace commonj::sdo;
 using std::ostringstream;
 
-
-
-#define SDO_VERSION "1.2.3"
+#define SDO_VERSION "1.2.4"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
@@ -138,6 +136,20 @@ extern PHP_SDO_API int sdo_parse_offset_param(DataObjectPtr dop, zval *z_offset,
 	const Property **return_property, const char **return_xpath, int property_required, int quiet TSRMLS_DC);
 extern PHP_SDO_API Type::Types sdo_map_zval_type (zval *z_value);
 
+/* {{{ refcount handling macros for forward compatibility
+ */
+#ifndef Z_ADDREF_P
+#define Z_ADDREF_P(x) (x)->refcount++
+#endif
+
+#ifndef Z_SET_REFCOUNT_P
+#define Z_SET_REFCOUNT_P(x, n) (x)->refcount = n
+#endif
+
+#ifndef Z_UNSET_ISREF_P
+#define Z_UNSET_ISREF_P(x) (x)->is_ref = 0
+#endif
+/* }}} */
 
 /* {{{ object memory debugging macros
  */

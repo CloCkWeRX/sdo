@@ -341,7 +341,7 @@ static zval *sdo_do_read_list(sdo_do_object *sdo, const char *xpath, const Prope
 			return_value = EG(uninitialized_zval_ptr);
 		} else {
 			ALLOC_INIT_ZVAL(return_value);
-			return_value->refcount = 0;
+            Z_SET_REFCOUNT_P(return_value, 0);
 			/* make a new SDO_DataObjectList */
 			sdo_dataobjectlist_new(return_value, propertyp->getType(), sdo->dop, &list_value TSRMLS_CC);
 		}
@@ -396,7 +396,7 @@ static zval *sdo_do_read_value(sdo_do_object *sdo, const char *xpath, const Prop
 
 
 		ALLOC_INIT_ZVAL(return_value);
-		return_value->refcount = 0;
+        Z_SET_REFCOUNT_P(return_value, 0);
 
 		if (dop->isNull(xpath)) {
 			RETVAL_NULL();
@@ -992,7 +992,7 @@ zend_object_iterator *sdo_do_get_iterator(zend_class_entry *ce, zval *object TSR
 
 	sdo_do_object *my_object = (sdo_do_object *)sdo_do_get_instance(object TSRMLS_CC);
 	sdo_do_iterator *iterator = (sdo_do_iterator *)emalloc(sizeof(sdo_do_iterator));
-	object->refcount++;
+    Z_ADDREF_P(object);
 	iterator->zoi.data = (void *)object;
 	iterator->zoi.funcs = &sdo_do_iterator_funcs;
 	sdo_do_iterator_rewind((zend_object_iterator *)iterator TSRMLS_CC);
@@ -1136,7 +1136,10 @@ static int sdo_do_serialize (zval *object, unsigned char **buffer_p, zend_uint *
 		model_length = strlen(serialized_model);
 
 		/* serialize the data graph to an unformatted string */
-		serialized_graph = xmlhp->save(my_object->dop, (const char*)0, (const char *)0, -1);
+		/* Note Tuscany is supposed to handle a null as the root element name,
+		 * but currently (549872) barfs, so guard against this here
+		 */
+		serialized_graph = xmlhp->save(my_object->dop, (const char*)0, "", -1);
 		graph_length = strlen(serialized_graph);
 
 		/*

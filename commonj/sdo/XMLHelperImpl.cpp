@@ -172,7 +172,7 @@ namespace commonj
             const char* rootElementName)
         {
         	SDOString uri;
-        	SDOString name = rootElementName;
+        	SDOString name;
         	if (0 == rootElementURI)
         	  uri = "";
         	  else

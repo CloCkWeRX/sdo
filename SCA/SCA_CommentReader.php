@@ -33,10 +33,15 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
     class SCA_CommentReader {
 
         const   EOL                     = "\n" ;
-        const   NAMESPACE               = "@namespace" ;
+        
+        // Clashed with 5.3 namespace support.  Does not appear to be used
+        // TODO: clean up unused constants
+        //const   NAMESPACE               = "@namespace" ;
+        
         const   STRETCHEDNS             = "@namespace " ;
 
         const   BINDING                 = 'binding' ;
+        const   SERVICE                 = 'service' ;
 
         const   PARAM_ANNOTATION        = 'parameters' ;
         const   RETRN_ANNOTATION        = 'return' ;
@@ -84,6 +89,18 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             return $binding_config;
         }
 
+        /**
+         * Get the interface name following an @service annotation.
+         * 
+         * @return string The service interface name or null if one isn't specified.
+         *
+         */
+        public function getServiceInterface() {
+            $config = $this->getNameValuePairs();
+            if (array_key_exists('service', $config))
+                return $config['service'];
+        }
+        
         public function __construct($comment)
         {
 
@@ -442,7 +459,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
             if ($this->getBinding() != null) {
                 return $this->_getSingleWordFollowing(self::BINDING);
             } else {
-                throw new SCA_RuntimeException("Instance variable has @reference has no valid @binding.*");
+                throw new SCA_RuntimeException("Instance variable has @reference but has no valid @binding.*");
             }
         }
 

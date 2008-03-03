@@ -40,7 +40,9 @@ A number of samples are provided, which illustrate different aspects of the Serv
 </tr>
 </table>
 
-<h3>Local Binding - A script making a local call to an SCA Component</h3>
+<h3>Local binding</h3>
+
+<h5>A script making a local call to an SCA Component</h5>
 <table>
 <tr>
 <td><a href="./Local/ScriptCallingLocalSCAComponent/HelloClient.php">ScriptCallingLocalSCAComponent</a></td>
@@ -53,7 +55,7 @@ HelloService.php - local SCA component: This component implements one method, sa
 </tr>
 </table>
 
-<h3>Local Binding - An SCA Component making a local call to another SCA Component</h3>
+<h5>An SCA Component making a local call to another SCA Component</h5>
 <table>
 <tr>
 <td><a href="./Local/SCAComponentCallingLocalSCAComponent/HelloClient.php">SCAComponentCallingLocalSCAComponent</a></td>
@@ -67,7 +69,10 @@ HelloService.php - local SCA component: This component implements one method say
 </tr>
 </table>
 
-<h3>Soap Binding -  A script making a remote (Web service) call to an SCA Component</h3>
+
+<h3>Soap Binding</h3>
+
+<h5>A script making a SOAP web service call to an SCA Component</h5>
 <table>
 <tr>
 <td><a href="./Soap/ScriptCallingRemoteSCAComponent/HelloClient.php">ScriptCallingRemoteSCAComponent</a></td>
@@ -81,7 +86,7 @@ HelloService.php - remote SCA component: This component implements one method, s
 </tr>
 </table>
 
-<h3>Soap Binding -  An SCA Component making a remote (Web service) call to another SCA Component</h3>
+<h5>An SCA Component making a SOAP web service call to another SCA Component</h5>
 <table>
 <tr>
 <td><a href="./Soap/SCAComponentCallingRemoteSCAComponent/HelloClient.php">SCAComponentCallingRemoteSCAComponent</a></td>
@@ -96,7 +101,7 @@ HelloService.php - remote SCA component: This component implements one method sa
 </tr>
 </table>
 
-<h3>Soap Binding - A simple script making a remote (Web service) call to an SCA Component using data structures</h3>
+<h5>A simple script making a SOAP web service call to an SCA Component using data structures</h5>
 <table>
 <tr>
 <td><a href="./Soap/SCAComponentUsingDataStructures/HelloClient.php">SCAComponentUsingDataStructures</a></td>
@@ -111,42 +116,138 @@ names.xsd - data structure schema: This file is a simple XML Schema containing o
 </tr>
 </table>
 
+<h3>JSON-RPC Binding</h3>
+
+<h5>A script making a variety of JSON calls to an SCA Component</h5>
+<table>
+<tr>
+<td><a href="./JsonRpc/MailApplicationClient.php">MailApplicationClient</a></td>
+</tr>
+<tr>
+<td>
+</td>
+</tr>
+</table>
+
+<h3>XML-RPC Binding</h3>
+
+<h5>A script that uses the xmlrpc binding to drive another component</h5>
+<table>
+<tr>
+<td><a href="./XmlRpc/TestClient.php">TestClient.php</a></td>
+</tr>
+<tr>
+<td>Runs a script which calls a component locally, then the same component via the xmlrpc binding. 
+The results should be the same, of course, but note the rounding errors in the floating point return. 
+</td>
+</tr>
+</table>
+
+<h3>REST resource-oriented Binding</h3>
+
+<h5>A page that sends HTTP verbs to drive an SCA Component in the REST style</h5>
+<table>
+<tr>
+<td><a href="./RestResource/Orders.html">Orders</a></td>
+</tr>
+<tr>
+<td>
+</td>
+</tr>
+</table>
+
+<h5>Drive two methods of the component yourself from the browser</h5>
+<table>
+<tr>
+<td><a href="./RestResource/Orders.php">Orders.php</a></td>
+</tr>
+<tr>
+<td>Just following a link to Orders.php will send a GET and drive an enumerate and return XML
+</td>
+</tr>
+<tr>
+<td><a href="./RestResource/Orders.php/order2">Orders.php/order2</a></td>
+</tr>
+<tr>
+<td>Following a link to Orders.php/order2 will drive a GET for just orders2
+</td>
+</tr>
+<tr>
+<td>The other methods require HTTP POST, PUT and DELETE and cannot be driven just by following links.
+</td>
+</tr>
+</table>
+
+<h5>Rest resource binding</h5>
+<table>
+<tr>
+<td><a href="./RestResource/OrdersClient.html">OrdersClient</a></td>
+</tr>
+<tr>
+<td>A page that uses HTTP verbs to drive an SCA component as above, but that component drives another SCA component using the restresource binding. It will behave like the first example.
+</td>
+</tr>
+</table>
+
+<h3>ATOM Publishing Binding</h3>
+
+<h5>A page that calls a script that uses the atom binding to drive another component</h5>
+<table>
+<tr>
+<td><a href="./atom/test_contact_feed.php">test contact feed</a></td>
+</tr>
+<tr>
+<td>Runs a script which drives create, retrieve, update and delete against an atom feed.
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td><a href="./atom/ContactFeed.php">See the contents of the feed in the browser</a></td>
+</tr>
+<tr>
+<td>Just fetch the contents and let the browser format it using the <a href="http://microformats.org/wiki/xoxo">"xoxo"</a> microformat.
+</td>
+</tr>
+</table>
+
 <h3>First Steps With Soap, RestRpc and JsonRpc - HelloWorld</h3>
 <table>
 <tr>
-<td><a href="./helloworldphp/helloworld.html">helloworld with PHP scripts</a></td>
-<td>Using only PHP scripts</td>
+<td><a href="./helloworldphp/helloworld.html">A PHP script calling classes</a></td>
+<td>helloworld.php is a PHP script which calls two local classes - no SCA at all</td>
 </tr>
 <tr>
-<td><a href="./helloworldscalocalservice/helloworld.html">helloworld with local SCA service binding</a></td>
-<td>An SCA Service accessed from a PHP script locally </td>
+<td><a href="./helloworldscalocalservice/helloworld.html">Using getService to get local proxies</a></td>
+<td>Helloworld is a PHP script which gets two local proxies to local components</td>
 </tr>
 <tr>
-<td><a href="./helloworldscalocalreference/helloworld.html">helloworld with local SCA service and reference binding</a></td>
-<td>An SCA service access from another SCA service locally</td>
+<td><a href="./helloworldscalocalreference/helloworld.html">A component with a rest-rpc binding calls local components</a></td>
+<td>helloworld.php is an SCA component with a rest-rpc binding. This gets two local proxies as above. The web page invokes helloworld with a POST. </td>
 </tr>
 <tr>
-<td><a href="./helloworldscawsservice/Greeting.php?wsdl">Greeting Service WSDL Generation</a></td>
+<td><a href="./helloworldscawsservice/Greeting.php?wsdl">Generate WSDL for the "Greeting" soap service</a></td>
 <td>Generating WSDL</td>
 </tr>
 <tr>
-<td><a href="./helloworldscawsservice/Reversing.php?wsdl">Reversing Service WSDL Generation</a></td>
+<td><a href="./helloworldscawsservice/Reversing.php?wsdl">Generate WSDL for the "Reversing" soap service</a></td>
 <td>Generating WSDL</td>
 </tr>
 <tr>
-<td><a href="./helloworldscawsservice/helloworld.html">helloworld with ws SCA service and binding</a></td>
-<td>Local binding replaced with a web services (SOAP) binding</td>
+<td><a href="./helloworldscawsservice/helloworld.html">Using getService to get soap proxies</a></td>
+<td>Helloworld is a script which gets two soap web service proxies</td>
 </tr>
 <tr>
-<td><a href="./helloworldscawsreference/helloworld.html">helloworld with ws SCA service and reference binding </a></td>
-<td>Local binding replaced with a web services (SOAP) binding</td>
+<td><a href="./helloworldscawsreference/helloworld.html">A component with a rest-rpc binding calls remote soap services</a></td>
+<td>Helloworld.php is an SCA component with a rest-rpc binding. This gets two soap web service proxies as above. The web page invokes helloworld with a POST. </td>
 </tr>
 <tr>
-<td><a href="./helloworldscajsonrpc/helloworldrest.html">helloworld with REST RPC SCA service binding and SDO message</a></td>
+<td><a href="./helloworldscajsonrpc/helloworldrest.html">As above but using SDO to pass data</a></td>
 <td>Complex types and REST binding</td>
 </tr>
 <tr>
-<td><a href="./helloworldscajsonrpc/helloworld.php?smd">HelloWorld Service SMD Generation</a></td>
+<td><a href="./helloworldscajsonrpc/helloworld.php?smd">Generate an SMD</a></td>
 <td>Generating a JSON-RPC Service Method Description</td>
 </tr>
 </table>

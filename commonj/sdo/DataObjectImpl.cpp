@@ -951,7 +951,7 @@ namespace sdo {
     //////////////////////////////////////////////////////////////////////
 
     const char* DataObjectImpl::templateString = 
-    " /abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890=[]._#";
+    " /abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890=[]._#-";
 
     char* DataObjectImpl::stripPath(const char* path)
     {

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SCA for PHP binding.message -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+        targetNamespace="http://www.example.org/MessageServiceDescription"
+        xmlns:msd="http://www.example.org/MessageServiceDescription">
+
+  <complexType name="MessageServiceDescriptionType">
+    <sequence>
+      <element name="destination" type="string" />
+      <element name="connectionFactory" type="msd:ConnectionFactory" />
+      <element name="correlationScheme" type="msd:CorrelationScheme" minOccurs="0" />
+      <element name="response" type="msd:Response" minOccurs="0"/>
+      <element name="headers" type="msd:Headers" minOccurs="0"/>
+      <element name="wsdl" type="string" />
+      <element name="responseTimeout" type="integer" minOccurs="0"/>
+      <any minOccurs="0"/>
+    </sequence>
+  </complexType>
+
+  <simpleType name="CorrelationScheme">
+      <restriction base="string">
+          <enumeration value="RequestMsgIDToCorrelID"/>
+          <enumeration value="RequestCorrelIDToCorrelID"/>
+          <enumeration value="None"/>
+      </restriction>
+  </simpleType> 
+
+  <complexType name="ConnectionFactory">
+      <sequence>
+          <element name="protocol" type="string" />
+          <element name="host" type="string" minOccurs="0" />
+          <element name="port" type="integer" minOccurs="0" />
+          <element name="broker" type="string" minOccurs="0" />
+          <element name="endpoints" type="string" minOccurs="0" />
+          <element name="targetchain" type="string" minOccurs="0" />
+          <element name="bus" type="string" minOccurs="0" /> 
+          <element name="userid" type="string" minOccurs="0" />
+          <element name="password" type="string" minOccurs="0" />
+      </sequence>
+  </complexType>
+
+  <complexType name="Response">
+      <sequence>
+          <element name="destination" type="string" />
+          <element name="connectionFactory" type="msd:ConnectionFactory" minOccurs="0" />
+      </sequence>
+  </complexType>
+
+  <complexType name="Headers">
+    <sequence>
+         <element name="JMSType" type="string" minOccurs="0" />
+         <element name="JMSCorrelationID" type="string" minOccurs="0" />
+         <element name="JMSDeliveryMode" type="string" minOccurs="0" />
+         <element name="JMSTimeToLive" type="integer" minOccurs="0" />
+         <element name="JMSPriority" type="string" minOccurs="0" />
+    </sequence>
+  </complexType>
+
+  <element name="MessageServiceDescription" type="msd:MessageServiceDescriptionType" />
+</schema>

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OrderType xmlns="urn::orderNS" xsi:type="OrderType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn::orderNS"><orderId>order1</orderId><status>NONE</status><item><itemId>0</itemId><description>some item</description><price>123.45</price><quantity>0</quantity><warehouseId>0</warehouseId></item><customerId>customer1</customerId></OrderType>

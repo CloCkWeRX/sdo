@@ -1,0 +1,50 @@
+Rest Resource Binding
+=====================
+
+The restresource binding provides a binding for accessing services that
+map URLs to resources. A resource in SCA is passes back and forth as XML. 
+There is though no restriction on how the service itself manages resources
+
+HTTP Operation/URL/Resource Mapping
+====================================
+
+URL                                     Verb    Operation Request Content  Response Content
+--------------------------------------- ------  --------- ---------------  ----------------
+http://???:??/???/Script.php            GET     enumerate none             xml
+http://???:??/???/Script.php            POST    create    xml              plain(ResourceURL)
+http://???:??/???/Script.php/resourceid GET     retrieve  plain(ResourceId)xml
+http://???:??/???/Script.php/resourceid PUT     update    xml              xml
+http://???:??/???/Script.php/resourceid DELETE  delete    plain(ResourceId)none
+
+POST with form content (x-www-form-urlencoded) is not supported. 
+
+Service Function Template
+=========================
+
+The interface SCA_Bindings_restresource_ResourceTemplate.php provides a template
+for services that wish to use binding.restresource. The service class doesn't have
+to physically
+
+
+
+
+Issues
+======
+1/ If the service class does explicitly implement the ResourceTemplate interface 
+   then the statement 
+    
+   include 'SCA/SCA.php';
+   
+   must come at the bottom of the file as the class_exists function operates
+   differently when your class implements an interface and this effects the 
+   behaviour of SCA
+   
+2/ No queury parameters or user credentials are passed explicitly into the 
+   service currently although they are available directly from PHP.
+   
+
+  
+
+
+
+

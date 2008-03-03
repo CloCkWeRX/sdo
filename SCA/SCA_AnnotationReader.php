@@ -106,13 +106,13 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
                 foreach ( $ref_props as $ref_prop ) {
                     $reader = new SCA_CommentReader($ref_prop->getDocComment());
                     if ($reader->isReference()) {
-                        $reference_type = $reader->getReferenceFull();                        
+                        $reference_type = $reader->getReferenceFull();
                         $references[$ref_prop->getName()] = $reference_type;
                     }
                 }
             } catch ( Exception $e ) {
                 throw new SCA_RuntimeException(
-                "The following error occured while examining the comment block for instance variable " 
+                "The following error occured while examining the comment block for instance variable "
                 . $ref_prop->getName() . ": " .
                 $e->getMessage()) ;
             }
@@ -125,14 +125,13 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
 
             $reflection = $this->__getReflection();
             $reader     = new SCA_CommentReader($reflection->getDocComment());
-            $xsds       = $reader -> getXSDTypes(); // may be an emptry array if none to be found
+            $xsds       = $reader -> getXSDTypes(); // may be an empty array if none to be found
             return      $xsds;
         }
 
         private function __getReflection()
         {
             if ($this->instance_of_the_component !== null) {
-                $sca_name   = get_class($this->instance_of_the_component);
                 $reflection = new ReflectionObject($this->instance_of_the_component);
             } else {
                 $reflection = new ReflectionClass($this->class_name);
@@ -175,6 +174,23 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
         }
 
         /**
+         * Get a ReflectionObject for a service interface from a 
+         * ReflectionObject for a service implementation
+         *
+         * @param ReflectionObject $reflection The reflection for the service implementation
+         * @param string $interface_name The service interface name
+         * @return ReflectionObject The reflection for the service interface
+         */
+        private function __getInterfaceReflection($reflection, $interface_name) {
+            foreach ($reflection->getInterfaces() as $interface_reflection) {
+                if ($interface_reflection->getName() == $interface_name) {
+                    return $interface_reflection;
+                }
+            }
+            return null;
+        }
+
+        /**
          *
          * @return object SCA_ServiceDescription
          * @throws SCA_RuntimeException
@@ -198,8 +214,28 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
 
             $service = new SCA_ServiceDescription();
 
-            if ($reader->isService())
+            $interface_reflection = null;
+
+            if ($reader->isService()) {
+                $service->interface_name = $reader->getServiceInterface();
+
+
+                // Get the ReflectionObject for any service interface
+                $interface_reflection =
+                $this->__getInterfaceReflection($reflection,
+                $service->interface_name);
+
+                if (is_null($interface_reflection)) {
+                    $interface_methods = null;
+                    if (!empty($service->interface_name)) {
+                        throw new SCA_RuntimeException("Service interface {$service->interface_name} specified by @service does not match any interface implemented by {$sca_name}.php'.");
+                    }
+                } else {
+                    $interface_methods = $interface_reflection->getMethods();
+                }
+
                 $service->binding = $reader->getBindings();
+            }
 
             if (count($service->binding) == 0) {
                 throw new SCA_RuntimeException("No valid @binding annotation could be found for '{$sca_name}.php'.");
@@ -208,9 +244,10 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
             $service->xsd_types = $this->reflectXsdTypes();
 
             /* Filter reflected method array to show 'public' functions only   */
-            $public_methods =
+            $service_methods =
             SCA_Helper::filterMethods($this->__getMethods(),
-            $reflection->getMethods());
+            $reflection->getMethods(),
+            $interface_methods);
 
             $operations = array();
             $comment    = null ;
@@ -218,10 +255,10 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
             /* Check the comment of each method to find any annotations so that
             * a wsdl can be generated from the .php file.
             */
-            foreach ( $public_methods as $public_method ) {
+            foreach ( $service_methods as $service_method ) {
                 $methodAnnotations =
                 SCA_AnnotationRules::createEmptyAnnotationArray();
-                $comment = $public_method->getDocComment();
+                $comment = $service_method->getDocComment();
 
                 /* When the method has a doc comment ....                     */
                 if ( $comment != false ) {
@@ -280,7 +317,7 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
                 }/* End comment has value                                      */
 
                 /* Save the annotation set indexed by the method name.         */
-                $operations[$public_method->getName()] = $methodAnnotations ;
+                $operations[$service_method->getName()] = $methodAnnotations ;
 
             }/* End every method                                               */
 
@@ -295,6 +332,15 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
         /**
         * Check that the parameter, or return namespace definition for an object
         * is also in the xsd array.
+        * 
+        * Note that the array is an odd arrangement, it is really meant to represent
+        * a set of (namespace -> xsd file). Because more than one xsd can contain
+        * definitions for the same namespace it cannot be a simple associative array
+        * (actually it could have done if we had thought to make it xsd->namespace :-()
+        *     @types urn://namespace anything.xsd
+        *     @types urn://namespace more.xsd
+        * So it is actually an array (sequence) where each element is a two-element
+        * array (another sequence) of namespace, then xsd name
         *
         * @param array $xsdArray
         * @param string $namespace
@@ -302,16 +348,14 @@ if ( ! class_exists('SCA_AnnotationReader', false)) {
         */
         private function _matchXsds( $xsdArray, $namespace )
         {
-            foreach ($xsdArray as $index => $xsds) {
-                if ( in_array($namespace, $xsds) ) {
+            foreach ($xsdArray as $xsd_namespace_pair) {
+                if (in_array($namespace, $xsd_namespace_pair)) {
                     return true;
                 }
-            }/* End all xsds                                                       */
+            }
             return false ;
-        }/* End match xsds function                                                */
-
-    }/* End SCA AnnotationReader Class                                             */
-
-}/* End single instance check                                                      */
+        }
+    }
+}
 
 ?>

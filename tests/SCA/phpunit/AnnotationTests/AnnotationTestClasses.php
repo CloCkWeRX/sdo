@@ -444,5 +444,204 @@ class ReferenceWithAnEmptyWsBinding
     public $service;
 }
 
+/*******************************************************************************
+ * INTERFACES
+ ********************************************************************************/
+
+interface InterfaceWithTwoMethods {
+    
+    public function Method1($in1);
+    public function Method2($in1, $in2);
+}
+
+
+interface InterfaceWithOneMethod {
+    
+    public function Method3();
+    
+}
+
+/**
+ * MyService with a nonServiceMethod
+ * @service InterfaceWithTwoMethods
+ * @binding.soap
+ *
+ */
+class ServiceInterfaceWithTwoMethods implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
+    
+    /**
+     * A private method that should not appear
+     *
+     */
+    private function privateMethod() {}
+    
+    /**
+     * My first service method
+     *
+     * @param string $in1
+     * @return float
+     */
+    public function Method1($in1) {}
+    
+    /**
+     * My second service method
+     *
+     * @param string $in1
+     * @param float $in2
+     * @return integer
+     */
+    public function Method2($in1, $in2) {}
+
+    /**
+     * A method that I don't want to appear
+     *
+     */
+    public function Method3() {}
+
+    /**
+     * A method that I don't want to appear
+     *
+     */
+    public function Method4() {}
+
+}
+
+
+/**
+ * MyService with a nonServiceMethod
+ * @service InterfaceWithOneMethod
+ * @binding.soap
+ *
+ */
+class ServiceInterfaceWithOneMethod implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
+    
+    /**
+     * A private method that should not appear
+     *
+     */
+    private function privateMethod() {}
+    
+    /**
+     * We don't want this one
+     *
+     * @param string $in1
+     * @return float
+     */
+    public function Method1($in1) {}
+    
+    /**
+     * We don't want this one
+     *
+     * @param string $in1
+     * @param float $in2
+     * @return integer
+     */
+    public function Method2($in1, $in2) {}
+
+    /**
+     * We do want this one
+     *
+     */
+    public function Method3() {}
+
+    /**
+     * We don't want this one
+     *
+     */
+    public function Method4() {}
+
+}
+
+
+/**
+ * MyService with a nonServiceMethod
+ * @service
+ * @binding.soap
+ *
+ */
+class ServiceInterfaceWithFourMethods implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
+    
+    /**
+     * A private method that should not appear
+     *
+     */
+    private function privateMethod() {}
+    
+    /**
+     * We want this one
+     *
+     * @param string $in1
+     * @return float
+     */
+    public function Method1($in1) {}
+    
+    /**
+     * We want this one
+     *
+     * @param string $in1
+     * @param float $in2
+     * @return integer
+     */
+    public function Method2($in1, $in2) {}
+
+    /**
+     * We want this one
+     *
+     */
+    public function Method3() {}
+
+    /**
+     * We want this one
+     *
+     */
+    public function Method4() {}
+
+}
+
+
+/**
+ * MyService with a nonServiceMethod
+ * @service SomeNonExistentInterface
+ * @binding.soap
+ *
+ */
+class ServiceWithInvalidInterface implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
+    
+    /**
+     * A private method that should not appear
+     *
+     */
+    private function privateMethod() {}
+    
+    /**
+     * We want this one
+     *
+     * @param string $in1
+     * @return float
+     */
+    public function Method1($in1) {}
+    
+    /**
+     * We want this one
+     *
+     * @param string $in1
+     * @param float $in2
+     * @return integer
+     */
+    public function Method2($in1, $in2) {}
+
+    /**
+     * We want this one
+     *
+     */
+    public function Method3() {}
+
+    /**
+     * We want this one
+     *
+     */
+    public function Method4() {}
+
+}
 
 ?>

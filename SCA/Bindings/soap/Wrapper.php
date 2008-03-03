@@ -45,11 +45,14 @@ if (! class_exists('SCA_Bindings_soap_Wrapper', false)) {
     {
         private $instance_of_the_base_class = null ;
         private $xmldas                     = null ;
+        private $class_name                 = null;
 
         public function __construct($class_name, $handler )
         {
             SCA::$logger->log('Entering');
             SCA::$logger->log("class name = $class_name");
+            
+            $this->class_name = $class_name;
 
             $this->xmldas                     = $handler->getXmlDas();
             $this->instance_of_the_base_class = SCA::createInstance($class_name);
@@ -85,7 +88,8 @@ if (! class_exists('SCA_Bindings_soap_Wrapper', false)) {
                 }
             }
 
-            $xdoc = $this->xmldas->createDocument($method_name . "Response");
+            $namespace = 'http://' . $this->class_name;
+            $xdoc = $this->xmldas->createDocument($namespace,$method_name . "Response");
             $response_object = $xdoc->getRootDataObject();
             $response_object[$method_name."Return"] = is_object($return)
             ? clone $return

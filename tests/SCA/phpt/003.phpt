@@ -42,9 +42,31 @@ $_SERVER['REQUEST_METHOD'] = 'POST';
 $_SERVER['SCRIPT_FILENAME'] = $component_file;
 $_SERVER['CONTENT_TYPE'] = 'application/soap+xml';
 
+ob_start();
 include "$component_file";
+echo preg_replace("/>\s*</", ">\n<", ob_get_clean());
 
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://Component"><SOAP-ENV:Body><ns1:addResponse><addReturn><name><first>William</first><last>Shakespeare</last></name><phone><type>home</type><number>123-456</number></phone><address><street>456 Evergreen</street><city>Austin</city><state>TX</state></address></addReturn></ns1:addResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+<SOAP-ENV:Body>
+<tns2:addResponse xmlns:tns2="http://Component" xmlns:tns3="http://www.test.com/info" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<addReturn>
+<name>
+<first>William</first>
+<last>Shakespeare</last>
+</name>
+<phone>
+<type>home</type>
+<number>123-456</number>
+</phone>
+<address>
+<street>456 Evergreen</street>
+<city>Austin</city>
+<state>TX</state>
+</address>
+</addReturn>
+</tns2:addResponse>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

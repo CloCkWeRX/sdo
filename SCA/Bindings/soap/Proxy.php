@@ -146,7 +146,7 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
 
             try {
                 $this->handler->setWSDLTypes($absolute_path_to_target_wsdl);
-                $xmldas = $this->handler->getXmlDas();
+//                $xmldas = $this->handler->getXmlDas();
             } catch( SCA_RuntimeException $se ) {
                 if (substr($absolute_path_to_target_wsdl, 0, 5) == 'http:'
                 && strpos($se->getMessage(), 'SDO_Exception') !== false
@@ -211,17 +211,7 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
                 }
                 catch( SDO_Exception $sdoe )
                 {
-                    // TODO - the carefully constructed logic below would seem to
-                    // present a good change of losing exception detail so
-                    // I'm commenting it out for the time being
-                    //
-                    //         $reason =  $sdoe->__toString();
-
-                    //         if ( strpos($reason, $method_name) !== false ) {
-                    //             throw new SCA_RuntimeException("Method '{$method_name}' could not be found in your Service pointed at by {$this->wsdl_file_name}");
-                    //         } else {
                     throw new SCA_RuntimeException($sdoe->getMessage());
-                    //         }
                 }
                 $operation_array = array($operation_sdo);
                 $return          = $this->_passTheCallToTheSoapClient($method_name,
@@ -245,17 +235,15 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
                 // TODO: work out how to get the locations from the WSDL (or
                 // could require it to be set...? Naff
                 // Add the query params to the location
-                $location_array = null;
+                $options_array = null;
                 if ($this->location != null) {
-                    $location_array = array('location' => "{$this->location}?{$this->query_params}");
+                    $options_array = array('location' => "{$this->location}?{$this->query_params}");
                 }
 
-                $return = $this->__soapCall($method_name, $arguments, $location_array, $this->soap_headers);
+                $return = $this->__soapCall($method_name, $arguments, $options_array, $this->soap_headers);
                 SCA::$logger->log($this->getLastSoapRequest());
                 SCA::$logger->log($this->getLastSoapResponse());
-            }
-            catch( SoapFault $sfe )
-            {
+            } catch (SoapFault $sfe) {
                 SCA::$logger->log('SoapFault ocurred');
                 SCA::$logger->log($this->getLastSoapRequest());
                 SCA::$logger->log($this->getLastSoapResponse());
@@ -266,13 +254,43 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
             return $return;
 
         }
+        
+        /**
+         * Public version of the private method that follows
+         * introduced to test bug 12193 does not come back
+         *
+         */
+        public function getSoapOperationSdo($method_name, $arguments) {
+            return $this->_getSoapOperationSdo($method_name, $arguments);
+        }
+        
         private function _getSoapOperationSdo($method_name, $arguments)
         {
             $xmldas        = $this->handler->getXmlDas();
-            $xdoc          = $xmldas->createDocument($method_name);
+            $namespace     = $this->_getNamespaceForMethodName($xmldas, $method_name);
+            $xdoc          = $xmldas->createDocument($namespace,$method_name);
             $operation_sdo = $xdoc->getRootDataObject();
             $operation_sdo = $this->_copyPositionalArgumentsIntoSdoProperties($operation_sdo, $arguments);
             return         $operation_sdo;
+        }
+
+        /**
+         * seek out the namespace for the component from
+         * the wsdl which is loaded in the xml das.
+         * The line we are looking for looks like this:
+         *    - hello (http://HelloPersonService#hello)
+         * where 'hello' is the method name
+         *
+         */
+        private function _getNamespaceForMethodName($xmldas, $method_name) {
+            $regexp_str = '/\((.*)#' . $method_name . '\)/' ;
+            ob_start();
+            print $xmldas;
+            $input = ob_get_contents();
+            ob_end_clean();
+            $rc = preg_match($regexp_str, $input, $matches);
+            $namespace = $matches[1];
+            return $namespace;           
         }
 
         private function _copyPositionalArgumentsIntoSdoProperties($operation_sdo, $arguments)

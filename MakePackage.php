@@ -170,17 +170,33 @@
 //  .  "   - Added the eServiceStore example - shows several components which can be make local or\n"
 //  .  "     remote with only a swift change of the @binding annotations.\n"
 //  ,  
+//  'notes' =>
+//     " * Fixes for PECL bugs:\n"
+//  .  "   - TUSCANY-1362 - Incorrect operation of code that checks whether schema is loaded before going out on the net to retrieve it.\n"
+//  .  "   - TUSCANY-1112 - (which is PECL 9867)  Incorrect namespaces in generated XML\n"
+//  .  "   - TUSCANY-1564 - (which is PECL 11774) xsi:type not always set for complexType\n"
+//  .  "   - TUSCANY-1566 - Elements coming out in wrong namespace (found by Caroline and reported in the phpsoa group under \"Experiences with Atompub\"\n"
+//  .  " * Other:\n"
+//  .  "   - Pick up revision 568244 of Tuscany SDO code.\n"
+//  .  "   - There is a new Rest Resource binding, with tests and examples.\n"
+//  .  "   - There is a new simpledb binding with examples\n"
+//  ,
   'notes' =>
-     " * Fixes for PECL bugs:\n"
-  .  "   - TUSCANY-1362 - Incorrect operation of code that checks whether schema is loaded before going out on the net to retrieve it.\n"
-  .  "   - TUSCANY-1112 - (which is PECL 9867)  Incorrect namespaces in generated XML\n"
-  .  "   - TUSCANY-1564 - (which is PECL 11774) xsi:type not always set for complexType\n"
-  .  "   - TUSCANY-1566 - Elements coming out in wrong namespace (found by Caroline and reported in the phpsoa group under \"Experiences with Atompub\"\n"
-  .  " * Other:\n"
-  .  "   - Pick up revision 568244 of Tuscany SDO code.\n"
-  .  "   - There is a new Rest Resource binding, with tests and examples.\n"
-  .  "   - There is a new simpledb binding with examples\n"
-  ,
+	  " # The ability to control the operations on a service interface through a PHP interface \n"
+	. "     by specifying the PHP interface on the @service annotation - e.g. @service MyServiceInterface\n"
+    . " # PECL bug 11997 - don't remove xsi:type (except on top level soap message or response)\n"
+    . " # PECL bug 11996 - not showing LIBXML2 parse errors\n"
+    . " # PECL bug 12193 - alphabetical order of namespaces causes failure\n"
+    . " # PECL bug 12103 - saveString doesn't encode entities \n"
+    . " # PECL bug 12443 - unable to access an XSD property containing a hyphen (-) \n"
+    . " # PECL bug 13101 - Repeated nill elements of extended type cause "Parser found unknown element" exception\n"
+    . " # Fix to add wsdl namespace prefix to <types> element in WSDL, without which it will not validate. \n"
+    . " # Fix for Tuscany AccessViolation problem when serializing a DO\n"
+    . " # Backward-compatible updates to SDO extension so that it will work with PHP 5.3\n"
+    . " # Backward-compatible updates to SCA so that it will work with PHP 5.3. \n"
+    . " # Fix for failures that occur when using the soap extension - see thread \"SCA Webservice in WSDL mode\"\n"
+	. " # Substantial rework of the examples to illustrate more bindings - see examples/SCA/index.html\n"
+	 ,
        'simpleoutput' => true,
        'version' => '1.2.3',
        'baseinstalldir' => 'SDO',

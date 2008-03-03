@@ -21,7 +21,7 @@
 $Id$
 */
 
-if (!class_exists('SCA_Binding_Factory')) {
+if (!class_exists('SCA_Binding_Factory', false)) {
 
     class SCA_Binding_Factory
     {
@@ -63,7 +63,7 @@ if (!class_exists('SCA_Binding_Factory')) {
         private static function _generateClassNameAndLoadClass($binding_string, $class)
         {
             $full_class_name = "SCA_Bindings_{$binding_string}_{$class}";
-            if (!class_exists($full_class_name)) {
+            if (!class_exists($full_class_name, false)) {
                 $class_filename = "SCA/Bindings/{$binding_string}/$class.php";
                 require $class_filename;
             }

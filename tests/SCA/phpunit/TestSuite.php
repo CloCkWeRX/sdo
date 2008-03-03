@@ -20,10 +20,6 @@
 +----------------------------------------------------------------------+
 
 */
-/***********************************************************************************************************
-*
-*
-************************************************************************************************************/
 
 if (!defined('PHPUnit_MAIN_METHOD')) {
     define('PHPUnit_MAIN_METHOD', 'SCA_TestSuite::main');
@@ -52,6 +48,7 @@ require_once 'RestRpc/RestRpcTest.php';
 require_once 'eBaySoap/eBaySoapTest.php';
 require_once 'TargetTests/SCA_TargetTest.php';
 require_once 'RegressionTests/SCA_RegressionTestSuite.php';
+require_once 'SCA/SCATest.php';
 //require_once 'LogTests/SCALoggerTest.php' ;
 //require_once 'LogTests/SCALogFilterTest.php' ;
 
@@ -83,6 +80,11 @@ class SCA_TestSuite {
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_eBaySoapTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_JsonRpcTest"));
         $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_TargetTest"));
+        $suite->addTest(new PHPUnit_Framework_TestSuite("SCA_Test"));
+
+        //        $suite->addTest(new PHPUnit_Framework_TestSuite("Bug11774Test"));
+        //        $suite->addTest(new PHPUnit_Framework_TestSuite("Bug12193Test"));
+
         $suite->addTest(SCA_RegressionTestSuite::suite());
 
         // TODO

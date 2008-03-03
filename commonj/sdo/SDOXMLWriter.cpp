@@ -34,6 +34,7 @@ using namespace::std;
 #include "commonj/sdo/DataObjectImpl.h"
 #include "commonj/sdo/DataFactoryImpl.h"
 #include "commonj/sdo/PropertySetting.h"
+#include "commonj/sdo/SDOUtils.h"
 
 namespace commonj
 {
@@ -1255,7 +1256,7 @@ namespace commonj
                                         const SDOXMLString& content)
       {
         int rc = 0;
-        rc = xmlTextWriterWriteRaw(writer, content);
+        rc = xmlTextWriterWriteRaw(writer, SDOXMLString(SDOUtils::escapeHtmlEntitiesExcludingCData(content).c_str()));
 
         /* A more complex version that doesn't work!
          * I've left it here just in case we need to go back and separate out

@@ -28,9 +28,16 @@ $_SERVER['REQUEST_METHOD'] = 'POST';
 $_SERVER['SCRIPT_FILENAME'] = $component_file;
 $_SERVER['CONTENT_TYPE'] = 'application/soap+xml';
 
+ob_start();
 require_once "$component_file";
-
+echo preg_replace("/>\s*</", ">\n<", ob_get_clean());
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://Component"><SOAP-ENV:Body><ns1:reverseResponse><reverseReturn>MBI</reverseReturn></ns1:reverseResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+<SOAP-ENV:Body>
+<tns2:reverseResponse xmlns:tns2="http://Component" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<reverseReturn>MBI</reverseReturn>
+</tns2:reverseResponse>
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

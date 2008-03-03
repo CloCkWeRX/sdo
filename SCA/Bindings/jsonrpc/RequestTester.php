@@ -55,7 +55,7 @@ if ( ! class_exists('SCA_Bindings_Jsonrpc_RequestTester', false) ) {
                     $p2           = realpath($_SERVER['SCRIPT_FILENAME']); // from the URL
                     $content_type = isset($_SERVER['CONTENT_TYPE']) ?
                     $_SERVER['CONTENT_TYPE'] : null;
-                    if ( $p1 == $p2 && $content_type == "application/json-rpc" ) {
+                    if ( $p1 == $p2 && strstr($content_type, "application/json-rpc") ) {
                         return true;
                     }
                 }

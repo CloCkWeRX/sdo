@@ -111,7 +111,8 @@ if ( ! (class_exists( 'SCA_LogFactory', false )) ) {
             }
 
             /* link in the logger                                             */
-            return call_user_func_array( $link, null) ;
+            // Passing in empty array() to suppress warning
+            return call_user_func_array( $link, /*null*/array()) ;
 
         }/* End link log function                                             */
 

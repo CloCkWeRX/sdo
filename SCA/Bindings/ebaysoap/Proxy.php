@@ -26,7 +26,7 @@ require 'SCA/SCA_Helper.php';
 require 'SCA/Bindings/soap/Proxy.php';
 require 'SCA/Bindings/ebaysoap/Mapper.php';
 
-if ( ! class_exists('SCA_Bindings_soap_Proxy')) {
+if ( ! class_exists('SCA_Bindings_soap_Proxy', false)) {
 	trigger_error("Cannot use SCA ebay soap binding as the SCA soap binding is not loaded",E_USER_WARNING);
 	return;
 }

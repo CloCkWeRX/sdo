@@ -26,6 +26,15 @@ if ( ! class_exists('SCA_ServiceDescription', false) ) {
     {
 
         public $class_name;
+        
+        /**
+         * Used to restrict the operations on a service interface
+         * (@service <interface_name>)
+         *
+         * @var string
+         */
+        public $interface_name;
+        
         public $realpath;
         public $targetnamespace;
         

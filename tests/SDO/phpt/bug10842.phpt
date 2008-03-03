@@ -65,8 +65,12 @@ $bear2 = $bear1->bear;
 echo $bear2->name;
 echo "\n";
 
-
-echo $jungle['bear/bear/name'];
+try {
+    echo $jungle['bear/bear/name'];
+} catch (SDO_PropertyNotFoundException $e) {
+    echo "This test fails with SDO_PropertyNotFoundException because of Tuscany-988 ";
+    echo "(http://issues.apache.org/jira/browse/TUSCANY-988)\n";
+}
 
 ?>
 --EXPECT--

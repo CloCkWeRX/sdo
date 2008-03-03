@@ -103,8 +103,7 @@ if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
             {
                 $problem = $e->getMessage();
                 if ( $e instanceof SDO_Exception )
-                $problem = "SDO_Exception in fromXML : " . $problem ;
-
+   
                 /**
                  * Depending on whether the function is being used on the client side
                  * or the server side either report the problem to the client, or
@@ -114,7 +113,8 @@ if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
 
                 /* When the 'TypeHandler is being used by the Soap Server          */
                 if (strcmp($this->association, self::SERVER) === 0)
-                SoapServer::fault("Client", "Unable to decode from XML");
+                throw new SoapFault("Client",
+                 "Unable to decode the SOAP message from XML. The problem was: ".$problem);
 
             }/* End trap the problem                                               */
 
@@ -136,8 +136,36 @@ if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
                 $xdoc   = $this->xmldas->createDocument('', 'BOGUS', $sdo);
                 $xmlstr = $this->xmldas->saveString($xdoc, 0);
                 
-                // remove the xsi:type="<type of the top level element>" and its preceding blank
-                $xmlstr = preg_replace('/ xsi:type=".*"/','',$xmlstr);
+                /**
+                 * remove the xsi:type="<type of the top level element>" from the top 
+                 * level element. 
+                 * 
+                 * For example, convert:
+                 * <?xml version="1.0" encoding="UTF-8"?>
+                   <BOGUS xsi:type="tns2:reverseResponse" xmlns:tns2="http://....
+                      .../...
+                   </BOGUS>
+                 * to 
+                 * <?xml version="1.0" encoding="UTF-8"?>
+                   <BOGUS xmlns:tns2="http://....
+                      .../...
+                   </BOGUS>
+                 * 
+                 * Be careful not to remove any other xsi:type's as they may be valid. 
+                 * 
+                 * Actually Tuscany SDO should not be putting these xsi:type attributes on 
+                 * the top level element. They are invalid, and will cause the message 
+                 * or reply to fail validation. The reason is that the messages and 
+                 * reponses are defined as elements, not types. But it is hard to 
+                 * argue the case when we are already building an sdo that would not 
+                 * validate because the element name is BOGUS. 
+                 * See PECL bug 11997
+                 * 
+                 * Use preg to remove it. Note that we are relying on the xsi:type  
+                 * always being the first attribute which is a bit dodgy, but it 
+                 * always is. 
+                 */
+                $xmlstr = preg_replace('/BOGUS xsi:type="[^"]*"/','BOGUS',$xmlstr);
                 
                 SCA::$logger->log("xml = $xmlstr");
                 return         $xmlstr;
@@ -227,43 +255,29 @@ if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
             $str   = $this->xmldas->__toString();
             $types = array();
             $line  = strtok($str, self::EOL);
-            while ($line !== false) {
-                if (strpos($line, 'RootType') !== false)
-                break;
+            $line = strtok(self::EOL); // skip line that says this is an SDO
+            $line = strtok(self::EOL); // skip line that says nn types have been defined
+
+            while ($line !== false && strpos($line,'commonj.sdo')) {
                 $line = strtok(self::EOL);
             }
-            $line = strtok(self::EOL);
-
-            while ($line !== false) {
-                // format changed recently - namespace and type separated by #
-                // instead of :
-                // quick fix to try and deal with either
-                if (strpos($line,'#') !== false) {
-                    $trimmed_line = trim($line);
-                    $words        = explode(' ', $trimmed_line);
-                    if ($words[0] !== '-') break;
-                    $namespace_and_type_in_parens = $words[2];
-                    $namespace_and_type           = substr($namespace_and_type_in_parens, 1, strlen($namespace_and_type_in_parens)-2);
-                    $pos_last_hash                = strrpos($namespace_and_type, '#');
-                    $namespace                    = substr($namespace_and_type, 0, $pos_last_hash);
-                    $type                         = substr($namespace_and_type, $pos_last_hash+1);
-                    $types[]                      = array($namespace, $type);
-                    $line                         = strtok(self::EOL);
-                } else {
-                    $trimmed_line = trim($line);
-                    $words        = explode(' ', $trimmed_line);
-                    if ($words[0] !== '-') break;
-                    $namespace_and_type_in_parens = $words[2];
-                    $namespace_and_type           = substr($namespace_and_type_in_parens, 1, strlen($namespace_and_type_in_parens)-2);
-                    $pos_last_colon               = strrpos($namespace_and_type, ':');
-                    $namespace                    = substr($namespace_and_type, 0, $pos_last_colon);
-                    $type                         = substr($namespace_and_type, $pos_last_colon+1);
-                    $types[]                      = array($namespace, $type);
-                    $line                         = strtok(self::EOL);
+            while ($line !== false && $line != '}') {
+                $trimmed_line = trim($line);
+                $words        = explode(' ', $trimmed_line);
+                if ($words[0] == '-') {
+                    $line = strtok(self::EOL);
+                    continue;
                 }
+                $namespace_and_type = $words[1];
+                $pos_last_hash      = strrpos($namespace_and_type, '#');
+                $namespace          = substr($namespace_and_type, 0, $pos_last_hash);
+                $type               = substr($namespace_and_type, $pos_last_hash+1);
+                if ($type != 'RootType') {
+                    $types[]        = array($namespace, $type);
+                }
+                $line               = strtok(self::EOL);
             }
             return $types;
-
         }
 
     }/* End instance check                                                         */

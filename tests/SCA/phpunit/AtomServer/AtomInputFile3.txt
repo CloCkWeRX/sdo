@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:tns="http://www.w3.org/2005/Atom">
+  <id>TEST_ID</id>
+  <title type="text">TEST_TITLE</title>
+  <updated>TEST_DATE</updated>
+  <author>
+    <name>TEST_AUTHOR</name>
+  </author>
+  <link rel="edit">TEST_LINK</link>
+  <content type="xhtml">
+    <div>
+      <ul class="xoxo contact" title="contact" >
+        <li class="shortname" title="shortname">Gra</li>
+        <li class="fullname" title="fullname">Graham Charters</li>
+        <li class="email" title="email">gcharters@googlemail.com</li>
+      </ul>
+    </div>
+  </content>
+</entry>

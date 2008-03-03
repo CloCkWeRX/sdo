@@ -14,7 +14,7 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions xmlns:tns2="http://Component" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://Component">
-  <types>
+  <wsdl:types>
     <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
       xmlns:ns0="http://www.test.com/info"
       targetNamespace="http://Component"
@@ -50,7 +50,7 @@ echo substr($wsdl,0,strpos($wsdl,'location'));
         </xs:complexType>
       </xs:element>
     </xs:schema>
-  </types>
+  </wsdl:types>
 
   <wsdl:message name="reverseRequest">
     <wsdl:part name="reverseRequest" element="tns2:reverse"/>

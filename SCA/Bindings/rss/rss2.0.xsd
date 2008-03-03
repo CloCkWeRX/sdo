@@ -29,10 +29,10 @@
 
   <xs:element name="rss">
     <xs:complexType>
-      <xs:attribute name="version" default="2.0" />
       <xs:sequence>
         <xs:element name="channel" type="channelType" />
       </xs:sequence>
+      <xs:attribute name="version" default="2.0" />
     </xs:complexType>
   </xs:element>
 

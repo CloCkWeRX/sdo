@@ -47,6 +47,8 @@ namespace commonj
             static SDO_API const char*  XSDToSDO(const char* xsdname);
             static SDO_API void printTypes(std::ostream& out, DataFactoryPtr df);
             static SDOString replace(SDOString hostString, const char *fromString, const char *toString);
+			static SDOString escapeHtmlEntities(SDOString inputString);
+			static SDOString escapeHtmlEntitiesExcludingCData(SDOString inputString);
             
            /*
             * Markers used to represent the start and end of CDATA sections in the 
@@ -68,6 +70,7 @@ namespace commonj
 
             static std::map<std::string,std::string> XsdToSdo;
             static std::map<std::string,std::string> SdoToXsd;
+			static std::map<char, std::string> HtmlEntities;
 
         };
     } // End - namespace sdo

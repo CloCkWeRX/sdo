@@ -32,6 +32,63 @@ class SCA_Annotation_ServiceTest extends PHPUnit_Framework_TestCase {
         $this->fail();
     }
 
+    public function testServiceInterfaceFromFirstInterface()
+    {
+        try {
+            $instance            = new ServiceInterfaceWithTwoMethods();
+            $reader              = new SCA_AnnotationReader($instance);
+            $service_description = $reader->reflectService();
+            $this->assertEquals(count($service_description->operations), 2, 
+                                "Wrong number of operations on service description.");
+        }
+        catch (SCA_RuntimeException $e) {
+            $this->fail();
+        }
+    }
+
+    public function testServiceInterfaceFromSecondInterface()
+    {
+        try {
+            $instance            = new ServiceInterfaceWithOneMethod();
+            $reader              = new SCA_AnnotationReader($instance);
+            $service_description = $reader->reflectService();
+            $this->assertEquals(count($service_description->operations), 1, 
+                                "Wrong number of operations on service description.");
+        }
+        catch (SCA_RuntimeException $e) {
+            $this->fail();
+        }
+    }
+
+    public function testServiceInterfaceFromNoInterfaces()
+    {
+        try {
+            $instance            = new ServiceInterfaceWithFourMethods();
+            $reader              = new SCA_AnnotationReader($instance);
+            $service_description = $reader->reflectService();
+            $this->assertEquals(count($service_description->operations), 4, 
+                                "Wrong number of operations on service description.");
+        }
+        catch (SCA_RuntimeException $e) {
+            $this->fail();
+        }
+    }
+
+    public function testServiceWithInvalidInterfaces()
+    {
+        try {
+            $instance            = new ServiceWithInvalidInterface();
+            $reader              = new SCA_AnnotationReader($instance);
+            $service_description = $reader->reflectService();
+        }
+        catch (SCA_RuntimeException $e) {
+            $this->assertContains('Service interface',$e->getMessage());
+            $this->assertContains('specified by @service does not match any interface implemented by',$e->getMessage());
+            return;
+        }
+        $this->fail();
+    }
+
     public static function main()
     {
         require_once "PHPUnit/TextUI/TestRunner.php";

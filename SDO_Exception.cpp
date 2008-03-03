@@ -62,8 +62,8 @@ static zend_object_value sdo_exception_create_object(zend_class_entry *ce TSRMLS
 		"line", sizeof("line") - 1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
 
 	ALLOC_ZVAL(z_trace);
-	z_trace->is_ref = 0;
-	z_trace->refcount = 0;
+    Z_UNSET_ISREF_P(z_trace);
+    Z_SET_REFCOUNT_P(z_trace, 0);
 	zend_fetch_debug_backtrace(z_trace, 0, 0 TSRMLS_CC);
 
 	zend_update_property(exception_class_entry, &z_object,

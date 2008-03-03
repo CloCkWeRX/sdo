@@ -27,42 +27,45 @@ $Id$
 */
 
 if ( ! class_exists('SCA_Bindings_soap_RequestTester', false) ) {
-    class SCA_Bindings_soap_RequestTester
-    {
-        public function isServiceDescriptionRequest($calling_component_filename)
-        {
-            SCA_Helper::checkSoapExtensionLoaded();
-            
-            if (isset($_SERVER['REQUEST_METHOD'])) {
-                if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-                    $p1 = realpath($calling_component_filename);
-                    $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
-                    if ($p1 == $p2 && isset($_GET['wsdl'])) {
-                        return true;
-                    }
-                }
-            }
+	class SCA_Bindings_soap_RequestTester
+	{
+		public function isServiceDescriptionRequest($calling_component_filename)
+		{
+			SCA_Helper::checkSoapExtensionLoaded();
 
-            return false;
-        }
+			if (isset($_SERVER['REQUEST_METHOD'])) {
+				if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+					$p1 = realpath($calling_component_filename);
+					$p2 = realpath($_SERVER['SCRIPT_FILENAME']);
+					if ($p1 == $p2 && isset($_GET['wsdl'])) {
+						return true;
+					}
+				}
+			}
 
-        public function isServiceRequest($calling_component_filename)
-        {
-            SCA_Helper::checkSoapExtensionLoaded();
+			return false;
+		}
 
-            if (isset($_SERVER['HTTP_HOST'])) {
-                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                    $p1 = realpath($calling_component_filename);
-                    $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
-                    if ($p1 == $p2 &&
-                    (strpos($_SERVER['CONTENT_TYPE'], 'text/xml') !== false || strpos($_SERVER['CONTENT_TYPE'], 'soap') !== false)){
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+		public function isServiceRequest($calling_component_filename)
+		{
+			SCA_Helper::checkSoapExtensionLoaded();
 
-    }
+			if (isset($_SERVER['HTTP_HOST'])) {
+				if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+					if ((isset($_SERVER[ 'PATH_INFO' ])) && $_SERVER[ 'PATH_INFO' ] == '/RPC2') {
+						return false; // looks like it is XmlRpc, not SOAP
+					}
+					$p1 = realpath($calling_component_filename);
+					$p2 = realpath($_SERVER['SCRIPT_FILENAME']);
+					if ($p1 == $p2 &&
+					(strpos($_SERVER['CONTENT_TYPE'], 'text/xml') !== false || strpos($_SERVER['CONTENT_TYPE'], 'soap') !== false)){
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+	}
 }
 ?>

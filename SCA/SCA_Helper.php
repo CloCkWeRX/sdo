@@ -30,7 +30,7 @@ require "SCA/SCA_Exceptions.php";
 
 if ( ! class_exists('SCA_Helper', false) ) {
     class SCA_Helper {
-
+        
         private static $tmpdir;
 
         public static function guessClassName($class_file)
@@ -42,7 +42,7 @@ if ( ! class_exists('SCA_Helper', false) ) {
             // run out of directory path
 
             $class_name = basename($class_file, '.php');
-            if (class_exists($class_name)){
+            if (class_exists($class_name, false)){
                 return $class_name;
             }
 
@@ -53,7 +53,7 @@ if ( ! class_exists('SCA_Helper', false) ) {
             $dir_array = explode('/', dirname($class_file));
             foreach( array_reverse($dir_array) as $dir){
                 $pear_class_name = $dir . '_' . $pear_class_name;
-                if (class_exists($pear_class_name)){
+                if (class_exists($pear_class_name, false)){
                     return $pear_class_name;
                 }
             }
@@ -276,41 +276,66 @@ if ( ! class_exists('SCA_Helper', false) ) {
 
         /**
          * The ReflectMethod class returns all of the methods in a class. To build a
-         * WSDL only public methods may be used, so using the get_class_methods call
-         * ( which only lists public methods ) the filter removes any protected, or
-         * private functions.
+         * WSDL or other service description only public methods may be used, 
+         * so using the get_class_methods call ( which only lists public methods )
+         * the filter removes any protected, or private methods.
+         * Optionally, a service interface may be specified to further subset 
+         * the methods exposed on the service.  This is done using the third
+         * interfaceMethods argument.
          *
-         * @param  array        $public_list     1dim array of public methods
-         * @param  unknown_type $allMethodsArray 2dim array of all methods
-         * @return array                         modified 2dim array of all methods
+         * @param  array $public_list     1dim array of public methods
+         * @param  array $allMethodsArray Array of ReflectionMethod objects
+         * @param  array $interfaceMethods Array of ReflectionMethod objects
+         * @return array Modified array of ReflectionMethod objects
          */
-        public static function filterMethods($public_list,       //PHP Class list
-        $allMethodsArray)   //reflectionObject list
+        public static function filterMethods($public_list,
+        $allMethodsArray,
+        $interfaceMethods=null)
         {
             $editedArray = array() ;
-            $elements    = count($public_list);
-            $j           = 0 ;
 
-            /* For all of the public methods of the service class */
-            for ( $i = 0 ; $i < $elements ; $i++ ) {
-
-                /* Ignore the method if it's a magic method as defined by */
-                /* http://www.php.net/manual/en/language.oop5.magic.php   */
-                if ((substr($public_list[ $i ], 0, 2) != '__')) {
-
-                    /*  Check each method has a reflection object */
-                    foreach ( $allMethodsArray as $allMethod ) {
-
-                        $objArray = get_object_vars($allMethod);
-
-                        /* copy the relfection object to the filitered list if it does */
-                        if ( strcmp($objArray[ 'name' ], $public_list[ $i ]) === 0 ) {
-                            $editedArray[ $j++ ] = $allMethod ;
-
+            // Build up an array of ReflectionMethod objects from the allMethods
+            // array, that correspond to those in the interfaceMethods array.
+            // We need the implementation methods because their docComments
+            // are used to generate service descriptions.
+            // TODO: allow docComments to come from the interface.
+            if ($interfaceMethods != null) {
+                foreach ($interfaceMethods as $interfaceMethod) {
+                    if ((substr($interfaceMethod->name, 0, 2) != '__')) {
+                        foreach ($allMethodsArray as $implementationMethod) {
+                            if ($interfaceMethod->name == $implementationMethod->name) {
+                                $editedArray[] = $implementationMethod;
+                            }
                         }
                     }
                 }
-            }/* end all public methods */
+            }
+            else {
+                $elements    = count($public_list);
+                $j           = 0 ;
+
+                /* For all of the public methods of the service class */
+                for ( $i = 0 ; $i < $elements ; $i++ ) {
+
+                    /* Ignore the method if it's a magic method as defined by */
+                    /* http://www.php.net/manual/en/language.oop5.magic.php   */
+                    if ((substr($public_list[ $i ], 0, 2) != '__')) {
+
+                        /*  Check each method has a reflection object */
+                        foreach ( $allMethodsArray as $allMethod ) {
+
+                            $objArray = get_object_vars($allMethod);
+
+                            /* copy the relfection object to the filitered list if it does */
+                            if ( strcmp($objArray[ 'name' ], $public_list[ $i ]) === 0 ) {
+                                $editedArray[ $j++ ] = $allMethod ;
+
+                            }
+                        }
+                    }
+                }/* end all public methods */
+
+            }
 
             return $editedArray ;
 
@@ -425,7 +450,59 @@ if ( ! class_exists('SCA_Helper', false) ) {
             }
             return $types;
         }
+        
+        public function xmlToSdo($xml_das, $xml_string)
+        {
+            try{
+                $doc = $xml_das->loadString($xml_string);
+                $ret = $doc->getRootDataObject();
+                return $ret;
+            } catch( Exception $e ) {
+                SCA::$logger->log("Exception converting XML to SDO: ".$e->getMessage()."\n");
+                return $e->getMessage();
+            }
+        }
 
+        public function sdoToXml($xml_das, $sdo)
+        {
+            try{
+                $type       = $sdo->getTypeName();
+                $xdoc       = $xml_das->createDocument('', $type, $sdo);
+                $xml_string = $xml_das->saveString($xdoc,2);
+                return  $xml_string;
+            } catch (Exception $e) {
+                SCA::$logger->log("Exception converting SDO to XML: ".$e->getMessage()."\n");
+                return $e->getMessage();
+            }
+        }        
+
+        private static $CD_START = '<![CDATA[';
+        private static $CD_END = ']]>';
+        
+        /**
+         * Escapes HTML special chars, excluding data in CDATA sections,
+         * and avoiding double-escaping (that is, &amp; does NOT become &amp;amp;)
+         */
+        public static function encodeXmlData($raw = "")
+        {
+
+            if (!preg_match('/[&\'\"\<\>]/', $raw))
+                return $raw;
+
+            $out = "";
+            $remaining = $raw;
+            while (($cdata_pos = strpos($remaining, CD_START)) !== FALSE) {
+                $out .= htmlspecialchars(substr($remaining, 0, $cdata_pos), 
+                        ENT_QUOTES, NULL, 0);
+                $remaining = substr($remaining, $cdata_pos);
+                $cd_end_pos = strlen(CD_END) + strpos($remaining, CD_END);
+                $out .= substr($remaining, 0, $cd_end_pos);
+                $remaining = substr($remaining, $cd_end_pos);
+            }
+            $out .= htmlspecialchars($remaining, ENT_QUOTES, NULL, 0);
+            return $out;
+        }
+        
     }/* End SCA_Helper class                                                       */
 
 }/* End instance check                                                             */

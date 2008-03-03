@@ -1,0 +1,164 @@
+<!--
++-----------------------------------------------------------------------------+
+| Copyright IBM Corporation 2007.                                             |
+| All Rights Reserved.                                                        |
++-----------------------------------------------------------------------------+
+| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+| use this file except in compliance with the License. You may obtain a copy  |
+| of the License at -                                                         |
+|                                                                             |
+|                   http://www.apache.org/licenses/LICENSE-2.0                |
+|                                                                             |
+| Unless required by applicable law or agreed to in writing, software         |
+| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+| See the License for the specific language governing  permissions and        |
+| limitations under the License.                                              |
++-----------------------------------------------------------------------------+
+| Authors: Graham Charters, Megan Beynon                                      |
+|                                                                             |
++-----------------------------------------------------------------------------+
+$Id$
+-->
+<html>
+
+<script type="text/javascript">
+  var request;
+  var object;
+  
+  function handleResponse ()
+  {
+    if ( request.readyState == 4 )
+    {
+      if ( request.status == 200 || 
+           request.status == 201 )
+      {
+        var responseText = request.responseText;
+        document.getElementById('resource').value=responseText;
+      }
+      else
+      {
+        alert ( "The request didn't work " + request.status );
+      }
+    }
+  }
+ 
+  function doEnumerate ()
+  { 
+    document.getElementById('resource').value="";
+    
+    request = new XMLHttpRequest ();
+    request.onreadystatechange = handleResponse;
+    request.open ( "GET", "./Orders.php", true);
+    request.setRequestHeader ( "Content-Type",
+                               "text/plain; charset=UTF-8");
+    request.send("");
+  }
+  
+  function doRetrieve()
+  { 
+    var resourceId = document.getElementById ( "resourceId" ).value;  
+    document.getElementById('resource').value="";    
+    
+    request = new XMLHttpRequest ();
+    request.onreadystatechange = handleResponse;
+    request.open ( "GET", "./Orders.php/" + resourceId, true);
+    request.setRequestHeader ( "Content-Type",
+                               "text/plain; charset=UTF-8");
+    request.send("");
+  }  
+  
+  function doCreate()
+  { 
+    var resourceId = document.getElementById ( "resourceId" ).value;  
+    var resource = document.getElementById('resource').value;
+    
+    request = new XMLHttpRequest ();
+    request.onreadystatechange = handleResponse;
+    request.open ( "POST", "./Orders.php", true);
+    request.setRequestHeader ( "Content-Type",
+                               "text/xml; charset=UTF-8");
+    request.send(resource);
+  } 
+  
+  function doUpdate()
+  { 
+    var resourceId = document.getElementById ( "resourceId" ).value;  
+    var resource = document.getElementById('resource').value;
+    
+    request = new XMLHttpRequest ();
+    request.onreadystatechange = handleResponse;
+    request.open ( "PUT", "./Orders.php/" + resourceId, true);
+    request.setRequestHeader ( "Content-Type",
+                               "text/xml; charset=UTF-8");
+    request.send(resource);
+  } 
+  
+  function doDelete()
+  { 
+    var resourceId = document.getElementById ( "resourceId" ).value;  
+    document.getElementById('resource').value="";    
+    
+    request = new XMLHttpRequest ();
+    request.onreadystatechange = handleResponse;
+    request.open ( "DELETE", "./Orders.php/" + resourceId, true);
+    request.setRequestHeader ( "Content-Type",
+                               "text/plain; charset=UTF-8");
+    request.send("");
+  }         
+</script>
+
+<title>Orders RestResource tests</title>
+<body>
+<h3>Orders RestResource tests</h3>
+<table>
+<tr>
+<td>
+Retrieve a list of all orders
+</td>
+<td>
+<input type="button" value="Enumerate" onclick="doEnumerate()" />
+</td>
+</tr>
+<tr>
+<td>
+Retrieve a single orders by id 
+</td>
+<td>
+<input type="button" value="Retrieve" onclick="doRetrieve()" />
+</td>
+</tr>
+<tr>
+<td>
+Create a new order 
+</td>
+<td>
+<input type="button" value="Create" onclick="doCreate()" />
+</td>
+<tr>
+<td>
+Update an order by id 
+</td>
+<td>
+<input type="button" value="Update" onclick="doUpdate()" />
+</td>
+<tr>
+<td>
+Delete an order by id
+</td>
+<td>
+<input type="button" value="Delete" onclick="doDelete()" />
+</td>
+</tr>
+</table>
+<p/>
+ResourceId
+<input type="text" id="resourceId" size="80" value="order1" /><br/>
+
+Resource<br/>
+<textarea id="resource" rows="20" cols="80">
+No Resource
+</textarea>
+
+</body>
+</html>

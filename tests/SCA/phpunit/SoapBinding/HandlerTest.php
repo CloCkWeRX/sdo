@@ -113,7 +113,7 @@ EOF;
     $out = ob_get_contents();
     ob_end_clean();
 
-    $this->assertContains('<reverseReturn>MBI</reverseReturn>',$out);
+    $this->assertContains('<tns2:reverseReturn>MBI</tns2:reverseReturn>',$out);
 
 }
 

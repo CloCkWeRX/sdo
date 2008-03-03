@@ -44,6 +44,8 @@ namespace commonj {
 
         std::map<std::string,std::string> SDOUtils::XsdToSdo;
 
+        std::map<char,std::string> SDOUtils::HtmlEntities;
+
         bool SDOUtils::populated = false;
 
         bool SDOUtils::populate()
@@ -83,6 +85,12 @@ namespace commonj {
             SDOUtils::SdoToXsd["Byte"] = "byte";
             SDOUtils::SdoToXsd["Bytes"] = "base64Binary";
             SDOUtils::SdoToXsd["URI"] = "anyURI";
+
+			SDOUtils::HtmlEntities['&'] = "&amp;";
+			SDOUtils::HtmlEntities['<'] = "&lt;";
+			SDOUtils::HtmlEntities['>'] = "&gt;";
+			SDOUtils::HtmlEntities['\''] = "&apos;";
+			SDOUtils::HtmlEntities['"'] = "&quot;";
 
             SDOUtils::populated = true;
             return true;
@@ -316,6 +324,115 @@ namespace commonj {
 
             return returnString;
         }
+
+
+		/*
+		 * Processes a string, substituting entities (such as &amp;) for special characters
+		 * Does not double-encode, that is, &amp; is not converted to &amp;amp;
+		 */
+		SDOString SDOUtils::escapeHtmlEntities(SDOString inputString)
+		{
+			if (inputString.size() == 0)
+				return inputString;
+
+            if (!SDOUtils::populated) SDOUtils::populate();
+
+			SDOString returnString = SDOString();
+
+			SDOString::iterator start = inputString.begin();
+			SDOString::iterator end = inputString.end();
+			SDOString::iterator cur = start;
+
+			while(cur < end) {
+				//cout << SDOString(cur) <<endl;
+				if ((*cur) == '&') {
+					bool skip = false;
+					/*
+					 * Don't want to double-encode, so skip recognised entities
+					 */
+					for (map<char, SDOString>::iterator iter = HtmlEntities.begin(); 
+					         iter != HtmlEntities.end(); iter++ ) {	
+						if (SDOString(cur, end).compare(0, (*iter).second.length(), (*iter).second) == 0) {
+							cur += (*iter).second.length();
+							skip = true;
+							break;
+						}
+					}
+					
+					if (skip) continue;
+				}
+
+				/* 
+				 * look for characters which need encoding
+				 */
+				for (map<char, SDOString>::iterator iter = HtmlEntities.begin(); 
+				         iter != HtmlEntities.end(); iter++ ) {
+					if ((*cur) == (*iter).first) {
+						returnString += SDOString(start, cur);
+						//	cout << returnString <<endl;
+						returnString += (*iter).second;
+						//	cout << returnString <<endl;
+						start = cur + 1;
+						break;
+					} 
+				}
+				
+				cur++;
+			}
+			
+			returnString += SDOString(start, end);
+			//	cout << returnString <<endl;
+			return returnString;
+		}
+		
+
+		/* 
+		 * Processes a string substituting entities (such as &amp;) for special characters 
+		 * CDATA sections within the string are left untouched
+		 */
+		SDOString SDOUtils::escapeHtmlEntitiesExcludingCData(SDOString inputString)
+		{
+			if (inputString.size() == 0)
+				return inputString;
+
+            if (!SDOUtils::populated) SDOUtils::populate();
+
+			SDOString returnString = SDOString();
+
+			SDOString::const_iterator start = inputString.begin();
+			SDOString::const_iterator end = inputString.end();
+			SDOString::const_iterator cur = start;
+
+			bool inCdataSection = false;
+			while(cur < end) {
+				if (!inCdataSection && SDOString(cur, end).compare(0, strlen(XMLCDataStartMarker), XMLCDataStartMarker) == 0) {
+					inCdataSection = true;
+					returnString += escapeHtmlEntities(SDOString(start, cur));
+					start = cur;
+					cur += strlen(XMLCDataStartMarker);
+					continue;
+				}
+
+				if (inCdataSection && SDOString(cur, end).compare(0, strlen(XMLCDataEndMarker), XMLCDataEndMarker) == 0) {
+					inCdataSection = false;
+					cur += strlen(XMLCDataEndMarker);
+					/* don't escape inside the cdata section */
+					returnString += SDOString(start, cur);
+					start = cur;
+					continue;
+				}
+
+				++cur;
+			}
+
+			if (inCdataSection) {
+				returnString += SDOString(start, end);
+			} else {
+				returnString += escapeHtmlEntities(SDOString(start, end));
+			}
+
+			return returnString;
+		}
         
 
     };

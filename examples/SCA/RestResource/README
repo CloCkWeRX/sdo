@@ -1,0 +1,48 @@
+Rest Resource Example
+=====================
+
+This example is based on the "order" object from the eServiceStore example.
+Here we  provide a Rest Resource alternative to the OrderProcessingService
+where orders for a given user can be created, modified and deleted using 
+vanilla HTTP.
+
+There are two parts to this example:
+
+1. Orders.html can drive Orders.php directly using HTTP verbs, in the REST style. 
+   See the section below for the mapping to HTTP
+2. The restresource binding in SCA for PHP also allows one PHP script or component 
+   to drive another, in the same way, using HTTP verbs. In this example, 
+   OrdersClient.html drives the script OrdersClient.php which in turn drives 
+   Orders.php using this binding. 
+
+Orders Data Structure
+=====================
+
+Orders 1 ---- n Order 1 ---- n Item 
+                 - OrderId      - ItemId
+                 - Status       - Description
+                 - CustId       - Price
+                                - Quantity
+                                - WharehouseId
+
+Mapping To HTTP
+===============
+
+URL                                          Verb    Description
+---------------------------------------      ------  -----------                   
+http://???:??/???/Orders.php                 GET     Get the order collection
+http://???:??/???/Orders.php                 POST    Create a new order
+http://???:??/???/Orders.php/OrderId         GET     Get the order
+http://???:??/???/Orders.php/OrderId         PUT     Update an order
+http://???:??/???/Orders.php/OrderId         DELETE  Delete an order
+
+All of these operations depend on the client having appropriate authorization
+to perform the action. 
+
+Databindings
+============
+
+Resources take the form of XML presented to the resource script as an SDO. 
+
+
+

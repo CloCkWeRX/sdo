@@ -149,7 +149,7 @@ static zval *sdo_sequence_read_value(sdo_seq_object *my_object, long sequence_in
 	char		*class_name, *space;
 
 	ALLOC_INIT_ZVAL(return_value);
-	return_value->refcount = 0;
+    Z_SET_REFCOUNT_P(return_value, 0);
 
 	try {
 		Sequence& seq = *my_object->seqp;
@@ -682,7 +682,7 @@ zend_object_iterator *sdo_sequence_get_iterator(zend_class_entry *ce, zval *obje
 #endif
 
 	sdo_seq_iterator *iterator = (sdo_seq_iterator *)emalloc(sizeof(sdo_seq_iterator));
-	object->refcount++;
+    Z_ADDREF_P(object);
 	iterator->zoi.data = (void *)object;
 	iterator->zoi.funcs = &sdo_sequence_iterator_funcs;
 	iterator->index = 0;

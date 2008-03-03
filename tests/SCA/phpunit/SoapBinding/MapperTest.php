@@ -101,13 +101,13 @@ public function testToXmlGeneratesGoodXmlFromSdoWithScalars()
     $xml = $th->toXML($request);
 
     $this->assertContains('<?xml version="1.0" encoding="UTF-8"?>',$xml);
-    $this->assertContains('<BOGUS>',$xml);
+    $this->assertContains('<BOGUS',$xml);
     $this->assertContains('<tns2:a>hello</tns2:a>',$xml);
     /* there's a difference in the number of trailing zeros which seems to be platform-specific */
     $this->assertRegExp('?<tns2:b>1\.100e\+0*</tns2:b>?', $xml);
     $this->assertContains('<tns2:c>99</tns2:c>',$xml);
     $this->assertContains('<tns2:d>true</tns2:d>',$xml);
-    $this->assertContains('</BOGUS>',$xml);
+    $this->assertContains('</BOGUS',$xml);
 }
 
 public function testToXmlGeneratesGoodXmlFromSdoWithSdos()
@@ -122,13 +122,13 @@ public function testToXmlGeneratesGoodXmlFromSdoWithSdos()
     $xml = $th->toXML($request);
 
     $this->assertContains('<?xml version="1.0" encoding="UTF-8"?>',$xml);
-    $this->assertContains('<BOGUS>',$xml);
+    $this->assertContains('<BOGUS',$xml);
     $this->assertContains('<tns2:p1>',$xml);
     $this->assertContains('<name>William Shakespeare</name>',$xml);
     $this->assertContains('<dob>April 1564, most likely 23rd</dob>',$xml);
     $this->assertContains('<pob>Stratford-upon-Avon, Warwickshire</pob>',$xml);
     $this->assertContains('</tns2:p1>',$xml);
-    $this->assertContains('</BOGUS>',$xml);
+    $this->assertContains('</BOGUS',$xml);
 
 }
 
@@ -144,12 +144,12 @@ public function testToXmlHandlesNullsInSdo()
     $xml = $th->toXML($request);
 
     $this->assertContains('<?xml version="1.0" encoding="UTF-8"?>',$xml);
-    $this->assertContains('<BOGUS>',$xml);
+    $this->assertContains('<BOGUS',$xml);
     $this->assertContains('<tns2:a xsi:nil="true"/>',$xml);
     $this->assertContains('<tns2:b xsi:nil="true"/>',$xml);
     $this->assertContains('<tns2:c xsi:nil="true"/>',$xml);
     $this->assertContains('<tns2:d xsi:nil="true"/>',$xml);
-    $this->assertContains('</BOGUS>',$xml);
+    $this->assertContains('</BOGUS',$xml);
 }
 
 public function testFromXmlGeneratesGoodSdoFromXml()

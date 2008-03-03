@@ -1,0 +1,27 @@
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+  targetNamespace="http://example.org/contacts" 
+  xmlns:ct="http://example.org/contacts">
+
+  <element name="contacts">
+    <complexType>
+      <sequence>
+          <element name="contact" ref="ct:contact" maxOccurs="unbounded" />
+      </sequence>
+    </complexType>
+  </element>
+
+  <element name="contact">
+    <complexType>
+      <sequence>
+        <element name="id" type="integer" />
+        <element name="title" type="string" />
+        <element name="author" type="string" />
+        <element name="updated" type="string" />
+        <element name="shortname" type="string" nillable="true" />
+        <element name="fullname" type="string" nillable="true" />
+        <element name="email" type="string" nillable="true" />
+      </sequence>
+    </complexType>
+  </element>
+  
+</schema>

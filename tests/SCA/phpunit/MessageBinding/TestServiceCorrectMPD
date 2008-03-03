@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MessageServiceDescription xmlns="http://www.example.org/MessageServiceDescription" xmlns:tns="http://www.example.org/MessageServiceDescription" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <destination>queue://MS_TestService</destination>
+  <connectionFactory>
+    <protocol>stomp</protocol>
+    <host>localhost</host>
+    <port>61613</port>
+  </connectionFactory>
+  <correlationScheme>RequestCorrelIDToCorrelID</correlationScheme>
+  <response>
+    <destination>queue://reqponsequeue</destination>
+    <connectionFactory>
+      <protocol>wmq</protocol>
+      <host>l33h84m</host>
+      <broker>QM_Test</broker>
+    </connectionFactory>
+  </response>
+  <headers>
+    <JMSCorrelationID>sca-correl-target2334524</JMSCorrelationID>
+  </headers>
+  <wsdl>disabled</wsdl>
+</MessageServiceDescription>

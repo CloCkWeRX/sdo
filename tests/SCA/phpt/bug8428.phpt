@@ -2,11 +2,16 @@
 SCA - test for WSDL which imports schema with no schemaLocation attribute
 --INI--
 display_errors=on
+
 --SKIPIF--
 <?php
+if (phpversion('sdo') <= '1.2.4')
+    echo "skip test requires version > 1.2.4"; // need fix for bug13296
+else {
   define('URI', 'http://api.urbandictionary.com/soap');
   if (@fopen(URI, 'r') === false)
       print 'skip - ' . URI . ' is unreachable';
+}
 ?>
 --FILE--
 <?php

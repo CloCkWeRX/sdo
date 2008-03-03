@@ -223,11 +223,11 @@ if (! class_exists('SCA', false)) {
         private static function _includedByAClientScriptThatIsNotAComponent($calling_component_filename)
         {
             $class_name = SCA_Helper::guessClassName($calling_component_filename);
-            if (!class_exists($class_name)) {
+            if (!class_exists($class_name, false)) {
                 return true;
             }
 
-            if (class_exists($class_name)) {
+            if (class_exists($class_name, false)) {
                 $reflection = new ReflectionClass($class_name);
                 $reader     = new SCA_CommentReader($reflection->getDocComment());
                 if (!$reader->isService()) {
@@ -455,7 +455,7 @@ if (! class_exists('SCA', false)) {
                 include "$class_file";
             }
 
-            if ( class_exists($class_name) ) {
+            if ( class_exists($class_name, false) ) {
                 $instance            = new $class_name;
                 $reader              = new SCA_AnnotationReader($instance);
                 $service_description = $reader->reflectService();

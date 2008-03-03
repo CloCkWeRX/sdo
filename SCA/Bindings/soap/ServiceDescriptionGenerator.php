@@ -193,7 +193,7 @@ if ( ! class_exists('SCA_Bindings_soap_ServiceDescriptionGenerator', false) ) {
                 $namespace = null;
             }
 
-            $types_element  = '<types>'                                                         . "\n";
+            $types_element  = '<wsdl:types>'                                                         . "\n";
             $types_element .= '    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" '             . "\n";
 
             $namespace_to_prefix_map = array();
@@ -283,7 +283,7 @@ if ( ! class_exists('SCA_Bindings_soap_ServiceDescriptionGenerator', false) ) {
             }
 
             $types_element .= '    </xs:schema>'                                                 . "\n";
-            $types_element .= '  </types>'                                                         . "\n";
+            $types_element .= '  </wsdl:types>'                                                         . "\n";
 
             /***********************************************************************
             * Find the <types/> element and replace it with the generated one

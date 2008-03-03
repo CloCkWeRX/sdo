@@ -218,7 +218,7 @@ static zval *sdo_dataobjectlist_read_value(sdo_list_object *my_object, long inde
 	DataObjectList& dol = *my_object->dolp;
 
 	ALLOC_INIT_ZVAL(return_value);
-	return_value->refcount = 0;
+    Z_SET_REFCOUNT_P(return_value, 0);
 
 	try {
 		if (index >= dol.size()) {
@@ -325,7 +325,7 @@ static zval *sdo_changeddataobjectlist_read_value(sdo_list_object *my_object, lo
 	zval *return_value;
 
 	MAKE_STD_ZVAL(return_value);
-	return_value->refcount = 0;
+    Z_SET_REFCOUNT_P(return_value, 0);
 
 	/* Elements of a ChangedDataObjectList are all DataObject type */
 	try {
@@ -356,7 +356,7 @@ static zval *sdo_das_settinglist_read_value(sdo_list_object *my_object, long ind
 	const SettingList& sl = *my_object->slp;
 
 	MAKE_STD_ZVAL(return_value);
-	return_value->refcount = 0;
+    Z_SET_REFCOUNT_P(return_value, 0);
 
 	/* Elements of a SettingList are all DAS_Setting type */
 	try {
@@ -1124,7 +1124,7 @@ zend_object_iterator *sdo_list_get_iterator(zend_class_entry *ce, zval *object T
 #endif
 
 	sdo_list_iterator *iterator = (sdo_list_iterator *)emalloc(sizeof(sdo_list_iterator));
-	object->refcount++;
+    Z_ADDREF_P(object);
 	iterator->zoi.data = (void *)object;
 	iterator->zoi.funcs = &sdo_list_iterator_funcs;
 	iterator->index = 0;
