@@ -32,19 +32,24 @@
   </maintainer>
   </maintainers>
  <release>
-  <version>1.2.3</version>
-  <date>2007-08-24</date>
+  <version>1.2.4</version>
+  <date>2008-03-03</date>
   <license>Apache 2.0</license>
   <state>stable</state>
-  <notes>* Fixes for PECL bugs:
-   - TUSCANY-1362 - Incorrect operation of code that checks whether schema is loaded before going out on the net to retrieve it.
-   - TUSCANY-1112 - (which is PECL 9867)  Incorrect namespaces in generated XML
-   - TUSCANY-1564 - (which is PECL 11774) xsi:type not always set for complexType
-   - TUSCANY-1566 - Elements coming out in wrong namespace (found by Caroline and reported in the phpsoa group under &quot;Experiences with Atompub&quot;
- * Other:
-   - Pick up revision 568244 of Tuscany SDO code.
-   - There is a new Rest Resource binding, with tests and examples.
-   - There is a new simpledb binding with examples
+  <notes># The ability to control the operations on a service interface through a PHP interface 
+     by specifying the PHP interface on the @service annotation - e.g. @service MyServiceInterface
+ # PECL bug 11997 - don&apos;t remove xsi:type (except on top level soap message or response)
+ # PECL bug 11996 - not showing LIBXML2 parse errors
+ # PECL bug 12193 - alphabetical order of namespaces causes failure
+ # PECL bug 12103 - saveString doesn&apos;t encode entities 
+ # PECL bug 12443 - unable to access an XSD property containing a hyphen (-) 
+ # PECL bug 13101 - Repeated nill elements of extended type cause &quot;Parser found unknown element&quot; exception
+ # Fix to add wsdl namespace prefix to &lt;types&gt; element in WSDL, without which it will not validate. 
+ # Fix for Tuscany AccessViolation problem when serializing a DO
+ # Backward-compatible updates to SDO extension so that it will work with PHP 5.3
+ # Backward-compatible updates to SCA so that it will work with PHP 5.3. 
+ # Fix for failures that occur when using the soap extension - see thread &quot;SCA Webservice in WSDL mode&quot;
+ # Substantial rework of the examples to illustrate more bindings - see examples/SCA/index.html
   </notes>
   <deps>
    <dep type="php" rel="ge" version="5.1.0" optional="no"/>
@@ -54,6 +59,16 @@
   <filelist>
     <dir name="SCA">
      <dir name="Bindings">
+      <dir name="atom">
+       <file role="php" name="Atom1.0.xsd"/>
+       <file role="php" name="Proxy.php"/>
+       <file role="php" name="RequestTester.php"/>
+       <file role="php" name="SCA_AtomServer.php"/>
+       <file role="php" name="SCA_ServiceWrapperAtom.php"/>
+       <file role="php" name="ServiceRequestHandler.php"/>
+       <file role="php" name="xhtml1-strict.xsd"/>
+       <file role="php" name="xml.xsd"/>
+      </dir> <!-- /SCA/Bindings/atom -->
       <dir name="ebaysoap">
        <file role="php" name="Mapper.php"/>
        <file role="php" name="Proxy.php"/>
@@ -73,7 +88,7 @@
       </dir> <!-- /SCA/Bindings/local -->
       <dir name="message">
        <file role="php" name="Mapper.php"/>
-       <file role="php" name="MessageProviderDescription.xsd"/>
+       <file role="php" name="MessageServiceDescription.xsd"/>
        <file role="php" name="Proxy.php"/>
        <file role="php" name="RequestTester.php"/>
        <file role="php" name="SAM_Client.php"/>
@@ -393,6 +408,19 @@
       <file role="test" name="index.html"/>
      </dir> <!-- /examples/DAS -->
      <dir name="SCA">
+      <dir name="atom">
+       <file role="test" name="Atom1.0.xsd"/>
+       <file role="test" name="Contact.php"/>
+       <file role="test" name="ContactFeed.php"/>
+       <file role="test" name="ContactFeedConsumer.php"/>
+       <file role="test" name="ContactFile.php"/>
+       <file role="test" name="contacts.xsd"/>
+       <file role="test" name="db_config.inc.php"/>
+       <file role="test" name="test_contact.php"/>
+       <file role="test" name="test_contact_feed.php"/>
+       <file role="test" name="xhtml1-strict.xsd"/>
+       <file role="test" name="xml.xsd"/>
+      </dir> <!-- /examples/SCA/atom -->
       <dir name="ebaysoap">
        <file role="test" name="eBayClient.php"/>
        <file role="test" name="eBayClient2.php"/>
@@ -583,6 +611,17 @@
         <file role="test" name="HelloService.php"/>
        </dir> <!-- /examples/SCA/Soap/ScriptCallingRemoteSCAComponent -->
       </dir> <!-- /examples/SCA/Soap -->
+      <dir name="XmlRpc">
+       <file role="test" name="BadExchangeException.php"/>
+       <file role="test" name="BadTickerException.php"/>
+       <file role="test" name="ExchangeRate.php"/>
+       <file role="test" name="HelloClient.php"/>
+       <file role="test" name="HelloService.php"/>
+       <file role="test" name="StockQuote.php"/>
+       <file role="test" name="StockQuoteService.php"/>
+       <file role="test" name="SurnameService.php"/>
+       <file role="test" name="TestClient.php"/>
+      </dir> <!-- /examples/SCA/XmlRpc -->
       <file role="test" name="index.html"/>
       <file role="test" name="phpinfo.php"/>
      </dir> <!-- /examples/SCA -->
@@ -649,6 +688,10 @@
        </dir> <!-- /tests/DAS/Relational/phpunit -->
       </dir> <!-- /tests/DAS/Relational -->
       <dir name="XML">
+       <dir name="phpt">
+        <file role="test" name="bug12103.phpt"/>
+        <file role="test" name="bug12443.phpt"/>
+       </dir> <!-- /tests/DAS/XML/phpt -->
        <dir name="phpunit">
         <dir name="abstractComplexType">
          <file role="test" name="abstract.xsd"/>
@@ -694,6 +737,7 @@
        <file role="test" name="003.phpt"/>
        <file role="test" name="004.phpt"/>
        <file role="test" name="bug8428.phpt"/>
+       <file role="test" name="bug13090.phpt"/>
        <file role="test" name="Component.php"/>
        <file role="test" name="Component.wsdl"/>
        <file role="test" name="person.xsd"/>
@@ -709,6 +753,27 @@
         <file role="test" name="ServiceAnnotationTest.php"/>
         <file role="test" name="TypesAnnotationTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/AnnotationTests -->
+       <dir name="AtomServer">
+        <file role="test" name="AtomInputFile.txt"/>
+        <file role="test" name="AtomInputFile2.txt"/>
+        <file role="test" name="AtomInputFile3.txt"/>
+        <file role="test" name="ComponentCreate.php"/>
+        <file role="test" name="ComponentCreate2.php"/>
+        <file role="test" name="ComponentCreate3.php"/>
+        <file role="test" name="ComponentCreateLinkFormat.php"/>
+        <file role="test" name="ComponentCreateLocation.php"/>
+        <file role="test" name="ComponentCreateResponse.php"/>
+        <file role="test" name="ComponentDeleteReturnTrueResponse.php"/>
+        <file role="test" name="ComponentEnumerateFeedFormat.php"/>
+        <file role="test" name="ComponentEnumerateResponse.php"/>
+        <file role="test" name="ComponentNoCreateMethod.php"/>
+        <file role="test" name="ComponentRetrieveResponse.php"/>
+        <file role="test" name="ComponentUpdateEmptyResponse.php"/>
+        <file role="test" name="ComponentUpdateReturnTrueResponse.php"/>
+        <file role="test" name="ComponentUpdateSimpleReturnResponse.php"/>
+        <file role="test" name="EmptyRequestBody.txt"/>
+        <file role="test" name="SCA_AtomServerTest.php"/>
+       </dir> <!-- /tests/SCA/phpunit/AtomServer -->
        <dir name="eBaySoap">
         <dir name="config">
          <file role="test" name="bad_appid.ini"/>
@@ -754,9 +819,20 @@
         <file role="test" name="SCALogFilterTest.php"/>
         <file role="test" name="SCALoggerTest.php"/>
        </dir> <!-- /tests/SCA/phpunit/LogTests -->
+       <dir name="MessageBinding">
+        <file role="test" name="MSTest.php"/>
+        <file role="test" name="MS_TestService.php"/>
+        <file role="test" name="MS_TestServiceSDO.php"/>
+        <file role="test" name="MS_TestServiceSDO.wsdl"/>
+        <file role="test" name="MS_TestServiceSDO_msd"/>
+        <file role="test" name="MS_TestServiceSDO_wsdl"/>
+        <file role="test" name="names.xsd"/>
+        <file role="test" name="names_xsd"/>
+        <file role="test" name="TestServiceCorrectMPD"/>
+       </dir> <!-- /tests/SCA/phpunit/MessageBinding -->
        <dir name="RegressionTests">
-        <file role="test" name="Bug11774.xsd"/>
         <file role="test" name="Bug11774Test.php"/>
+        <file role="test" name="Bug12193Test.php"/>
         <file role="test" name="SCA_RegressionTestSuite.php"/>
         <file role="test" name="Tuscany1566Test.php"/>
        </dir> <!-- /tests/SCA/phpunit/RegressionTests -->
@@ -774,6 +850,11 @@
         <file role="test" name="RestRpcTestService.php"/>
         <file role="test" name="RestRpcTestService.response"/>
        </dir> <!-- /tests/SCA/phpunit/RestRpc -->
+       <dir name="SCA">
+        <file role="test" name="person.xsd"/>
+        <file role="test" name="SCATest.php"/>
+        <file role="test" name="SCATestService.php"/>
+       </dir> <!-- /tests/SCA/phpunit/SCA -->
        <dir name="SoapBinding">
         <file role="test" name="Class5.php"/>
         <file role="test" name="HandlerTest.php"/>
@@ -1109,6 +1190,27 @@ Update to Apache Tuscany C++ SDO revision level 495327 (namespace fixes, perform
    - Pick up revision 568244 of Tuscany SDO code.
    - There is a new Rest Resource binding, with tests and examples.
    - There is a new simpledb binding with examples
+    </notes>
+   </release>
+   <release>
+    <version>1.2.4</version>
+    <date>2008-03-03</date>
+    <license>Apache 2.0</license>
+    <state>stable</state>
+    <notes># The ability to control the operations on a service interface through a PHP interface 
+     by specifying the PHP interface on the @service annotation - e.g. @service MyServiceInterface
+ # PECL bug 11997 - don&apos;t remove xsi:type (except on top level soap message or response)
+ # PECL bug 11996 - not showing LIBXML2 parse errors
+ # PECL bug 12193 - alphabetical order of namespaces causes failure
+ # PECL bug 12103 - saveString doesn&apos;t encode entities 
+ # PECL bug 12443 - unable to access an XSD property containing a hyphen (-) 
+ # PECL bug 13101 - Repeated nill elements of extended type cause &quot;Parser found unknown element&quot; exception
+ # Fix to add wsdl namespace prefix to &lt;types&gt; element in WSDL, without which it will not validate. 
+ # Fix for Tuscany AccessViolation problem when serializing a DO
+ # Backward-compatible updates to SDO extension so that it will work with PHP 5.3
+ # Backward-compatible updates to SCA so that it will work with PHP 5.3. 
+ # Fix for failures that occur when using the soap extension - see thread &quot;SCA Webservice in WSDL mode&quot;
+ # Substantial rework of the examples to illustrate more bindings - see examples/SCA/index.html
     </notes>
    </release>
  </changelog>

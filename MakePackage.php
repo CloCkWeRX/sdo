@@ -189,7 +189,7 @@
     . " # PECL bug 12193 - alphabetical order of namespaces causes failure\n"
     . " # PECL bug 12103 - saveString doesn't encode entities \n"
     . " # PECL bug 12443 - unable to access an XSD property containing a hyphen (-) \n"
-    . " # PECL bug 13101 - Repeated nill elements of extended type cause "Parser found unknown element" exception\n"
+    . " # PECL bug 13101 - Repeated nill elements of extended type cause \"Parser found unknown element\" exception\n"
     . " # Fix to add wsdl namespace prefix to <types> element in WSDL, without which it will not validate. \n"
     . " # Fix for Tuscany AccessViolation problem when serializing a DO\n"
     . " # Backward-compatible updates to SDO extension so that it will work with PHP 5.3\n"
@@ -198,7 +198,7 @@
 	. " # Substantial rework of the examples to illustrate more bindings - see examples/SCA/index.html\n"
 	 ,
        'simpleoutput' => true,
-       'version' => '1.2.3',
+       'version' => '1.2.4',
        'baseinstalldir' => 'SDO',
        'state' => 'stable',
        'license' => 'Apache 2.0',
