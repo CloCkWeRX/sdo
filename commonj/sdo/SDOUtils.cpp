@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 510951 $ $Date$ */
+/* $Rev: 620502 $ $Date$ */
 
 #include "commonj/sdo/SDOUtils.h"
 #include <stdio.h>
@@ -223,8 +223,11 @@ namespace commonj {
                     else if (propertyType.isDataType())
                     {
                         printTabs(out, incr);
-                        out<< "Property Value: " 
-                            << dataObject->getCString(pl[i]) <<endl ; 
+                        out<< "Property Value: " ;
+                        if (dataObject->isNull(pl[i]))
+                            out << "NULL" << endl;
+                        else
+                            out << dataObject->getCString(pl[i]) <<endl ; 
                     }
             
                     //////////////////////////////////////////////////////////////////////

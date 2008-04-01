@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 547318 $ $Date$ */
+/* $Rev: 620502 $ $Date$ */
 
 #include "commonj/sdo/SDOSAX2Parser.h"
 
@@ -1173,16 +1173,29 @@ namespace commonj
                 return;
             }
             
+            bool popDO = false; // Indicate if we need to pop DO from stack
+
             // If currentPropertySetting is set (name is not null)
             // then we need to set the property now
             if (!currentPropertySetting.name.isNull())
             {
+                // Determine if this is an extended primitive         
+                bool isExtendedPrimitive = false;
+                const Type& tp = currentPropertySetting.dataObject->getType();
+                XSDTypeInfo* typeInfo = (XSDTypeInfo*)
+                    ((DASType*)&tp)->getDASValue("XMLDAS::TypeInfo");
+                if (typeInfo && typeInfo->getTypeDefinition().isExtendedPrimitive)
+                {
+                    isExtendedPrimitive = true;
+                    // If this setting was for an extended primitive we need to remove the
+                    // DO from the stack
+                    popDO = true;
+                }
+
                 if (currentPropertySetting.isNULL)
                 {
-
                     currentPropertySetting.dataObject->
                             setNull((const char*)currentPropertySetting.name);
-
                 }
                 else 
                 {    
@@ -1192,10 +1205,7 @@ namespace commonj
                     }
                     try
                     {
-                        const Type& tp = currentPropertySetting.dataObject->getType();
-                        XSDTypeInfo* typeInfo = (XSDTypeInfo*)
-                            ((DASType*)&tp)->getDASValue("XMLDAS::TypeInfo");
-                        if (typeInfo && typeInfo->getTypeDefinition().isExtendedPrimitive)
+                        if (isExtendedPrimitive)
                         {
                             const Property& p = currentPropertySetting.dataObject->getProperty(
                                 "value");
@@ -1230,18 +1240,7 @@ namespace commonj
                                     setCString((const char*)"value", currentPropertySetting.getStringWithCDataMarkers().c_str() );
                                 }
                             }
-                            if (dataObjectStack.size() == 0 || rootDataObject == dataObjectStack.top())
-                            {
-                                currentDataObject = 0;
-                                currentDataObjectType = 0;
-                            }
-                            else
-                            {
-                                dataObjectStack.pop();
-                                currentDataObject = dataObjectStack.top();
-                                currentDataObjectType = &(currentDataObject->getType());
-                            }
-
+                            popDO = true;
                         }
                         else
                         {
@@ -1309,7 +1308,12 @@ namespace commonj
                     }
                     changeSummary = false;
                 }
-                
+
+                popDO = true;
+            }
+
+            if (popDO)
+            {
                 if (dataObjectStack.size() == 0 || rootDataObject == dataObjectStack.top())
                 {
                     currentDataObject = 0;
@@ -1322,6 +1326,7 @@ namespace commonj
                     currentDataObjectType = &(currentDataObject->getType());
                 }
             }
+
             LOGEXIT(INFO,"SDOSAX2Parser: endElementNs - exit4");
         }
 
