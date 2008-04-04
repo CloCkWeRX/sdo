@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005, 2006.                            |
+| (c) Copyright IBM Corporation 2005, 2008.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -406,7 +406,7 @@ zend_module_entry sdo_module_entry = {
 	NULL, /* rinit */
 	NULL, /* rshutdown */
 	PHP_MINFO(sdo),
-	SDO_VERSION,
+	PHP_SDO_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -444,7 +444,7 @@ PHP_MINIT_FUNCTION(sdo)
 	}
 
 	REGISTER_STRING_CONSTANT("SDO_TYPE_NAMESPACE_URI", (char *)Type::SDOTypeNamespaceURI.c_str(), CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("SDO_VERSION", SDO_VERSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("SDO_VERSION", PHP_SDO_VERSION, CONST_CS | CONST_PERSISTENT);
 
 	/* interface SDO_PropertyAccess */
 	INIT_CLASS_ENTRY(ce, "SDO_PropertyAccess", sdo_propertyaccess_methods);
@@ -586,7 +586,7 @@ PHP_MINFO_FUNCTION(sdo)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "sdo support", "enabled");
-	php_info_print_table_row(2, "sdo extension version", SDO_VERSION);
+	php_info_print_table_row(2, "sdo extension version", PHP_SDO_VERSION);
 	php_info_print_table_row(2, "Tuscany sdo cpp version", SdoRuntime::getVersion());
 	php_info_print_table_end();
 }

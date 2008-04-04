@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  |
+| (c) Copyright IBM Corporation 2005, 2008.                            |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -24,6 +24,8 @@
 #define PHP_SDO_H
 
 #include "php.h"
+
+#define PHP_SDO_VERSION "1.2.4"
 
 extern zend_module_entry sdo_module_entry;
 #define phpext_sdo_ptr &sdo_module_entry

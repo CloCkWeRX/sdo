@@ -1,6 +1,6 @@
 /*
 +----------------------------------------------------------------------+
-| Copyright IBM Corporation 2005, 2007.                                |
+| Copyright IBM Corporation 2005, 2008.                                |
 | All Rights Reserved.                                                 |
 +----------------------------------------------------------------------+
 |                                                                      |
@@ -34,8 +34,6 @@
 
 using namespace commonj::sdo;
 using std::ostringstream;
-
-#define SDO_VERSION "1.2.4"
 
 #define SDO_NAMESPACE_URI "namespaceURI"
 #define SDO_TYPE_NAME     "typeName"
