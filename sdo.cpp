@@ -77,17 +77,17 @@ PHP_SDO_API zend_class_entry *sdo_cppexception_class_entry;
 /* }}} */
 
 /* {{{ single SDO_DataObject parameter */
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject, 0)
     ZEND_ARG_OBJ_INFO(0, data_object, SDO_DataObject, 0)
 ZEND_END_ARG_INFO();
 /* }}} */
 
 /* {{{ SDO_PropertyAccess methods */
-static ZEND_BEGIN_ARG_INFO(arginfo___get, 0)
+ZEND_BEGIN_ARG_INFO(arginfo___get, 0)
     ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
 
-static ZEND_BEGIN_ARG_INFO(arginfo___set, 0)
+ZEND_BEGIN_ARG_INFO(arginfo___set, 0)
     ZEND_ARG_INFO(0, name)
     ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
@@ -100,7 +100,7 @@ function_entry sdo_propertyaccess_methods[] = {
 /* }}} */
 
 /* {{{ SDO_DataObject methods */
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject_createdataobject, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject_createdataobject, 0)
     ZEND_ARG_INFO(0, identifier)
 ZEND_END_ARG_INFO();
 
@@ -116,16 +116,16 @@ function_entry sdo_dataobject_methods[] = {
 /* }}} */
 
 /* {{{ SDO_Sequence methods */
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_getproperty, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_getproperty, 0)
     ZEND_ARG_INFO(0, sequence_index)
 ZEND_END_ARG_INFO();
 
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_move, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_sdo_sequence_move, 0)
     ZEND_ARG_INFO(0, to_index)
     ZEND_ARG_INFO(0, from_index)
 ZEND_END_ARG_INFO();
 
-static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_sequence_insert, 0, ZEND_RETURN_VALUE, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_sequence_insert, 0, ZEND_RETURN_VALUE, 1)
     ZEND_ARG_INFO(0, value)
     ZEND_ARG_INFO(0, sequence_index)
 	ZEND_ARG_INFO(0, property_identifier)
@@ -141,7 +141,7 @@ function_entry sdo_sequence_methods[] = {
 /* }}} */
 
 /* {{{ SDO_List methods */
-static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_list_insert, 0, ZEND_RETURN_VALUE, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_list_insert, 0, ZEND_RETURN_VALUE, 1)
     ZEND_ARG_INFO(0, value)
     ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
@@ -155,7 +155,7 @@ function_entry sdo_list_methods[] = {
 /* }}} */
 
 /* {{{ SDO_DataFactory methods */
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_datafactory_create, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_sdo_datafactory_create, 0)
     ZEND_ARG_INFO(0, type_namespace_uri)
     ZEND_ARG_INFO(0, type_name)
 ZEND_END_ARG_INFO();
@@ -174,13 +174,13 @@ function_entry sdo_das_dataobject_methods[] = {
 /* }}} */
 
 /* {{{ SDO_DAS_DataFactory methods */
-static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addType, 0, ZEND_RETURN_VALUE, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addType, 0, ZEND_RETURN_VALUE, 2)
     ZEND_ARG_INFO(0, type_namespace_uri)
     ZEND_ARG_INFO(0, type_name)
     ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
-static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addPropertyToType, 0, ZEND_RETURN_VALUE, 5)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addPropertyToType, 0, ZEND_RETURN_VALUE, 5)
     ZEND_ARG_INFO(0, parent_type_namespace_uri)
     ZEND_ARG_INFO(0, parent_type_name)
     ZEND_ARG_INFO(0, property_name)
@@ -260,7 +260,7 @@ function_entry sdo_sequenceimpl_methods[] = {
 /* }}} */
 
 /* {{{ SDO_Model_Type methods */
-static ZEND_BEGIN_ARG_INFO(arginfo_sdo_model_type_identifier, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_sdo_model_type_identifier, 0)
     ZEND_ARG_INFO(0, identifier)
 ZEND_END_ARG_INFO();
 
@@ -322,7 +322,7 @@ function_entry sdo_model_propertyimpl_methods[] = {
 /* }}} */
 
 /* {{{ SDO_Model_ReflectionDataObject methods */
-static ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_model_reflectiondataobject_export, 0, ZEND_RETURN_VALUE, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_model_reflectiondataobject_export, 0, ZEND_RETURN_VALUE, 1)
     ZEND_ARG_OBJ_INFO(0, reflector, Reflector, 0)
     ZEND_ARG_INFO(0, return_output)
 ZEND_END_ARG_INFO();
@@ -379,7 +379,7 @@ PHP_SDO_API function_entry *sdo_exception_get_methods()
 /* {{{ sdo_deps
 */
 #if ZEND_MODULE_API_NO >= 20050922
-static zend_module_dep sdo_deps[] = {
+zend_module_dep sdo_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_REQUIRED("Reflection")
