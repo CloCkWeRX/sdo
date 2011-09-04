@@ -20,7 +20,7 @@
 
 */
 
-static char rcs_id[] = "$Id$";
+static char rcs_id[] = "$Id: sdo_utils.cpp 229262 2007-02-07 11:26:44Z cem $";
 
 /*
  * Utility functions for internal use by the SDO extension

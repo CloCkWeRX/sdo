@@ -18,7 +18,7 @@
 +----------------------------------------------------------------------+
 | Author: Matthew Peters                                               |
 +----------------------------------------------------------------------+
-$Id$
+$Id: Exception.php 217749 2006-08-08 16:13:29Z cem $
 */
 /**
  * Exception class to support SDO Relational Data Access Service

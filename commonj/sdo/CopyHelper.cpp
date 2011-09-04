@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 532769 $ $Date$ */
+/* $Rev: 241789 $ $Date: 2007-08-25 00:50:26 +0930 (Sat, 25 Aug 2007) $ */
 
 #include "commonj/sdo/Property.h"
 #include "commonj/sdo/Type.h"

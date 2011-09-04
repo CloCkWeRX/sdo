@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: ServiceDescriptionGenerator.php 254122 2008-03-03 17:56:38Z mfp $
 */
 
 if ( ! class_exists('SCA_Bindings_soap_ServiceDescriptionGenerator', false) ) {

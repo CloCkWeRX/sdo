@@ -1,5 +1,5 @@
  <?php
- /* $Id$ */
+ /* $Id: MakePackage.php 254167 2008-03-04 10:09:53Z mfp $ */
     require_once('PEAR/PackageFileManager.php');
     $packagexml = new PEAR_PackageFileManager;
     if (PEAR::isError($packagexml)) {

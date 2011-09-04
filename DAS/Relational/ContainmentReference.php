@@ -18,7 +18,7 @@
 +----------------------------------------------------------------------+
 | Author: Matthew Peters                                               |
 +----------------------------------------------------------------------+
-$Id$
+$Id: ContainmentReference.php 220738 2006-09-28 19:25:00Z cem $
 */
 
 require_once 'SDO/DAS/Relational/PrimaryKey.php';

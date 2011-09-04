@@ -20,7 +20,7 @@
 
 */
 
-static char rcs_id[] = "$Id$";
+static char rcs_id[] = "$Id: sdo.cpp 261641 2008-06-25 15:26:28Z cem $";
 
 #ifdef PHP_WIN32
 #include <iostream>
@@ -403,7 +403,7 @@ zend_module_entry sdo_module_entry = {
 	NULL, /* function list */
 	PHP_MINIT(sdo),
 	NULL, /* mshutdown */
-	NULL, /* rinit */
+	PHP_RINIT(sdo),
 	NULL, /* rshutdown */
 	PHP_MINFO(sdo),
 	PHP_SDO_VERSION,
@@ -574,9 +574,23 @@ PHP_MINIT_FUNCTION(sdo)
     sdo_das_xml_document_minit(TSRMLS_C);
     sdo_das_xml_parserexception_minit(TSRMLS_C);
     sdo_das_xml_fileexception_minit(TSRMLS_C);
-
+      
    return SUCCESS;
 
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION
+*/
+PHP_RINIT_FUNCTION(sdo)
+{
+   /* pass on the php precision to Tuscany */
+   long precision = php_ini_long("precision", sizeof("precision"), false);
+   if (precision > 0) {
+       SDODataConverter::precision = precision;
+   }
+   
+   return SUCCESS;
 }
 /* }}} */
 

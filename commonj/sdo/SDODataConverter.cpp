@@ -20,6 +20,7 @@
 #include <string.h>
 #include "commonj/sdo/SDODataConverter.h"
 #include "commonj/sdo/SDORuntimeException.h"
+#include "commonj/sdo/TypeImpl.h"
 
 
 // Data type conversion code is currently spread across this class and

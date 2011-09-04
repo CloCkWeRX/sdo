@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: SCA_Helper.php 261640 2008-06-25 15:24:35Z cem $
 */
 
 require "SCA/SCA_Exceptions.php";
@@ -501,6 +501,15 @@ if ( ! class_exists('SCA_Helper', false) ) {
             }
             $out .= htmlspecialchars($remaining, ENT_QUOTES, NULL, 0);
             return $out;
+        }
+        
+        /**
+         * Basic XML formatter
+         * Simply inserts newline characters to make long xml strings more readable. 
+         */
+        public static function simpleFormatXml($xml)
+        {
+            return preg_replace("/>\s*</", ">\n<", $xml);
         }
         
     }/* End SCA_Helper class                                                       */

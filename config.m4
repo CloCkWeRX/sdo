@@ -1,4 +1,4 @@
-dnl $Id$
+dnl $Id: config.m4 234945 2007-05-04 15:05:53Z mfp $
 
 PHP_ARG_ENABLE(sdo, [whether to enable SDO support],
 [  --enable-sdo            enable SDO support])

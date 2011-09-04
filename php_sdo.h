@@ -19,13 +19,13 @@
 +----------------------------------------------------------------------+
 
 */
-/* $Id$ */
+/* $Id: php_sdo.h 261641 2008-06-25 15:26:28Z cem $ */
 #ifndef PHP_SDO_H
 #define PHP_SDO_H
 
 #include "php.h"
 
-#define PHP_SDO_VERSION "1.2.4"
+#define PHP_SDO_VERSION "1.2.5-beta"
 
 extern zend_module_entry sdo_module_entry;
 #define phpext_sdo_ptr &sdo_module_entry
@@ -47,6 +47,7 @@ extern zend_module_entry sdo_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(sdo);
+PHP_RINIT_FUNCTION(sdo);
 PHP_MINFO_FUNCTION(sdo);
 
 PHP_METHOD(SDO_PropertyAccess, __get);

@@ -20,7 +20,7 @@
 |         Megan Beynon,                                                       |
 |         Caroline Maynard                                                    |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: ServiceRequestHandler.php 238265 2007-06-22 14:32:40Z mfp $
 */
 
 include 'SCA/Bindings/rss/RssDas.php';

@@ -18,7 +18,7 @@
 +----------------------------------------------------------------------+
 | Author: Matthew Peters                                               |
 +----------------------------------------------------------------------+
-$Id$
+$Id: PDOConstants.underscore.inc.php 217749 2006-08-08 16:13:29Z cem $
 */
 
 // A quick bodge to handle how PDO constants are defined

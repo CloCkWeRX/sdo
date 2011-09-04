@@ -19,7 +19,7 @@
 +----------------------------------------------------------------------+
 
 */
-static char rcs_id[] = "$Id$";
+static char rcs_id[] = "$Id: SDO_Exception.cpp 254122 2008-03-03 17:56:38Z mfp $";
 
 #ifdef PHP_WIN32
 #include <iostream>

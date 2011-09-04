@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: Proxy.php 254122 2008-03-03 17:56:38Z mfp $
 */
 
 require "SCA/SCA_Exceptions.php";

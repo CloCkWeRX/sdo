@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: SCA_Exceptions.php 234864 2007-05-03 18:23:57Z mfp $
 */
 
 if ( ! class_exists('SCA_RuntimeException', false) ) {

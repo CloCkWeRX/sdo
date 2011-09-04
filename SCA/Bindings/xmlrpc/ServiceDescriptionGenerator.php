@@ -24,7 +24,7 @@
 |         Simon Laws,                                                         |
 |         Rajini Sivaram                                                      |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: ServiceDescriptionGenerator.php 234945 2007-05-04 15:05:53Z mfp $
 */
 
 require "SCA/Bindings/xmlrpc/Das.php";

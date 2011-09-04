@@ -1,4 +1,4 @@
-$Id$
+$Id: README 223806 2006-11-24 10:44:42Z cem $
 
 SCA for PHP allows a PHP programmer to write reusable components,
 which can be called either locally, or remotely via Web services, with

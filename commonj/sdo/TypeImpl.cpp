@@ -17,11 +17,12 @@
  * under the License.
  */
 
-/* $Rev: 546667 $ $Date$ */
+/* $Rev: 261641 $ $Date: 2008-06-26 00:56:28 +0930 (Thu, 26 Jun 2008) $ */
 
 #include "commonj/sdo/Logger.h"
 
 #include "commonj/sdo/PropertyImpl.h"
+#include "commonj/sdo/SDODataConverter.h"
 #include "commonj/sdo/TypeImpl.h"
 
 #include <iostream>
@@ -2079,18 +2080,18 @@ namespace sdo{
                 wchar_t* fmt = new wchar_t[5];
                 fmt[0] = (wchar_t)'%';
                 fmt[1] = (wchar_t)'.';
-                fmt[2] = (wchar_t)'3';
-                fmt[3] = (wchar_t)'e';
+                fmt[2] = (wchar_t)'*';
+                fmt[3] = (wchar_t)'g';
                 fmt[4] = (wchar_t)0;
 #if defined(WIN32)  || defined (_WINDOWS)    
-                swprintf((wchar_t*)outval,fmt,*(long double*)value);
+                swprintf((wchar_t*)outval, fmt, SDODataConverter::precision, *(long double*)value);
 #else
 #if defined(NO_SWPRINTF)
                 {
                 int k;
                 char *tmpbuf = new char[50];
                 wchar_t *tmpw = (wchar_t*)outval;
-                sprintf(tmpbuf,"%.3Le",*(long double*)value);
+                sprintf(tmpbuf, "%.*Lg", SDODataConverter::precision, *(long double*)value);
                 for (k=0;k<strlen(tmpbuf);k++)
                 {
                     *(tmpw++) = (wchar_t)(tmpbuf[k]);
@@ -2100,7 +2101,7 @@ namespace sdo{
                 }
 
 #else
-                swprintf((wchar_t*)outval, wcslen((wchar_t*)outval), fmt, *(long double*)value);
+                swprintf((wchar_t*)outval, wcslen((wchar_t*)outval), fmt, SDODataConverter::precision, *(long double*)value);
 #endif
 #endif
                 delete fmt;
@@ -2114,18 +2115,18 @@ namespace sdo{
                 wchar_t* fmt = new wchar_t[5];
                 fmt[0] = (wchar_t)'%';
                 fmt[1] = (wchar_t)'.';
-                fmt[2] = (wchar_t)'3';
-                fmt[3] = (wchar_t)'e';
+                fmt[2] = (wchar_t)'*';
+                fmt[3] = (wchar_t)'g';
                 fmt[4] = (wchar_t)0;
 #if defined(WIN32)  || defined (_WINDOWS)
-                swprintf(outval,fmt,*(float*)value);
+                swprintf(outval, fmt, SDODataConverter::precision, *(float*)value);
 #else
 #if defined(NO_SWPRINTF)
                 {
                 int k;
                 char *tmpbuf = new char[50];
                 wchar_t *tmpw = (wchar_t*)outval;
-                sprintf(tmpbuf,"%.3e",*(float*)value);
+                sprintf(tmpbuf, "%.*g", SDODataConverter::precision, *(float*)value);
                 for (k=0;k<strlen(tmpbuf);k++)
                 {
                     *(tmpw++) = (wchar_t)(tmpbuf[k]);
@@ -2134,7 +2135,7 @@ namespace sdo{
                 delete tmpbuf;
                 }
 #else
-                swprintf(outval, wcslen(outval), fmt, *(float*)value);
+                swprintf(outval, wcslen(outval), fmt, SDODataConverter::precision, *(float*)value);
 #endif
 #endif
                 delete fmt;
@@ -2301,13 +2302,13 @@ unsigned int TypeImpl::convertToString(const SDOValue& sdoValue,
         case DoubleType:
                 if (value == 0) return 0;
                 if (max < MAX_DOUBLE_SIZE) return 0;
-                sprintf(outval,"%.3Le",*(long double*)value);
+                sprintf(outval, "%.*Lg", SDODataConverter::precision, *(long double*)value);
                 return strlen(outval);
 
         case FloatType:
                 if (value == 0) return 0;
                 if (max < MAX_FLOAT_SIZE) return 0;
-                sprintf(outval,"%.3e",*(float*)value);
+                sprintf(outval, "%.*g", SDODataConverter::precision, *(float*)value);
                 return strlen(outval);
 
         case OtherTypes:
@@ -2485,7 +2486,7 @@ unsigned int TypeImpl::convertToString(const SDOValue& sdoValue,
               if (max < MAX_DOUBLE_SIZE) return 0;
 
               char* tmpstr = new char[MAX_DOUBLE_SIZE + 1];
-              sprintf(tmpstr, "%.3Le", *(const long double*)value);
+              sprintf(tmpstr, "%.*Lg", SDODataConverter::precision, *(const long double*)value);
               outval = tmpstr;
               delete tmpstr;
               return outval.length();
@@ -2498,7 +2499,7 @@ unsigned int TypeImpl::convertToString(const SDOValue& sdoValue,
         if (max < MAX_FLOAT_SIZE) return 0;
 
         char* tmpstr = new char[MAX_FLOAT_SIZE + 1];
-        sprintf(tmpstr, "%.3Le", *(const float*)value);
+        sprintf(tmpstr, "%.*g", SDODataConverter::precision, *(const float*)value);
         outval = tmpstr;
         delete tmpstr;
         return outval.length();
@@ -2591,7 +2592,7 @@ unsigned int TypeImpl::convertToString(const SDOValue& sdoValue,
                 (*asstringbuf)[0] = 0;
                 return *asstringbuf;
             }
-            sprintf(*asstringbuf,"%.3Le",*(long double*)value);
+            sprintf(*asstringbuf, "%.*Lg", SDODataConverter::precision, *(long double*)value);
             return *asstringbuf;
 
         case FloatType:
@@ -2603,7 +2604,7 @@ unsigned int TypeImpl::convertToString(const SDOValue& sdoValue,
                 (*asstringbuf)[0] = 0;
                 return *asstringbuf;
             }
-            sprintf(*asstringbuf,"%.3e", *(float*)value);
+            sprintf(*asstringbuf, "%.*g", SDODataConverter::precision, *(float*)value);
             return *asstringbuf;
 
         case LongType:

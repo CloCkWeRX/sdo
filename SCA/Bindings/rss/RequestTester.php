@@ -20,7 +20,7 @@
 |         Megan Beynon,                                                       |
 |         Caroline Maynard                                                    |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: RequestTester.php 238265 2007-06-22 14:32:40Z mfp $
 */
 
 class SCA_Bindings_rss_RequestTester

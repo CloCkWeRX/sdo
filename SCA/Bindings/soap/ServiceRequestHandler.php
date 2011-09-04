@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: ServiceRequestHandler.php 241789 2007-08-24 15:20:26Z mfp $
 */
 
 include "SCA/Bindings/soap/Wrapper.php";

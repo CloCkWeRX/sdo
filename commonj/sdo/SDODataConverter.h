@@ -18,7 +18,7 @@
 /* $Rev: 505382 $ $Date$ */
 
 #ifndef _SDODATACONVERTER_H_
-#define _SDODATACONVERTOR_H_
+#define _SDODATACONVERTER_H_
 
 #include "commonj/sdo/DataTypeInfo.h"
 #include "commonj/sdo/SDODate.h"
@@ -69,6 +69,7 @@ namespace commonj
                                                 const DataTypeInfo::TrueDataType& dataType,
                                                 wchar_t* outptr,
                                                 unsigned int max_length);
+			static unsigned int precision;
          private:
             // We sometimes need to convert primitive data types into an
             // equivalent string representation and for that we need a

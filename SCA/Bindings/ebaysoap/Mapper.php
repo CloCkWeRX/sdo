@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: Mapper.php 238265 2007-06-22 14:32:40Z mfp $
 */
 
 if ( ! class_exists('SCA_Bindings_ebaysoap_Mapper', false) ) {
@@ -65,5 +65,3 @@ if ( ! class_exists('SCA_Bindings_ebaysoap_Mapper', false) ) {
 
     }/* End instance check                                                         */
 }/* End SCA_Bindings_soap_SDO_TypeHandler class                                                      */
-
-?>

@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: ServiceRequestHandler.php 234945 2007-05-04 15:05:53Z mfp $
 */
 
 require "SCA/Bindings/jsonrpc/SCA_ServiceWrapperJson.php";

@@ -23,7 +23,7 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: SCA_GenerateSmd.php 235424 2007-05-11 15:53:57Z mfp $
 */
 require 'SCA/SCA_ServiceDescription.php';
 

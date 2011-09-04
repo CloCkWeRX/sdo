@@ -1,4 +1,4 @@
-// $Id$
+// $Id: config.w32 234945 2007-05-04 15:05:53Z mfp $
 // vim:ft=javascript
 
 ARG_ENABLE("sdo", "enable SDO support", "no");

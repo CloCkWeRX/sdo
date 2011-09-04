@@ -18,7 +18,7 @@
 +----------------------------------------------------------------------+
 | Author: Matthew Peters                                               |
 +----------------------------------------------------------------------+
-$Id$
+$Id: ContainmentReferencesModel.php 223806 2006-11-24 10:44:42Z cem $
 */
 
 require_once 'SDO/DAS/Relational/ContainmentReference.php';

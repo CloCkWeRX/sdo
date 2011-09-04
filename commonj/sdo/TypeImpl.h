@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 546667 $ $Date$ */
+/* $Rev: 241789 $ $Date: 2007-08-25 00:50:26 +0930 (Sat, 25 Aug 2007) $ */
 
 #ifndef _TYPEIMPL_H_
 #define _TYPEIMPL_H_

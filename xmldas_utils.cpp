@@ -19,7 +19,7 @@
 +----------------------------------------------------------------------+
 
 */
-static char rcs_id[] = "$Id$";
+static char rcs_id[] = "$Id: xmldas_utils.cpp 207591 2006-02-20 18:50:26Z mfp $";
 
 #ifdef PHP_WIN32
 /* disable warning about identifier lengths in browser information */

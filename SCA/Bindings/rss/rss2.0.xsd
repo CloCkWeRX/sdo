@@ -23,7 +23,7 @@
 | Author: Matthew Peters                                                      |
 |         Graham Charters                                                     |
 +-----------------------------------------------------------------------------+
-    $Id$
+    $Id: rss2.0.xsd 254122 2008-03-03 17:56:38Z mfp $
     </xs:documentation>
   </xs:annotation>
 

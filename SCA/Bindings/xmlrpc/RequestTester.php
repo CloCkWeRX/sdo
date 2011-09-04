@@ -24,7 +24,7 @@
 |         Simon Laws,                                                         |
 |         Rajini Sivaram                                                      |
 +-----------------------------------------------------------------------------+
-$Id$
+$Id: RequestTester.php 234945 2007-05-04 15:05:53Z mfp $
 */
 
 if ( ! class_exists('SCA_Bindings_Xmlrpc_RequestTester', false) ) {

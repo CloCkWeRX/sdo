@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* $Rev: 511929 $ $Date$ */
+/* $Rev: 241789 $ $Date: 2007-08-25 00:50:26 +0930 (Sat, 25 Aug 2007) $ */
 
 #include "commonj/sdo/ChangeSummaryBuilder.h"
 
