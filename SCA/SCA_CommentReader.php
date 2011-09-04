@@ -378,11 +378,11 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
                 $targetLine = substr($this->docComment, $pos);
                 $pos = $pos + strlen($bindingAnnotation);
 
-                $targetLine = ereg_replace("\t", " ", $targetLine);
+                $targetLine = preg_replace("{[ \t]+}", " ", $targetLine);
                 $words      = explode(" ", $targetLine);
                 for ($i = 0; $i < count($words); $i++) {
                     $word = trim($words[$i++]);
-                    if (strpos($word, $word, $bindingAnnotation) === 0) {
+                    if (strpos($word, $bindingAnnotation) === 0) {
                         $binding = substr($word, strlen($bindingAnnotation));
                         break;
                     }
@@ -589,7 +589,7 @@ if ( ! class_exists('SCA_CommentReader', false) ) {
         {
 
             $targetLine = strchr($this->docComment, "@" . $label);
-            $targetLine = ereg_replace("\t", " ", $targetLine);
+            $targetLine = preg_replace("{[ \t]+}", " ", $targetLine);
             $words      = explode(" ", $targetLine);
             $phoneme    = $words[ 1 ];
 
