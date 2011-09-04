@@ -219,7 +219,7 @@ if ( ! class_exists('SCA_AnnotationRules', false)) {
             $comment      = false ;
             $commentArray = null ;
             $j            = 0 ;
-            $line         = ereg_replace("\t", " ", $line);
+            $line         = preg_replace("{[ \t]+}", " ", $line);
             $arrayOfLine  = explode(' ', (trim($line)));
 
             /**
