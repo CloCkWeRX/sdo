@@ -16,7 +16,7 @@
  */
 
 /* $Rev: 509991 $ $Date$ */
-
+#include <stdio.h>
 #include <string.h>
 #include "commonj/sdo/SDODataConverter.h"
 #include "commonj/sdo/SDORuntimeException.h"
