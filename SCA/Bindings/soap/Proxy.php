@@ -364,7 +364,7 @@ if ( ! class_exists('SCA_Bindings_soap_Proxy', false) ) {
 
         }
 
-        public function __setLocation($location) {
+        public function __setLocation($location = null) {
             $this->location = $location;
         }
 
