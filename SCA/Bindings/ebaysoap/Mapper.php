@@ -58,7 +58,7 @@ if ( ! class_exists('SCA_Bindings_ebaysoap_Mapper', false) ) {
 
                 /* When the 'TypeHandler is being used by the Soap Server */
                 if ( strcmp($this->association, self::SERVER) === 0 )
-                SoapServer::fault("Client", "Invalid WSDL Type");
+                throw new SoapFault("Client", "Invalid WSDL Type");
             }
 
         }

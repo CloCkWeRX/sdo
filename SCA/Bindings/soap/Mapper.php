@@ -81,7 +81,7 @@ if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
 
                 /* When the 'TypeHandler is being used by the Soap Server */
                 if ( strcmp($this->association, self::SERVER) === 0 )
-                SoapServer::fault("Client", "Invalid WSDL Type");
+                throw new SoapFault("Client", "Invalid WSDL Type");
             }
         }
 
@@ -185,7 +185,7 @@ if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
 
                 /* When the 'TypeHandler is being used by the Soap Server          */
                 if ( strcmp($this->association, self::SERVER) === 0)
-                SoapServer::fault("Client", "Unable to encode to XML");
+                throw new SoapFault("Client", "Unable to encode to XML");
 
             }/* End trap problem                                                   */
         }/* End toXML function                                                     */
@@ -218,7 +218,7 @@ if ( ! class_exists('SCA_Bindings_soap_Mapper', false) ) {
 
                 /* When the 'TypeHandler is being used by the Soap Server          */
                 if (strcmp($this->association, self::SERVER) === 0)
-                SoapServer::fault("Client", "Unable to create data object");
+                throw new SoapFault("Client", "Unable to create data object");
 
             }/* End of trap                                                        */
 
