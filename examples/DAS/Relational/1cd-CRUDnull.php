@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -27,7 +27,7 @@ require_once 'company_metadata.inc.php';
  * Scenario - Use one company and department to test the handling of null
  * Set the location of the shoe department to a string and write back,
  * then to a null, write back, then back to a string, then to a null
- * Test each time. 
+ * Test each time.
  *
  */
 
@@ -72,7 +72,7 @@ $acme = $root['company'][0];
 echo "Looked for Acme and found company with name = " . $acme->name . " and id " . $acme->id . "\n";
 $shoe = $acme['department'][0];
 echo "Looked for Shoe department and found department with name = " . $shoe->name . " and id " . $shoe->id . "\n";
-echo "location is " ;
+echo "location is ";
 var_dump($shoe->location);
 assert($shoe->location === null);
 

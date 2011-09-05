@@ -35,7 +35,7 @@ class SCA_Bindings_Xmlrpc_ServiceRequestHandler
     public function handle($calling_component_filename, $service_description)
     {
         SCA::$logger->log("Entering");
-        SCA::$logger->log( "_handleXmlRpcRequest - $calling_component_filename\n" ) ;
+        SCA::$logger->log( "_handleXmlRpcRequest - $calling_component_filename\n" );
 
         try {
 
@@ -73,6 +73,6 @@ class SCA_Bindings_Xmlrpc_ServiceRequestHandler
 
             echo $response;
         }
-        return ;
+        return;
     }
 }

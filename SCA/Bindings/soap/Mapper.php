@@ -29,17 +29,17 @@ $Id: Mapper.php 254122 2008-03-03 17:56:38Z mfp $
 
 class SCA_Bindings_soap_Mapper {
 
-    const   SERVER     = "SoapServer" ;
-    const   CLIENT     = "SoapClient" ;
+    const   SERVER     = "SoapServer";
+    const   CLIENT     = "SoapClient";
 
-    private $association  = null ;
-    protected $xmldas       = null ;
+    private $association  = null;
+    protected $xmldas       = null;
 
     public function __construct( $association )
     {
         if ($association != self::CLIENT && $association != self::SERVER )
         throw new SoapFault('Client', 'SCA_Bindings_soap_Mapper should be initialised with an association of SoapServer or SoapClient');
-        $this->association = $association ;
+        $this->association = $association;
 
     }
 
@@ -70,7 +70,7 @@ class SCA_Bindings_soap_Mapper {
 
 
             if ( $e instanceof SDO_Exception )
-            $problem = "SDO_Exception in setWSDLTypes : " . $problem ;
+            $problem = "SDO_Exception in setWSDLTypes : " . $problem;
 
             /**
                  * Depending on whether the function is being used on the
@@ -174,7 +174,7 @@ class SCA_Bindings_soap_Mapper {
         {
             $problem = $e->getMessage();
             if ( $e instanceof SDO_Exception )
-            $problem = "SDO_Exception in toXML : " . $problem ;
+            $problem = "SDO_Exception in toXML : " . $problem;
 
             /**
              * Depending on whether the function is being used on the client side
@@ -207,7 +207,7 @@ class SCA_Bindings_soap_Mapper {
         {
             $problem = $e->getMessage();
             if ( $e instanceof SDO_Exception )
-            $problem = "SDO_Exception in createDataObject : " . $problem ;
+            $problem = "SDO_Exception in createDataObject : " . $problem;
 
             /**
              * Depending on whether the function is being used on the client side
@@ -243,12 +243,12 @@ class SCA_Bindings_soap_Mapper {
             "type_ns"    => $type[0],
             "type_name"  => $type[1],
             "to_xml"     => $encoder_callback,
-            "from_xml"   => $decoder_callback) ;
+            "from_xml"   => $decoder_callback);
         }
         return $ret;
     }
 
-    const   EOL               = "\n" ;
+    const   EOL               = "\n";
 
     public function getAllTypes()
     {

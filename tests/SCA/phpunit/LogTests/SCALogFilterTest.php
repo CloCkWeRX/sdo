@@ -12,10 +12,10 @@ require_once 'SCA/SCA_Logger.php';
  */
 class SCALogFilterTest extends PHPUnit_Framework_TestCase
 {
-    private static  $logger             = null ;
+    private static  $logger             = null;
 
     private         $testentry          =
-                    "Log Entry test string for the SCA_LoggerTest" ;
+                    "Log Entry test string for the SCA_LoggerTest";
 
 
     private         $loginfo;
@@ -37,18 +37,18 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testDefaultLoggerCreated()
     {
-        self::$logger = new SCA_Logger( $this->loginfo[ 0 ], $this->loginfo[ 1 ]   ) ;
+        self::$logger = new SCA_Logger( $this->loginfo[ 0 ], $this->loginfo[ 1 ]   );
 
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        self::$logger->startLog() ;
+        self::$logger->startLog();
 
-        $status = self::$logger->logStatus() ;
+        $status = self::$logger->logStatus();
 
         $this->assertEquals( $status[ 'run' ]
                            , "Running"
                            , "SCA_LoggerTest::testStopMethod Status is not running"
-                           ) ;
+                           );
     }
 
     /**
@@ -61,22 +61,22 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testSetFilter()
     {
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        self::$logger->setLogLevel( SCA_LOGGER_CRITICAL | SCA_LOGGER_WARNING | SCA_LOGGER_DEBUG ) ;
+        self::$logger->setLogLevel( SCA_LOGGER_CRITICAL | SCA_LOGGER_WARNING | SCA_LOGGER_DEBUG );
 
-        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_CRITICAL ) ;
-        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_ERROR ) ;
-        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_WARNING ) ;
-        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_INFO ) ;
-        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_DEBUG ) ;
+        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_CRITICAL );
+        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_ERROR );
+        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_WARNING );
+        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_INFO );
+        self::$logger->log( $this->testentry, "", "", SCA_LOGGER_DEBUG );
 
-        $status = self::$logger->logStatus() ;
+        $status = self::$logger->logStatus();
 
         $this->assertEquals( $status[ 'count' ]
                            , 3
                            , "SCA_LoggerTest::testSetFilterMethod Invalid number of log entries"
-                           ) ;
+                           );
 
     }
 
@@ -86,21 +86,21 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testReadCritical()
     {
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        $critical = self::$logger->fromLog( SCA_LOGGER_CRITICAL ) ;
+        $critical = self::$logger->fromLog( SCA_LOGGER_CRITICAL );
 
-        $msgs = sizeof( $critical ) ;
+        $msgs = sizeof( $critical );
 
         $this->assertEquals( $msgs
                            , 1
                            , "SCA_LogFilterTest::testReadCritical Invalid number of CRITICAL Messages"
-                           ) ;
+                           );
 
         $this->assertContains( 'Critical'
                              , $critical[ 0 ]
                              , "SCA_LogFilterTest::testReadCritical CRITICAL message not found"
-                             ) ;
+                             );
 
     }
     /**
@@ -109,16 +109,16 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testReadError()
     {
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        $error = self::$logger->fromLog( SCA_LOGGER_ERROR ) ;
+        $error = self::$logger->fromLog( SCA_LOGGER_ERROR );
 
-        $msgs = sizeof( $error ) ;
+        $msgs = sizeof( $error );
 
         $this->assertEquals( $msgs
                            , 0
                            , "SCA_LogFilterTest::testReadCritical NO ERROR Message should exist"
-                           ) ;
+                           );
 
 
     }
@@ -129,21 +129,21 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testReadWarning()
     {
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        $warning = self::$logger->fromLog( SCA_LOGGER_WARNING ) ;
+        $warning = self::$logger->fromLog( SCA_LOGGER_WARNING );
 
-        $msgs = sizeof( $warning ) ;
+        $msgs = sizeof( $warning );
 
         $this->assertEquals( $msgs
                            , 1
                            , "SCA_LogFilterTest::testReadWarning Invalid number of WARNING Messages"
-                           ) ;
+                           );
 
         $this->assertContains( 'Warning'
                              , $warning[ 0 ]
                              , "SCA_LogFilterTest::testReadWarning WARNING message not found"
-                             ) ;
+                             );
 
     }
 
@@ -153,16 +153,16 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testReadInformation()
     {
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        $info = self::$logger->fromLog( SCA_LOGGER_INFO ) ;
+        $info = self::$logger->fromLog( SCA_LOGGER_INFO );
 
-        $msgs = sizeof( $info ) ;
+        $msgs = sizeof( $info );
 
         $this->assertEquals( $msgs
                            , 0
                            , "SCA_LogFilterTest::testReadInformation Invalid number of INFO Messages"
-                           ) ;
+                           );
 
 
     }
@@ -173,21 +173,21 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testReadDebug()
     {
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        $debug = self::$logger->fromLog( SCA_LOGGER_DEBUG ) ;
+        $debug = self::$logger->fromLog( SCA_LOGGER_DEBUG );
 
-        $msgs = sizeof( $debug ) ;
+        $msgs = sizeof( $debug );
 
         $this->assertEquals( $msgs
                            , 1
                            , "SCA_LogFilterTest::testReadDebug Invalid number of DEBUG Messages"
-                           ) ;
+                           );
 
         $this->assertContains( 'Debug'
                              , $debug[ 0 ]
                              , "SCA_LogFilterTest::testReadDebug DEBUG message not found"
-                             ) ;
+                             );
 
     }
 
@@ -197,11 +197,11 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testDeleteLogMethod()
     {
-        $this->assertNotNull( self::$logger ) ;
+        $this->assertNotNull( self::$logger );
 
-        self::$logger->deleteLogFile() ;
+        self::$logger->deleteLogFile();
 
-        $this->assertFileNotExists( $this->loglocn ) ;
+        $this->assertFileNotExists( $this->loglocn );
 
     }
 

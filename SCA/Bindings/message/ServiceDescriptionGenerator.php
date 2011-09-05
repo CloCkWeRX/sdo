@@ -48,7 +48,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
         }
         catch (SCA_RuntimeException $se )
         {
-            echo $se . "\n" ;
+            echo $se . "\n";
         } catch( SDO_DAS_XML_FileException $e) {
             echo "{$e->getMessage()} in {$e->getFile()}";
         }
@@ -61,7 +61,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
         /*Get a DAS*/
         $xmldas = SDO_DAS_XML::create(dirname(__FILE__)."/MessageServiceDescription.xsd");
         $msd_doc = $xmldas->createDocument();
-        $msdDataObject = $msd_doc->getRootDataObject() ;
+        $msdDataObject = $msd_doc->getRootDataObject();
 
          // Guess a queue name
         if(!isset($service_desc->binding_config['destination'])){
@@ -107,7 +107,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
                  /*create an empty document*/
                  $xmldas = SDO_DAS_XML::create(dirname(__FILE__)."/MessageServiceDescription.xsd");
                  $msd_doc = $xmldas->createDocument();
-                 $msdDataObject = $msd_doc->getRootDataObject() ;
+                 $msdDataObject = $msd_doc->getRootDataObject();
              }
          }
 
@@ -152,7 +152,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
                 }
                 /* delete prefix 'response.' */
                 $new_key = substr_replace($key, '', 0, 9);
-                $resp_ConnFactory->$new_key = $value ;
+                $resp_ConnFactory->$new_key = $value;
                 break;
 
             /*JMS heahers for all operations*/
@@ -167,7 +167,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
                 $headers->$key = $value;
                 break;
             default:
-                $msdDataObject->$key = $value ;
+                $msdDataObject->$key = $value;
             }
          }
          return $msdDataObject;

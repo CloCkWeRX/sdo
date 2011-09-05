@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -35,7 +35,7 @@ require_once 'SDO/DAS/Relational/Exception.php';
  * 7 the PK is a name
  * 8 the PK name must be one of the columns
  * 99 there are four valid settings in the array: name, columns, PK, FK
- */ 
+ */
 
 
 class SDO_DAS_Relational_Table {
@@ -46,7 +46,7 @@ class SDO_DAS_Relational_Table {
     private $columns = array();
     private $primary_key;
 
-    public function __construct($table_metadata) 
+    public function __construct($table_metadata)
     {
         /*
         * Check metadata specifies a table name and assign
@@ -93,7 +93,7 @@ class SDO_DAS_Relational_Table {
         /*
         * Check column names are all unique
         */
-        for ($i = 0 ; $i < count($this->columns); $i++) {
+        for ($i = 0; $i < count($this->columns); $i++) {
             $checking_col = $this->columns[$i];
             $remaining_slice = array_slice($this->columns, $i+1);
             if (in_array($checking_col, $remaining_slice)) {
@@ -123,30 +123,30 @@ class SDO_DAS_Relational_Table {
         if (!in_array($this->primary_key, $this->columns)){
             throw new SDO_DAS_Relational_Exception('The metadata for table '.$table_metadata['name'].' specified a primary key with a name that was not one of the columns.');
         }
-                
+
         /*
         * Once everything else has passed, check we have only valid keys in the metadata
         */
         $valid_keys = array('name', 'columns', 'PK' , 'FK');
         $supplied_keys = array_keys($table_metadata);
-        
+
         if (count(array_diff($supplied_keys, $valid_keys))) {
             throw new SDO_DAS_Relational_Exception('The metadata for table '.$table_metadata['name'].' contained an invalid key. The only valid keys are: name, columns, PK, or FK.');
         }
 
     }
 
-    public function getTableName() 
+    public function getTableName()
     {
         return $this->table_name;
     }
 
-    public function getColumns() 
+    public function getColumns()
     {
         return $this->columns;
     }
 
-    public function getPrimaryKey() 
+    public function getPrimaryKey()
     {
         return $this->primary_key;
     }

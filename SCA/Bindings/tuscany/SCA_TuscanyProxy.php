@@ -33,8 +33,8 @@ $Id: SCA_TuscanyProxy.php 234945 2007-05-04 15:05:53Z mfp $
 
 class SCA_TuscanyProxy {
 
-    private $containing_class_name          = null ;
-    private $reference_name                 = null ;
+    private $containing_class_name          = null;
+    private $reference_name                 = null;
 
     /**
       * Create the local proxy to the service given as an argument.

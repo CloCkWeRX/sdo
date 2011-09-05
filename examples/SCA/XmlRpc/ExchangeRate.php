@@ -30,7 +30,7 @@ $Id$
 
 
 
-include_once ( "SCA/SCA.php" ) ;
+include_once ( "SCA/SCA.php" );
 
 /**
  * @service
@@ -41,11 +41,11 @@ class ExchangeRate {
 
     /**
      * @param float $currency
-     * @return float 
+     * @return float
      */
     function getRate($currency) {
         return 0.5;
-    } 
+    }
 
 }
 

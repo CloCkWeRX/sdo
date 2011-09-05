@@ -227,7 +227,7 @@ class SCA_Helper {
     public static function findExtensionMethod( $methodName, $extensionName )
     {
         // TODO implement this method using the reflection API
-        return true ;
+        return true;
     }/* End find extension method function                                     */
 
     public static function wsdlWasGeneratedForAnScaComponent($wsdl_file_name)
@@ -256,7 +256,7 @@ class SCA_Helper {
     */
     public static function checkMethods($method, $class)
     {
-        $return       = false ;
+        $return       = false;
         $classMethods = get_class_methods($class);
 
 
@@ -265,12 +265,12 @@ class SCA_Helper {
 
         foreach ( $classMethods as $method_name ) {
             if ( $method === $method_name ) {
-                $return = true ;
-                break ;
+                $return = true;
+                break;
             }
         }
 
-        return $return ;
+        return $return;
 
     }/* End check methods */
 
@@ -292,7 +292,7 @@ class SCA_Helper {
     $allMethodsArray,
     $interfaceMethods=null)
     {
-        $editedArray = array() ;
+        $editedArray = array();
 
         // Build up an array of ReflectionMethod objects from the allMethods
         // array, that correspond to those in the interfaceMethods array.
@@ -312,10 +312,10 @@ class SCA_Helper {
         }
         else {
             $elements    = count($public_list);
-            $j           = 0 ;
+            $j           = 0;
 
             /* For all of the public methods of the service class */
-            for ( $i = 0 ; $i < $elements ; $i++ ) {
+            for ( $i = 0; $i < $elements; $i++ ) {
 
                 /* Ignore the method if it's a magic method as defined by */
                 /* http://www.php.net/manual/en/language.oop5.magic.php   */
@@ -328,7 +328,7 @@ class SCA_Helper {
 
                         /* copy the relfection object to the filitered list if it does */
                         if ( strcmp($objArray[ 'name' ], $public_list[ $i ]) === 0 ) {
-                            $editedArray[ $j++ ] = $allMethod ;
+                            $editedArray[ $j++ ] = $allMethod;
 
                         }
                     }
@@ -337,7 +337,7 @@ class SCA_Helper {
 
         }
 
-        return $editedArray ;
+        return $editedArray;
 
     }/* End filter methods function */
 
@@ -419,7 +419,7 @@ class SCA_Helper {
      * slightly different from the one in Mapper in
      * that it finds top level types
      */
-    const EOL = "\n" ;
+    const EOL = "\n";
 
     public static function getAllXmlDasTypes($xml_das)
     {

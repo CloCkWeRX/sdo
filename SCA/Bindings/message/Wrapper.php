@@ -25,9 +25,9 @@
 
 class SCA_Bindings_message_Wrapper
 {
-    private $instance_of_the_base_class = null ;
-    private $service_description        = null ;
-    private $mapper                     = null ;
+    private $instance_of_the_base_class = null;
+    private $service_description        = null;
+    private $mapper                     = null;
 
     public function __construct($class_name, $service_description, $mapper)
     {
@@ -35,7 +35,7 @@ class SCA_Bindings_message_Wrapper
         SCA::$logger->log("class name = $class_name");
 
         $this->mapper                    = $mapper;
-        $this->service_description        = $service_description ;
+        $this->service_description        = $service_description;
         $this->instance_of_the_base_class = SCA::createInstance($class_name);
         SCA::fillInReferences($this->instance_of_the_base_class);
 
@@ -52,7 +52,7 @@ class SCA_Bindings_message_Wrapper
      */
     public function onMessage($msg)
     {
-        SCA::$logger->log('Entering') ;
+        SCA::$logger->log('Entering');
         $method_name = trim($this->_getMethodName($msg));
         SCA::$logger->log("method name = $method_name.");
 

@@ -60,7 +60,7 @@ END;
             echo $desc;
 
         } catch (Exception $se ) {
-            echo $se->exceptionString() . "\n" ;
+            echo $se->exceptionString() . "\n";
         }
 
     }

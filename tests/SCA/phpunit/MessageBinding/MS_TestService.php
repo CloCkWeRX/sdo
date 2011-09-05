@@ -35,7 +35,7 @@ class MS_TestService
      */
     function onMessage($text)
     {
-        echo "onMessage ". $text ;
+        echo "onMessage ". $text;
     }
 
 

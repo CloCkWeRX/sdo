@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                  |
 | All Rights Reserved.                                                 |
@@ -21,10 +21,10 @@
 $Id: interop-xml.php 229262 2007-02-07 11:26:44Z cem $
 */
 
-/* 
+/*
  * Some simple code to compare two XML documents
- * This is very rundimentary but better than eyeballing the xml files 
- * It needs replacing with a proper XML comparison at some point 
+ * This is very rundimentary but better than eyeballing the xml files
+ * It needs replacing with a proper XML comparison at some point
  * In particular beware
  *  - I am only testing for attributes in the default and xsi namespaces
  *  - Simple XML does some strange things with namespaces which I can't tie down
@@ -43,20 +43,20 @@ define ( 'DEBUG',  'off' );
  */
 define ( 'WARN_XSITYPE_DIFFERENCE',  'on' );
 
-/* 
+/*
  * checks the number of contained nodes are equal
  */
 function compareNodeCount ( $nodename, $node1, $node2, $reason )
 {
   $count1 = count ($node1);
   $count2 = count ($node2);
-  
+
   $message = $reason . "  " . $nodename . ": Node1 count = $count1   Node2 count  = $count2";
 
   if ( $count1 != $count2  ){
       throw new Exception ( $message );
   }
- 
+
   if ( DEBUG == "on" ){
      echo $message . "\n";
   }
@@ -64,7 +64,7 @@ function compareNodeCount ( $nodename, $node1, $node2, $reason )
   return $count1;
 }
 
-/* 
+/*
  * checks that the node names are equal
  */
 function compareNodeName ( $node1, $node2 )
@@ -81,7 +81,7 @@ function compareNodeName ( $node1, $node2 )
   if ( DEBUG == "on" ){
      echo $message . "\n";
   }
-  
+
 }
 
 /*
@@ -99,22 +99,22 @@ function compareNodeValue ( $node1, $node2 )
   if ( DEBUG == "on" )
   {
      echo $message . "\n";
-  } 
+  }
 }
 
-/* 
+/*
  * checks that the node attributes are equal
  */
 function compareNodeAttributes ( $node1, $node2, $namespace )
 {
   $attributes1 = $node1->attributes($namespace);
   $attributes2 = $node2->attributes($namespace);
- 
+
   $count1 = count ($node1);
   $count2 = count ($node2);
-  
+
   $message = "for node " . $node1->getName() . " in namespace " . $namespace . " - ";
-  
+
   for ( $i = 0; $i < $count1; $i += 1 ) {
       $att1      = $attributes1[$i];
       $att1_type = gettype($att1);
@@ -122,34 +122,34 @@ function compareNodeAttributes ( $node1, $node2, $namespace )
       $att2      = $attributes2[$i];
       $att2_type = gettype($att2);
       $att2_name = null;
-      
+
       if ( $att1 != null && $att1_type != "NULL" ) {
          $att1_name = $att1->getName();
-      } 
-      
+      }
+
       if ( $att2 != null && $att2_type != "NULL" ) {
          $att2_name = $att2->getName();
       }
-            
+
       if ( $att1_type != $att2_type || $att1_name != $att2_name ) {
           $message = $message . "Attribute $i not equal AttributeA = " . $att1_name . "  " . $att1 . " type " . $att1_type . " AttributeB = " . $att2_name . " " . $att2 . " type " . $att2_type;
-          
+
           // test for a special case because we know schema location isn't copied to output
           if ( $att1_name == "schemaLocation"  || $att1_name == "noNamespaceSchemaLocation" ) {
               //echo $message . "\n";
           } else {
               throw new Exception ( $message );
           }
-      } 
+      }
   }
-  
+
   if ( $count1 != $count2 ) {
          $message = $message . "Attribute counts not equal count1 = " . $count1 . " count2 = " . $count2;
          throw new Exception ( $message );
   }
-  
+
   $attributecount = $count1;
-  
+
   if ( DEBUG == "on" && $attributecount > 0){
     echo "ATTRIBUTES\n";
   }
@@ -162,12 +162,12 @@ function compareNodeAttributes ( $node1, $node2, $namespace )
 
 }
 
-/* 
+/*
  * checks that the node children are equal
  */
 function compareNodeChildren ( $node1, $node2, $namespace )
 {
-  // children 
+  // children
   $children1 = $node1->children($namespace);
   $children2 = $node2->children($namespace);
 
@@ -211,25 +211,25 @@ function compareXMLNode ( $node1, $node2 )
 
     compareNodeName( $node1, $node2 );
 
-    compareNodeValue( $node1, $node2 );  
+    compareNodeValue( $node1, $node2 );
 
     // Should really detect the namespaces in the following tests automatically
-    compareNodeAttributes ( $node1, $node2, NULL ); 
-    compareNodeAttributes ( $node1, $node2, "http://www.w3.org/2001/XMLSchema-instance" );  
+    compareNodeAttributes ( $node1, $node2, NULL );
+    compareNodeAttributes ( $node1, $node2, "http://www.w3.org/2001/XMLSchema-instance" );
 
-    compareNodeChildren( $node1, $node2, NULL ); 
+    compareNodeChildren( $node1, $node2, NULL );
 
  // SimpleXML is doing something strange with namespaces
  // need to go to DOM I think
- //   compareNodeChildren( $node1, $node2, "http://www.apache.org/tuscany/interop" ); 
+ //   compareNodeChildren( $node1, $node2, "http://www.apache.org/tuscany/interop" );
  //   compareNodeChildren( $node1, $node2, "http://www.apache.org/tuscany/interop/import" );
 
   } catch ( Exception $ex ) {
-   if (( WARN_XSITYPE_DIFFERENCE == "on" ) &&  
+   if (( WARN_XSITYPE_DIFFERENCE == "on" ) &&
        ( ($node1->getName() == "type" ) ||
          ($node2->getName() == "type" ) ) )
    {
-     echo "WARNING: The two XML files are different because: " . $ex->getMessage() . "\n" ;
+     echo "WARNING: The two XML files are different because: " . $ex->getMessage() . "\n";
    }
    else
    {
@@ -239,20 +239,20 @@ function compareXMLNode ( $node1, $node2 )
 }
 
 /*
- * load two XML files an see if they are equal 
+ * load two XML files an see if they are equal
  */
 function compareXMLfiles ( $file1, $file2 )
 {
 
   if (file_exists($file1)) {
-   $xml1 = simplexml_load_file($file1, NULL, LIBXML_NOBLANKS); 
+   $xml1 = simplexml_load_file($file1, NULL, LIBXML_NOBLANKS);
   } else {
      $message = "Failed to open $file1";
      throw new Exception ( $message );
   }
 
   if (file_exists($file2)) {
-   $xml2 = simplexml_load_file($file2, NULL, LIBXML_NOBLANKS); 
+   $xml2 = simplexml_load_file($file2, NULL, LIBXML_NOBLANKS);
   } else {
      $message = "Failed to open $file2";
      throw new Exception ( $message );
@@ -269,7 +269,7 @@ function compareXMLfiles ( $file1, $file2 )
   }
   catch ( Exception $ex )
   {
-    $message = "ERROR: The two XML files are different because: " . $ex->getMessage() ;
+    $message = "ERROR: The two XML files are different because: " . $ex->getMessage();
     throw new Exception ( $message );
   }
 }
@@ -278,7 +278,7 @@ function compareXMLfiles ( $file1, $file2 )
 
 /*****************************************************************************/
 
-/* 
+/*
  * the interop tests themselves
  */
 function test1ReadAndWriteXML ( $commondir, $testname )
@@ -287,7 +287,7 @@ function test1ReadAndWriteXML ( $commondir, $testname )
    $infile  = $commondir . $testname . "-in.xml";
    $outfile = $commondir . $testname . "-php-out.xml";
 
-   try { 
+   try {
      echo $testname . "- read and write XML \n";
      if ( DEBUG == "on" ) {
        echo "Read the schema\n";
@@ -312,7 +312,7 @@ function test1ReadAndWriteXML ( $commondir, $testname )
 
   } catch (Exception $e) {
      echo "Exception in PHP Interop test: ";
-     echo $e->getMessage();  
+     echo $e->getMessage();
      echo "\n";
   }
 }
@@ -335,7 +335,7 @@ function test4ReadAndWriteXSD ( $commondir, $testname )
        echo "Write the output XSD file\n";
      }
      $serializedod = serialize( $root_data_object );
-   
+
      if (!$handle = fopen($commondir . $testname . "-php-out.xsd", 'a')) {
            $message = "Cannot open file ". $testname . "-php-out.xsd";
            throw new Exception( $message );
@@ -344,20 +344,20 @@ function test4ReadAndWriteXSD ( $commondir, $testname )
      if (fwrite($handle, $serializedod) == FALSE) {
          $message = "Cannot write to file " . $testname . "-php-out.xsd";
          throw new Exception( $message );
-     } 
+     }
      if ( DEBUG == "on" ) {
        echo "New file has been written:\n";
      }
   } catch (Exception $e) {
      echo "Exception in PHP Interop test: ";
-     echo $e->getMessage();  
+     echo $e->getMessage();
      echo "\n";
   }
 }
 
 $commondir = dirname(__FILE__) . "/";
 
-// uncomment this so that a debugger can be attached 
+// uncomment this so that a debugger can be attached
 //echo "Ready to start interop tests - hit any key"; $line = fgets(STDIN);
 
 echo "Test 1 - Read and write XML \n";
@@ -482,4 +482,4 @@ test4ReadAndWriteXSD ( $commondir, "interop50" );
 
 // Used for testing the XML comparison functions
 //compareXMLfiles ( "interop00-in.xml", "interop00-out.xml" );
-?> 
+?>

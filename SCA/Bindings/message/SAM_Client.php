@@ -50,7 +50,7 @@ class SCA_Bindings_message_SAMClient {
 //                                          ,
 //                                          'JMSTimeToLive'    => SAM_TIMETOLIVE,
 //                                          'JMSPriority'      => SAM_PRIORITY
-                                      ) ;
+                                      );
 
     /**
      * Constructor -
@@ -78,7 +78,7 @@ class SCA_Bindings_message_SAMClient {
             $msg = $this->getRequest();
             if($msg){
                 /*call the wrapper*/
-                $response = $this->wrapper->onMessage($msg) ;
+                $response = $this->wrapper->onMessage($msg);
                 if (isset($response)){
                     $this->sendResponse($msg,$response);
                 }
@@ -160,7 +160,7 @@ class SCA_Bindings_message_SAMClient {
             /*apply correlation Scheme*/
             $options = ($this->headers !== null) ? $this->headers : array();
             if($this->correlationScheme == 'RequestCorrelIDToCorrelID'){
-                $options[SAM_CORRELID] = $request_msg->header->SAM_CORRELID ;
+                $options[SAM_CORRELID] = $request_msg->header->SAM_CORRELID;
             }
             if($this->correlationScheme == 'RequestMsgIDToCorrelID'){
                 $options[SAM_CORRELID] = $request_msg->header->SAM_MESSAGEID;
@@ -316,10 +316,10 @@ private:
         foreach ($connFactory as $key => $value){
             switch ($key) {
             case "protocol":
-                $protocol = $value ;
+                $protocol = $value;
                 break;
             default:
-                $optionsarray[self::$samOptions[$key]] = $value ;
+                $optionsarray[self::$samOptions[$key]] = $value;
                 break;
             }
         }

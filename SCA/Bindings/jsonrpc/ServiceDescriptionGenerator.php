@@ -41,7 +41,7 @@ class SCA_Bindings_Jsonrpc_ServiceDescriptionGenerator
             SCA::sendHttpHeader('Content-type: text/plain');
             echo $smd_str;
         } catch (SCA_RuntimeException $se ) {
-            echo $se->exceptionString() . "\n" ;
+            echo $se->exceptionString() . "\n";
         } catch( SDO_DAS_XML_FileException $e) {
             throw new SCA_RuntimeException("{$e->getMessage()} in {$e->getFile()}");
         }

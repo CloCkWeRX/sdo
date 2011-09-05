@@ -40,7 +40,7 @@ class HelloPersonService
     */
     public function hello(\$person)
     {
-        return "hello \$person->name, you were born in \$person->pob on \$person->dob" ;
+        return "hello \$person->name, you were born in \$person->pob on \$person->dob";
     }
 }
 ?>
@@ -106,5 +106,3 @@ if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "Bug12193Test::main");
     Bug12193Test::main();
 }
-
-?>

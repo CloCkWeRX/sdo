@@ -40,9 +40,9 @@ $Id: SCA_LogFactory.php 254122 2008-03-03 17:56:38Z mfp $
 * For the 'LogFactory to recognize this the following configuration items must
 * be set in 'php.ini -
 *
-* ; Enable a different logger to masquerade as the SCA_Logger
-* ;   sca.logger : "path/filename.php" of the mapping file ( path can be omitted )
-* ;   sca.logger.parameters : ordered comma delimited list (param1,param2,param3)
+*; Enable a different logger to masquerade as the SCA_Logger
+*;   sca.logger : "path/filename.php" of the mapping file ( path can be omitted )
+*;   sca.logger.parameters : ordered comma delimited list (param1,param2,param3)
 *
 * sca.logger=SCA_PHPZero_Map.php
 * sca.logger.parameters=param1,param2,param3
@@ -67,11 +67,11 @@ $Id: SCA_LogFactory.php 254122 2008-03-03 17:56:38Z mfp $
 class SCA_LogFactory {
 
     /* Instance of the logger class                                       */
-    private  static      $thelogger          = null ;
+    private  static      $thelogger          = null;
 
     /* The logger masquerading as the SCA_Logger                          */
-    private  static      $logger             = null ;
-    private  static      $paramargs          = null ;
+    private  static      $logger             = null;
+    private  static      $paramargs          = null;
 
      /**
      * create an instance of a logger.
@@ -83,12 +83,12 @@ class SCA_LogFactory {
      */
     public static function create()
     {
-        self::$logger = self::_loggingmode() ;
+        self::$logger = self::_loggingmode();
 
-        include_once self::$logger ;
+        include_once self::$logger;
 
         self::$thelogger = self::_linkLog( self::_findclassname( self::$logger ));
-        return self::$thelogger ;
+        return self::$thelogger;
 
     }/* End sca log constructor                                           */
 
@@ -100,19 +100,19 @@ class SCA_LogFactory {
      */
     private static function _linkLog( $class_name )
     {
-        $link       = array() ;
+        $link       = array();
 
         /* build the correct callback for the selected logger             */
         if ( $class_name === 'SCA_Logger' ) {
-            $link = array( $class_name, 'singleSCA_Logger' ) ;
+            $link = array( $class_name, 'singleSCA_Logger' );
 
         } else {
-            $link = array( $class_name, 'loadLogger' ) ;
+            $link = array( $class_name, 'loadLogger' );
         }
 
         /* link in the logger                                             */
         // Passing in empty array() to suppress warning
-        return call_user_func_array( $link, /*null*/array()) ;
+        return call_user_func_array( $link, /*null*/array());
 
     }/* End link log function                                             */
 
@@ -124,14 +124,14 @@ class SCA_LogFactory {
     private static function _loggingmode()
     {
         if ( false !== ($logger = get_cfg_var( 'sca.logger' )) ) {
-            return $logger ;
+            return $logger;
         }else{
             return 'SCA/SCA_Logger.php';
 
         }
 
         if ( false !== ($params = get_cfg_var( 'sca.logger.parameters' )) ) {
-            self::$paramargs = self::_stringtoarray( $params ) ;
+            self::$paramargs = self::_stringtoarray( $params );
         }
 
     }/* End in php zero function                                          */
@@ -144,19 +144,19 @@ class SCA_LogFactory {
      */
     private static function _findclassname( $candidate )
     {
-        $instance   = "" ;
+        $instance   = "";
 
         //replace any backslash with forward slash
         $line         = str_replace( "\\", "/", $candidate );
         $arrayOfLine  = explode('/', (trim($line)));
-        $bits         = count( $arrayOfLine ) ;
+        $bits         = count( $arrayOfLine );
 
         if ( ($last = strrpos( $arrayOfLine[ --$bits ], '.php' )) > 0 ) {
-            $instance = substr( $arrayOfLine[ $bits ], 0, $last ) ;
+            $instance = substr( $arrayOfLine[ $bits ], 0, $last );
 
         }
 
-        return $instance ;
+        return $instance;
 
     }/* End find class name                                               */
 
@@ -176,19 +176,19 @@ class SCA_LogFactory {
      * @return array
      */
     private static function _stringtoarray( $cdstring ) {
-        $token      = "," ;
-        $array      = array() ;
+        $token      = ",";
+        $array      = array();
 
-        $parameter  = strtok( $cdstring, $token ) ;
+        $parameter  = strtok( $cdstring, $token );
 
-        for ( $i = 0 ; $parameter !== false ;  $i++ ) {
-            $parameter   = trim( $parameter ) ;
-            $array[ $i ] = $parameter ;
-            $parameter   = strtok( $token ) ;
+        for ( $i = 0; $parameter !== false;  $i++ ) {
+            $parameter   = trim( $parameter );
+            $array[ $i ] = $parameter;
+            $parameter   = strtok( $token );
 
         }
 
-        return $array ;
+        return $array;
 
     }/* End string to array function                                      */
 

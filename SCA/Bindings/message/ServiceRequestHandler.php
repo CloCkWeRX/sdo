@@ -70,7 +70,7 @@ class SCA_Bindings_message_ServiceRequestHandler
                 SCA::$logger->log("Wsdl Type = {$wsdl_filename}");
                 $mapper->setWSDLTypes($wsdl_filename);
             } catch( SCA_RuntimeException $wsdlerror ) {
-                echo $wsdlerror->exceptionString() . "\n" ;
+                echo $wsdlerror->exceptionString() . "\n";
             }
         }
 
@@ -88,6 +88,6 @@ class SCA_Bindings_message_ServiceRequestHandler
 
         echo ">> Test END <<";
         SCA::$logger->log("exiting");
-        return ;
+        return;
     }
 }

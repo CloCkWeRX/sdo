@@ -43,7 +43,7 @@ class SCA_MessageBindingTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->mpd  = file_get_contents(dirname(__FILE__) . "/TestServiceCorrectMPD");
-        SCA_Bindings_message_SAMClient::$test_mode = true ;
+        SCA_Bindings_message_SAMClient::$test_mode = true;
 
         /*preparing test messages for testOperationSelection
              msg1 has 'scaOperationName' property, and = 'hello'
@@ -64,7 +64,7 @@ class SCA_MessageBindingTest extends PHPUnit_Framework_TestCase
         /*copy names.xsd to current directory*/
         copy(dirname(__FILE__)."/names_xsd","names.xsd");
 
-        
+
     }
 
     public function tearDown()
@@ -79,13 +79,13 @@ class SCA_MessageBindingTest extends PHPUnit_Framework_TestCase
             unlink('./MS_TestServiceSDO.wsdl');
         }
         unlink("./names.xsd");
- 
+
     }
 
     public function testMPDGeneration()
     {
         //global $HTTP_RAW_GET_DATA;
-    
+
         $_SERVER['HTTP_HOST'] = 'localhost';
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['SCRIPT_FILENAME'] = 'MS_TestService.php';
@@ -103,7 +103,7 @@ class SCA_MessageBindingTest extends PHPUnit_Framework_TestCase
 
     public function testOperationSelection(){
         unset($_SERVER['REQUEST_METHOD']);
-        
+
         ob_start();
         SCA_Bindings_message_SAMClient::$test_queueborker['queue://MS_TestService'] = $this->msg1;
         SCA::initComponent("MS_TestService.php");
@@ -115,12 +115,12 @@ class SCA_MessageBindingTest extends PHPUnit_Framework_TestCase
         SCA::initComponent("MS_TestService.php");
         $out2 = ob_get_contents();
         ob_end_clean();
-  
+
 
         $this->assertContains('hello', $out1);
         $this->assertContains('onMessage', $out2);
     }
-    
+
 
     public function testWrapperAndProxy()
     {
@@ -151,7 +151,7 @@ class SCA_MessageBindingTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(3,sizeof($sdo->name));
 
     }
-      
+
 
     public static function main()
     {

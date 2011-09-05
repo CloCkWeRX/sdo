@@ -83,6 +83,6 @@ class SCA_Bindings_Jsonrpc_ServiceRequestHandler
 
             echo $response;
         }
-        return ;
+        return;
     }
 }

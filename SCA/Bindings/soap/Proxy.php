@@ -103,7 +103,7 @@ function errorHandler(  $errno, $errstr, $errfile, $errline )
     if ( strpos($errstr, "SDO_Exception") !== false )
     throw new SCA_RuntimeException($errstr);
 
-    return false ;
+    return false;
 
 }/* End callback error handler                                                 */
 
@@ -120,7 +120,7 @@ class SCA_Bindings_soap_Proxy extends SoapClient
     protected $sdo_type_handler_class_name = "SCA_Bindings_soap_Mapper";
 
     //TODO Chris says error handler does not work any longer ....
-    private $previousErrorHandler ;
+    private $previousErrorHandler;
 
     public function __construct($target, $base_path_for_relative_paths,
     $binding_config)
@@ -156,7 +156,7 @@ class SCA_Bindings_soap_Proxy extends SoapClient
                 . $absolute_path_to_target_wsdl
                 . " The document returned was empty. One explanation for this may be apache bug 39662. See http://issues.apache.org/bugzilla/show_bug.cgi?id=36692. You may need to obtain the WSDL in a browser and save it as a local file.");
             }
-            throw $se ;
+            throw $se;
 
         }
         try {
@@ -202,8 +202,8 @@ class SCA_Bindings_soap_Proxy extends SoapClient
         SCA::$logger->log("method name = $method_name");
 
         if (SCA_Helper::wsdlWasGeneratedForAnScaComponent($this->wsdl_file_name)) {
-            $return        = null ;
-            $operation_sdo = null ;
+            $return        = null;
+            $operation_sdo = null;
             /* Break out of the 'call' in the event of an SDO problem               */
             try
             {
@@ -283,7 +283,7 @@ class SCA_Bindings_soap_Proxy extends SoapClient
      *
      */
     private function _getNamespaceForMethodName($xmldas, $method_name) {
-        $regexp_str = '/\((.*)#' . $method_name . '\)/' ;
+        $regexp_str = '/\((.*)#' . $method_name . '\)/';
         ob_start();
         print $xmldas;
         $input = ob_get_contents();
@@ -315,25 +315,25 @@ class SCA_Bindings_soap_Proxy extends SoapClient
     public function getLastSoapResponse()
     {
         $response = $this->__getLastResponse();
-        return    $response ;
+        return    $response;
     }
 
     public function getLastSoapResponseHeaders()
     {
         $response = $this->__getLastResponseHeaders();
-        return    $response ;
+        return    $response;
     }
 
     public function getLastSoapRequest()
     {
         $response = $this->__getLastRequest();
-        return    $response ;
+        return    $response;
     }
 
     public function getLastSoapRequestHeaders()
     {
         $response = $this->__getLastRequestHeaders();
-        return    $response ;
+        return    $response;
     }
 
     /**

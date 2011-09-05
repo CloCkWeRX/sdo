@@ -47,7 +47,7 @@ class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper
 
 
             if ( $e instanceof SDO_Exception )
-            $problem = "SDO_Exception in setWSDLTypes : " . $problem ;
+            $problem = "SDO_Exception in setWSDLTypes : " . $problem;
 
             /**
                  * Depending on whether the function is being used on the

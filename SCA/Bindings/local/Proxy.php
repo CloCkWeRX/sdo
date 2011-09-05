@@ -54,8 +54,8 @@ $Id: Proxy.php 238265 2007-06-22 14:32:40Z mfp $
 
 class SCA_Bindings_local_Proxy {
 
-    private $instance_of_the_component            = null ;
-    private $component_class_name                 = null ;
+    private $instance_of_the_component            = null;
+    private $component_class_name                 = null;
 
     /**
       * Create the local proxy to the service given as an argument.
@@ -71,7 +71,7 @@ class SCA_Bindings_local_Proxy {
         SCA_Helper::guessClassName($absolute_path_to_component);
 
         if (!class_exists($this->component_class_name, false)) {
-            include_once "$absolute_path_to_component" ;
+            include_once "$absolute_path_to_component";
         }
 
         $this->instance_of_the_component = SCA::createInstance($this->component_class_name);

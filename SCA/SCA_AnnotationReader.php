@@ -80,7 +80,7 @@ class SCA_AnnotationReader
                 }
             }
         } catch( SCA_RuntimeException $se ) {
-            throw $se ;
+            throw $se;
         } catch ( Exception $e ) {
             throw new SCA_RuntimeException($e->getMessage());
         }
@@ -113,7 +113,7 @@ class SCA_AnnotationReader
             throw new SCA_RuntimeException(
             "The following error occured while examining the comment block for instance variable "
             . $ref_prop->getName() . ": " .
-            $e->getMessage()) ;
+            $e->getMessage());
         }
 
         return $references;
@@ -249,7 +249,7 @@ class SCA_AnnotationReader
         $interface_methods);
 
         $operations = array();
-        $comment    = null ;
+        $comment    = null;
 
         /* Check the comment of each method to find any annotations so that
         * a wsdl can be generated from the .php file.
@@ -270,7 +270,7 @@ class SCA_AnnotationReader
                     $method_reader->getMethodAnnotations();
 
                     if ( $methodAnnotations != null ) {
-                        $thisElement = 0 ;
+                        $thisElement = 0;
 
                         /* Each set of method annotations contain a set of 1
                         * or more  parameter annotations, and 1 return
@@ -307,7 +307,7 @@ class SCA_AnnotationReader
 
                                     }/* End only for object descriptions   */
 
-                                    $thisElement++ ; // next annotation
+                                    $thisElement++; // next annotation
                                 }/* End all of the sub-sets                */
                             }
                         }/* End all of method annotation set               */
@@ -316,7 +316,7 @@ class SCA_AnnotationReader
             }/* End comment has value                                      */
 
             /* Save the annotation set indexed by the method name.         */
-            $operations[$service_method->getName()] = $methodAnnotations ;
+            $operations[$service_method->getName()] = $methodAnnotations;
 
         }/* End every method                                               */
 
@@ -352,6 +352,6 @@ class SCA_AnnotationReader
                 return true;
             }
         }
-        return false ;
+        return false;
     }
 }

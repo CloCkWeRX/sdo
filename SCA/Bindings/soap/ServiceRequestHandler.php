@@ -58,7 +58,7 @@ class SCA_Bindings_soap_ServiceRequestHandler
             SCA::$logger->log("Wsdl Type = {$wsdl_filename}");
             $handler->setWSDLTypes($wsdl_filename);
         } catch( SCA_RuntimeException $wsdlerror ) {
-            echo $wsdlerror->exceptionString() . "\n" ;
+            echo $wsdlerror->exceptionString() . "\n";
         }
 
         if (SCA_Helper::wsdlWasGeneratedForAnScaComponent($wsdl_filename)) {

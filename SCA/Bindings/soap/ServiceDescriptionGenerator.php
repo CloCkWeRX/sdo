@@ -41,7 +41,7 @@ class SCA_Bindings_soap_ServiceDescriptionGenerator
         }
         catch (SCA_RuntimeException $se )
         {
-            echo $se->exceptionString() . "\n" ;
+            echo $se->exceptionString() . "\n";
         } catch( SDO_DAS_XML_FileException $e) {
             echo "{$e->getMessage()} in {$e->getFile()}";
         }
@@ -200,8 +200,8 @@ class SCA_Bindings_soap_ServiceDescriptionGenerator
 
         /* When namespace annotation has been captured from the php file ....     */
         if (count($service_desc->xsd_types) > 0) {
-            $xmlns_types  = "" ;
-            $schema_types = "" ;
+            $xmlns_types  = "";
+            $schema_types = "";
             $xsd_count    = 0;
             //            $namespace_to_prefix_map = array();
             foreach ($service_desc->xsd_types as $index => $xsds) {
@@ -219,11 +219,11 @@ class SCA_Bindings_soap_ServiceDescriptionGenerator
             }
 
             /* Make up the wsdl elements                                            */
-            $types_element              .= $xmlns_types ;
+            $types_element              .= $xmlns_types;
             $target_namespace_in_quotes  = self::QUOTES . $wsdl->targetNamespace . self::QUOTES;
             $types_element              .= "      targetNamespace=$target_namespace_in_quotes\n";
             $types_element              .= "      elementFormDefault=" . self::QUOTES . "qualified" . self::QUOTES . ">\n";
-            $types_element              .= $schema_types ;
+            $types_element              .= $schema_types;
         } else {
             /* No namespaces                                                        */
             $target_namespace_in_quotes  = self::QUOTES . $wsdl->targetNamespace . self::QUOTES;

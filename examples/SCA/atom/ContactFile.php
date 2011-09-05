@@ -6,9 +6,9 @@ include_once "SCA/SCA.php";
 
 /**
  * A service for managing contact details held as files.
- * 
+ *
  * @service
- * 
+ *
  *
  * @types http://example.org/contacts contacts.xsd
  */
@@ -35,7 +35,7 @@ class ContactFile {
 
             $xmldas = SDO_DAS_XML::create('contacts.xsd');
 
-            for($i=$first; $i<=$last ; $i++){
+            for($i=$first; $i<=$last; $i++){
 
                 if (file_exists("Contact/$i.xml")){
                     $doc = $xmldas->loadFile("Contact/$i.xml");
@@ -77,7 +77,7 @@ class ContactFile {
 
     }
     /**
-     * Create a file representing a contact from an SDO passed in. 
+     * Create a file representing a contact from an SDO passed in.
      */
     function create($contact) {
 
@@ -128,7 +128,7 @@ class ContactFile {
     }
 
     /**
-     * Retrieve a contact 
+     * Retrieve a contact
      */
     function retrieve($id){
 

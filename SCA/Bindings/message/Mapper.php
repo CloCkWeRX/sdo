@@ -32,7 +32,7 @@
 
 class SCA_Bindings_message_Mapper {
 
-    protected $xmldas       = null ;
+    protected $xmldas       = null;
 
     public function __construct()
     {
@@ -64,7 +64,7 @@ class SCA_Bindings_message_Mapper {
             SCA::$logger->log("exception thrown from create(): $problem");
 
             if ( $e instanceof SDO_Exception )
-            $problem = "SDO_Exception in setWSDLTypes : " . $problem ;
+            $problem = "SDO_Exception in setWSDLTypes : " . $problem;
 
             trigger_error($problem);
 
@@ -89,7 +89,7 @@ class SCA_Bindings_message_Mapper {
         {
             $problem = $e->getMessage();
             if ( $e instanceof SDO_Exception )
-            $problem = "SDO_Exception in fromXML : " . $problem ;
+            $problem = "SDO_Exception in fromXML : " . $problem;
 
             trigger_error($problem);
 
@@ -113,7 +113,7 @@ class SCA_Bindings_message_Mapper {
         {
             $problem = $e->getMessage();
             if ( $e instanceof SDO_Exception )
-            $problem = "SDO_Exception in createDataObject : " . $problem ;
+            $problem = "SDO_Exception in createDataObject : " . $problem;
 
             trigger_error($problem);
 

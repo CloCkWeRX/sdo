@@ -32,7 +32,7 @@ require_once "SCA/Bindings/xmlrpc/ServiceDescriptionGenerator.php";
 class SCA_Bindings_Xmlrpc_Wrapper {
 
     private $class_name  = null;
-    private $instance_of_the_base_class  = null ;
+    private $instance_of_the_base_class  = null;
     private $xmlrpc_das  = null;
     private $annotations = null;
     private $method_aliases = array();

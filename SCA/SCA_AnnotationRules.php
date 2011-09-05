@@ -38,25 +38,25 @@ $Id: SCA_AnnotationRules.php 234945 2007-05-04 15:05:53Z mfp $
 
 
 class SCA_AnnotationRules {
-    const PARAM            = "@param"  ;
-    const RETRN            = "@return" ;
-    const NAME             = "@name" ;
-    const TYPES            = "@types" ;
-    const AT               = "@" ;
-    const DOLLAR           = "\$" ;
-    const BACKSLASH        = "\\" ;
-    const FORESLASH        = "/" ;
-    const DOT              = "." ;
-    const SPACE            = " " ;
-    const LEFTBRACKET      = "(" ;
-    const RIGHTBRACKET     = ")" ;
-    const BRACKETS         = "()" ;
-    const STAR             = "*" ;
+    const PARAM            = "@param";
+    const RETRN            = "@return";
+    const NAME             = "@name";
+    const TYPES            = "@types";
+    const AT               = "@";
+    const DOLLAR           = "\$";
+    const BACKSLASH        = "\\";
+    const FORESLASH        = "/";
+    const DOT              = ".";
+    const SPACE            = " ";
+    const LEFTBRACKET      = "(";
+    const RIGHTBRACKET     = ")";
+    const BRACKETS         = "()";
+    const STAR             = "*";
 
-    const   PARAM_ANNOTATION        = 'parameters' ;
-    const   RETRN_ANNOTATION        = 'return' ;
+    const   PARAM_ANNOTATION        = 'parameters';
+    const   RETRN_ANNOTATION        = 'return';
 
-    private $token         = self::DOLLAR ;
+    private $token         = self::DOLLAR;
 
     // TODO make this the right list
     private $dataTypeArray = array ( 'boolean'
@@ -67,7 +67,7 @@ class SCA_AnnotationRules {
     , 'float'
     , 'double'
     , 'real'
-    ) ;
+    );
 
     /**
      * Constructor for SCA_AnnotationRules
@@ -88,7 +88,7 @@ class SCA_AnnotationRules {
     {
         return ( $this->isParameter($line) || $this->isReturn($line) ||
                  $this->isName($line)) ?
-            true : false ;
+            true : false;
 
     }/* End is parameter function                                              */
 
@@ -100,7 +100,7 @@ class SCA_AnnotationRules {
      */
     public function isParameter( $line )
     {
-        return ( strpos($line, self::PARAM) != false ) ? true : false ;
+        return ( strpos($line, self::PARAM) != false ) ? true : false;
     }/* End is parameter function                                              */
 
     /**
@@ -111,7 +111,7 @@ class SCA_AnnotationRules {
      */
     public function isReturn( $line )
     {
-        return ( strpos($line, self::RETRN) != false ) ? true : false ;
+        return ( strpos($line, self::RETRN) != false ) ? true : false;
     }/* End is return function                                                 */
 
     /**
@@ -122,7 +122,7 @@ class SCA_AnnotationRules {
      */
     public function isName( $line )
     {
-        return ( strpos($line, self::NAME) != false ) ? true : false ;
+        return ( strpos($line, self::NAME) != false ) ? true : false;
     }/* End is name function                                                   */
 
     /**
@@ -144,7 +144,7 @@ class SCA_AnnotationRules {
      */
     public function isVariable( $word )
     {
-        return  ( strpos($word, self::DOLLAR) === 0 ) ? true : false ;
+        return  ( strpos($word, self::DOLLAR) === 0 ) ? true : false;
 
     }/* End is variable function                                               */
 
@@ -160,7 +160,7 @@ class SCA_AnnotationRules {
     {
         $namepart = trim($variableName, $this->token);
 
-        return ( strcmp($name, $namepart) === 0 ) ? true : false ;
+        return ( strcmp($name, $namepart) === 0 ) ? true : false;
 
     }/* End match xsd name function                                            */
 
@@ -174,7 +174,7 @@ class SCA_AnnotationRules {
     public function looksLikeNamespace( $word )
     {
         return (  ( strpos($word, self::BACKSLASH) >= 0 )
-        || ( strpos($word, self::FORESLASH) >= 0 ) ) ? true : false ;
+        || ( strpos($word, self::FORESLASH) >= 0 ) ) ? true : false;
 
     }/* End looks like namespace function                                      */
 
@@ -186,19 +186,19 @@ class SCA_AnnotationRules {
      */
     public function isSupportedPrimitiveType( $type )
     {
-        $return = false ;
+        $return = false;
 
         /* Is there a value worth testing?                                     */
         if ( strlen($type) > 0 ) {
             foreach ($this->dataTypeArray as $dataType ) {
                 if ( strpos($dataType, $type) !== false ) {
-                    $return = true ;
-                    break ;
+                    $return = true;
+                    break;
                 }/* End match                                                  */
             }/* End all supported types                                        */
         }/* End something to test                                              */
 
-        return $return ;
+        return $return;
 
     }/* End parse type function                                                */
 
@@ -214,11 +214,11 @@ class SCA_AnnotationRules {
      */
     public static function parseAnnotation( $line )
     {
-        $thesePieces  = null ;
-        $i            = 0 ;
-        $comment      = false ;
-        $commentArray = null ;
-        $j            = 0 ;
+        $thesePieces  = null;
+        $i            = 0;
+        $comment      = false;
+        $commentArray = null;
+        $j            = 0;
         $line         = preg_replace("{[ \t]+}", " ", $line);
         $arrayOfLine  = explode(' ', (trim($line)));
 
@@ -233,11 +233,11 @@ class SCA_AnnotationRules {
                 if ( $element !== self::STAR ) {
                     /* Alter the flow when the word is not a reserved word     */
                     if ( ( strpos($element, self::LEFTBRACKET) ) !== false )
-                    $comment = true ;
+                    $comment = true;
 
                     /* Put the 'word' into either the comment or the definitions array  */
                     if  ( $comment === true )
-                    $commentArray[ $j++ ] = $element ;
+                    $commentArray[ $j++ ] = $element;
                     else
                     $thesePieces[ $i++ ] = trim($element);
 
@@ -252,7 +252,7 @@ class SCA_AnnotationRules {
         $thesePieces[ $i ] = trim((implode(' ', $commentArray)), self::BRACKETS);
 
 
-        return $thesePieces ;
+        return $thesePieces;
 
     }/*End parse annotation function                                           */
 
@@ -272,7 +272,7 @@ class SCA_AnnotationRules {
         // I think the person who wrote this meant ||
         // but it's only a crude check of the parameter and return
         // lines anyway and not right
-        return ( ( $entries < 2 && $entries > 4 ) ? false : true ) ;
+        return ( ( $entries < 2 && $entries > 4 ) ? false : true );
 
     }/* End enough pieces function                                             */
 
@@ -283,11 +283,11 @@ class SCA_AnnotationRules {
      */
     public static function createEmptyAnnotationArray()
     {
-        $emptySet                           = array() ;
-        $emptySet[ self::PARAM_ANNOTATION ] = array() ;
-        $emptySet[ self::RETRN_ANNOTATION ] = null ;
+        $emptySet                           = array();
+        $emptySet[ self::PARAM_ANNOTATION ] = array();
+        $emptySet[ self::RETRN_ANNOTATION ] = null;
 
-        return $emptySet ;
+        return $emptySet;
     }/*End create empty annotation array                                       */
 
 }/* End annotation rules class                                                 */

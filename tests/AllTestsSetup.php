@@ -30,7 +30,7 @@ if ($isavailable == FALSE)
   echo "PHPUnit PEAR package was not found\n";
   echo "The various unit tests require PHPUnit 3.0 to be present in your\n";
   echo "PHP build. PHPUnit 3.0 is available from http://www.phpunit.de/\n";
-  echo "You will probably use pear to install it, and the chances are that\n" ;
+  echo "You will probably use pear to install it, and the chances are that\n";
   echo "you already have pear installed, but to be on the safe side, here are \n";
   echo "complete instructions:\n";
   echo "The instructions for getting pear are here:\n";

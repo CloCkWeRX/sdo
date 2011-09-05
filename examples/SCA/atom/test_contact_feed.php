@@ -57,7 +57,7 @@ echo '<p>';
 /***********************************************/
 echo '<p>';
 echo '<b>Testing Retrieve<br/></b>';
-echo 'Retrieving the entry with id = 1.<br/>' ;
+echo 'Retrieving the entry with id = 1.<br/>';
 $entry = $contact_service->retrieve(1);
 
 echo '<pre>';
@@ -73,8 +73,8 @@ echo '<p>';
 /***********************************************/
 echo '<p>';
 echo '<b>Testing Update<br/></b>';
-echo 'Updating the <i>updated</i> field in entry with id = 1<br/>' ;
-$entry->updated[0]->value = date(DATE_W3C) ; //date('Y-m-j G-i-s');
+echo 'Updating the <i>updated</i> field in entry with id = 1<br/>';
+$entry->updated[0]->value = date(DATE_W3C); //date('Y-m-j G-i-s');
 if ($contact_service->update(1, $entry)) echo 'Update worked';
 echo '</p>';
 echo '<p>';
@@ -86,7 +86,7 @@ echo '<p>';
 /***********************************************/
 echo '<p>';
 echo '<b>Testing Retrieve<br/></b>';
-echo 'Retrieving the entry with id = 1. Note the changed field.<br/>' ;
+echo 'Retrieving the entry with id = 1. Note the changed field.<br/>';
 $entry = $contact_service->retrieve(1);
 
 echo '<pre>';

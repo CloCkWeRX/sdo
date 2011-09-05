@@ -59,8 +59,8 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
 
     }
 
-    //TODO no need to pass these arguments in 
-    public function computeSettingsForSetAndWhereClauses($object_model, $do, $old_values) 
+    //TODO no need to pass these arguments in
+    public function computeSettingsForSetAndWhereClauses($object_model, $do, $old_values)
     {
         $old_values_of_any_changed_properties = SDO_DAS_Relational_SettingListHelper::getSettingsAsArray($old_values);
         // iterate through data object and examine the primitive properties and non-containment references
@@ -94,7 +94,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
         }
     }
 
-    public function convertNonContainmentReferencesFromObjectToPK() 
+    public function convertNonContainmentReferencesFromObjectToPK()
     {
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
         foreach($this->settings_for_set_clause as $prop => $value) {
@@ -126,11 +126,11 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
         $stmt .= $this->constructSetClauseFromChangedValues($this->settings_for_set_clause);
         $stmt .= ' ';
         $stmt .= $this->constructWhereClauseFromOriginalValues($this->settings_for_where_clause);
-        $stmt .= ';'  ;
+        $stmt .= ';';
         return $stmt;
     }
 
-    public function buildValueList() 
+    public function buildValueList()
     {
         $value_list = array();
         foreach($this->settings_for_set_clause as $name => $value) {

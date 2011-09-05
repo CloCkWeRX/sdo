@@ -34,10 +34,10 @@ $Id$
 /*       This is because in the event that this script is activated through a   */
 /*       xmlrpc request, control is passed to SCA and not returned to the script*/
 /*       so the include files will not be loaded.                               */
-include_once ( "BadTickerException.php" ) ;
-include_once ( "BadExchangeException.php" ) ;
+include_once ( "BadTickerException.php" );
+include_once ( "BadExchangeException.php" );
 
-include_once ( "SCA/SCA.php" ) ;
+include_once ( "SCA/SCA.php" );
 
 /**
  * @service
@@ -100,7 +100,7 @@ class StockQuoteService {
         if ($ticker == "IBM") {
             return 76.8;
         } else {
-            throw new BadTickerException(  "Invalid Parameter = " . $ticker ) ;
+            throw new BadTickerException(  "Invalid Parameter = " . $ticker );
         }
     }
 

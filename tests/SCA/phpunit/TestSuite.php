@@ -49,8 +49,8 @@ require_once 'eBaySoap/eBaySoapTest.php';
 require_once 'TargetTests/SCA_TargetTest.php';
 require_once 'RegressionTests/SCA_RegressionTestSuite.php';
 require_once 'SCA/SCATest.php';
-//require_once 'LogTests/SCALoggerTest.php' ;
-//require_once 'LogTests/SCALogFilterTest.php' ;
+//require_once 'LogTests/SCALoggerTest.php';
+//require_once 'LogTests/SCALogFilterTest.php';
 
 class SCA_TestSuite {
 

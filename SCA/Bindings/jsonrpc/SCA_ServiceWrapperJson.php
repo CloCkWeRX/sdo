@@ -43,7 +43,7 @@ class SCA_ServiceWrapperJson
 {
 
     private $class_name = null;
-    private $instance_of_the_base_class = null ;
+    private $instance_of_the_base_class = null;
     private $json_das   = null;
 
     /**

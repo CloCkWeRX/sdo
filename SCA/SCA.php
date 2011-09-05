@@ -73,11 +73,11 @@ $Id: SCA.php 254122 2008-03-03 17:56:38Z mfp $
 *
 */
 
-require_once "SCA/SCA_Exceptions.php" ;
+require_once "SCA/SCA_Exceptions.php";
 require_once "SCA/SCA_AnnotationReader.php";
-require_once "SCA/SCA_Helper.php" ;
-require_once "SCA/SCA_LogFactory.php" ;
-require_once "SCA/SCA_BindingFactory.php" ;
+require_once "SCA/SCA_Helper.php";
+require_once "SCA/SCA_LogFactory.php";
+require_once "SCA/SCA_BindingFactory.php";
 require_once "SCA/SCA_HttpHeaderCatcher.php";
 
 /* TODO remove this once the Tuscany binding is converted to
@@ -90,7 +90,7 @@ class SCA
 {
     const DEBUG = false;
     public static $logger;
-    public static $xml_das_array  = array() ;
+    public static $xml_das_array  = array();
 
     public static $http_header_catcher = null;
     public static function sendHttpHeader($header)
@@ -294,7 +294,7 @@ class SCA
         }
 
         if (!isset($type) || $type == null) {
-            $msg = "The right binding to use could not be inferred from the target {$target}. The binding must be specified as the second argument to SCA::getService()." ;
+            $msg = "The right binding to use could not be inferred from the target {$target}. The binding must be specified as the second argument to SCA::getService().";
             throw new SCA_RuntimeException($msg);
         }
 
@@ -461,7 +461,7 @@ class SCA
 
             $service_description->class_name      = $class_name;
             $service_description->realpath        = realpath($class_file);
-            $service_description->targetnamespace = "http://$class_name" ;
+            $service_description->targetnamespace = "http://$class_name";
 
         } else {
             throw new SCA_RuntimeException("Invalid Classname: $class_name");
@@ -490,7 +490,7 @@ class SCA
 
         // Check if there is a matching xsd in the xmldas array
         if ( array_key_exists($keyname, self::$xml_das_array) ) {
-            $xmldas = self::$xml_das_array[ $keyname ] ;
+            $xmldas = self::$xml_das_array[ $keyname ];
         } else {
             // The trap will only trigger if the Annotations cannot be found
             // normally this is because a SCA Client Component has incorrectly
@@ -499,7 +499,7 @@ class SCA
             try {
                 $class_name = SCA_Helper::guessClassName($filepath);
                 $xmldas     = SCA_Helper::getXmldas($class_name, null);
-                self::$xml_das_array[ $keyname ] = $xmldas ;
+                self::$xml_das_array[ $keyname ] = $xmldas;
             } catch( ReflectionException $e ) {
                 $msg =  $e->getMessage();
                 throw new SCA_RuntimeException( "A PHP ReflectionException was thrown with message $msg. "
@@ -539,7 +539,7 @@ class SCA
 SCA_Helper::checkSdoExtensionLoaded();
 
 $backtrace        = debug_backtrace();
-$immediate_caller = $backtrace[ 0 ][ 'file' ] ;
+$immediate_caller = $backtrace[ 0 ][ 'file' ];
 
 SCA::initComponent($immediate_caller);
 

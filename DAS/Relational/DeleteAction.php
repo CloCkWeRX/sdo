@@ -79,7 +79,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
         return $this->spawned_actions;
     }
 
-    public function convertNonContainmentReferencesFromObjectToPK() 
+    public function convertNonContainmentReferencesFromObjectToPK()
     {
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
         foreach($this->settings_for_where_clause as $prop => $value) {
@@ -91,7 +91,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
         }
     }
 
-    public function buildValueList() 
+    public function buildValueList()
     {
         $value_list = array();
         foreach($this->settings_for_where_clause as $name => $value) {
@@ -109,7 +109,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
         $table_name = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
         $stmt   = 'DELETE FROM ' . $table_name . ' ';
         $stmt .= $this->constructWhereClauseFromOriginalValues($this->settings_for_where_clause);
-        $stmt .= ';'  ;
+        $stmt .= ';';
         return $stmt;
     }
 

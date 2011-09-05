@@ -50,7 +50,7 @@ class SCA_Bindings_message_Proxy {
         if ( $binding_config === null ) {
             $binding_config = array();
         }
-        $binding_config['msd'] = $path_to_msd ;
+        $binding_config['msd'] = $path_to_msd;
 
         /*parse MSD file */
         $msd_config = SCA_Bindings_message_ServiceDescriptionGenerator::parseBindingConfig($binding_config);
@@ -82,7 +82,7 @@ class SCA_Bindings_message_Proxy {
                         . $path_to_wsdl
                         . " The document returned was empty. One explanation for this may be apache bug 39662. See http://issues.apache.org/bugzilla/show_bug.cgi?id=36692. You may need to obtain the WSDL in a browser and save it as a local file.");
                     }
-                    throw $se ;
+                    throw $se;
                 }
             }
         }

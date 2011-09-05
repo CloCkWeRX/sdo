@@ -43,8 +43,8 @@ require_once "SCA/Bindings/soap/Proxy.php";
 
 class SCA_Bindings_soap_Wrapper
 {
-    private $instance_of_the_base_class = null ;
-    private $xmldas                     = null ;
+    private $instance_of_the_base_class = null;
+    private $xmldas                     = null;
     private $class_name                 = null;
 
     public function __construct($class_name, $handler )
