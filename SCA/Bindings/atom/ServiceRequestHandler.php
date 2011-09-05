@@ -1,38 +1,65 @@
 <?php
-/*
-+----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                  |
-| All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
-| http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Graham Charters,                                             |
-|         Matthew Peters,                                              |
-|         Megan Beynon,                                                |
-|         Chris Miller,                                                |
-|         Caroline Maynard,                                            |
-|         Simon Laws                                                   |
-+----------------------------------------------------------------------+
-*/
-include "SCA/Bindings/atom/SCA_ServiceWrapperAtom.php";
+/**
+ * +----------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                  |
+ * | All Rights Reserved.                                                 |
+ * +----------------------------------------------------------------------+
+ * |                                                                      |
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you  |
+ * | may not use this file except in compliance with the License. You may |
+ * | obtain a copy of the License at                                      |
+ * | http://www.apache.org/licenses/LICENSE-2.0                           |
+ * |                                                                      |
+ * | Unless required by applicable law or agreed to in writing, software  |
+ * | distributed under the License is distributed on an "AS IS" BASIS,    |
+ * | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+ * | implied. See the License for the specific language governing         |
+ * | permissions and limitations under the License.                       |
+ * +----------------------------------------------------------------------+
+ * | Author: Graham Charters,                                             |
+ * |         Matthew Peters,                                              |
+ * |         Megan Beynon,                                                |
+ * |         Chris Miller,                                                |
+ * |         Caroline Maynard,                                            |
+ * |         Simon Laws                                                   |
+ * +----------------------------------------------------------------------+
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+
+require_once "SCA/Bindings/atom/SCA_ServiceWrapperAtom.php";
 
 
-class SCA_Bindings_atom_ServiceRequestHandler {
+/**
+ * SCA_Bindings_atom_ServiceRequestHandler
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Atom_ServiceRequestHandler
+{
 
-    private $service_wrapper = null;
-    private $xml_das         = null;
-    private $input_stream    = "php://input";
+    protected $service_wrapper = null;
+    protected $xml_das         = null;
+    protected $input_stream    = "php://input";
 
+    /**
+     * Handle
+     *
+     * @param string $calling_component_filename Filename
+     * @param string $service_description        Service description
+     *
+     * @return mixed
+     */
     public function handle($calling_component_filename, $service_description)
     {
         SCA::$logger->log("Entering");
@@ -102,8 +129,7 @@ class SCA_Bindings_atom_ServiceRequestHandler {
         try {
 
             //Get (and check) the service description for the class.
-            $param_description =
-            $this->service_wrapper->getParametersForMethod($method);
+            $param_description = $this->service_wrapper->getParametersForMethod($method);
 
 
             //NOTE: we always give the component an sdo, but handle sdo or xml back from it.
@@ -138,11 +164,9 @@ class SCA_Bindings_atom_ServiceRequestHandler {
 
 
                     /* only add a trailing slash if there isn't one already */
-                    $slash_if_needed =
-                    preg_match('/\/$/', $_SERVER['REQUEST_URI'])?'':'/';
-                    $port_if_needed =
-                    isset($_SERVER['SERVER_PORT'])?'':
-                    ':'.$_SERVER['SERVER_PORT'];
+                    $slash_if_needed = preg_match('/\/$/', $_SERVER['REQUEST_URI'])?'':'/';
+                    $port_if_needed = isset($_SERVER['SERVER_PORT'])?'': ':'.$_SERVER['SERVER_PORT'];
+
                     //TODO: Ideally we'd Use http host to get the right scheme part
                     //problem with this is it could pick up the wrong port
                     //for some setups.
@@ -285,20 +309,34 @@ class SCA_Bindings_atom_ServiceRequestHandler {
         return;
     }
 
-    //TODO: refactor these methods - also appear in SDO_Typehandler and in AtomProxy
-    private function _fromXml ($xml)
+    /**
+     * From XML
+     *
+     * @param string $xml XML
+     *
+     * @todo refactor these methods - also appear in SDO_Typehandler and in AtomProxy
+     * @return mixed
+     */
+    private function _fromXml($xml)
     {
         try{
             $doc = $this->xml_das->loadString($xml);
             $ret = $doc->getRootDataObject();
             return         $ret;
-        } catch( Exception $e ) {
+        } catch( Exception $e) {
             SCA::$logger->log("Found exception in AtomServer: ".$e->getMessage()."\n");
             return $e->getMessage();
         }
     }
 
-    private function _toXml ($sdo)
+    /**
+     * To XML
+     *
+     * @param SDO $sdo SDO
+     *
+     * @return mixed
+     */
+    private function _toXml($sdo)
     {
         try{
             //get the type of the sdo eg. 'Contact', to avoid using 'BOGUS'

@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                         |
 | All Rights Reserved.                                                        |
@@ -23,29 +23,41 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-*/
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
-/**
-* This class handles incoming Atom requests.
-*/
 
 require_once "SCA/SCA_Exceptions.php";
 
 
+/**
+ * This class handles incoming Atom requests.
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_ServiceWrapperAtom
+{
 
-class SCA_ServiceWrapperAtom {
-
-    private $class_name = null;
-    private $instance_of_the_base_class = null;
-    private $xml_das = null;
+    protected $class_name = null;
+    protected $instance_of_the_base_class = null;
+    protected $xml_das = null;
 
     /**
      * Create the service wrapper for a SCA Component. In the event that the
      * mapping of the SCA Component methods the base_class and xmldas types are
      * set to null.
      *
-     * @param string $class_name
-     * @param string $wsdl_filename
+     * @param string $class_name Class name
      */
     public function __construct($class_name)
     {
@@ -62,9 +74,18 @@ class SCA_ServiceWrapperAtom {
 
         SCA::$logger->log("Exiting Constructor");
 
-    }/* End service wrapper constructor  */
+    }
 
-    //TODO: refactor this back into getXmldas - should just be able to load the atom schema if the namespace and type are http://www.w3.org/2005/Atom and entryType. This needs some thought though as the namespace could change, and someone else might use the type name entryType in a non-atom schema
+    /**
+     * Get XML DAS for Atom
+     *
+     * @param string $class_name    Class name
+     * @param string $namespace_uri Namespace
+     *
+     * @todo refactor this back into getXmldas - should just be able to load the atom schema if the namespace and type are http://www.w3.org/2005/Atom and entryType. This needs some thought though as the namespace could change, and someone else might use the type name entryType in a non-atom schema
+     *
+     * @return XML_DAS
+     */
     public static function getXmldasForAtom($class_name, $namespace_uri)
     {
 
@@ -91,18 +112,29 @@ class SCA_ServiceWrapperAtom {
             }
         }
 
-       // $atomhelperlog->log("SCA_ServiceWrapperAtom::getXmldasForAtom() xmldas after adding other types from the class:: $xmldas \n");
+        // $atomhelperlog->log("SCA_ServiceWrapperAtom::getXmldasForAtom() xmldas after adding other types from the class:: $xmldas \n");
         SCA::$logger->log("Exiting");
 
         return $xmldas;
     }
 
-
+    /**
+     * Get XML DAS
+     *
+     * @return XML_DAS
+     */
     public function getXmlDas()
     {
         return $this->xml_das;
     }
 
+    /**
+     * Determine parameters for method
+     *
+     * @param string $method_name method to call
+     *
+     * @return mixed
+     */
     public function getParametersForMethod($method_name)
     {
         $reader              = new SCA_AnnotationReader($this->instance_of_the_base_class);
@@ -129,7 +161,12 @@ class SCA_ServiceWrapperAtom {
      * Then pass to the method
      * Then wrap the return value back into an SDO. The element name is ...Response with a
      * property ...Return which contains the return value.
-    */
+     *
+     * @param string $method_name method to call
+     * @param mixed  $arguments   arguments to pass
+     *
+     * @return mixed
+     */
     public function __call($method_name, $arguments=null)
     {
         SCA::$logger->log("Entering __call");
@@ -143,15 +180,18 @@ class SCA_ServiceWrapperAtom {
 
         //trigger_error("About to do call_user_func_array\n");
         SCA::$logger->log("About to do call_user_func_array with method $method_name and arguments $arguments \n");
-        $return = call_user_func_array(array(&$this->instance_of_the_base_class,
-        $method_name), $arguments);
+        $return = call_user_func_array(
+            array(&$this->instance_of_the_base_class,
+                  $method_name),
+            $arguments
+        );
         SCA::$logger->log("Got return back from call_user_func_array: $return");
 
 
         SCA::$logger->log("Exiting __call");
 
         return $return;
-    }/* End of call function                                                  */
+    }
 
-}/* End Service Wrapper class                                                 */
+}
 

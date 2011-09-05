@@ -1,38 +1,59 @@
 <?php
-/*
-+----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                  |
-| All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
-| http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Graham Charters,                                             |
-|         Matthew Peters,                                              |
-|         Megan Beynon,                                                |
-|         Chris Miller,                                                |
-|         Caroline Maynard,                                            |
-|         Simon Laws                                                   |
-+----------------------------------------------------------------------+
-*/
+/**
+ * +----------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                  |
+ * | All Rights Reserved.                                                 |
+ * +----------------------------------------------------------------------+
+ * |                                                                      |
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you  |
+ * | may not use this file except in compliance with the License. You may |
+ * | obtain a copy of the License at                                      |
+ * | http://www.apache.org/licenses/LICENSE-2.0                           |
+ * |                                                                      |
+ * | Unless required by applicable law or agreed to in writing, software  |
+ * | distributed under the License is distributed on an "AS IS" BASIS,    |
+ * | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+ * | implied. See the License for the specific language governing         |
+ * | permissions and limitations under the License.                       |
+ * +----------------------------------------------------------------------+
+ * | Author: Graham Charters,                                             |
+ * |         Matthew Peters,                                              |
+ * |         Megan Beynon,                                                |
+ * |         Chris Miller,                                                |
+ * |         Caroline Maynard,                                            |
+ * |         Simon Laws                                                   |
+ * +----------------------------------------------------------------------+
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
+/**
+ * Atom Server
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_AtomServer
+{
 
-class SCA_AtomServer {
+    protected $service_wrapper = null;
+    protected $xml_das         = null;
+    protected $input_stream    = "php://input";
 
-    private $service_wrapper = null;
-    private $xml_das         = null;
-    private $input_stream    = "php://input";
-
-
+    /**
+     * Atom server
+     *
+     * @param mixed $wrapper Wrapper
+     */
     public function __construct($wrapper)
     {
 
@@ -44,7 +65,11 @@ class SCA_AtomServer {
 
     }
 
-
+    /**
+     * Handle
+     *
+     * @return mixed
+     */
     public function handle()
     {
         SCA::$logger->log("Entering");
@@ -110,8 +135,7 @@ class SCA_AtomServer {
         try {
 
             //Get (and check) the service description for the class.
-            $param_description =
-            $this->service_wrapper->getParametersForMethod($method);
+            $param_description = $this->service_wrapper->getParametersForMethod($method);
 
 
             //NOTE: we always give the component an sdo, but handle sdo or xml back from it.
@@ -121,8 +145,7 @@ class SCA_AtomServer {
                 $sdo = $this->fromXml($rawHTTPContents);
                 //should now have an atom format sdo
 
-                if (!$sdo instanceof SDO_DataObjectImpl)
-                {
+                if (!$sdo instanceof SDO_DataObjectImpl) {
                     SCA::sendHttpHeader("HTTP/1.1 400 Bad Request");
                     echo "Request did not contain valid atom format xml";
                 }
@@ -348,21 +371,36 @@ class SCA_AtomServer {
     }
 
 
-    //TODO: refactor these methods - also appear in SDO_Typehandler and in AtomProxy
-    private function fromXml($xml) {
+    /**
+     * From XML
+     *
+     * @param string $xml XML
+     *
+     * @todo refactor these methods - also appear in SDO_Typehandler and in AtomProxy
+     * @return mixed
+     */
+    protected function fromXml($xml)
+    {
         try{
             $doc = $this->xml_das->loadString($xml);
             $ret = $doc->getRootDataObject();
             return         $ret;
         }
-        catch( Exception $e ) {
+        catch( Exception $e) {
             SCA::$logger->log("Found exception in AtomServer: ".$e->getMessage()."\n");
             return $e->getMessage();
 
         }
     }
 
-    private function toXml($sdo)
+    /**
+     * To XML
+     *
+     * @param SDO $sdo SDO
+     *
+     * @return mixed
+     */
+    protected function toXml($sdo)
     {
 
         try{
@@ -373,14 +411,20 @@ class SCA_AtomServer {
             $xdoc   = $xmldas->createDocument('', $type, $sdo);
             $xmlstr = $xmldas->saveString($xdoc);
             return         $xmlstr;
-        }
-        catch(Exception $e) {
+        } catch(Exception $e) {
             SCA::$logger->log("Found exception in AtomServer: ".$e->getMessage()."\n");
             return $e->getMessage();
         }
     }
 
-    //could take parameters ($input_stream_type, $path) later and manage more types
+    /**
+     * Set input stream
+     *
+     * @param string $file_path File path
+     *
+     * @todo could take parameters ($input_stream_type, $path) later and manage more types
+     * @return null
+     */
     public function setInputStream($file_path)
     {
         $this->input_stream = "file://$file_path";
