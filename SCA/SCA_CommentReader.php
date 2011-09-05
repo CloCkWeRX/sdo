@@ -1,36 +1,53 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
-+-----------------------------------------------------------------------------+
-$Id: SCA_CommentReader.php 254122 2008-03-03 17:56:38Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws                                                          |
+ * +-----------------------------------------------------------------------------+
+ * $Id: SCA_CommentReader.php 254122 2008-03-03 17:56:38Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA_SDO
+ * @package  SCA_SDO
+ * @author   Graham Charters <gcc@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once "SCA/SCA_AnnotationRules.php";
 require_once "SCA/SCA_ReferenceType.php";
 
-
-class SCA_CommentReader {
+/**
+ * Comment Reader
+ *
+ * @category SCA_SDO
+ * @package  SCA_SDO
+ * @author   Graham Charters <gcc@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_CommentReader
+{
 
     const   EOL                     = "\n";
 
@@ -47,22 +64,24 @@ class SCA_CommentReader {
     const   RETRN_ANNOTATION        = 'return';
     const   NAME_ANNOTATION         = 'name';
 
-    private $docComment             = null;
-    private $Rule                   = null;
+    protected $docComment             = null;
+    protected $Rule                   = null;
 
-    private $xsd_types_array           = null;
-    private $returnValues           = null;
+    protected $xsd_types_array        = null;
+    protected $returnValues           = null;
 
-    private $methodAnnotations      = null;
-    private $annotation             = null;
+    protected $methodAnnotations      = null;
+    protected $annotation             = null;
 
-    private $reason                 = null; // In event of an exception
+    protected $reason                 = null; // In event of an exception
 
     /**
      * Pulls out name value pairs from the doc comment
      *
+     * @return array
      */
-    public function getNameValuePairs() {
+    public function getNameValuePairs()
+    {
         $lines = explode("\n", $this->docComment);
 
         $binding_config = array();
@@ -70,19 +89,20 @@ class SCA_CommentReader {
         foreach ($lines as $line) {
             $words = explode(" ", $line);
             for ($i=0; $i<count($words); $i++) {
-                if (($pos = strpos($words[$i], '@') !== false)
-                && isset($words[$i+1])) {
+                $contains_at = ($pos = strpos($words[$i], '@') !== false);
+                $has_next = isset($words[$i+1]);
+
+                if ($contains_at && $has_next) {
                     // If it's come from an annotation we need to get rid of the
                     // newlines.
-                    /*
-                    $temp  = str_replace("\r", "", substr($words[$i], 1, strlen($words[$i])-1));
-                    $name  = str_replace("\n", "", $temp);
-                    $temp  = str_replace("\r", "", $words[$i+1]);
-                    $value = str_replace("\n", "", $temp);
-                    $binding_config[$name] = $value;
-                    */
-                    $binding_config[trim(substr($words[$i], 1,
-                    strlen($words[$i])-1))] = trim($words[$i+1]);
+                    $key = trim(
+                        substr(
+                            $words[$i],
+                            1,
+                            strlen($words[$i]) - 1
+                        )
+                    );
+                    $binding_config[$key] = trim($words[$i+1]);
                 }
             }
         }
@@ -95,29 +115,34 @@ class SCA_CommentReader {
      * @return string The service interface name or null if one isn't specified.
      *
      */
-    public function getServiceInterface() {
+    public function getServiceInterface()
+    {
         $config = $this->getNameValuePairs();
-        if (array_key_exists('service', $config))
+        if (array_key_exists('service', $config)) {
             return $config['service'];
+        }
     }
 
+    /**
+     * Instantiate a new comment reader
+     *
+     * @param string $comment Comment to read
+     */
     public function __construct($comment)
     {
-
         $this->docComment    = $comment;
         $this->Rule          = new SCA_AnnotationRules();
 
-    }/* End constructor method                                                 */
+    }
 
     /**
      * Build a two-dimensional array containing the contents of the method
      * annotations discovered in the document comment.
      * The format of the returned array is compatible with the generate
      * wsdl function
-     *      array( 'parameters' => $parameter_descriptions
-     *         , 'return'     => $return_descriptor
+     *      array( 'parameters' => $parameter_descriptions,
+     *             'return'     => $return_descriptor
      *        );
-     *
      *
      * @return array ( 2dim array containing parameter lines or null )
      * @throws SCA_RuntimeException when an error in the parameter annotation
@@ -132,58 +157,54 @@ class SCA_CommentReader {
         $line = strtok($this->docComment, self::EOL); /* 1st line              */
 
         /* Loop round until all the doc comment has been read                  */
-        while ($line !== false ) {
+        while ($line !== false) {
             /* Is this a 'parameter' line                                      */
-            if ($this->Rule->isMethodAnnotation($line) ) {
+            if ($this->Rule->isMethodAnnotation($line)) {
 
                 /* Extract the components of the annotation into an array      */
                 $words = SCA_AnnotationRules::parseAnnotation($line);
 
-                if ( SCA_AnnotationRules::enoughPieces($words) === true ) {
-                    if ( strcmp($words[0], SCA_AnnotationRules::PARAM) === 0 ) {
-                        $this->methodAnnotations[self::PARAM_ANNOTATION][$i++] =
-                        $this->setParameterValues($words);
-                    } else if ( strcmp($words[0], SCA_AnnotationRules::NAME) === 0 ) {
-                        $this->methodAnnotations[self::NAME_ANNOTATION] =
-                        $this->setMethodAlias($words);
-                    } else {
-                        /* Ensure that no syntax error has been detected       */
-                        if ( ($checkValue = $this->setReturnValues($words)) != null ) {
-                            $this->methodAnnotations[self::RETRN_ANNOTATION][0] =
-                            $checkValue;
-                        } else {
-                            $reason = "Invalid return annotation syntax in '{$line}' ";
-                            throw new SCA_RuntimeException($reason);
-                        }/* End syntax check                                   */
-
-                    }/* End parameter or return annotations                    */
-
-                } else {
+                if (SCA_AnnotationRules::enoughPieces($words) !== true) {
                     $reason = "Invalid method annotation syntax in '{$line}' ";
                     throw new SCA_RuntimeException($reason);
-                }/* End not enough pieces                                      */
+                }
 
-            }/* End no method annotatons in this line                          */
+                if (strcmp($words[0], SCA_AnnotationRules::PARAM) === 0) {
+                    $this->methodAnnotations[self::PARAM_ANNOTATION][$i++] = $this->setParameterValues($words);
+                } else if (strcmp($words[0], SCA_AnnotationRules::NAME) === 0) {
+                    $this->methodAnnotations[self::NAME_ANNOTATION] = $this->setMethodAlias($words);
+                } else {
+                    /* Ensure that no syntax error has been detected       */
+                    if (($checkValue = $this->setReturnValues($words)) != null) {
+                        $this->methodAnnotations[self::RETRN_ANNOTATION][0] = $checkValue;
+                    } else {
+                        $reason = "Invalid return annotation syntax in '{$line}' ";
+                        throw new SCA_RuntimeException($reason);
+                    }
+
+                }
+            }
 
             $line = strtok(self::EOL); /* next line                            */
 
-        }/* End all lines of the comment                                       */
+        }
 
         return $this->methodAnnotations;
 
-    }/* End get the method annotations function                                */
+    }
 
     /**
-    * Build a two-dimensional array containing the contents of the parameter annotations
-    * The format of the paramater annotations differs depending on whether simple type or SDO. e.g.
-    *  - @param string $name (comment)
-    * or
-    *  - @param objectname namespaceprefix nameType (comment)
-    *
-    * @param  array  of raw words
-    * @return array  containing parameter values for the wsdl
-    */
-    public function setParameterValues($words )
+     * Build a two-dimensional array containing the contents of the parameter annotations
+     * The format of the paramater annotations differs depending on whether simple type or SDO. e.g.
+     *  - @param string $name (comment)
+     * or
+     *  - @param objectname namespaceprefix nameType (comment)
+     *
+     * @param array $words of raw words
+     *
+     * @return array  containing parameter values for the wsdl
+     */
+    public function setParameterValues($words)
     {
         $paramValue                   = array();
         $paramValue['annotationType'] = $words[0];
@@ -196,27 +217,29 @@ class SCA_CommentReader {
             throw new SCA_RuntimeException('@param must be followed by a type then a variable name');
         }
 
-        $type                         = $words[1];
-        $param_name                   = $words[2];
+        $type       = $words[1];
+        $param_name = $words[2];
 
-        if (strncmp($param_name,'$',1) !== 0) {
+        if (strncmp($param_name, '$', 1) !== 0) {
             throw new SCA_RuntimeException('The variable name in an @param annotation must begin with a $');
         }
 
         $paramValue['nillable'] = false;
-        $pos_pipe = strpos($type,'|');
+        $pos_pipe = strpos($type, '|');
         if ($pos_pipe !== false) {
-            $after_pipe = substr($type,$pos_pipe+1);
-            $type = substr($type,0,$pos_pipe);
+            $after_pipe = substr($type, $pos_pipe+1);
+            $type = substr($type, 0, $pos_pipe);
             if ($after_pipe == 'null') {
                 $paramValue['nillable'] = true;
             } else {
-                throw new SCA_RuntimeException('@param with a type containing the pipe symbol may only have null as the second type');
+                throw new SCA_RuntimeException(
+                    '@param with a type containing the pipe symbol may only have null as the second type'
+                );
             }
         }
 
         /* When the type is an object the format of the line is different      */
-        if ($this->Rule->isSupportedPrimitiveType($type) === false ) {
+        if ($this->Rule->isSupportedPrimitiveType($type) === false) {
             $paramValue['type']          = 'object';
             $paramValue['name']          = $param_name;
 
@@ -227,20 +250,22 @@ class SCA_CommentReader {
 
             $paramValue['namespace']     = $words[3];
             $paramValue['objectType']    = $type;
-            if ( (count($words)) > 4 )
-            $paramValue['description'] = $words[4];
+            if ((count($words)) > 4) {
+                $paramValue['description'] = $words[4];
+            }
 
         } else {
             $paramValue['type']          = $type;
             $paramValue['name']          = $param_name;
-            if ( (count($words)) > 3 )
-            $paramValue['description'] = $words[3];
+            if ((count($words)) > 3) {
+                $paramValue['description'] = $words[3];
+            }
 
-        }/* End place into the wsdl definitions                                */
+        }
 
         return $paramValue;
 
-    }/* End setParameterValues function                                        */
+    }
 
     /**
     * Build an array containing the contents of return annotation lines.
@@ -249,10 +274,11 @@ class SCA_CommentReader {
     * or
     * - -@return objectname nameType (comment)
     *
-    * @param  array   Containing the raaw words
+    * @param array $words Containing the raw words
+    *
     * @return array   for the WSDL
     */
-    public function setReturnValues($words )
+    public function setReturnValues($words)
     {
         $returnValue                   = array();
         $returnValue['annotationType'] = $words[0];
@@ -260,13 +286,16 @@ class SCA_CommentReader {
         if (!isset($words[1])) {
             throw new SCA_RuntimeException('@return must be followed by a type');
         }
-        $type                          = $words[1];
+
+        $type = $words[1];
 
         $returnValue['nillable'] = false;
-        $pos_pipe = strpos($type,'|');
+
+        $pos_pipe = strpos($type, '|');
+
         if ($pos_pipe !== false) {
-            $after_pipe = substr($type,$pos_pipe+1);
-            $type = substr($type,0,$pos_pipe);
+            $after_pipe = substr($type, $pos_pipe+1);
+            $type = substr($type, 0, $pos_pipe);
             if ($after_pipe == 'null') {
                 $returnValue['nillable'] = true;
             } else {
@@ -275,40 +304,44 @@ class SCA_CommentReader {
         }
 
         /* When the type is an object the format of the line is different      */
-        if ($this->Rule->isSupportedPrimitiveType($type) === false ) {
+        if ($this->Rule->isSupportedPrimitiveType($type) === false) {
             /**
              * Make sure that the return annotation although appearing as if
              * it is an object has enough elements to make the wsdl definition
              */
-            if ( count($words) > 2 ) {
-                $returnValue['type']          = 'object';
-                $returnValue['namespace']     = $words[2];
-                $returnValue['objectType']     = $type;
-                if ( (count($words)) > 3 )
-                $returnValue['description'] = $words[3];
+            if (count($words) > 2) {
+                $returnValue['type']       = 'object';
+                $returnValue['namespace']  = $words[2];
+                $returnValue['objectType'] = $type;
+
+                if ((count($words)) > 3) {
+                    $returnValue['description'] = $words[3];
+                }
             } else {
                 $returnValue =  null; // error return!
             }
 
         } else {
-            $returnValue['type']          = $type;
-            if ( (count($words)) > 2 )
-            $returnValue['description'] = $words[2];
+            $returnValue['type'] = $type;
+            if ((count($words)) > 2) {
+                $returnValue['description'] = $words[2];
+            }
 
 
-        }/* End place into the wsdl definitions                                   */
+        }
 
         return  $returnValue;
 
-    }/* End set return annotation values function                               */
+    }
 
     /**
     * Return method alias specified using @name
     *
-    * @param  array   Containing the raw words
-    * @return array   Method alias (Currently used only for XMLRPC)
+    * @param array $words Containing the raw words
+    *
+    * @return array Method alias (Currently used only for XMLRPC)
     */
-    public function setMethodAlias($words )
+    public function setMethodAlias($words)
     {
         $alias                   = array();
         $alias['annotationType'] = $words[0];
@@ -317,12 +350,12 @@ class SCA_CommentReader {
             throw new SCA_RuntimeException('@name must be followed by a name');
         }
 
-        $alias['name']          = $words[1];
+        $alias['name'] = $words[1];
 
 
         return  $alias;
 
-    }/* End set alias annotation values function                               */
+    }
 
     /**
     * Extract the XML Schema Definition from the script comment
@@ -355,19 +388,30 @@ class SCA_CommentReader {
         return $this->xsd_types_array;
     }
 
+    /**
+     * Is a service?
+     *
+     * @return bool
+     */
     public function isService()
     {
         return $this->_hasAnnotation('service');
     }
 
-    // Return the binding annotation in the comment starting from the specified start position
-    // Update the start position so that the next binding can be retrieved using this method
-    // when scanning bindings for services.
-    //
-    // Return only valid bindings which are identified by the subdirectories under SCA/Bindings
-    //
-    private function getBinding($ignoreLocal=false, &$pos = 0) {
-
+    /**
+     * Return the binding annotation in the comment starting from the specified start position
+     * Update the start position so that the next binding can be retrieved using this method
+     * when scanning bindings for services.
+     *
+     * Return only valid bindings which are identified by the subdirectories under SCA/Bindings
+     *
+     * @param bool $ignoreLocal Ignore local
+     * @param int  &$pos        Position
+     *
+     * @return mixed
+     */
+    protected function getBinding($ignoreLocal = false, &$pos = 0)
+    {
         $binding = null;
 
         // Find the next binding annotation @binding.<binding>
@@ -390,8 +434,9 @@ class SCA_CommentReader {
         }
 
         // binding.php is local binding
-        if ($binding == "php")
-        $binding = $ignoreLocal? null: "local";
+        if ($binding == "php") {
+            $binding = $ignoreLocal? null: "local";
+        }
 
         // Check if this is a known binding - all known bindings have a Binding/<binding>
         // subdirectory under the directory containing SCA.php
@@ -404,16 +449,22 @@ class SCA_CommentReader {
                     break;
                 }
             }
-            if (!isset($bindingDir)||$bindingDir === false)
-            $binding = null;
+
+            if (!isset($bindingDir) || $bindingDir === false) {
+                $binding = null;
+            }
         }
 
         return $binding;
-
     }
 
-    // Find all valid bindings under following a service annotation
-    public function getBindings() {
+    /**
+     * Find all valid bindings under following a service annotation
+     *
+     * @return array
+     */
+    public function getBindings()
+    {
 
         $bindings = array();
         $pos = 0;
@@ -431,7 +482,11 @@ class SCA_CommentReader {
 
     }
 
-
+    /**
+     * Is a web method?
+     *
+     * @return bool
+     */
     public function isWebMethod()
     {
         // currently exposing all methods if the class is a web service
@@ -439,30 +494,58 @@ class SCA_CommentReader {
         return true;
     }
 
+    /**
+     * Is a reference?
+     *
+     * @return bool
+     */
     public function isReference()
     {
         return $this->_hasAnnotation('reference');
     }
+
+    /**
+     * Has a binding?
+     *
+     * @return bool
+     */
     public function hasBinding()
     {
         return $this->_hasAnnotation('binding');
     }
 
+    /**
+     * Is a namespace?
+     *
+     * @return bool
+     */
     public function isNamespace()
     {
         return $this->_hasAnnotation('namespace');
     }
 
 
+    /**
+     * Get reference
+     *
+     * @return mixed
+     */
     public function getReference()
     {
         if ($this->getBinding() != null) {
             return $this->_getSingleWordFollowing(self::BINDING);
-        } else {
-            throw new SCA_RuntimeException("Instance variable has @reference but has no valid @binding.*");
         }
+
+        throw new SCA_RuntimeException(
+            "Instance variable has @reference but has no valid @binding.*"
+        );
     }
 
+    /**
+     * Get full reference
+     *
+     * @return mixed
+     */
     public function getReferenceFull()
     {
         $reference_type = new SCA_ReferenceType();
@@ -473,8 +556,11 @@ class SCA_CommentReader {
         if (($bindingType = $this->getBinding()) != null) {
             $binding = $this->_getSingleWordFollowing(self::BINDING);
             $reference_type->setBindingType($bindingType);
-        }else {
-            throw new SCA_RuntimeException("An @reference was found with no following @binding, or an invalid @binding");
+        } else {
+            throw new SCA_RuntimeException(
+                "An @reference was found with no following"
+                . " @binding, or an invalid @binding"
+            );
         }
 
         $reference_type->addBinding($binding);
@@ -488,41 +574,81 @@ class SCA_CommentReader {
         return $reference_type;
     }
 
+    /**
+     * Get template
+     *
+     * @return mixed
+     */
     public function getTemplate()
     {
         return $this->_getSingleWordFollowing("template");
     }
 
+    /**
+     * Get type
+     *
+     * @return mixed
+     */
     public function getType()
     {
         return $this->_getSingleWordFollowing("type");
     }
 
+    /**
+     * Get icon
+     *
+     * @return mixed
+     */
     public function getIcon()
     {
         return $this->_getSingleWordFollowing("icon");
     }
 
+    /**
+     * Get factory
+     *
+     * @return mixed
+     */
     public function getFactory()
     {
         return $this->_getSingleWordFollowing("factory");
     }
 
+    /**
+     * Get parameter
+     *
+     * @return mixed
+     */
     public function getParameter()
     {
         return $this->_getSingleWordFollowing("parameter");
     }
 
+    /**
+     * Get description
+     *
+     * @return mixed
+     */
     public function getDescription()
     {
         return $this->_getEveryWordFollowing("description");
     }
 
+    /**
+     * Get display name
+     *
+     * @return mixed
+     */
     public function getDisplayName()
     {
         return $this->_getEveryWordFollowing("displayName");
     }
 
+    /**
+     * Get defaults
+     *
+     * @return mixed
+     */
     public function getDefaults()
     {
         $max = $this->getMultiplicity();
@@ -536,31 +662,61 @@ class SCA_CommentReader {
 
     }
 
+    /**
+     * Get choices
+     *
+     * @return mixed
+     */
     public function getChoices()
     {
         return $this->_getValuesFollowing("choices");
     }
 
+    /**
+     * Get expert
+     *
+     * @return mixed
+     */
     public function getExpert()
     {
         return $this->_getBooleanFollowing("expert");
     }
 
+    /**
+     * Get multiplicity
+     *
+     * @return mixed
+     */
     public function getMultiplicity()
     {
         return $this->_getSingleWordFollowing("multiplicity");
     }
 
+    /**
+     * Get regex
+     *
+     * @return mixed
+     */
     public function getRegularExpression()
     {
         return $this->_getSingleWordFollowing("regex");
     }
 
+    /**
+     * Get value provider
+     *
+     * @return mixed
+     */
     public function getValueProvider()
     {
         return $this->_getSingleWordFollowing("valueProvider");
     }
 
+    /**
+     * Get arguments
+     *
+     * @return mixed
+     */
     public function getArguments()
     {
         return $this->_getArgumentsFor("argument");
@@ -574,7 +730,7 @@ class SCA_CommentReader {
     public function because()
     {
         return $this->reason;
-    }/* End because function                                                   */
+    }
 
 
     /**
@@ -582,7 +738,8 @@ class SCA_CommentReader {
      * extra spaces ( shown as a zero length string by explode() ) and tabs
      * make sure that these skipped until the first 'real' word is found.
      *
-     * @param  string  $label
+     * @param string $label Label
+     *
      * @return string
      */
     private function _getSingleWordFollowing($label)
@@ -593,40 +750,61 @@ class SCA_CommentReader {
         $words      = explode(" ", $targetLine);
         $phoneme    = $words[1];
 
-        if ( ($size = count($words)) >1 ) {
+        if (($size = count($words)) >1) {
             /* Ensuring you step over the first word . . .                     */
-            for ($i = 1; $i < $size; $i++  ) {
+            for ($i = 1; $i < $size; $i++) {
                 /* ... ditch all the 'spaces'                                  */
-                if ( strlen($words[$i]) !== 0  ) {
+                if (strlen($words[$i]) !== 0) {
                     $phoneme = $words[$i]; // and grab the 1st word you find
                     break;
                 }
-            }/*End all words in the label                                      */
+            }
 
             return trim($phoneme);
 
-        }/* End there are enough words                                         */
+        }
 
         return null;
     }
 
+    /**
+     * Unknown functionality
+     *
+     * @param string $label Label
+     *
+     * @return bool
+     */
     private function _hasAnnotation($label)
     {
         $pos = strpos($this->docComment, "@" . $label);
-        return ( ($pos !== false) ? true : false);
+        return ($pos !== false);
     }
 
+    /**
+     * Unknown functionality
+     *
+     * @param string $label Label
+     *
+     * @return mixed
+     */
     private function _getEveryWordFollowing($label)
     {
-        $every=$this->_getValuesFollowing($label);
+        $every = $this->_getValuesFollowing($label);
 
-        if ($every==null) {
+        if ($every == null) {
             return null;
         }
 
         return implode(" ", $every);
     }
 
+    /**
+     * Unknown functionality
+     *
+     * @param string $label Label
+     *
+     * @return mixed
+     */
     private function _getValuesFollowing($label)
     {
         $words = explode(" ", strchr($this->docComment, "@" . $label . " "));
@@ -648,6 +826,13 @@ class SCA_CommentReader {
         return $every;
     }
 
+    /**
+     * Unknown functionality
+     *
+     * @param string $label Label
+     *
+     * @return mixed
+     */
     private function _getArgumentsFor($label)
     {
 
@@ -673,11 +858,18 @@ class SCA_CommentReader {
         return $every;
     }
 
+    /**
+     * Unknown functionality
+     *
+     * @param string $label Label
+     *
+     * @return bool
+     */
     private function _getBooleanFollowing($label)
     {
         $word = $this->_getSingleWordFollowing($label);
-        return ($word=='true') ? true : false;
+        return ($word == 'true');
     }
 
-}/* End comment reader class                                                   */
+}
 
