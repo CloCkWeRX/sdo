@@ -62,7 +62,7 @@ class SCA_Bindings_soap_ServiceDescriptionGenerator
         array(
         dirname(__FILE__) . '/2003-02-11.xsd',
         dirname(__FILE__) . '/soap/2003-02-11.xsd'
-        )            );
+        )           );
         // expect to find xsds along with the SCA code
         $wsdl_doc = $xmldas->createDocument();
         $wsdl     = $wsdl_doc->getRootDataObject();

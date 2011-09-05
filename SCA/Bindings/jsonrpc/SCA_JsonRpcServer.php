@@ -110,7 +110,7 @@ class SCA_JsonRpcServer {
             ob_start();
             $debug =  " ParamName: "  . $param_name . " ParamValue: " . $param_value . " ParamType: "  . $param_type . "\n";
             echo $debug;
-            print_r( $param_description );
+            print_r( $param_description);
             $debug = ob_get_contents();
             ob_end_clean();
             file_put_contents("json_messages.txt",

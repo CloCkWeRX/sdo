@@ -1,5 +1,5 @@
-<?php 
-/* 
+<?php
+/*
 +----------------------------------------------------------------------+
 | Copyright IBM Corporation 2005, 2007.                                |
 | All Rights Reserved.                                                 |
@@ -42,13 +42,13 @@ class TestObjectModel extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns'=> array('id'),
         'PK' => 'id'
-        );
+       );
         $department_table_metadata = array(
         'name' => 'department',
         'columns'=> array('id'),
         'PK' => 'id',
         'FK' => array ('from' => 'id' , 'to' => 'company')
-        );
+       );
         $database_metadata = array($company_table_metadata, $department_table_metadata);
         $department_reference = array('parent' => 'company', 'child' => 'department');
         $SDO_references_metadata = array($department_reference);
@@ -70,13 +70,13 @@ class TestObjectModel extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns'=> array('id'),
         'PK' => 'id'
-        );
+       );
         $department_table_metadata = array(
         'name' => 'department',
         'columns'=> array('id'),
         'PK' => 'id',
         'FK' => array ('from' => 'id' , 'to' => 'company')
-        );
+       );
         $database_metadata = array($company_table_metadata, $department_table_metadata);
 
         $department_reference = array('parent' => 'not-a-valid-table', 'child' => 'department');
@@ -100,13 +100,13 @@ class TestObjectModel extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns'=> array('id'),
         'PK' => 'id'
-        );
+       );
         $department_table_metadata = array(
         'name' => 'department',
         'columns'=> array('id'),
         'PK' => 'id',
         // deliberately comment this one out to remove the supportingFK     'FK' => array ('from' => 'id' , 'to' => 'company')
-        );
+       );
         $database_metadata = array($company_table_metadata, $department_table_metadata);
         $department_reference = array('parent' => 'company', 'child' => 'department');
         $SDO_references_metadata = array($department_reference);

@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                  |
 | All Rights Reserved.                                                 |
@@ -20,29 +20,29 @@
 +----------------------------------------------------------------------+
 $Id: interop-rdbms-db2.php 219957 2006-09-14 12:16:19Z slaws $
 */
-   
+
     require_once 'SDO/DAS/Relational.php';
-  
+
     // Describe the structure of the alltypeparent table
     $alltypeparent_table = array('name' => 'alltypeparent',
-                                 'columns' => array( 'parentid', 
+                                 'columns' => array( 'parentid',
                                                      'description'),
                                  'PK' => 'parentid');
 
     // Describe the structure of the alltype table
     $alltype_table = array('name' => 'alltype',
-                           'columns' => array( 'asmallint', 
-                                               'ainteger', 
-                                               'abigint', 
-                                               'afloat', 
-                                               'adouble', 
-                                               'adoubleprecision', 
-                                               'areal', 
-                                               'adecimal', 
-                                               'adate', 
-                                               'atimestamp', 
-                                               'atime', 
-                                               'achar', 
+                           'columns' => array( 'asmallint',
+                                               'ainteger',
+                                               'abigint',
+                                               'afloat',
+                                               'adouble',
+                                               'adoubleprecision',
+                                               'areal',
+                                               'adecimal',
+                                               'adate',
+                                               'atimestamp',
+                                               'atime',
+                                               'achar',
                                                'avarchar',
                                                'parentid' ),
                            'PK' => 'asmallint',
@@ -50,8 +50,8 @@ $Id: interop-rdbms-db2.php 219957 2006-09-14 12:16:19Z slaws $
 		                           'from' => 'parentid',
 		                           'to' => 'alltypeparent'
 		                            )
-                          );
-                       
+                         );
+
 
     // create the meta data structure for the single table
     $table_metadata = array($alltypeparent_table, $alltype_table);
@@ -63,60 +63,60 @@ $Id: interop-rdbms-db2.php 219957 2006-09-14 12:16:19Z slaws $
     // Create the Relational Data Access Service telling it the database
     // schema, that table should be considered the root of the graph,
     // and finally the additional information for the object model.
-    $das = new SDO_DAS_Relational($table_metadata, 'alltypeparent',$reference_metadata );
+    $das = new SDO_DAS_Relational($table_metadata, 'alltypeparent',$reference_metadata);
 
     // no security on my local database so access control strings are empty
     $user = "";
     $password = "";
-    
-    try 
+
+    try
     {
       // connect to the DB2 database.  This connection will be released when the
-      // $dbh variable is cleaned up. 
+      // $dbh variable is cleaned up.
       $dbh = new PDO("odbc:interop", $user, $password, array(
-                            PDO::ATTR_PERSISTENT => TRUE, 
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));                                      
-      
+                            PDO::ATTR_PERSISTENT => TRUE,
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+
       // construct the SQL query for contact retrieval
-      $stmt = "select p.parentid, p.description, a.asmallint, a.ainteger, a.abigint, a.afloat, a.adouble, a.adoubleprecision, a.areal, a.adecimal, a.adate, a.atimestamp, a.atime, a.achar, a.avarchar from alltypeparent p, alltype a where p.parentid = a.parentid ";    
-       
+      $stmt = "select p.parentid, p.description, a.asmallint, a.ainteger, a.abigint, a.afloat, a.adouble, a.adoubleprecision, a.areal, a.adecimal, a.adate, a.atimestamp, a.atime, a.achar, a.avarchar from alltypeparent p, alltype a where p.parentid = a.parentid ";
+
       // execute the query to retrieve the departments
-      $root = $das->executeQuery($dbh, $stmt, array('alltypeparent.parentid', 
-                                                    'alltypeparent.description', 
-                                                    'alltype.asmallint', 
-                                                    'alltype.ainteger', 
-                                                    'alltype.abigint', 
+      $root = $das->executeQuery($dbh, $stmt, array('alltypeparent.parentid',
+                                                    'alltypeparent.description',
+                                                    'alltype.asmallint',
+                                                    'alltype.ainteger',
+                                                    'alltype.abigint',
                                                     'alltype.afloat',
                                                     'alltype.adouble',
                                                     'alltype.adoubleprecision',
                                                     'alltype.areal',
-                                                    'alltype.adecimal', 
-                                                    'alltype.adate', 
-                                                    'alltype.atimestamp', 
-                                                    'alltype.atime', 
-                                                    'alltype.achar', 
-                                                    'alltype.avarchar') );
-          
+                                                    'alltype.adecimal',
+                                                    'alltype.adate',
+                                                    'alltype.atimestamp',
+                                                    'alltype.atime',
+                                                    'alltype.achar',
+                                                    'alltype.avarchar'));
+
       echo "\nprint_r root \n";
       print_r($root);
       echo "\n";
-      
+
       // get each alltype object and print location
       echo "print out data for each alltype \n";
       $alltypeparent = $root ['alltypeparent'];
       $alltype = $alltypeparent[0]['alltype'];
       $count = 1;
-      foreach ($alltype as $row) 
+      foreach ($alltype as $row)
       {
          echo "Alltype obtained from the database has id = " . $row['asmallint'] . "\n";
          $count = $count + 1;
-      }  
-     
+      }
+
       //create a new row in the table
       $newrow = $alltypeparent[0] -> createDataObject('alltype');
-      
+
       // set the properties from the first row (the one that was loaded when the table was created)
-      //$newrow->abit             = $alltype[0]->abit; 
+      //$newrow->abit             = $alltype[0]->abit;
       //$newrow->atinyint         = $alltype[0]->atinyint;
       //$newrow->aboolean         = $alltype[0]->aboolean;
       $newrow->asmallint        = $count;
@@ -130,20 +130,20 @@ $Id: interop-rdbms-db2.php 219957 2006-09-14 12:16:19Z slaws $
       $newrow->adecimal         = $alltype[0]->adecimal;
       $newrow->adate            = $alltype[0]->adate;
       //$newrow->adatetime        = $alltype[0]->adatetime;
-      $newrow->atimestamp       = $alltype[0]->atimestamp; 
+      $newrow->atimestamp       = $alltype[0]->atimestamp;
       $newrow->atime            = $alltype[0]->atime;
-      //$newrow->ayear            = $alltype[0]->ayear; 
-      $newrow->achar            = $alltype[0]->achar; 
+      //$newrow->ayear            = $alltype[0]->ayear;
+      $newrow->achar            = $alltype[0]->achar;
       $newrow->avarchar         = "PHP XP DB2";
-         
+
       echo "\nprint_r root \n";
       print_r($root);
-           
+
       // update the data base with the new row
       $das->applyChanges($dbh, $root);
-       
-    } 
-    catch (Exception $e) 
+
+    }
+    catch (Exception $e)
     {
       print "Error: " . $e->getMessage() . "<br/><br/>";
     }

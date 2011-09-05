@@ -59,7 +59,7 @@ class SCA_Annotation_TypesTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(
         array('http://Namespace','Anything.xsd'),
         $types[0]
-        );
+       );
     }
 
     public function testTwoTypesWithSameNamespaceAndDifferentXsdsIsValid()
@@ -74,12 +74,12 @@ class SCA_Annotation_TypesTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(
         array('http://Namespace','Anything.xsd'),
         $types[0]
-        );
+       );
 
         $this->assertEquals(
         array('http://Namespace','More.xsd'),
         $types[1]
-        );
+       );
     }
 
     public function testParamWithInvalidNamespaceIsInvalid()

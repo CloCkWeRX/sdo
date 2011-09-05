@@ -26,7 +26,7 @@ include 'SCA/SCA.php';
 
 /**
  * Service for managing email contacts
- * 
+ *
  * @service
  * @binding.jsonrpc
  * @types http://example.org/contacts contacts.xsd
@@ -50,10 +50,10 @@ class ContactService {
             $contact = SCA::createDataObject('http://example.org/contacts', 'contact');
             $contact->shortname = $shortname;
             if ($row) {
-                SCA::$logger->log("Contact found $shortname = " . 
-                                  $row['FULLNAME'] . 
-                                  " " . 
-                                  $row['EMAIL'] );            
+                SCA::$logger->log("Contact found $shortname = " .
+                                  $row['FULLNAME'] .
+                                  " " .
+                                  $row['EMAIL']);
                 //trigger_error("Contact found: " . $shortname);
                 $contact->fullname = $row['FULLNAME'];
                 $contact->email = $row['EMAIL'];

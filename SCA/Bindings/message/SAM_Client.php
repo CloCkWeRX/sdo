@@ -50,7 +50,7 @@ class SCA_Bindings_message_SAMClient {
 //                                          ,
 //                                          'JMSTimeToLive'    => SAM_TIMETOLIVE,
 //                                          'JMSPriority'      => SAM_PRIORITY
-                                      );
+                                     );
 
     /**
      * Constructor -
@@ -146,9 +146,9 @@ class SCA_Bindings_message_SAMClient {
                   or the JMS replyTo header*/
         $callback_queue = false;
         if (isset($request_msg->header->scaCallbackQueue)) {
-            $callback_queue = trim( $request_msg->header->scaCallbackQueue );
+            $callback_queue = trim( $request_msg->header->scaCallbackQueue);
         }else if (isset($request_msg->header->SAM_REPLY_TO)) {
-            $callback_queue = trim( $request_msg->header->SAM_REPLY_TO );
+            $callback_queue = trim( $request_msg->header->SAM_REPLY_TO);
         }
 
         $response_queue = ($this->isFixedResponseQueue) ? $this->response_queue : $callback_queue;

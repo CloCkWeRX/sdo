@@ -24,7 +24,7 @@ include 'SCA/SCA.php';
 
 /**
  * Service for sending emails
- * 
+ *
  * @service
  *
  */
@@ -36,12 +36,12 @@ class ContactEmailService {
      * @binding.soap ./EmailService.wsdl
      */
     public $email_service;
-    
+
     private $contacts = array(
                             "fred"  => array("Fred Bloggs", "fred.bloggs@somewhere.net"),
                             "simon" => array("Simon Laws", "simonslaws@goolemail.com")
-                        );
-    
+                       );
+
 
     /**
      * Send a simple text email with the options of using short names for addresses.
@@ -61,7 +61,7 @@ class ContactEmailService {
             }
         }
 
-        // send the email 
+        // send the email
         return $this->email_service->send($to, $from, $subject, $message);
     }
 

@@ -26,21 +26,21 @@ $contact_table = array(
     'name' => 'contact',
     'columns' => array('shortname', 'fullname'),
     'PK' => 'shortname'
-    );
+   );
 
 // Describe the structure of the address table
 $address_table = array (
-    'name' => 'address', 
-    'columns' => array('id', 'contact_id', 'addressline1', 'addressline2', 
+    'name' => 'address',
+    'columns' => array('id', 'contact_id', 'addressline1', 'addressline2',
                        'city', 'state', 'zip', 'telephone'),
-    'PK' => 'id', 
+    'PK' => 'id',
     'FK' => array ('from' => 'contact_id', 'to' => 'contact')
-    );
+   );
 
 $table_schema = array($contact_table, $address_table);
 
 // Describe the parent-child relationship.  This is information required
-// by the Relational DAS to help map from the relational database representation to 
+// by the Relational DAS to help map from the relational database representation to
 // the data graph representation of SDO.
 $address_reference = array('parent' => 'contact', 'child' => 'address');
 ?>

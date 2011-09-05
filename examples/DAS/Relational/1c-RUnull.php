@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -25,9 +25,9 @@ require_once 'SDO/DAS/Relational.php';
 require_once 'company_metadata.inc.php';
 
 /**
- * Scenario - Retrieve one company 
+ * Scenario - Retrieve one company
  *
- * Retrieve one company row in the company table. 
+ * Retrieve one company row in the company table.
  */
 
 /**************************************************************
@@ -54,7 +54,7 @@ $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 try {
 	$root = $das->executeQuery($dbh,
 			"select name, id from company where name='Acme'",
-			array('company.name', 'company.id') );			
+			array('company.name', 'company.id'));
 } catch (SDO_DAS_Relational_Exception $e) {
 	echo "SDO_DAS_Relational_Exception raised when trying to retrieve data from the database.";
 	echo "Probably something wrong with the SQL query.";

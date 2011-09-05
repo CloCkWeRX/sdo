@@ -116,7 +116,7 @@ class SCA_CommentReader {
      * wsdl function
      *      array( 'parameters' => $parameter_descriptions
      *         , 'return'     => $return_descriptor
-     *         );
+     *        );
      *
      *
      * @return array ( 2dim array containing parameter lines or null )
@@ -613,7 +613,7 @@ class SCA_CommentReader {
     private function _hasAnnotation($label)
     {
         $pos = strpos($this->docComment, "@" . $label);
-        return ( ($pos !== false) ? true : false );
+        return ( ($pos !== false) ? true : false);
     }
 
     private function _getEveryWordFollowing($label)

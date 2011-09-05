@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -28,11 +28,11 @@ require_once 'SDO/DAS/Relational.php';
 require_once 'company_metadata.inc.php';
 
 /**
- * Scenario - Create one company 
+ * Scenario - Create one company
  *
  * Create one company row in the company table.
  *
- * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
+ * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database
  */
 
 /**************************************************************
@@ -49,7 +49,7 @@ try {
 
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 $root = $das->executeQuery($dbh,
-"select name, id from company where name='Acme'",array('company.name', 'company.id') );
+"select name, id from company where name='Acme'",array('company.name', 'company.id'));
 
 $company = $root['company'][0];
 

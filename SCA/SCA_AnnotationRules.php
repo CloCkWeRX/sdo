@@ -67,7 +67,7 @@ class SCA_AnnotationRules {
     , 'float'
     , 'double'
     , 'real'
-    );
+   );
 
     /**
      * Constructor for SCA_AnnotationRules
@@ -272,7 +272,7 @@ class SCA_AnnotationRules {
         // I think the person who wrote this meant ||
         // but it's only a crude check of the parameter and return
         // lines anyway and not right
-        return ( ( $entries < 2 && $entries > 4 ) ? false : true );
+        return ( ( $entries < 2 && $entries > 4 ) ? false : true);
 
     }/* End enough pieces function                                             */
 

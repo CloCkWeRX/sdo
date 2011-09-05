@@ -54,7 +54,7 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns'=> array('id'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table_metadata);
 
         $exception_thrown = false;
@@ -74,12 +74,12 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns'=> array('id'),
         'PK' => 'id',
-        );
+       );
         $department_table_metadata = array(
         'name' => 'department',
         'columns'=> array('id'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table_metadata, $department_table_metadata);
 
         $exception_thrown = false;
@@ -100,12 +100,12 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns'=> array('id'),
         'PK' => 'id',
-        );
+       );
         $department_table_metadata = array(
         'name' => 'department',
         'columns'=> array('id'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table_metadata, $department_table_metadata);
 
         $exception_thrown = false;
@@ -125,7 +125,7 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns' => array('id', 'name',  'employee_of_the_month'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table);
         $exception_thrown = false;
         $das = new SDO_DAS_Relational ($database_metadata);
@@ -145,7 +145,7 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns' => array('id', 'name',  'employee_of_the_month'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table);
         $exception_thrown = false;
         $das = new SDO_DAS_Relational ($database_metadata);
@@ -165,7 +165,7 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns' => array('id', 'name',  'employee_of_the_month'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table);
         $exception_thrown = false;
         $das = new SDO_DAS_Relational ($database_metadata);
@@ -185,7 +185,7 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns' => array('id', 'name',  'employee_of_the_month'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table);
         $exception_thrown = false;
         $das = new SDO_DAS_Relational ($database_metadata);
@@ -204,7 +204,7 @@ class TestRelational extends PHPUnit_Framework_TestCase
         'name' => 'company',
         'columns' => array('id', 'name',  'employee_of_the_month'),
         'PK' => 'id',
-        );
+       );
         $database_metadata = array($company_table);
         $exception_thrown = false;
         $das = new SDO_DAS_Relational ($database_metadata);

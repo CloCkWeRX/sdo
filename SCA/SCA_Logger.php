@@ -519,7 +519,7 @@ class SCA_Logger implements  iLogInterface
             SCA_LOGGER_DEBUG    => 'Debug',
             SCA_LOGGER_ALL      => 'AllLevels',
             SCA_LOGGER_NONE     => 'NoLevels'
-        );
+       );
 
         if (key_exists($keyvalue, $leveltext)) {
             return $leveltext[$keyvalue];
@@ -545,7 +545,7 @@ class SCA_Logger implements  iLogInterface
             'Debug'     => SCA_LOGGER_DEBUG,
             'AllLevels' => SCA_LOGGER_ALL,
             'NoLevels'  => SCA_LOGGER_NONE
-        );
+       );
 
         if (key_exists($keyvalue, $textlevel)) {
             return $textlevel[$keyvalue];

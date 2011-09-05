@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 +----------------------------------------------------------------------+
 | Copyright IBM Corporation 2005, 2007.                                |
@@ -52,7 +52,7 @@ class TestInsertAction extends PHPUnit_Framework_TestCase
         'from' => 'employee_of_the_month',
         'to' => 'employee',
         ),
-        );
+       );
         $department_table = array (
         'name' => 'department',
         'columns' => array('id', 'name', 'location' , 'number', 'co_id'),
@@ -61,7 +61,7 @@ class TestInsertAction extends PHPUnit_Framework_TestCase
         'from' => 'co_id',
         'to' => 'company',
         )
-        );
+       );
         $employee_table = array (
         'name' => 'employee',
         'columns' => array('id', 'name', 'SN', 'manager', 'dept_id'),
@@ -70,7 +70,7 @@ class TestInsertAction extends PHPUnit_Framework_TestCase
         'from' => 'dept_id',
         'to' => 'department',
         )
-        );
+       );
         $database_metadata = array($company_table, $department_table, $employee_table);
 
         /*******************************************************************

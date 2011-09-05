@@ -1,5 +1,5 @@
-<?php 
-/* 
+<?php
+/*
 +----------------------------------------------------------------------+
 | Copyright IBM Corporation 2005, 2007.                                |
 | All Rights Reserved.                                                 |
@@ -36,26 +36,26 @@ class TestReferencesModel extends PHPUnit_Framework_TestCase
     public function __construct($name) {
         parent::__construct($name);
     }
-    
-    
+
+
     public function testActiveTypesCorrectlyDetermined() {
         $company_table_metadata = array(
         'name' => 'company',
         'columns'=> array('id'),
         'PK' => 'id'
-        );
+       );
         $department_table_metadata = array(
         'name' => 'department',
         'columns'=> array('id'),
         'PK' => 'id',
         'FK' => array ('from' => 'id' , 'to' => 'company')
-        );
+       );
         $employee_table_metadata = array(
         'name' => 'employee',
         'columns'=> array('id'),
         'PK' => 'id',
         'FK' => array ('from' => 'id' , 'to' => 'department')
-        );
+       );
         $database_metadata = array($company_table_metadata, $department_table_metadata, $employee_table_metadata);
         $database_model = new SDO_DAS_Relational_DatabaseModel($database_metadata);
 
@@ -69,19 +69,19 @@ class TestReferencesModel extends PHPUnit_Framework_TestCase
         $references_model = new SDO_DAS_Relational_ContainmentReferencesModel('company',$SDO_references_metadata, $database_model);
         $this->assertTrue($references_model->getActiveTypes() == array('company', 'department', 'employee'),
         'Expected three active types to be found'
-        );
+       );
 
         // try a model rooted on department
         $references_model = new SDO_DAS_Relational_ContainmentReferencesModel('department',$SDO_references_metadata, $database_model);
         $this->assertTrue($references_model->getActiveTypes() == array('department', 'employee'),
         'Expected two active types to be found'
-        );
+       );
 
         // try a model rooted on employee
         $references_model = new SDO_DAS_Relational_ContainmentReferencesModel('employee',$SDO_references_metadata, $database_model);
         $this->assertTrue($references_model->getActiveTypes() == array('employee'),
         'Expected one active types to be found'
-        );
+       );
 
     }
 
@@ -91,19 +91,19 @@ class TestReferencesModel extends PHPUnit_Framework_TestCase
         'columns'=> array('id'),
         'PK' => 'id',
         'FK' => array('from' => 'id', 'to' => 'employee')
-        );
+       );
         $department_table_metadata = array(
         'name' => 'department',
         'columns'=> array('id'),
         'PK' => 'id',
         'FK' => array ('from' => 'id' , 'to' => 'company')
-        );
+       );
         $employee_table_metadata = array(
         'name' => 'employee',
         'columns'=> array('id'),
         'PK' => 'id',
         'FK' => array ('from' => 'id' , 'to' => 'department')
-        );
+       );
         $database_metadata = array($company_table_metadata, $department_table_metadata, $employee_table_metadata);
 
         $department_reference = array('parent' => 'company', 'child' => 'department');

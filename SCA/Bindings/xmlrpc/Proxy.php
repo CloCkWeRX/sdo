@@ -308,7 +308,7 @@ class SCA_Bindings_Xmlrpc_Proxy {
             if ( $faultCode != null ) {
 
                 throw new SCA_RuntimeException("XML-RPC call to $this->service_url for method " .
-                "$method_name failed. Fault Code: $faultCode, Reason: $faultReason" );
+                "$method_name failed. Fault Code: $faultCode, Reason: $faultReason");
             }
 
         } else if ((is_array($xml_response)||is_object($xml_response)) && !strstr($method_name, "system.")) {

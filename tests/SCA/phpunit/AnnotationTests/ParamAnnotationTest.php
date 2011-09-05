@@ -22,7 +22,7 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
     {
 //        $this->markTestSkipped(
 //        'We should give a helpful message, not just "Invalid syntax ...'
-//        );
+//       );
         try {
             $instance            = new ParamWithNoTypeOrName();
             $reader              = new SCA_AnnotationReader($instance);
@@ -165,7 +165,7 @@ class SCA_Annotation_ParamTest extends PHPUnit_Framework_TestCase {
         'return' => null),
         $method);
     }
-    
+
     public static function main()
     {
         require_once "PHPUnit/TextUI/TestRunner.php";

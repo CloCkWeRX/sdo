@@ -161,7 +161,7 @@ class SCA_Bindings_simpledb_Proxy
             'name' => $this->table_name,
             'columns' => $columns,
             'PK' => $pk
-            );
+           );
             */
 
             $this->datafactory = SDO_DAS_DataFactory::getDataFactory();

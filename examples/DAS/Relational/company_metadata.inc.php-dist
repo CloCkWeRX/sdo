@@ -72,7 +72,7 @@ $company_table = array (
         'from' => 'employee_of_the_month',
         'to' => 'employee',
         ),
-    );
+   );
 $department_table = array (
     'name' => 'department', 
     'columns' => array('id', 'name', 'location' , 'number', 'co_id'),
@@ -81,7 +81,7 @@ $department_table = array (
         'from' => 'co_id',
         'to' => 'company',
         )
-    );
+   );
 $employee_table = array (
     'name' => 'employee',
     'columns' => array('id', 'name', 'SN', 'manager', 'dept_id'),
@@ -90,7 +90,7 @@ $employee_table = array (
         'from' => 'dept_id',
         'to' => 'department',
         )
-    );
+   );
 $database_metadata = array($company_table, $department_table, $employee_table);
 
 /*******************************************************************

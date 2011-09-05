@@ -44,7 +44,7 @@ class SCA_Bindings_Jsonrpc_ServiceRequestHandler
                 file_put_contents($smd_filename,
                 SCA_GenerateSmd::generateSmd($service_description));
                 //                    ,self::generateSMD($calling_component_filename)
-                //                    );
+                //                   );
             }
 
             $wsdl_filename = null;

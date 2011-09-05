@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -25,7 +25,7 @@ require_once 'SDO/DAS/Relational.php';
 require_once 'company_metadata.inc.php';
 
 /**
- * Scenario - Create one company 
+ * Scenario - Create one company
  *
  * Create one company row in the company table.
  *
@@ -33,7 +33,7 @@ require_once 'company_metadata.inc.php';
  *   id integer auto_increment,
  *   name char(20),
  *   employee_of_the_month integer,
- *   primary key(id) ); 
+ *   primary key(id));
  */
 
 echo "executing scenario one-company-create\n";

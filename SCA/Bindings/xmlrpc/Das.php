@@ -188,7 +188,7 @@ class SCA_Bindings_Xmlrpc_DAS {
                                                            $property_namespace,
                                                            $converted_property_type,
                                                            array('containment'=>true,
-                                                                 'many'       =>$is_array) );
+                                                                 'many'       =>$is_array));
 
 
                 }
