@@ -74,7 +74,7 @@ class SCA_GenerateSmd {
         $smd->serviceURL  = str_replace(' ', '%20', "http://" . $http_host . $_SERVER['SCRIPT_NAME']);
         $smd->methods     = array();
 
-        foreach ( $service_desc->operations as $operation_name => $operation ) {
+        foreach ($service_desc->operations as $operation_name => $operation ) {
             $method              = new stdClass;
             $method->name        = $operation_name;
             $method->parameters  = array();
@@ -83,7 +83,7 @@ class SCA_GenerateSmd {
             if (array_key_exists("parameters", $operation) &&
             $operation["parameters"]) {
                 // create the method parameters entries
-                foreach ( $operation["parameters"] as $parameter ) {
+                foreach ($operation["parameters"] as $parameter ) {
                     $param                = new stdClass;
                     $param->name          = $parameter["name"];
                     if ( array_key_exists('objectType', $parameter) ) {
@@ -102,7 +102,7 @@ class SCA_GenerateSmd {
             if ( array_key_exists("return", $operation) &&
             $operation["return"] ) {
                 // create the method return type entries
-                foreach ( $operation["return"] as $return ) {
+                foreach ($operation["return"] as $return ) {
                     $rtn = new stdClass;
                     if ( array_key_exists('objectType', $return) ) {
                         $rtn->type = $return["objectType"];
@@ -183,7 +183,7 @@ class SCA_GenerateSmd {
                 $property_object->type   = self::sdoTypeToSmdType($property_type_name);
 
                 // work out if this is an array or not
-                if ( $property->isMany() ) {
+                if ($property->isMany() ) {
                     $property_object->type .= " []";
                 }
 

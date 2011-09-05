@@ -46,7 +46,7 @@ class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper
             SCA::$logger->log("exception thrown from create(): $problem");
 
 
-            if ( $e instanceof SDO_Exception )
+            if ($e instanceof SDO_Exception )
             $problem = "SDO_Exception in setWSDLTypes : " . $problem;
 
             /**

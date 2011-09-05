@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | Copyright IBM Corporation 2005, 2006.                                |
 | All Rights Reserved.                                                 |
@@ -32,14 +32,14 @@ require_once 'SDO/DAS/Relational/ContainmentReference.php';
  * We want to know that the relationships between the tables in the model will form a graph that
  * SDO will recognise as valid. There are two main requirements:
  * 1. The containment relationships must form a rooted tree: that is, a connected acyclic
- *   graph with a vertex singled out as the root. We will follow the 
- *   parent-child relationships and check that there are no cycles. 
+ *   graph with a vertex singled out as the root. We will follow the
+ *   parent-child relationships and check that there are no cycles.
  *
  * 2. The non-containment relationships must not automatically cause closure to be violated.
- *   For example if in the model a table contains a foreign key to another table but that other table is 
- *   not in the model, then no graph can ever satisfy closure, so we check for that too. Of course the 
- *   final test is once the data graph is populated - closure might still be violated then too - but 
- *   that is another check at another time. 
+ *   For example if in the model a table contains a foreign key to another table but that other table is
+ *   not in the model, then no graph can ever satisfy closure, so we check for that too. Of course the
+ *   final test is once the data graph is populated - closure might still be violated then too - but
+ *   that is another check at another time.
  */
 
 class SDO_DAS_Relational_ContainmentReferencesModel {
@@ -52,10 +52,10 @@ class SDO_DAS_Relational_ContainmentReferencesModel {
 
     public function __construct($app_root_type, $containment_references_metadata, $database_model)
     {
-        if ( $app_root_type != null ) {
+        if ($app_root_type != null ) {
             assert(gettype($app_root_type) == 'string');
         }
-        
+
         assert(gettype($containment_references_metadata) == 'array');
 
         $this->app_root_type  = $app_root_type;
@@ -66,16 +66,16 @@ class SDO_DAS_Relational_ContainmentReferencesModel {
         }
 
         $reachable_types_already_visited = array();
-        
+
         // maintain app_root_type here for backward compatibility
-        if ( $app_root_type != null ) {
+        if ($app_root_type != null ) {
             $reachable_types_still_to_check = array($app_root_type);
         } else {
-            // we need to check all the types and find all of the ones for which no 
+            // we need to check all the types and find all of the ones for which no
             // containment references are specified
             $reachable_types_still_to_check = $this->getAllNonContainedTypes();
         }
-        
+
         $references_traversed = array();
         while (count($reachable_types_still_to_check) > 0) {
             $type = array_shift($reachable_types_still_to_check);
@@ -93,7 +93,7 @@ class SDO_DAS_Relational_ContainmentReferencesModel {
         $this->active_types = $reachable_types_already_visited;
         $this->active_containment_references = $references_traversed;
     }
-    
+
 
     public function getActiveContainmentReferences()
     {
@@ -145,28 +145,28 @@ class SDO_DAS_Relational_ContainmentReferencesModel {
         }
         return null;
     }
-    
+
     public function getAllNonContainedTypes()
     {
         $non_contained_types = array();
         $all_types = $this->database_model->getAllTableNames();
-        
+
         // loop through all the types. If a type name doesn't appear
-        // as a child in the containment meta-data then the type 
+        // as a child in the containment meta-data then the type
         // is non contained
-        foreach ( $all_types as $type ) {           
+        foreach ($all_types as $type ) {
             $contained = false;
-            foreach ( $this->full_set_containment_references as $ref ) {
-                if ( $ref->getChildName() == $type ) {
+            foreach ($this->full_set_containment_references as $ref ) {
+                if ($ref->getChildName() == $type ) {
                     $contained = true;
                     break;
                 }
             }
-            if ( $contained == false ) {
+            if ($contained == false ) {
                 $non_contained_types[] = $type;
             }
         }
-        
+
         return $non_contained_types;
     }
 }

@@ -112,13 +112,13 @@ class SDO_DAS_Json {
      */
     public function addTypesSmdString($smd_string, $namespace_map = null)
     {
-        if ( $this->is_xsd_model == true ) {
+        if ($this->is_xsd_model == true ) {
             // XSD has already been used to build part of the type
             // model so we can't now switch to using SMD
             throw SDO_Exception('Cannot add SMD types to the JSON DAS because XSD types have already been added');
         }
 
-        if ( $this->is_generic_model == true ) {
+        if ($this->is_generic_model == true ) {
             // XSD has already been used to build part of the type
             // model so we can't now switch to using SMD
             throw SDO_Exception('Cannot add SMD types to the JSON DAS because the DAS has already been used to parse JSON generically');
@@ -126,11 +126,11 @@ class SDO_DAS_Json {
 
         $this->is_smd_model = true;
 
-        if ( $this->data_factory == null ) {
+        if ($this->data_factory == null ) {
             $this->data_factory = SDO_DAS_DataFactory::getDataFactory();
         }
 
-        if ( $smd_string != null ) {
+        if ($smd_string != null ) {
             $this->_parseSmd($smd_string, $namespace_map);
         }
     }
@@ -143,13 +143,13 @@ class SDO_DAS_Json {
 
     public function addTypesXsdFile($xsd_file)
     {
-        if ( $this->is_smd_model == true ) {
+        if ($this->is_smd_model == true ) {
             // SMD has already been used to build part of the type
             // model so we can't now switch to using XSD
             throw SDO_Exception('Cannot add XSD types to the JSON DAS because SMD types have already been added');
         }
 
-        if ( $this->is_generic_model == true ) {
+        if ($this->is_generic_model == true ) {
             // XSD has already been used to build part of the type
             // model so we can't now switch to using SMD
             throw SDO_Exception('Cannot add XSD types to the JSON DAS because the DAS has already been used to parse JSON generically');
@@ -157,11 +157,11 @@ class SDO_DAS_Json {
 
         $this->is_xsd_model = true;
 
-        if ( $this->xml_das == null ) {
+        if ($this->xml_das == null ) {
             $this->xml_das = SDO_DAS_XML::create();
         }
 
-        if ( $xsd_file != null ) {
+        if ($xsd_file != null ) {
             $this->xml_das->addTypes($xsd_file);
         }
     }
@@ -182,13 +182,13 @@ class SDO_DAS_Json {
 
             // iterate over the types adding types to the
             // SDO model
-            foreach ( $smd_types as $type ) {
+            foreach ($smd_types as $type ) {
                 $type_name = $type->name;
                 $namespace = $this->default_namespace;
 
                 // look type up in namespace map
-                if ( $namespace_map != null &&
-                     array_key_exists( $type_name, $namespace_map) ) {
+                if ($namespace_map != null &&
+                     array_key_exists($type_name, $namespace_map) ) {
                     $namespace = $namespace_map[$type_name];
                 }
 
@@ -209,18 +209,18 @@ class SDO_DAS_Json {
             // that have already been created. This is a two pass
             // process because the property type must exist before
             // we create the property of that type
-            foreach ( $smd_types as $type ) {
+            foreach ($smd_types as $type ) {
                 $type_name = $type->name;
                 $namespace = $this->default_namespace;
 
                 // look type up in namespace map
-                if ( $namespace_map != null &&
-                     array_key_exists( $type_name, $namespace_map) ) {
+                if ($namespace_map != null &&
+                     array_key_exists($type_name, $namespace_map) ) {
                     $namespace = $namespace_map[$type->name];
                 }
 
                 // create the properties of the type
-                foreach ( $type->typedef->properties as $property ) {
+                foreach ($type->typedef->properties as $property ) {
                     $property_name      = $property->name;
                     $property_type      = $property->type;
                     $property_namespace = $this->default_namespace;
@@ -230,7 +230,7 @@ class SDO_DAS_Json {
                     // valued
                     $array_pos          = strpos($property_type, "[]");
 
-                    if ( $array_pos !== false ) {
+                    if ($array_pos !== false ) {
                         // it is an array so strip out the array
                         // markers
                         $property_type = substr($property_type, 0, $array_pos);
@@ -245,12 +245,12 @@ class SDO_DAS_Json {
                     $converted_property_type = $this->_smdTypeToSdoType($property_type);
 
                     // fix up the namespace
-                    if ( $converted_property_type === $property_type ) {
+                    if ($converted_property_type === $property_type ) {
                         // the type name wasn't changed so it's a
                         // complex type. Map the namespace to see
                         // if the user has told us what namespace this
                         // typename should have
-                        if ( $namespace_map != null &&
+                        if ($namespace_map != null &&
                              array_key_exists($property_type, $namespace_map) ) {
                             $property_namespace = $namespace_map[$property_type];
                         }
@@ -339,7 +339,7 @@ it comes in but by then the model is set
         $sdo = null;
 
         // guess the namespace if one is not provided
-        if ( $root_namespace == null ) {
+        if ($root_namespace == null ) {
             $root_namespace = $this->default_namespace;
         }
 
@@ -347,13 +347,13 @@ it comes in but by then the model is set
         // compared to the generic parse we started with
         // just want to keep the code separate while we move toward
         // the newer type driven parse.
-        if ( $this->is_smd_model == true &&
+        if ($this->is_smd_model == true &&
              $root_type          != null ) {
             // walk the jason tree creating the correct types based
             // on the model from the specified root type down
             $sdo = $this->data_factory->create($root_namespace, $root_type);
             $this->_decodeObjectToSDONew($json, $sdo);
-        } else if ( $this->is_xsd_model == true &&
+        } else if ($this->is_xsd_model == true &&
                     $root_type         != null ) {
             // walk the jason tree creating the correct types based
             // on the model from the specified root type down
@@ -364,7 +364,7 @@ it comes in but by then the model is set
             // so we need to create a generic model
             $this->is_generic_model = true;
 
-            if ( $this->data_factory == null ) {
+            if ($this->data_factory == null ) {
                 // create an empty data factory
                 $this->data_factory = SDO_DAS_DataFactory::getDataFactory();
 
@@ -387,7 +387,7 @@ it comes in but by then the model is set
 
     private function _decodeObjectToSDONew($object, $sdo)
     {
-        foreach ( $object as $param_name => $param_value ) {
+        foreach ($object as $param_name => $param_value ) {
             $this->_decodeToSDONew($param_name, $param_value, $sdo);
         }
     }
@@ -398,15 +398,15 @@ it comes in but by then the model is set
     private function _decodeArrayToSDONew($array_name, $array, $sdo)
     {
         $array_index = 0;
-        foreach ( $array as $array_entry ) {
+        foreach ($array as $array_entry ) {
             $array_entry_type = gettype($array_entry);
 
             //echo "Typed - Array Name: " . $array_name . " Array Index: " . $array_index . " Array Entry: " . $array_entry . " Type: ". $array_entry_type . "\n";
 
-            if ( $array_entry_type == "object" ) {
+            if ($array_entry_type == "object" ) {
                 $new_sdo = $sdo->createDataObject($array_name);
                 $this->_decodeObjectToSDONew($array_entry, $new_sdo);
-            } else if ( $array_entry_type == "array" ) {
+            } else if ($array_entry_type == "array" ) {
                 $new_sdo = $sdo->createDataObject($array_name);
                 $this->_decodeArrayToSDO($array_name, $array_entry, $new_sdo);
             } else {
@@ -427,10 +427,10 @@ it comes in but by then the model is set
 
         //echo "Typed - Name: " . $item_name . " Value: " . $item . " Type: ". $item_type . "\n";
 
-        if ( $item_type == "object" ) {
+        if ($item_type == "object" ) {
             $new_sdo = $sdo->createDataObject($item_name);
             $this->_decodeObjectToSDONew($item, $new_sdo);
-        } else if ( $item_type == "array" ) {
+        } else if ($item_type == "array" ) {
             //$new_sdo = $sdo->createDataObject($item_name);
             $this->_decodeArrayToSDONew($item_name, $item, $sdo);
         } else {
@@ -469,7 +469,7 @@ it comes in but by then the model is set
      */
     private function _decodeObjectToSDO($object, $sdo)
     {
-        foreach ( $object as $param_name => $param_value ) {
+        foreach ($object as $param_name => $param_value ) {
             $this->_decodeToSDO($param_name, $param_value, $sdo);
         }
     }
@@ -480,7 +480,7 @@ it comes in but by then the model is set
     private function _decodeArrayToSDO($array_name, $array, $sdo)
     {
         $index = 0;
-        foreach ( $array as $array_entry ) {
+        foreach ($array as $array_entry ) {
             $array_index = $array_name . $index;
             $this->_decodeToSDO($array_index, $array_entry, $sdo);
             $index = $index + 1;
@@ -503,11 +503,11 @@ it comes in but by then the model is set
                           $debug,
                           FILE_APPEND);
 */
-        if ( $item_type == "object" ) {
+        if ($item_type == "object" ) {
             $new_sdo = $this->data_factory->create('GenericNS', 'GenericType');
             $sdo[$item_name] = $new_sdo;
             $this->_decodeObjectToSDO($item, $new_sdo);
-        } else if ( $item_type == "array" ) {
+        } else if ($item_type == "array" ) {
             $new_sdo = $this->data_factory->create('GenericNS', 'GenericType');
             $sdo[$item_name] = $new_sdo;
             $this->_decodeArrayToSDO($item_name, $item, $new_sdo);
@@ -532,7 +532,7 @@ it comes in but by then the model is set
      *   Many valued property -> "propery name" : [property value, ...]
      *   Primitive            -> property value
      */
-    public function encode ( $sdo )
+    public function encode ($sdo )
     {
         $json_string = null;
 
@@ -541,7 +541,7 @@ it comes in but by then the model is set
         return $json_string;
     }
 
-    private function _encodeObjectFromSDO ( $sdo, &$json_string )
+    private function _encodeObjectFromSDO ($sdo, &$json_string )
     {
         $json_string .= "{";
 
@@ -550,7 +550,7 @@ it comes in but by then the model is set
 
         $sdo_size = $this->_count($sdo);
         $i        = 0;
-        foreach ( $sdo as $property_name => $property_value ) {
+        foreach ($sdo as $property_name => $property_value ) {
             $json_string .= "\"" . $property_name . "\":";
 
             $sdo_property           = null;
@@ -571,7 +571,7 @@ it comes in but by then the model is set
                 $is_object              = !$sdo_property_type->isDataType();
 
             } catch (SDO_PropertyNotFoundException $ex ) {
-                if ( $sdo_type->isOpenType() == true ) {
+                if ($sdo_type->isOpenType() == true ) {
                     // We can validly have properties that
                     // don't appear in the model. For now we
                     // assume that these are single valued
@@ -586,7 +586,7 @@ it comes in but by then the model is set
                     // on the data unless it is an SDO object (as opposed to
                     // a primitive type)
                     $php_type = gettype($property_value);
-                    if ( $php_type == "object") {
+                    if ($php_type == "object") {
                         $is_object              = true;
                         $reflection             = new SDO_Model_ReflectionDataObject($property_value);
                         $sdo_property_type      = $reflection->getType();
@@ -602,10 +602,10 @@ it comes in but by then the model is set
                 }
             }
 
-            if ( $is_array ) {
+            if ($is_array ) {
                 // it's an array
                 $this->_encodeArrayFromSDO($property_value, $json_string, $sdo_property_type);
-            } else if ( $is_object ) {
+            } else if ($is_object ) {
                 // it's an object
                 $this->_encodeObjectFromSDO($property_value, $json_string);
             } else {
@@ -614,7 +614,7 @@ it comes in but by then the model is set
             }
 
             $i++;
-            if ( $i < $sdo_size ) {
+            if ($i < $sdo_size ) {
                 $json_string .= ",";
             }
         }
@@ -622,29 +622,29 @@ it comes in but by then the model is set
         $json_string .= "}";
     }
 
-    private function _encodeArrayFromSDO ( $sdo, &$json_string, $sdo_type )
+    private function _encodeArrayFromSDO ($sdo, &$json_string, $sdo_type )
     {
         $json_string .= "[";
 
         $sdo_size = $this->_count($sdo);
         $i        = 0;
 
-        if ( $sdo_type->isDataType() == true )
+        if ($sdo_type->isDataType() == true )
         {
             // it's an array of primitives
-            foreach ( $sdo as $property_name => $property_value ) {
+            foreach ($sdo as $property_name => $property_value ) {
                 $this->_encodePrimitiveFromSDO($property_value, $json_string, $sdo_type->getName());
                 $i++;
-                if ( $i < $sdo_size ) {
+                if ($i < $sdo_size ) {
                     $json_string .= ",";
                 }
             }
         } else {
             // it's an array of objects
-            foreach ( $sdo as $property_name => $property_value ) {
+            foreach ($sdo as $property_name => $property_value ) {
                 $this->_encodeObjectFromSDO($property_value, $json_string);
                 $i++;
-                if ( $i < $sdo_size ) {
+                if ($i < $sdo_size ) {
                     $json_string .= ",";
                 }
             }
@@ -653,7 +653,7 @@ it comes in but by then the model is set
         $json_string .= "]";
     }
 
-    private function _encodePrimitiveFromSDO ( $sdo, &$json_string, $type_name )
+    private function _encodePrimitiveFromSDO ($sdo, &$json_string, $type_name )
     {
         // Note. both PHP and SDO primitive types are included here to
         //       cover the open type case where I can't predict from the
@@ -662,7 +662,7 @@ it comes in but by then the model is set
             case "Boolean":
 
             case "boolean":
-                if ( $sdo == true ) {
+                if ($sdo == true ) {
                     $json_string .= "true";
                 } else {
                     $json_string .= "false";
@@ -701,11 +701,11 @@ it comes in but by then the model is set
      * SDO returns the number of properties in the model rather than
      * in the data object
      */
-    private function _count ( $array )
+    private function _count ($array )
     {
         $i = 0;
 
-        foreach ( $array as $item ) {
+        foreach ($array as $item ) {
             $i++;
         }
 

@@ -91,7 +91,7 @@ class SCA_Bindings_Jsonrpc_Proxy {
      * based on a type that is expected to form part of
      * a message to reference
      */
-    public function createDataObject( $namespace_uri, $type_name )
+    public function createDataObject($namespace_uri, $type_name )
     {
         try {
             $xmldas     = $this->reference_type->getXmlDas();

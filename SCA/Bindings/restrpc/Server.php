@@ -173,7 +173,7 @@ class SCA_Bindings_restrpc_Server {
         $param_array = array();
 
         $request_string = "";
-        foreach ( $request as $param_name => $param_value ) {
+        foreach ($request as $param_name => $param_value ) {
             $request_string    = $request_string .
                                  "  Name=" . $param_name .
                                  " Value=" . $param_value;

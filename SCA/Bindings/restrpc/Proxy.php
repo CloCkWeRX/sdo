@@ -122,8 +122,8 @@ class SCA_Bindings_restrpc_Proxy
             // form params.
             $argument_id = 0;
             $no_of_arguments = count($arguments);
-            foreach ( $arguments as $argument ) {
-                if ( $argument == null ) {
+            foreach ($arguments as $argument ) {
+                if ($argument == null ) {
                     // ignore null parameters
                 } else if ( is_object($argument) ) {
                     throw new SCA_RuntimeException("Argument $argument_id to $method_name of type object found. " .
@@ -170,7 +170,7 @@ class SCA_Bindings_restrpc_Proxy
         curl_close($request);
 
         // test the response status
-        if ( $response == null || $response == false  ) {
+        if ($response == null || $response == false  ) {
             SCA::$logger->log("restrpc call to $this->target_url for method " .
                                            "$method_name failed ");
             throw new SCA_RuntimeException("restrpc call to $this->target_url for method " .

@@ -386,7 +386,7 @@ class SCA_Bindings_soap_Proxy extends SoapClient
      * @param  SoapFault  ( Contains a serialized exception )
      * @return  Exception   ( Unserialized Exception  or  an Exception about an Exception )
      */
-    private function _convertedSoapFault( $fault )
+    private function _convertedSoapFault($fault )
     {
         $unable_to_deserialize_msg = "A remote SCA component threw an exception. "
         . "An attempt was made to pass back the exception and rethrow it but this failed. "
@@ -409,7 +409,7 @@ class SCA_Bindings_soap_Proxy extends SoapClient
                 $headerlen            = strlen(self::SERIALIZED_EXCEPTION_HEADER);
                 $serialized_exception = substr($fault->detail, $headerlen);
                 $recreateExpn         = unserialize(base64_decode($serialized_exception));
-                if ( $recreateExpn instanceof Exception ) {
+                if ($recreateExpn instanceof Exception ) {
                     return $recreateExpn;
                 } else { // we were unable to de-serialize it - likely because no definition exists at this end
                     return new SCA_RuntimeException($unable_to_deserialize_msg

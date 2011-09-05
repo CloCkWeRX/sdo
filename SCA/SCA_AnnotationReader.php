@@ -102,7 +102,7 @@ class SCA_AnnotationReader
         $ref_props  = $reflection->getProperties();
 
         try {
-            foreach ( $ref_props as $ref_prop ) {
+            foreach ($ref_props as $ref_prop ) {
                 $reader = new SCA_CommentReader($ref_prop->getDocComment());
                 if ($reader->isReference()) {
                     $reference_type = $reader->getReferenceFull();
@@ -254,13 +254,13 @@ class SCA_AnnotationReader
         /* Check the comment of each method to find any annotations so that
         * a wsdl can be generated from the .php file.
         */
-        foreach ( $service_methods as $service_method ) {
+        foreach ($service_methods as $service_method ) {
             $methodAnnotations =
             SCA_AnnotationRules::createEmptyAnnotationArray();
             $comment = $service_method->getDocComment();
 
             /* When the method has a doc comment ....                     */
-            if ( $comment != false ) {
+            if ($comment != false ) {
                 $method_reader = new SCA_CommentReader($comment);
 
                 /* ... and the method a web service method ....           */
@@ -269,23 +269,23 @@ class SCA_AnnotationReader
                     $methodAnnotations =
                     $method_reader->getMethodAnnotations();
 
-                    if ( $methodAnnotations != null ) {
+                    if ($methodAnnotations != null ) {
                         $thisElement = 0;
 
                         /* Each set of method annotations contain a set of 1
                         * or more  parameter annotations, and 1 return
                         * annotation.
                         */
-                        foreach ( $methodAnnotations as $annotationSet ) {
+                        foreach ($methodAnnotations as $annotationSet ) {
 
                             // check that $annotationSet is not null to
                             // take account of the situation where no
                             // @return or @param annotation is specified
 
-                            if ( $annotationSet ) {
+                            if ($annotationSet ) {
                                 /* Clean off the dollar sign from the variable name, and do */
                                 /* a namespace check as appropriate.                        */
-                                foreach ( $annotationSet as $annotation ) {
+                                foreach ($annotationSet as $annotation ) {
                                     if ( strcmp($annotation['annotationType'], SCA_AnnotationRules::PARAM) === 0 ) {
                                         if ( strpos($annotation['name'], SCA_AnnotationRules::DOLLAR) === false ) {
                                             throw new SCA_RuntimeException("Invalid syntax '{$annotation['name']}' is not a php variable name");
@@ -345,7 +345,7 @@ class SCA_AnnotationReader
     * @param string $namespace
     * @return boolean
     */
-    private function _matchXsds( $xsdArray, $namespace )
+    private function _matchXsds($xsdArray, $namespace )
     {
         foreach ($xsdArray as $xsd_namespace_pair) {
             if (in_array($namespace, $xsd_namespace_pair)) {

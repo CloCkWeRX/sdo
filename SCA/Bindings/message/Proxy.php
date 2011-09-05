@@ -47,7 +47,7 @@ class SCA_Bindings_message_Proxy {
             throw new SCA_RuntimeException("The SAM extension must be loaded");
         }
 
-        if ( $binding_config === null ) {
+        if ($binding_config === null ) {
             $binding_config = array();
         }
         $binding_config['msd'] = $path_to_msd;
@@ -121,7 +121,7 @@ class SCA_Bindings_message_Proxy {
         }
 
         /*waiting for the response*/
-        if ( $this->waitResponseTimeout >=0 ) {
+        if ($this->waitResponseTimeout >=0 ) {
             $msg_response = $this->ms_client->getResponse($correlid,$this->waitResponseTimeout);
             if($msg_response){
                 /*do we have a WSDL schema*/

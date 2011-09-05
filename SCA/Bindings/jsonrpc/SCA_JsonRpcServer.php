@@ -101,7 +101,7 @@ class SCA_JsonRpcServer {
         //get the list of parameter types
         $parameter_descriptions = $this->service_wrapper->getParametersForMethod($method);
 
-        foreach ( $params as $param_name => $param_value ) {
+        foreach ($params as $param_name => $param_value ) {
 
             $param_description = $parameter_descriptions[$param_name];
             $param_type        = gettype($param_value);
@@ -110,7 +110,7 @@ class SCA_JsonRpcServer {
             ob_start();
             $debug =  " ParamName: "  . $param_name . " ParamValue: " . $param_value . " ParamType: "  . $param_type . "\n";
             echo $debug;
-            print_r( $param_description);
+            print_r($param_description);
             $debug = ob_get_contents();
             ob_end_clean();
             file_put_contents("json_messages.txt",
@@ -118,7 +118,7 @@ class SCA_JsonRpcServer {
             FILE_APPEND);
             */
 
-            if ( $param_type == "object" ) {
+            if ($param_type == "object" ) {
                 if ( array_key_exists('objectType', $param_description) &&
                 array_key_exists('namespace', $param_description) ) {
                     $new_params_array[] = $this->service_wrapper->getJsonDas()->decodeFromPHPObject($param_value,
@@ -130,7 +130,7 @@ class SCA_JsonRpcServer {
                     "@param description element as the type and " .
                     "namespace are not both defined");
                 }
-            } else if ( $param_type == "array" ) {
+            } else if ($param_type == "array" ) {
                 throw new SCA_RuntimeException("Parameter $param_name of type array found as " .
                 "a top level parameter of incoming message $rawHTTPContents " .
                 " message parameters must be either primitives or SDOs");

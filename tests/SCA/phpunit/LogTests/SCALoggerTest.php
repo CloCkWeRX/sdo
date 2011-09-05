@@ -34,7 +34,7 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
      */
     public function testDefaultLoggerCreated()
     {
-        self::$logger =  new SCA_Logger( $this->loginfo[0], $this->loginfo[1]);
+        self::$logger =  new SCA_Logger($this->loginfo[0], $this->loginfo[1]);
         $this->assertNotNull( self::$logger);
     }
 
@@ -47,9 +47,9 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
     {
         $this->assertNotNull( self::$logger);
 
-        self::$logger->log( $this->testentry, "",  "", SCA_LOGGER_CRITICAL);
+        self::$logger->log($this->testentry, "",  "", SCA_LOGGER_CRITICAL);
 
-        $this->assertFileNotExists( $this->loglocn);
+        $this->assertFileNotExists($this->loglocn);
 
     }
 
@@ -65,7 +65,7 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
 
         $status = self::$logger->logStatus();
 
-        $this->assertEquals( $status['run']
+        $this->assertEquals($status['run']
                            , "Running"
                            , "SCA_LoggerTest::testStopMethod Status is not running"
                          );
@@ -80,13 +80,13 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
     {
         $this->assertNotNull( self::$logger);
 
-        self::$logger->log( $this->testentry, "",  "", SCA_LOGGER_CRITICAL);
+        self::$logger->log($this->testentry, "",  "", SCA_LOGGER_CRITICAL);
 
-        $this->assertFileExists( $this->loglocn);
+        $this->assertFileExists($this->loglocn);
 
         $log = self::$logger->fromLog();
 
-        $this->assertContains( $this->testentry
+        $this->assertContains($this->testentry
                              , $log[0]
                              , "SCA_LoggerTest::testLogMethod Log entry not found"
                            );
@@ -104,11 +104,11 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
 
         $this->assertNotNull( self::$logger);
 
-        self::$logger->log( $this->testentry, $file,  $line, SCA_LOGGER_CRITICAL);
+        self::$logger->log($this->testentry, $file,  $line, SCA_LOGGER_CRITICAL);
 
         $log = self::$logger->fromLog();
 
-        $this->assertContains( $file
+        $this->assertContains($file
                              , $log[1]
                              , "SCA_LoggerTest::testLogFileMethod Filename not found"
                            );
@@ -131,12 +131,12 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
 
         $status = self::$logger->logStatus();
 
-        $this->assertEquals( $status['run']
+        $this->assertEquals($status['run']
                            , "Stopped"
                            , "SCA_LoggerTest::testStopMethod Status is not stopped"
                          );
 
-        $this->assertEquals( $status['count']
+        $this->assertEquals($status['count']
                            , 2
                            , "SCA_LoggerTest::testStopMethod Invalid number of log entries"
                          );
@@ -153,15 +153,15 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
 
         self::$logger->startLog();
 
-        self::$logger->log( $this->testentry, "",  "", SCA_LOGGER_CRITICAL);
+        self::$logger->log($this->testentry, "",  "", SCA_LOGGER_CRITICAL);
 
         $status = self::$logger->logStatus();
 
-        $this->assertEquals( $status['run']
+        $this->assertEquals($status['run']
                            , "Running"
                            , "SCA_LoggerTest::testRestartMethod Status is not running"
                          );
-        $this->assertEquals( $status['count']
+        $this->assertEquals($status['count']
                            , 3
                            , "SCA_LoggerTest::testRestartMethod Invalid number of log entries"
                          );
@@ -184,7 +184,7 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
 
         $status = self::$logger->logStatus();
 
-        $this->assertEquals( $status, $checkArray);
+        $this->assertEquals($status, $checkArray);
 
     }
 
@@ -198,7 +198,7 @@ class SCALoggerTest extends PHPUnit_Framework_TestCase
 
         self::$logger->deleteLogFile();
 
-        $this->assertFileNotExists( $this->loglocn);
+        $this->assertFileNotExists($this->loglocn);
 
     }
 

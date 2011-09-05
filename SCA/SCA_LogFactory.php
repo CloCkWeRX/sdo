@@ -98,21 +98,21 @@ class SCA_LogFactory {
      * @param string  $class_name       classname to be invoked
      * @return object                   invoked class
      */
-    private static function _linkLog( $class_name )
+    private static function _linkLog($class_name )
     {
         $link       = array();
 
         /* build the correct callback for the selected logger             */
-        if ( $class_name === 'SCA_Logger' ) {
-            $link = array( $class_name, 'singleSCA_Logger');
+        if ($class_name === 'SCA_Logger' ) {
+            $link = array($class_name, 'singleSCA_Logger');
 
         } else {
-            $link = array( $class_name, 'loadLogger');
+            $link = array($class_name, 'loadLogger');
         }
 
         /* link in the logger                                             */
         // Passing in empty array() to suppress warning
-        return call_user_func_array( $link, /*null*/array());
+        return call_user_func_array($link, /*null*/array());
 
     }/* End link log function                                             */
 
@@ -131,7 +131,7 @@ class SCA_LogFactory {
         }
 
         if ( false !== ($params = get_cfg_var( 'sca.logger.parameters' )) ) {
-            self::$paramargs = self::_stringtoarray( $params);
+            self::$paramargs = self::_stringtoarray($params);
         }
 
     }/* End in php zero function                                          */
@@ -142,17 +142,17 @@ class SCA_LogFactory {
      * @param string $candidate             instance name of the php file
      * @return string                       candidate class name
      */
-    private static function _findclassname( $candidate )
+    private static function _findclassname($candidate )
     {
         $instance   = "";
 
         //replace any backslash with forward slash
         $line         = str_replace( "\\", "/", $candidate);
         $arrayOfLine  = explode('/', (trim($line)));
-        $bits         = count( $arrayOfLine);
+        $bits         = count($arrayOfLine);
 
-        if ( ($last = strrpos( $arrayOfLine[--$bits], '.php' )) > 0 ) {
-            $instance = substr( $arrayOfLine[$bits], 0, $last);
+        if ( ($last = strrpos($arrayOfLine[--$bits], '.php' )) > 0 ) {
+            $instance = substr($arrayOfLine[$bits], 0, $last);
 
         }
 
@@ -175,16 +175,16 @@ class SCA_LogFactory {
      * @param string $strvalues
      * @return array
      */
-    private static function _stringtoarray( $cdstring ) {
+    private static function _stringtoarray($cdstring ) {
         $token      = ",";
         $array      = array();
 
-        $parameter  = strtok( $cdstring, $token);
+        $parameter  = strtok($cdstring, $token);
 
-        for ( $i = 0; $parameter !== false;  $i++ ) {
-            $parameter   = trim( $parameter);
+        for ($i = 0; $parameter !== false;  $i++ ) {
+            $parameter   = trim($parameter);
             $array[$i] = $parameter;
-            $parameter   = strtok( $token);
+            $parameter   = strtok($token);
 
         }
 

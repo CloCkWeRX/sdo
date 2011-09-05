@@ -67,12 +67,12 @@ class SCA_TuscanyWrapper {
 
         // if a class name has not been provided
         // then this may just be a script.
-        if ( $class_name == null ){
+        if ($class_name == null ){
          //   $arg_array = $this->mediator->getArgArray();
 
             // get the arguments and put them into the request
             $index = 0;
-            foreach ( $arg_array as $arg_val ){
+            foreach ($arg_array as $arg_val ){
                 $_REQUEST[$index] = $arg_val;
                 $index = $index + 1;
             }
@@ -101,7 +101,7 @@ class SCA_TuscanyWrapper {
 
 //var_dump($arg_array);
 
-            if ( $this->class_name != null ){
+            if ($this->class_name != null ){
                 SCA::$logger->log('Attempt to create a service');
                 $this->service = new $this->class_name();
                 $reflection    = new ReflectionObject($this->service);
@@ -109,7 +109,7 @@ class SCA_TuscanyWrapper {
 
                 // if it's an SCA service recreate the instance
                 // with all the references filled in
-                if ( $reader->isService() ){
+                if ($reader->isService() ){
                     SCA::$logger->log('Create SCA service');
                     $this->service = SCA::createInstanceAndFillInReferences($this->class_name);
                 } else {
@@ -118,7 +118,7 @@ class SCA_TuscanyWrapper {
             }
 
             //invoke the function
-            if ( $this->service != null ){
+            if ($this->service != null ){
                 SCA::$logger->log('Invoke service as PHP object');
                 // it's a class with a member function
                 // so call it. Even if it's an SCA service

@@ -119,7 +119,7 @@ class SCA_ServiceWrapperJson
         // convert the reponse from the message call into something
         // that can be copied  into a JSON result string by the
         // JSON Server
-        if ( $return == null ) {
+        if ($return == null ) {
             $response_object = "null";
         } else if ( is_object($return) ) {
             $response_object = $this->json_das->encode($return);

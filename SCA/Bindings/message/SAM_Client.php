@@ -146,9 +146,9 @@ class SCA_Bindings_message_SAMClient {
                   or the JMS replyTo header*/
         $callback_queue = false;
         if (isset($request_msg->header->scaCallbackQueue)) {
-            $callback_queue = trim( $request_msg->header->scaCallbackQueue);
+            $callback_queue = trim($request_msg->header->scaCallbackQueue);
         }else if (isset($request_msg->header->SAM_REPLY_TO)) {
-            $callback_queue = trim( $request_msg->header->SAM_REPLY_TO);
+            $callback_queue = trim($request_msg->header->SAM_REPLY_TO);
         }
 
         $response_queue = ($this->isFixedResponseQueue) ? $this->response_queue : $callback_queue;
@@ -363,7 +363,7 @@ private:
     }
 
     /*helper function for sending request/response messages in test mode*/
-    private function _testmsgput( $queue, $msg, $corrid = null){
+    private function _testmsgput($queue, $msg, $corrid = null){
         /*in test mode, use $this::test_queueborker */
         if(is_null(self::$test_queueborker)){
             return false;

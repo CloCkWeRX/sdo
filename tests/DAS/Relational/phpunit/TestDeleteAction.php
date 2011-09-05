@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005,2007.                             |
@@ -95,7 +95,7 @@ class TestDeleteAction extends PHPUnit_Framework_TestCase
 		$changed_company = $changed_data_objects[0];
 		$old_values = $change_summary->getOldValues($changed_company);
 		$change_type = $change_summary->getChangeType($changed_company);
-		$this->assertTrue( $change_type == SDO_DAS_ChangeSummary::DELETION);
+		$this->assertTrue($change_type == SDO_DAS_ChangeSummary::DELETION);
 		$delete_action = new SDO_DAS_Relational_DeleteAction($this->object_model,$changed_company,$old_values);
 		$this->assertTrue(get_class($delete_action) == 'SDO_DAS_Relational_DeleteAction','Construction of DeleteAction failed');
 	}

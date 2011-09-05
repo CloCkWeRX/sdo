@@ -127,7 +127,7 @@ class SCA_Bindings_local_Proxy {
         return $return;
     }
 
-    public function createDataObject( $namespace_uri, $type_name )
+    public function createDataObject($namespace_uri, $type_name )
     {
         try {
             return SCA_Helper::createDataObject($namespace_uri, $type_name, $this->component_class_name);

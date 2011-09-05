@@ -96,11 +96,11 @@ class SCA_Bindings_Xmlrpc_DAS {
 
         // check if any types have been returned by XMLRPC system.describeMethods
         // simple types map directly to the SDO basic types
-        if ( $types_list != null) {
+        if ($types_list != null) {
 
             // iterate over the types adding types to the
             // SDO model
-            foreach ( $types_list as $type ) {
+            foreach ($types_list as $type ) {
                 $type_name = $type["name"];
                 $namespace = $this->default_namespace;
 
@@ -108,8 +108,8 @@ class SCA_Bindings_Xmlrpc_DAS {
                     continue;
 
                 // look type up in namespace map
-                if ( $namespace_map != null &&
-                     array_key_exists( $type_name, $namespace_map) ) {
+                if ($namespace_map != null &&
+                     array_key_exists($type_name, $namespace_map) ) {
                     $namespace = $namespace_map[$type_name];
                 }
 
@@ -126,7 +126,7 @@ class SCA_Bindings_Xmlrpc_DAS {
             // that have already been created. This is a two pass
             // process because the property type must exist before
             // we create the property of that type
-            foreach ( $types_list as $type ) {
+            foreach ($types_list as $type ) {
                 $type_name = $type["name"];
                 $namespace = $this->default_namespace;
 
@@ -135,13 +135,13 @@ class SCA_Bindings_Xmlrpc_DAS {
                     continue;
 
                 // look type up in namespace map
-                if ( $namespace_map != null &&
-                     array_key_exists( $type_name, $namespace_map) ) {
+                if ($namespace_map != null &&
+                     array_key_exists($type_name, $namespace_map) ) {
                     $namespace = $namespace_map[$type["name"]];
                 }
 
                 // create the properties of the type
-                foreach ( $type["member"] as $property ) {
+                foreach ($type["member"] as $property ) {
                     $property_name      = $property["name"];
                     $property_type      = $property["type"];
                     $property_namespace = $this->default_namespace;
@@ -151,7 +151,7 @@ class SCA_Bindings_Xmlrpc_DAS {
                     // valued
                     $array_pos          = strpos($property_type, "[]");
 
-                    if ( $array_pos !== false ) {
+                    if ($array_pos !== false ) {
                         // it is an array so strip out the array
                         // markers
                         $property_type = substr($property_type, 0, $array_pos);
@@ -171,7 +171,7 @@ class SCA_Bindings_Xmlrpc_DAS {
                         // Map the namespace to see
                         // if the user has told us what namespace this
                         // typename should have
-                        if ( $namespace_map != null &&
+                        if ($namespace_map != null &&
                              array_key_exists($property_type, $namespace_map) ) {
                             $property_namespace = $namespace_map[$property_type];
                         }
@@ -206,11 +206,11 @@ class SCA_Bindings_Xmlrpc_DAS {
     public function addTypesXsdFile($xsd_file)
     {
 
-        if ( $this->xml_das == null ) {
+        if ($this->xml_das == null ) {
             $this->xml_das = SDO_DAS_XML::create();
         }
 
-        if ( $xsd_file != null ) {
+        if ($xsd_file != null ) {
             $this->xml_das->addTypes($xsd_file);
         }
     }
@@ -286,7 +286,7 @@ class SCA_Bindings_Xmlrpc_DAS {
         $sdo = null;
 
         // guess the namespace if one is not provided
-        if ( $root_namespace == null ) {
+        if ($root_namespace == null ) {
             $root_namespace = $this->default_namespace;
         }
 
@@ -370,7 +370,7 @@ class SCA_Bindings_Xmlrpc_DAS {
      */
     private function decodeObjectToSDOTyped($object, $sdo)
     {
-        foreach ( $object as $param_name => $param_value ) {
+        foreach ($object as $param_name => $param_value ) {
             $this->decodeToSDOTyped($param_name, $param_value, $sdo);
         }
     }
@@ -382,17 +382,17 @@ class SCA_Bindings_Xmlrpc_DAS {
     private function decodeArrayToSDOTyped($array_name, $array, $sdo)
     {
         $array_index = 0;
-        foreach ( $array as $array_entry ) {
+        foreach ($array as $array_entry ) {
             $array_entry_type = $this->gettype($array_entry);
 
             // SCA::$logger->log( "Typed - Array Name: " . $array_name .
             //                      " Array Index: " . $array_index .
             //                      " Type: ". $array_entry_type . "\n");
 
-            if ( $array_entry_type == "object" ) {
+            if ($array_entry_type == "object" ) {
                 $new_sdo = $sdo->createDataObject($array_name);
                 $this->decodeObjectToSDOTyped($array_entry, $new_sdo);
-            } else if ( $array_entry_type == "array" ) {
+            } else if ($array_entry_type == "array" ) {
                 $new_sdo = $sdo->createDataObject($array_name);
                 $this->decodeArrayToSDO($array_name, $array_entry, $new_sdo);
             } else {
@@ -413,10 +413,10 @@ class SCA_Bindings_Xmlrpc_DAS {
 
         // SCA::$logger->log( "Typed - Name: " . $item_name .  " Type: ". $item_type . "\n");
 
-        if ( $item_type == "object" ) {
+        if ($item_type == "object" ) {
             $new_sdo = $sdo->createDataObject($item_name);
             $this->decodeObjectToSDOTyped($item, $new_sdo);
-        } else if ( $item_type == "array" ) {
+        } else if ($item_type == "array" ) {
             //$new_sdo = $sdo->createDataObject($item_name);
             $this->decodeArrayToSDOTyped($item_name, $item, $sdo);
         } else {
@@ -445,7 +445,7 @@ class SCA_Bindings_Xmlrpc_DAS {
      */
     private function decodeObjectToSDO($object, $sdo)
     {
-        foreach ( $object as $param_name => $param_value ) {
+        foreach ($object as $param_name => $param_value ) {
             $this->decodeToSDO($param_name, $param_value, $sdo);
         }
     }
@@ -456,7 +456,7 @@ class SCA_Bindings_Xmlrpc_DAS {
     private function decodeArrayToSDO($array_name, $array, $sdo)
     {
         $index = 0;
-        foreach ( $array as $array_entry ) {
+        foreach ($array as $array_entry ) {
             $array_index = $array_name . $index;
             $this->decodeToSDO($array_index, $array_entry, $sdo);
             $index = $index + 1;
@@ -471,11 +471,11 @@ class SCA_Bindings_Xmlrpc_DAS {
     {
         $item_type = $this->gettype($item);
 
-        if ( $item_type == "object" ) {
+        if ($item_type == "object" ) {
             $new_sdo = $this->data_factory->create($this->default_namespace, 'GenericType');
             $sdo[$item_name] = $new_sdo;
             $this->decodeObjectToSDO($item, $new_sdo);
-        } else if ( $item_type == "array" ) {
+        } else if ($item_type == "array" ) {
             $new_sdo = $this->data_factory->create($this->default_namespace, 'GenericType');
             $sdo[$item_name] = $new_sdo;
             $this->decodeArrayToSDO($item_name, $item, $new_sdo);

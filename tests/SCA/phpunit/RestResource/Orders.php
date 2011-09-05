@@ -87,7 +87,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
         $return_order = null;
 
         foreach($this->orders->order as $order){
-          if ( $order->orderId == $id ){
+          if ($order->orderId == $id ){
               $return_order = $order;
           }
         }
@@ -113,7 +113,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
 
         $orderIndex = 0;
         foreach($this->orders->order as $order){
-          if ( $order->orderId == $id ){
+          if ($order->orderId == $id ){
               $this->orders->order[$orderIndex] = $resource;
           }
           $orderIndex = $orderIndex + 1;
@@ -136,7 +136,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
 
         $orderIndex = 0;
         foreach($this->orders->order as $order){
-          if ( $order->orderId == $id ){
+          if ($order->orderId == $id ){
               unset($this->orders->order[$orderIndex]);
           }
           $orderIndex = $orderIndex + 1;

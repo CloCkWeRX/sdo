@@ -63,7 +63,7 @@ try
 }
 catch ( SCA_RuntimeException $se )
 {
-    print "<b>{$se->decodeCode( $se->getCode() )}</b> :: {$se->__toString()} \n";
+    print "<b>{$se->decodeCode($se->getCode() )}</b> :: {$se->__toString()} \n";
 
 }
 

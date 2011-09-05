@@ -106,7 +106,7 @@ class SCA_Bindings_Xmlrpc_Wrapper {
             $parameter_descriptions =  $service_description->operations[$method_name]["parameters"];
         }
 
-        foreach ( $params as $param_name => $param_value ) {
+        foreach ($params as $param_name => $param_value ) {
 
 
             if (isset($parameter_descriptions) && array_key_exists($param_name, $parameter_descriptions))
@@ -115,7 +115,7 @@ class SCA_Bindings_Xmlrpc_Wrapper {
             $param_type        = gettype($param_value);
 
 
-            if ( $param_type == "object" || $param_type == "array") {
+            if ($param_type == "object" || $param_type == "array") {
                 if ( isset($param_description) &&
                      array_key_exists('objectType', $param_description) &&
                      array_key_exists('namespace', $param_description)) {

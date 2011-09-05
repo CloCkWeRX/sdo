@@ -132,9 +132,9 @@ class SCA_CommentReader {
         $line = strtok($this->docComment, self::EOL); /* 1st line              */
 
         /* Loop round until all the doc comment has been read                  */
-        while ( $line !== false ) {
+        while ($line !== false ) {
             /* Is this a 'parameter' line                                      */
-            if ( $this->Rule->isMethodAnnotation($line) ) {
+            if ($this->Rule->isMethodAnnotation($line) ) {
 
                 /* Extract the components of the annotation into an array      */
                 $words = SCA_AnnotationRules::parseAnnotation($line);
@@ -183,7 +183,7 @@ class SCA_CommentReader {
     * @param  array  of raw words
     * @return array  containing parameter values for the wsdl
     */
-    public function setParameterValues( $words )
+    public function setParameterValues($words )
     {
         $paramValue                   = array();
         $paramValue['annotationType'] = $words[0];
@@ -216,7 +216,7 @@ class SCA_CommentReader {
         }
 
         /* When the type is an object the format of the line is different      */
-        if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
+        if ($this->Rule->isSupportedPrimitiveType($type) === false ) {
             $paramValue['type']          = 'object';
             $paramValue['name']          = $param_name;
 
@@ -252,7 +252,7 @@ class SCA_CommentReader {
     * @param  array   Containing the raaw words
     * @return array   for the WSDL
     */
-    public function setReturnValues( $words )
+    public function setReturnValues($words )
     {
         $returnValue                   = array();
         $returnValue['annotationType'] = $words[0];
@@ -275,7 +275,7 @@ class SCA_CommentReader {
         }
 
         /* When the type is an object the format of the line is different      */
-        if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
+        if ($this->Rule->isSupportedPrimitiveType($type) === false ) {
             /**
              * Make sure that the return annotation although appearing as if
              * it is an object has enough elements to make the wsdl definition
@@ -308,7 +308,7 @@ class SCA_CommentReader {
     * @param  array   Containing the raw words
     * @return array   Method alias (Currently used only for XMLRPC)
     */
-    public function setMethodAlias( $words )
+    public function setMethodAlias($words )
     {
         $alias                   = array();
         $alias['annotationType'] = $words[0];
@@ -595,7 +595,7 @@ class SCA_CommentReader {
 
         if ( ($size = count($words)) >1 ) {
             /* Ensuring you step over the first word . . .                     */
-            for ( $i = 1; $i < $size; $i++  ) {
+            for ($i = 1; $i < $size; $i++  ) {
                 /* ... ditch all the 'spaces'                                  */
                 if ( strlen($words[$i]) !== 0  ) {
                     $phoneme = $words[$i]; // and grab the 1st word you find

@@ -169,11 +169,11 @@ class SCA_Bindings_Xmlrpc_Proxy {
         if ( isset($this->type_list) ) {
             // now match the required type name against all the
             // types specified in XSDs
-            foreach ( $this->type_list as $type ) {
+            foreach ($this->type_list as $type ) {
                 $type_namespace = $type[0];
                 $type_name      = $type[1];
 
-                if ( $name_of_type == $type_name ) {
+                if ($name_of_type == $type_name ) {
                     $return_namespace      = $type_namespace;
                     $number_of_types_found = $number_of_types_found + 1;
                 }
@@ -184,7 +184,7 @@ class SCA_Bindings_Xmlrpc_Proxy {
             // associated with a reference can specify the same type name
             // in two or more different namespaces. Raise a warning if this
             // happens
-            if ( $number_of_types_found > 1 ) {
+            if ($number_of_types_found > 1 ) {
                 throw new SCA_RuntimeException("Type name $name_of_type appears multiple times in the " .
                 "XSDs provided in @type annotations with the reference " .
                 "The namespace chosen was $return_namespace");
@@ -282,13 +282,13 @@ class SCA_Bindings_Xmlrpc_Proxy {
 //                              FILE_APPEND);
 
         // test the response status
-        if ( $response == null || $response == false  ) {
+        if ($response == null || $response == false  ) {
             throw new SCA_RuntimeException("XML-RPC call to $this->service_url for method " .
             "$method_name failed ");
         }
 
         // test the response status
-        if ( $response_http_code != 200 ) {
+        if ($response_http_code != 200 ) {
             throw new SCA_RuntimeException("XML-RPC call to $this->service_url for method " .
             "$method_name failed with HTTP response code " .
             $response_http_code);
@@ -305,7 +305,7 @@ class SCA_Bindings_Xmlrpc_Proxy {
 
             $faultCode = $xml_response["faultCode"];
             $faultReason = $xml_response["faultString"];
-            if ( $faultCode != null ) {
+            if ($faultCode != null ) {
 
                 throw new SCA_RuntimeException("XML-RPC call to $this->service_url for method " .
                 "$method_name failed. Fault Code: $faultCode, Reason: $faultReason");
@@ -330,7 +330,7 @@ class SCA_Bindings_Xmlrpc_Proxy {
      * based on a type that is expected to form part of
      * a message to reference
      */
-    public function createDataObject( $namespace_uri, $type_name )
+    public function createDataObject($namespace_uri, $type_name )
     {
         try {
 

@@ -176,7 +176,7 @@ class SDO_DAS_Relational {
 
         $root        = self::createRoot($this->data_factory);
         $table_names = $this->database_model->getAllTableNames();   //TODO make sure they come back in graph order
-        if ( $this->application_root_type ) {
+        if ($this->application_root_type ) {
             assert($table_names[0] == $this->application_root_type);
         }
         $key_object_map = new SDO_DAS_Relational_KeyObjectMap();
@@ -211,7 +211,7 @@ class SDO_DAS_Relational {
                             }
                             $current_object = $parent_object->createDataObject($table_name);
                             foreach ($row as $column_name=>$column_value) {
-                                if ( $this->object_model->isNonContainmentReferenceProperty($table_name, $column_name)) {
+                                if ($this->object_model->isNonContainmentReferenceProperty($table_name, $column_name)) {
                                     // object that the n-c-ref points to may not exist yet so save as update for later
                                     $later_update = array();
                                     $later_update['object_to_update'] = $current_object;

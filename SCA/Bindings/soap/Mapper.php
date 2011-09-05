@@ -35,7 +35,7 @@ class SCA_Bindings_soap_Mapper {
     private $association  = null;
     protected $xmldas       = null;
 
-    public function __construct( $association )
+    public function __construct($association )
     {
         if ($association != self::CLIENT && $association != self::SERVER )
         throw new SoapFault('Client', 'SCA_Bindings_soap_Mapper should be initialised with an association of SoapServer or SoapClient');
@@ -69,7 +69,7 @@ class SCA_Bindings_soap_Mapper {
             SCA::$logger->log("exception thrown from create(): $problem");
 
 
-            if ( $e instanceof SDO_Exception )
+            if ($e instanceof SDO_Exception )
             $problem = "SDO_Exception in setWSDLTypes : " . $problem;
 
             /**
@@ -102,7 +102,7 @@ class SCA_Bindings_soap_Mapper {
         catch( Exception $e )
         {
             $problem = $e->getMessage();
-            if ( $e instanceof SDO_Exception )
+            if ($e instanceof SDO_Exception )
 
             /**
              * Depending on whether the function is being used on the client side
@@ -173,7 +173,7 @@ class SCA_Bindings_soap_Mapper {
         catch( Exception $e )
         {
             $problem = $e->getMessage();
-            if ( $e instanceof SDO_Exception )
+            if ($e instanceof SDO_Exception )
             $problem = "SDO_Exception in toXML : " . $problem;
 
             /**
@@ -206,7 +206,7 @@ class SCA_Bindings_soap_Mapper {
         catch( Exception $e )
         {
             $problem = $e->getMessage();
-            if ( $e instanceof SDO_Exception )
+            if ($e instanceof SDO_Exception )
             $problem = "SDO_Exception in createDataObject : " . $problem;
 
             /**

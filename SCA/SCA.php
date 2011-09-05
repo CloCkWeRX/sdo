@@ -183,7 +183,7 @@ class SCA
         }
 
         $service_description = self::constructServiceDescription($calling_component_filename);
-        if ( isset( $_SERVER['HTTP_HOST'] ) ) {
+        if ( isset($_SERVER['HTTP_HOST'] ) ) {
             $http_host = $_SERVER['HTTP_HOST'];
         } else {
             $http_host = "localhost";
@@ -479,7 +479,7 @@ class SCA
      * @param string $type_name     Element being reference in the xsd
      * @return object                Empty Data Object structure
      */
-    public static function createDataObject( $namespace_uri, $type_name )
+    public static function createDataObject($namespace_uri, $type_name )
     {
         // Find out who/what called this function so that the type annotations
         // that define the xml used to create a 'das' can be scanned.

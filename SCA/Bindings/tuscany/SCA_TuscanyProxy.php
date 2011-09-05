@@ -73,14 +73,14 @@ class SCA_TuscanyProxy {
     {
         // Invoke the Tuscany service
 
-        $return = SCA_Tuscany::invoke( $this->containing_class_name,
+        $return = SCA_Tuscany::invoke($this->containing_class_name,
                                      $this->reference_name,
                                      $method_name,
                                      $arguments);
         return $return;
     }
 
-    public function createDataObject( $namespace_uri, $type_name )
+    public function createDataObject($namespace_uri, $type_name )
     {
         try {
             return SCA_Helper::createDataObject(

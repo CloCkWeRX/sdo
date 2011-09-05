@@ -224,7 +224,7 @@ class SCA_Helper {
     * @param string $extensionName   Name of the extension to be checked
     * @return boolean                true' if found
     */
-    public static function findExtensionMethod( $methodName, $extensionName )
+    public static function findExtensionMethod($methodName, $extensionName )
     {
         // TODO implement this method using the reflection API
         return true;
@@ -240,7 +240,7 @@ class SCA_Helper {
         }
     }
 
-    public static function createDataObject( $namespace_uri, $type_name, $class_name)
+    public static function createDataObject($namespace_uri, $type_name, $class_name)
     {
         $xmldas     = self::getXmldas($class_name, $namespace_uri);
         $dataobject = $xmldas->createDataObject($namespace_uri, $type_name);
@@ -263,8 +263,8 @@ class SCA_Helper {
         //SCA::$logger->log("methods found: ".print_r($classMethods,true)."class: ".get_class($class)."\n");
 
 
-        foreach ( $classMethods as $method_name ) {
-            if ( $method === $method_name ) {
+        foreach ($classMethods as $method_name ) {
+            if ($method === $method_name ) {
                 $return = true;
                 break;
             }
@@ -315,14 +315,14 @@ class SCA_Helper {
             $j           = 0;
 
             /* For all of the public methods of the service class */
-            for ( $i = 0; $i < $elements; $i++ ) {
+            for ($i = 0; $i < $elements; $i++ ) {
 
                 /* Ignore the method if it's a magic method as defined by */
                 /* http://www.php.net/manual/en/language.oop5.magic.php   */
                 if ((substr($public_list[$i], 0, 2) != '__')) {
 
                     /*  Check each method has a reflection object */
-                    foreach ( $allMethodsArray as $allMethod ) {
+                    foreach ($allMethodsArray as $allMethod ) {
 
                         $objArray = get_object_vars($allMethod);
 
@@ -435,12 +435,12 @@ class SCA_Helper {
             if ( count($words) > 1 ) {
                 $namespace_and_type = $words[1];
                 $pos_last_colon     = strrpos($namespace_and_type, '#');
-                if ( $pos_last_colon !== false ) {
+                if ($pos_last_colon !== false ) {
                     $namespace = substr($namespace_and_type, 0, $pos_last_colon);
                     $type      = substr($namespace_and_type, $pos_last_colon+1);
 
                     //don't include any SDO primitve types or the root type
-                    if ( $namespace != "commonj.sdo" &&
+                    if ($namespace != "commonj.sdo" &&
                     $type      != "RootType"       ) {
                         $types[] = array($namespace, $type);
                     }

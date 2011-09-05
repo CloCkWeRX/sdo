@@ -34,7 +34,7 @@ class SCA_Bindings_Jsonrpc_RequestTester
     {
         SCA::$logger->log('Entering');
         if ( isset($_SERVER['REQUEST_METHOD']) ) {
-            if ( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
+            if ($_SERVER['REQUEST_METHOD'] == 'GET' ) {
                 $p1 = realpath($calling_component_filename);
                 $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
                 if (($p1 == $p2) && (isset($_GET['smd']) || isset($_GET['system-describe']) ||
@@ -50,12 +50,12 @@ class SCA_Bindings_Jsonrpc_RequestTester
     {
         SCA::$logger->log('Entering');
         if ( isset($_SERVER['HTTP_HOST']) ) {
-            if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
+            if ($_SERVER['REQUEST_METHOD'] == 'POST' ) {
                 $p1           = realpath($calling_component_filename); // the component who called us
                 $p2           = realpath($_SERVER['SCRIPT_FILENAME']); // from the URL
                 $content_type = isset($_SERVER['CONTENT_TYPE']) ?
                 $_SERVER['CONTENT_TYPE'] : null;
-                if ( $p1 == $p2 && strstr($content_type, "application/json-rpc") ) {
+                if ($p1 == $p2 && strstr($content_type, "application/json-rpc") ) {
                     return true;
                 }
             }

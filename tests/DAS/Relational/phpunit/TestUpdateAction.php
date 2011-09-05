@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005, 2007.                            |
@@ -95,7 +95,7 @@ class TestUpdateAction extends PHPUnit_Framework_TestCase
 		$changed_company = $changed_data_objects[0];
 		$old_values = $change_summary->getOldValues($changed_company);
 		$change_type = $change_summary->getChangeType($changed_company);
-		$this->assertTrue( $change_type == SDO_DAS_ChangeSummary::MODIFICATION);
+		$this->assertTrue($change_type == SDO_DAS_ChangeSummary::MODIFICATION);
 		$update_action = new SDO_DAS_Relational_UpdateAction($this->object_model,$changed_company,$old_values);
 		$this->assertTrue(get_class($update_action) == 'SDO_DAS_Relational_UpdateAction','Construction of UpdateAction failed');
 	}

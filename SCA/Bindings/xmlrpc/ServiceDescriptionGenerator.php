@@ -118,7 +118,7 @@ END;
                 $property_object->type   = $this->sdoTypeToXmlRpcType($property_type_name);
 
                 // work out if this is an array or not
-                if ( $property->isMany() ) {
+                if ($property->isMany() ) {
                     $property_object->type .= " []";
                 }
 

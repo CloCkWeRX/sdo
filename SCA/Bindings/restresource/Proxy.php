@@ -90,7 +90,7 @@ class SCA_Bindings_restresource_Proxy
         //check whether it is an sdo or an xml string.
         if($resource instanceof SDO_DataObjectImpl){
             //if the thing received is an sdo convert it to xml
-            if ( $this->xml_das !== null ) {
+            if ($this->xml_das !== null ) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
             } else {
                 throw new SCA_RuntimeException('Trying to create a resource with SDO but ' .
@@ -190,7 +190,7 @@ class SCA_Bindings_restresource_Proxy
         //check whether it is an sdo or an xml string.
         if($resource instanceof SDO_DataObjectImpl){
             //if the thing received is an sdo convert it to xml
-            if ( $this->xml_das !== null ) {
+            if ($this->xml_das !== null ) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
             } else {
                 throw new SCA_RuntimeException('Trying to update a resource with SDO but ' .
@@ -312,7 +312,7 @@ class SCA_Bindings_restresource_Proxy
      * based on a type that is expected to form part of
      * a message to reference
      */
-    public function createDataObject( $namespace_uri, $type_name )
+    public function createDataObject($namespace_uri, $type_name )
     {
         SCA::$logger->log("Entering");
         try {
