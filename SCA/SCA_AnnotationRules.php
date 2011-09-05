@@ -219,7 +219,7 @@ class SCA_AnnotationRules {
         $comment      = false;
         $commentArray = null;
         $j            = 0;
-        $line         = preg_replace("{[ \t]+}", " ", $line);
+        $line         = preg_replace("{[\t]+}", " ", $line);
         $arrayOfLine  = explode(' ', (trim($line)));
 
         /**
@@ -237,9 +237,9 @@ class SCA_AnnotationRules {
 
                     /* Put the 'word' into either the comment or the definitions array  */
                     if  ( $comment === true )
-                    $commentArray[ $j++ ] = $element;
+                    $commentArray[$j++] = $element;
                     else
-                    $thesePieces[ $i++ ] = trim($element);
+                    $thesePieces[$i++] = trim($element);
 
                 }/* End not star                                               */
 
@@ -249,7 +249,7 @@ class SCA_AnnotationRules {
 
         /* Putting back the comment into a single element                      */
         if ( $commentArray !== null )
-        $thesePieces[ $i ] = trim((implode(' ', $commentArray)), self::BRACKETS);
+        $thesePieces[$i] = trim((implode(' ', $commentArray)), self::BRACKETS);
 
 
         return $thesePieces;
@@ -284,8 +284,8 @@ class SCA_AnnotationRules {
     public static function createEmptyAnnotationArray()
     {
         $emptySet                           = array();
-        $emptySet[ self::PARAM_ANNOTATION ] = array();
-        $emptySet[ self::RETRN_ANNOTATION ] = null;
+        $emptySet[self::PARAM_ANNOTATION] = array();
+        $emptySet[self::RETRN_ANNOTATION] = null;
 
         return $emptySet;
     }/*End create empty annotation array                                       */

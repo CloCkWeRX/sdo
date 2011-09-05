@@ -286,11 +286,11 @@ class SCA_AnnotationReader
                                 /* Clean off the dollar sign from the variable name, and do */
                                 /* a namespace check as appropriate.                        */
                                 foreach ( $annotationSet as $annotation ) {
-                                    if ( strcmp($annotation['annotationType' ], SCA_AnnotationRules::PARAM) === 0 ) {
-                                        if ( strpos($annotation[ 'name' ], SCA_AnnotationRules::DOLLAR) === false ) {
-                                            throw new SCA_RuntimeException("Invalid syntax '{$annotation[ 'name' ]}' is not a php variable name");
+                                    if ( strcmp($annotation['annotationType'], SCA_AnnotationRules::PARAM) === 0 ) {
+                                        if ( strpos($annotation['name'], SCA_AnnotationRules::DOLLAR) === false ) {
+                                            throw new SCA_RuntimeException("Invalid syntax '{$annotation['name']}' is not a php variable name");
                                         } else {
-                                            $methodAnnotations[ 'parameters' ][ $thisElement ][ 'name' ] = trim($annotation[ 'name' ], SCA_AnnotationRules::DOLLAR);
+                                            $methodAnnotations['parameters'][$thisElement]['name'] = trim($annotation['name'], SCA_AnnotationRules::DOLLAR);
                                         }/* End variable name check                             */
 
                                     }/* End parameter annotation test                         */
@@ -298,10 +298,10 @@ class SCA_AnnotationReader
                                     /* When the array is formatted for SDO objects            */
                                     if ( array_key_exists('namespace', $annotation) ) {
                                         /* .... check that the xsd is defined for the namespace */
-                                        if ( ! $this->_matchXsds($service->xsd_types, $annotation[ 'namespace' ]) ) {
+                                        if ( ! $this->_matchXsds($service->xsd_types, $annotation['namespace']) ) {
                                             //TODO: noticed potential defect that if a method A has no @param, the @param of another method is being picked up instead and this error being thrown for method A
 
-                                            throw new SCA_RuntimeException("Namespace defined in {$annotation[ 'annotationType' ]} not found in @types annotation: '{$annotation[ 'namespace' ]}'");
+                                            throw new SCA_RuntimeException("Namespace defined in {$annotation['annotationType']} not found in @types annotation: '{$annotation['namespace']}'");
 
                                         }/* End xsd - namespace exists     */
 

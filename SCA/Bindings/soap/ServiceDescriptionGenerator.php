@@ -241,7 +241,7 @@ class SCA_Bindings_soap_ServiceDescriptionGenerator
             foreach ($settings['parameters'] as $parameter) {
                 $parameter_name_in_quotes = self::QUOTES . $parameter['name'] . self::QUOTES;
                 $parameter_type           = ($parameter['type'] == 'object')
-                ? $namespace_to_prefix_map[$parameter[ 'namespace']] . self::COLON . $parameter['objectType']
+                ? $namespace_to_prefix_map[$parameter['namespace']] . self::COLON . $parameter['objectType']
                 : self::XS . self::COLON . $parameter['type'];
                 $parameter_type_in_quotes   = self::QUOTES . $parameter_type . self::QUOTES;
                 if ($parameter['nillable']) {

@@ -37,7 +37,7 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
      */
     public function testDefaultLoggerCreated()
     {
-        self::$logger = new SCA_Logger( $this->loginfo[ 0 ], $this->loginfo[ 1 ]   );
+        self::$logger = new SCA_Logger( $this->loginfo[0], $this->loginfo[1]   );
 
         $this->assertNotNull( self::$logger );
 
@@ -45,7 +45,7 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
 
         $status = self::$logger->logStatus();
 
-        $this->assertEquals( $status[ 'run' ]
+        $this->assertEquals( $status['run']
                            , "Running"
                            , "SCA_LoggerTest::testStopMethod Status is not running"
                            );
@@ -73,7 +73,7 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
 
         $status = self::$logger->logStatus();
 
-        $this->assertEquals( $status[ 'count' ]
+        $this->assertEquals( $status['count']
                            , 3
                            , "SCA_LoggerTest::testSetFilterMethod Invalid number of log entries"
                            );
@@ -98,7 +98,7 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
                            );
 
         $this->assertContains( 'Critical'
-                             , $critical[ 0 ]
+                             , $critical[0]
                              , "SCA_LogFilterTest::testReadCritical CRITICAL message not found"
                              );
 
@@ -141,7 +141,7 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
                            );
 
         $this->assertContains( 'Warning'
-                             , $warning[ 0 ]
+                             , $warning[0]
                              , "SCA_LogFilterTest::testReadWarning WARNING message not found"
                              );
 
@@ -185,7 +185,7 @@ class SCALogFilterTest extends PHPUnit_Framework_TestCase
                            );
 
         $this->assertContains( 'Debug'
-                             , $debug[ 0 ]
+                             , $debug[0]
                              , "SCA_LogFilterTest::testReadDebug DEBUG message not found"
                              );
 

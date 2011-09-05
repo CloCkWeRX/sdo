@@ -319,7 +319,7 @@ class SCA_Helper {
 
                 /* Ignore the method if it's a magic method as defined by */
                 /* http://www.php.net/manual/en/language.oop5.magic.php   */
-                if ((substr($public_list[ $i ], 0, 2) != '__')) {
+                if ((substr($public_list[$i], 0, 2) != '__')) {
 
                     /*  Check each method has a reflection object */
                     foreach ( $allMethodsArray as $allMethod ) {
@@ -327,8 +327,8 @@ class SCA_Helper {
                         $objArray = get_object_vars($allMethod);
 
                         /* copy the relfection object to the filitered list if it does */
-                        if ( strcmp($objArray[ 'name' ], $public_list[ $i ]) === 0 ) {
-                            $editedArray[ $j++ ] = $allMethod;
+                        if ( strcmp($objArray['name'], $public_list[$i]) === 0 ) {
+                            $editedArray[$j++] = $allMethod;
 
                         }
                     }

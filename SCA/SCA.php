@@ -139,16 +139,16 @@ class SCA
         self::$logger->log('$_SERVER[\'CONTENT_TYPE\'] = ' .  $_SERVER['CONTENT_TYPE']);
 
         // contains the X.wsdl in http://..../X.php/X.wsdl
-        if (isset($_SERVER[ 'PATH_INFO' ]))
+        if (isset($_SERVER['PATH_INFO']))
         self::$logger->log('$_SERVER[\'PATH_INFO\'] = ' .  $_SERVER['PATH_INFO']);
 
-        if (isset($_SERVER[ 'PHP_SELF' ]))
+        if (isset($_SERVER['PHP_SELF']))
         self::$logger->log('$_SERVER[\'PHP_SELF\'] = ' .  $_SERVER['PHP_SELF']);
 
-        if (isset($_SERVER[ 'REQUEST_URI' ]))
+        if (isset($_SERVER['REQUEST_URI']))
         self::$logger->log('$_SERVER[\'REQUEST_URI\'] = ' .  $_SERVER['REQUEST_URI']);
 
-        if (isset($_GET[ 'wsdl' ]))
+        if (isset($_GET['wsdl']))
         self::$logger->log('$_GET[\'wsdl\'] = ' .  $_GET['wsdl']);
 
         /**
@@ -490,7 +490,7 @@ class SCA
 
         // Check if there is a matching xsd in the xmldas array
         if ( array_key_exists($keyname, self::$xml_das_array) ) {
-            $xmldas = self::$xml_das_array[ $keyname ];
+            $xmldas = self::$xml_das_array[$keyname];
         } else {
             // The trap will only trigger if the Annotations cannot be found
             // normally this is because a SCA Client Component has incorrectly
@@ -499,7 +499,7 @@ class SCA
             try {
                 $class_name = SCA_Helper::guessClassName($filepath);
                 $xmldas     = SCA_Helper::getXmldas($class_name, null);
-                self::$xml_das_array[ $keyname ] = $xmldas;
+                self::$xml_das_array[$keyname] = $xmldas;
             } catch( ReflectionException $e ) {
                 $msg =  $e->getMessage();
                 throw new SCA_RuntimeException( "A PHP ReflectionException was thrown with message $msg. "
@@ -539,7 +539,7 @@ class SCA
 SCA_Helper::checkSdoExtensionLoaded();
 
 $backtrace        = debug_backtrace();
-$immediate_caller = $backtrace[ 0 ][ 'file' ];
+$immediate_caller = $backtrace[0]['file'];
 
 SCA::initComponent($immediate_caller);
 

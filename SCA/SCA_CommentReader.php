@@ -140,16 +140,16 @@ class SCA_CommentReader {
                 $words = SCA_AnnotationRules::parseAnnotation($line);
 
                 if ( SCA_AnnotationRules::enoughPieces($words) === true ) {
-                    if ( strcmp($words[ 0 ], SCA_AnnotationRules::PARAM) === 0 ) {
-                        $this->methodAnnotations[ self::PARAM_ANNOTATION ][$i++] =
+                    if ( strcmp($words[0], SCA_AnnotationRules::PARAM) === 0 ) {
+                        $this->methodAnnotations[self::PARAM_ANNOTATION][$i++] =
                         $this->setParameterValues($words);
-                    } else if ( strcmp($words[ 0 ], SCA_AnnotationRules::NAME) === 0 ) {
-                        $this->methodAnnotations[ self::NAME_ANNOTATION ] =
+                    } else if ( strcmp($words[0], SCA_AnnotationRules::NAME) === 0 ) {
+                        $this->methodAnnotations[self::NAME_ANNOTATION] =
                         $this->setMethodAlias($words);
                     } else {
                         /* Ensure that no syntax error has been detected       */
                         if ( ($checkValue = $this->setReturnValues($words)) != null ) {
-                            $this->methodAnnotations[ self::RETRN_ANNOTATION ][ 0 ] =
+                            $this->methodAnnotations[self::RETRN_ANNOTATION][0] =
                             $checkValue;
                         } else {
                             $reason = "Invalid return annotation syntax in '{$line}' ";
@@ -186,7 +186,7 @@ class SCA_CommentReader {
     public function setParameterValues( $words )
     {
         $paramValue                   = array();
-        $paramValue['annotationType'] = $words[ 0 ];
+        $paramValue['annotationType'] = $words[0];
 
         if (!isset($words[1])) {
             throw new SCA_RuntimeException('@param must be followed by a type');
@@ -196,8 +196,8 @@ class SCA_CommentReader {
             throw new SCA_RuntimeException('@param must be followed by a type then a variable name');
         }
 
-        $type                         = $words[ 1 ];
-        $param_name                   = $words[ 2 ];
+        $type                         = $words[1];
+        $param_name                   = $words[2];
 
         if (strncmp($param_name,'$',1) !== 0) {
             throw new SCA_RuntimeException('The variable name in an @param annotation must begin with a $');
@@ -217,24 +217,24 @@ class SCA_CommentReader {
 
         /* When the type is an object the format of the line is different      */
         if ( $this->Rule->isSupportedPrimitiveType($type) === false ) {
-            $paramValue[ 'type' ]          = 'object';
-            $paramValue[ 'name' ]          = $param_name;
+            $paramValue['type']          = 'object';
+            $paramValue['name']          = $param_name;
 
             if (!isset($words[3])) {
                 throw new SCA_RuntimeException('@param with a data type must contain a namespace');
             }
 
 
-            $paramValue[ 'namespace' ]     = $words[3];
-            $paramValue[ 'objectType' ]    = $type;
+            $paramValue['namespace']     = $words[3];
+            $paramValue['objectType']    = $type;
             if ( (count($words)) > 4 )
-            $paramValue[ 'description' ] = $words[4];
+            $paramValue['description'] = $words[4];
 
         } else {
-            $paramValue[ 'type' ]          = $type;
-            $paramValue[ 'name' ]          = $param_name;
+            $paramValue['type']          = $type;
+            $paramValue['name']          = $param_name;
             if ( (count($words)) > 3 )
-            $paramValue[ 'description' ] = $words[ 3 ];
+            $paramValue['description'] = $words[3];
 
         }/* End place into the wsdl definitions                                */
 
@@ -255,12 +255,12 @@ class SCA_CommentReader {
     public function setReturnValues( $words )
     {
         $returnValue                   = array();
-        $returnValue['annotationType'] = $words[ 0 ];
+        $returnValue['annotationType'] = $words[0];
 
         if (!isset($words[1])) {
             throw new SCA_RuntimeException('@return must be followed by a type');
         }
-        $type                          = $words[ 1 ];
+        $type                          = $words[1];
 
         $returnValue['nillable'] = false;
         $pos_pipe = strpos($type,'|');
@@ -281,19 +281,19 @@ class SCA_CommentReader {
              * it is an object has enough elements to make the wsdl definition
              */
             if ( count($words) > 2 ) {
-                $returnValue[ 'type' ]          = 'object';
-                $returnValue[ 'namespace' ]     = $words[ 2 ];
-                $returnValue[ 'objectType' ]     = $type;
+                $returnValue['type']          = 'object';
+                $returnValue['namespace']     = $words[2];
+                $returnValue['objectType']     = $type;
                 if ( (count($words)) > 3 )
-                $returnValue[ 'description' ] = $words[ 3 ];
+                $returnValue['description'] = $words[3];
             } else {
                 $returnValue =  null; // error return!
             }
 
         } else {
-            $returnValue[ 'type' ]          = $type;
+            $returnValue['type']          = $type;
             if ( (count($words)) > 2 )
-            $returnValue[ 'description' ] = $words[ 2 ];
+            $returnValue['description'] = $words[2];
 
 
         }/* End place into the wsdl definitions                                   */
@@ -311,13 +311,13 @@ class SCA_CommentReader {
     public function setMethodAlias( $words )
     {
         $alias                   = array();
-        $alias['annotationType'] = $words[ 0 ];
+        $alias['annotationType'] = $words[0];
 
         if (!isset($words[1])) {
             throw new SCA_RuntimeException('@name must be followed by a name');
         }
 
-        $alias[ 'name' ]          = $words[ 1 ];
+        $alias['name']          = $words[1];
 
 
         return  $alias;
@@ -378,7 +378,7 @@ class SCA_CommentReader {
             $targetLine = substr($this->docComment, $pos);
             $pos = $pos + strlen($bindingAnnotation);
 
-            $targetLine = preg_replace("{[ \t]+}", " ", $targetLine);
+            $targetLine = preg_replace("{[\t]+}", " ", $targetLine);
             $words      = explode(" ", $targetLine);
             for ($i = 0; $i < count($words); $i++) {
                 $word = trim($words[$i++]);
@@ -589,16 +589,16 @@ class SCA_CommentReader {
     {
 
         $targetLine = strchr($this->docComment, "@" . $label);
-        $targetLine = preg_replace("{[ \t]+}", " ", $targetLine);
+        $targetLine = preg_replace("{[\t]+}", " ", $targetLine);
         $words      = explode(" ", $targetLine);
-        $phoneme    = $words[ 1 ];
+        $phoneme    = $words[1];
 
         if ( ($size = count($words)) >1 ) {
             /* Ensuring you step over the first word . . .                     */
             for ( $i = 1; $i < $size; $i++  ) {
                 /* ... ditch all the 'spaces'                                  */
-                if ( strlen($words[ $i ]) !== 0  ) {
-                    $phoneme = $words[ $i ]; // and grab the 1st word you find
+                if ( strlen($words[$i]) !== 0  ) {
+                    $phoneme = $words[$i]; // and grab the 1st word you find
                     break;
                 }
             }/*End all words in the label                                      */

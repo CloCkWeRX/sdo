@@ -151,8 +151,8 @@ class SCA_LogFactory {
         $arrayOfLine  = explode('/', (trim($line)));
         $bits         = count( $arrayOfLine );
 
-        if ( ($last = strrpos( $arrayOfLine[ --$bits ], '.php' )) > 0 ) {
-            $instance = substr( $arrayOfLine[ $bits ], 0, $last );
+        if ( ($last = strrpos( $arrayOfLine[--$bits], '.php' )) > 0 ) {
+            $instance = substr( $arrayOfLine[$bits], 0, $last );
 
         }
 
@@ -183,7 +183,7 @@ class SCA_LogFactory {
 
         for ( $i = 0; $parameter !== false;  $i++ ) {
             $parameter   = trim( $parameter );
-            $array[ $i ] = $parameter;
+            $array[$i] = $parameter;
             $parameter   = strtok( $token );
 
         }

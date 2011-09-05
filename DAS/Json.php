@@ -529,7 +529,7 @@ it comes in but by then the model is set
      * is observed
      *   Data object          -> {}
      *   Data obect property  -> "propery name" : property value
-     *   Many valued property -> "propery name" : [ property value, ... ]
+     *   Many valued property -> "propery name" : [property value, ...]
      *   Primitive            -> property value
      */
     public function encode ( $sdo )

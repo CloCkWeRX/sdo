@@ -38,7 +38,7 @@ class SCA_Bindings_Jsonrpc_RequestTester
                 $p1 = realpath($calling_component_filename);
                 $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
                 if (($p1 == $p2) && (isset($_GET['smd']) || isset($_GET['system-describe']) ||
-                    ((isset($_SERVER[ 'PATH_INFO' ])) && $_SERVER[ 'PATH_INFO' ] == '/system.describe'))) {
+                    ((isset($_SERVER['PATH_INFO'])) && $_SERVER['PATH_INFO'] == '/system.describe'))) {
                     return true;
                 }
             }

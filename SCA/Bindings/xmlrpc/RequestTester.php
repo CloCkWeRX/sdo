@@ -39,7 +39,7 @@ class SCA_Bindings_Xmlrpc_RequestTester
                 $p1 = realpath($calling_component_filename);
                 $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
                 if (($p1 == $p2) &&
-                    (isset($_SERVER[ 'PATH_INFO' ])) && $_SERVER[ 'PATH_INFO' ] == '/system.describeMethods') {
+                    (isset($_SERVER['PATH_INFO'])) && $_SERVER['PATH_INFO'] == '/system.describeMethods') {
                     return true;
                 }
             }
@@ -59,7 +59,7 @@ class SCA_Bindings_Xmlrpc_RequestTester
                 $_SERVER['CONTENT_TYPE'] : null;
                 if ( $p1 == $p2 && $content_type == "text/xml" ) {
 
-                    if ((isset($_SERVER[ 'PATH_INFO' ])) && $_SERVER[ 'PATH_INFO' ] == '/RPC2') {
+                    if ((isset($_SERVER['PATH_INFO'])) && $_SERVER['PATH_INFO'] == '/RPC2') {
                         return true;
                     }
                 }

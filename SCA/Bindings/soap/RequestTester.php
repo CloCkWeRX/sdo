@@ -52,7 +52,7 @@ class SCA_Bindings_soap_RequestTester
 
         if (isset($_SERVER['HTTP_HOST'])) {
             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                if ((isset($_SERVER[ 'PATH_INFO' ])) && $_SERVER[ 'PATH_INFO' ] == '/RPC2') {
+                if ((isset($_SERVER['PATH_INFO'])) && $_SERVER['PATH_INFO'] == '/RPC2') {
                     return false; // looks like it is XmlRpc, not SOAP
                 }
                 $p1 = realpath($calling_component_filename);
