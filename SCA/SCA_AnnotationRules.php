@@ -1,43 +1,55 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
-+-----------------------------------------------------------------------------+
-$Id: SCA_AnnotationRules.php 234945 2007-05-04 15:05:53Z mfp $
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws                                                          |
+ * +-----------------------------------------------------------------------------+
+ * $Id: SCA_AnnotationRules.php 234945 2007-05-04 15:05:53Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA_SDO
+ * @package  SCA_SDO
+ * @author   Graham Charters <gcc@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+
+/**
+ * The following script contains some simple methods that can be combined to
+ * check that the format rules for the annotation of a parameter line, and return
+ * line are obeyed, (or at least are sensible).
+ *
+ * Note : There are a few useful constants defined that can be accessed by other
+ *        classes that include this file.
+ *
+ * @category SCA_SDO
+ * @package  SCA_SDO
+ * @author   Graham Charters <gcc@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
 */
-
-/*
-* The following script contains some simple methods that can be combined to
-* check that the format rules for the annotation of a parameter line, and return
-* line are obeyed, ( or at least are sensible ).
-*
-* Note : There are a few useful constants defined that can be accessed by other
-*        classes that include this file.
-*
-*/
-
-
-class SCA_AnnotationRules {
+class SCA_AnnotationRules
+{
     const PARAM            = "@param";
     const RETRN            = "@return";
     const NAME             = "@name";
@@ -56,163 +68,157 @@ class SCA_AnnotationRules {
     const   PARAM_ANNOTATION        = 'parameters';
     const   RETRN_ANNOTATION        = 'return';
 
-    private $token         = self::DOLLAR;
+    protected $token         = self::DOLLAR;
 
     // TODO make this the right list
-    private $dataTypeArray = array ( 'boolean'
-    , 'bool'
-    , 'string'
-    , 'integer'
-    , 'array'
-    , 'float'
-    , 'double'
-    , 'real'
-   );
-
-    /**
-     * Constructor for SCA_AnnotationRules
-     * @returns object handle
-     */
-    public function __construct()
-    {
-
-    }/* End constructor function                                               */
+    protected $dataTypeArray = array(
+        'boolean', 'bool', 'string', 'integer',
+        'array', 'float', 'double', 'real'
+    );
 
     /**
      * Is there any method annotations at the beginning of the line
      *
-     * @param string $line
+     * @param string $line Line to check
+     *
      * @return boolean
      */
-    public function isMethodAnnotation($line )
+    public function isMethodAnnotation($line)
     {
         return ($this->isParameter($line) || $this->isReturn($line) ||
-                 $this->isName($line)) ?
-            true : false;
-
-    }/* End is parameter function                                              */
+                 $this->isName($line));
+    }
 
     /**
      * Is the parameter annotation at the beginning of the line
      *
-     * @param string $line
+     * @param string $line Line to check
+     *
      * @return boolean
      */
-    public function isParameter($line )
+    public function isParameter($line)
     {
-        return ( strpos($line, self::PARAM) != false ) ? true : false;
-    }/* End is parameter function                                              */
+        return (strpos($line, self::PARAM) != false);
+    }
 
     /**
      * Is the return annotation at the beginning of the line
      *
-     * @param string $line
+     * @param string $line Line to check
+     *
      * @return boolean
      */
-    public function isReturn($line )
+    public function isReturn($line)
     {
-        return ( strpos($line, self::RETRN) != false ) ? true : false;
-    }/* End is return function                                                 */
+        return (strpos($line, self::RETRN) != false);
+    }
 
     /**
      * Is the name annotation at the beginning of the line
      *
-     * @param string $line
+     * @param string $line Line to check
+     *
      * @return boolean
      */
-    public function isName($line )
+    public function isName($line)
     {
-        return ( strpos($line, self::NAME) != false ) ? true : false;
-    }/* End is name function                                                   */
+        return (strpos($line, self::NAME) != false);
+    }
 
     /**
      * Is the data type defined as an object.
      *
-     * @param string $word
+     * @param string $word Word to check
+     *
      * @return boolean
      */
-    public function isDataObject($word )
+    public function isDataObject($word)
     {
-        return ( !$this->isSupportedPrimitiveType($word));
-    }/* End is data object function                                            */
+        return (!$this->isSupportedPrimitiveType($word));
+    }
 
     /**
      * Does the word start with an '$' sign denoting a variable definition
      *
-     * @param string $word
+     * @param string $word Word to check
+     *
      * @return boolean
      */
-    public function isVariable($word )
+    public function isVariable($word)
     {
-        return  ( strpos($word, self::DOLLAR) === 0 ) ? true : false;
+        return (strpos($word, self::DOLLAR) === 0);
 
-    }/* End is variable function                                               */
+    }
 
     /**
      * Check that the name given for the xsd definition is the same as the
      * variable name.
      *
-     * @param string $name
-     * @param string $variableName
+     * @param string $name         Name
+     * @param string $variableName Variable
+     *
      * @return boolean
      */
-    public function matchXsdName($name, $variableName )
+    public function matchXsdName($name, $variableName)
     {
         $namepart = trim($variableName, $this->token);
 
-        return ( strcmp($name, $namepart) === 0 ) ? true : false;
+        return (strcmp($name, $namepart) === 0);
 
-    }/* End match xsd name function                                            */
+    }
 
     /**
-     * Does the word resemble a namespace definition ( does it have some 'slash
-     * characters somewhere inside the word ).
+     * Does the word resemble a namespace definition (does it have some 'slash
+     * characters somewhere inside the word).
      *
-     * @param string $word
+     * @param string $word Word to check
+     *
      * @return boolean
      */
-    public function looksLikeNamespace($word )
+    public function looksLikeNamespace($word)
     {
-        return (  ( strpos($word, self::BACKSLASH) >= 0 )
-        || ( strpos($word, self::FORESLASH) >= 0 ) ) ? true : false;
+        return ((strpos($word, self::BACKSLASH) >= 0)
+        || (strpos($word, self::FORESLASH) >= 0));
 
-    }/* End looks like namespace function                                      */
+    }
 
     /**
      * Check that the type of data is a supported data type.
      *
-     * @param string $type
+     * @param string $type Type to check
+     *
      * @return boolean
      */
-    public function isSupportedPrimitiveType($type )
+    public function isSupportedPrimitiveType($type)
     {
         $return = false;
 
         /* Is there a value worth testing?                                     */
-        if ( strlen($type) > 0 ) {
-            foreach ($this->dataTypeArray as $dataType ) {
-                if ( strpos($dataType, $type) !== false ) {
+        if (strlen($type) > 0) {
+            foreach ($this->dataTypeArray as $dataType) {
+                if (strpos($dataType, $type) !== false) {
                     $return = true;
                     break;
-                }/* End match                                                  */
-            }/* End all supported types                                        */
-        }/* End something to test                                              */
+                }
+            }
+        }
 
         return $return;
 
-    }/* End parse type function                                                */
+    }
 
     /**
      * An annotation may be 'formatted' with extra spaces and/or tab chars. These
      * characters are removed, placing the words in a line into an array.
-     * The function also makes sure that any comment ( delimited by brackets )
+     * The function also makes sure that any comment (delimited by brackets)
      * remains as a string, and that extranious characters, and php variable
      * symbols are removed.
      *
-     * @param string The line to be parsed
+     * @param string $line The line to be parsed
+     *
      * @return array Containing elements of the parsed line
      */
-    public static function parseAnnotation($line )
+    public static function parseAnnotation($line)
     {
         $thesePieces  = null;
         $i            = 0;
@@ -226,43 +232,46 @@ class SCA_AnnotationRules {
          * Make up an array containing only words reserved words, and if there is
          * a comment filter it out into a separate array.
          */
-        foreach ($arrayOfLine as $element ) {
+        foreach ($arrayOfLine as $element) {
             /* When the the array captured a 'space'                           */
-            if ( strlen($element) !== 0 ) {
+            if (strlen($element) !== 0) {
                 /* .. and the contents are not the comment-star                */
-                if ($element !== self::STAR ) {
+                if ($element !== self::STAR) {
                     /* Alter the flow when the word is not a reserved word     */
-                    if ( ( strpos($element, self::LEFTBRACKET) ) !== false )
-                    $comment = true;
+                    if ((strpos($element, self::LEFTBRACKET)) !== false) {
+                        $comment = true;
+                    }
 
                     /* Put the 'word' into either the comment or the definitions array  */
-                    if  ($comment === true )
-                    $commentArray[$j++] = $element;
-                    else
-                    $thesePieces[$i++] = trim($element);
+                    if ($comment === true) {
+                        $commentArray[$j++] = $element;
+                    } else {
+                        $thesePieces[$i++] = trim($element);
+                    }
 
-                }/* End not star                                               */
+                }
 
-            }/* End no string ( was a space )                                  */
+            }
 
-        }/* End all of the pieces                                              */
+        }
 
         /* Putting back the comment into a single element                      */
-        if ($commentArray !== null )
-        $thesePieces[$i] = trim((implode(' ', $commentArray)), self::BRACKETS);
+        if ($commentArray !== null) {
+            $thesePieces[$i] = trim((implode(' ', $commentArray)), self::BRACKETS);
+        }
 
 
         return $thesePieces;
-
-    }/*End parse annotation function                                           */
+    }
 
     /**
      * Make sure that there are enough definitions to make up a wsdl entry
      *
-     * @param array $inThisArray
+     * @param array $inThisArray Arrray to check
+     *
      * @return boolean
      */
-    public static function enoughPieces($inThisArray )
+    public static function enoughPieces($inThisArray)
     {
         $entries = count($inThisArray);
 
@@ -272,9 +281,9 @@ class SCA_AnnotationRules {
         // I think the person who wrote this meant ||
         // but it's only a crude check of the parameter and return
         // lines anyway and not right
-        return ( ($entries < 2 && $entries > 4 ) ? false : true);
+        return !($entries < 2 && $entries > 4);
 
-    }/* End enough pieces function                                             */
+    }
 
     /**
      * Make the empty set of annotation conversions
@@ -290,5 +299,5 @@ class SCA_AnnotationRules {
         return $emptySet;
     }/*End create empty annotation array                                       */
 
-}/* End annotation rules class                                                 */
+}
 
