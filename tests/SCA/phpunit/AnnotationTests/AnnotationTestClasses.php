@@ -3,7 +3,7 @@
 /**
  * class with no service annotation
  */
-class NoServiceAnnotation 
+class NoServiceAnnotation
 {
 }
 
@@ -11,7 +11,7 @@ class NoServiceAnnotation
  * class with no binding annotation
  * @service
  */
-class NoBindingAnnotation 
+class NoBindingAnnotation
 {
 }
 
@@ -20,7 +20,7 @@ class NoBindingAnnotation
  * @service
  * @binding.rubbish
  */
-class RubbishBindingAnnotation 
+class RubbishBindingAnnotation
 {
 }
 
@@ -29,7 +29,7 @@ class RubbishBindingAnnotation
  * @service
  * @binding.soap
  */
-class OneValidBindingAnnotation 
+class OneValidBindingAnnotation
 {
 }
 
@@ -39,7 +39,7 @@ class OneValidBindingAnnotation
  * @binding.soap
  * @binding.jsonrpc
  */
-class TwoValidBindingAnnotations 
+class TwoValidBindingAnnotations
 {
 }
 
@@ -52,7 +52,7 @@ class TwoValidBindingAnnotations
  * @service
  * @binding.soap
  */
-class NoMethods 
+class NoMethods
 {
 }
 
@@ -305,9 +305,9 @@ class ReturnWithChoiceOfValidTypeOrNull {
  * @binding.soap
  * @types
  */
-class EmptyTypes 
+class EmptyTypes
 {
-    
+
 }
 
 /**
@@ -316,9 +316,9 @@ class EmptyTypes
  * @binding.soap
  * @types http://Namespace
  */
-class TypesWithOnlyNamespace 
+class TypesWithOnlyNamespace
 {
-    
+
 }
 
 /**
@@ -327,9 +327,9 @@ class TypesWithOnlyNamespace
  * @binding.soap
  * @types http://Namespace Anything.xsd
  */
-class TypesWithValidNamespaceAndXsd 
+class TypesWithValidNamespaceAndXsd
 {
-    
+
 }
 
 /**
@@ -341,7 +341,7 @@ class TypesWithValidNamespaceAndXsd
  */
 class TwoTypesWithSameNamespaceAndDifferentXsds
 {
-    
+
 }
 
 /**
@@ -405,7 +405,7 @@ class BindingWithNoReference
     public $service;
 }
 
-/** 
+/**
  * reference with an invalid binding
  * @service
  */
@@ -418,7 +418,7 @@ class ReferenceWithAnInvalidBinding
     public $service;
 }
 
-/** 
+/**
  * reference with an empty php binding
  * @service
  */
@@ -426,12 +426,12 @@ class ReferenceWithAnEmptyPhpBinding
 {
     /**
      * @reference
-     * @binding.php 
+     * @binding.php
      */
     public $service;
 }
 
-/** 
+/**
  * reference with an empty ws binding
  * @service
  */
@@ -439,7 +439,7 @@ class ReferenceWithAnEmptyWsBinding
 {
     /**
      * @reference
-     * @binding.soap 
+     * @binding.soap
      */
     public $service;
 }
@@ -449,16 +449,16 @@ class ReferenceWithAnEmptyWsBinding
  ********************************************************************************/
 
 interface InterfaceWithTwoMethods {
-    
+
     public function Method1($in1);
     public function Method2($in1, $in2);
 }
 
 
 interface InterfaceWithOneMethod {
-    
+
     public function Method3();
-    
+
 }
 
 /**
@@ -468,13 +468,13 @@ interface InterfaceWithOneMethod {
  *
  */
 class ServiceInterfaceWithTwoMethods implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
-    
+
     /**
      * A private method that should not appear
      *
      */
     private function privateMethod() {}
-    
+
     /**
      * My first service method
      *
@@ -482,7 +482,7 @@ class ServiceInterfaceWithTwoMethods implements InterfaceWithTwoMethods, Interfa
      * @return float
      */
     public function Method1($in1) {}
-    
+
     /**
      * My second service method
      *
@@ -514,13 +514,13 @@ class ServiceInterfaceWithTwoMethods implements InterfaceWithTwoMethods, Interfa
  *
  */
 class ServiceInterfaceWithOneMethod implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
-    
+
     /**
      * A private method that should not appear
      *
      */
     private function privateMethod() {}
-    
+
     /**
      * We don't want this one
      *
@@ -528,7 +528,7 @@ class ServiceInterfaceWithOneMethod implements InterfaceWithTwoMethods, Interfac
      * @return float
      */
     public function Method1($in1) {}
-    
+
     /**
      * We don't want this one
      *
@@ -560,13 +560,13 @@ class ServiceInterfaceWithOneMethod implements InterfaceWithTwoMethods, Interfac
  *
  */
 class ServiceInterfaceWithFourMethods implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
-    
+
     /**
      * A private method that should not appear
      *
      */
     private function privateMethod() {}
-    
+
     /**
      * We want this one
      *
@@ -574,7 +574,7 @@ class ServiceInterfaceWithFourMethods implements InterfaceWithTwoMethods, Interf
      * @return float
      */
     public function Method1($in1) {}
-    
+
     /**
      * We want this one
      *
@@ -606,13 +606,13 @@ class ServiceInterfaceWithFourMethods implements InterfaceWithTwoMethods, Interf
  *
  */
 class ServiceWithInvalidInterface implements InterfaceWithTwoMethods, InterfaceWithOneMethod {
-    
+
     /**
      * A private method that should not appear
      *
      */
     private function privateMethod() {}
-    
+
     /**
      * We want this one
      *
@@ -620,7 +620,7 @@ class ServiceWithInvalidInterface implements InterfaceWithTwoMethods, InterfaceW
      * @return float
      */
     public function Method1($in1) {}
-    
+
     /**
      * We want this one
      *
@@ -643,5 +643,3 @@ class ServiceWithInvalidInterface implements InterfaceWithTwoMethods, InterfaceW
     public function Method4() {}
 
 }
-
-?>

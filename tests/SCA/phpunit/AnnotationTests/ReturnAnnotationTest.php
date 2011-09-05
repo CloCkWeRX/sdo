@@ -115,4 +115,3 @@ if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "SCA_Annotation_ReturnTest::main");
     SCA_Annotation_ReturnTest::main();
 }
-?>
