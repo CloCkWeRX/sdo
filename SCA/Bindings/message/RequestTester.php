@@ -20,33 +20,31 @@
 |                                                                             |
 +-----------------------------------------------------------------------------+
 */
-if ( ! class_exists('SCA_Bindings_message_RequestTester', false) ) {
 
-    class SCA_Bindings_message_RequestTester
+
+class SCA_Bindings_message_RequestTester
+{
+    public function isServiceDescriptionRequest($calling_component_filename)
     {
-        public function isServiceDescriptionRequest($calling_component_filename)
-        {
-            if ( isset($_SERVER['REQUEST_METHOD']) ) {
-                if ( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
-                    $p1 = realpath($calling_component_filename);
-                    $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
-                    if (($p1 == $p2) && ( isset($_GET['msd']) || 
-                                          isset($_GET['wsdl']) ) ) {
-                        return true;
-                    }
+        if ( isset($_SERVER['REQUEST_METHOD']) ) {
+            if ( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
+                $p1 = realpath($calling_component_filename);
+                $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
+                if (($p1 == $p2) && ( isset($_GET['msd']) ||
+                                      isset($_GET['wsdl']) ) ) {
+                    return true;
                 }
             }
-            return false;
         }
+        return false;
+    }
 
-        public function isServiceRequest($calling_component_filename)
-        {
-            //check if SAM extension is loaded
-            if ( ! (in_array('sam', get_loaded_extensions())) ) {
-                throw new SCA_RuntimeException("The SAM extension must be loaded");
-            }
-            return true;
+    public function isServiceRequest($calling_component_filename)
+    {
+        //check if SAM extension is loaded
+        if ( ! (in_array('sam', get_loaded_extensions())) ) {
+            throw new SCA_RuntimeException("The SAM extension must be loaded");
         }
+        return true;
     }
 }
-?>

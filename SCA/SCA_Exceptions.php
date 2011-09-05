@@ -26,26 +26,24 @@
 $Id: SCA_Exceptions.php 234864 2007-05-03 18:23:57Z mfp $
 */
 
-if ( ! class_exists('SCA_RuntimeException', false) ) {
-    class SCA_RuntimeException extends Exception
-    {
-        public function __toString()
-        {
-            // NOTE we use get_class() and not __CLASS__ because
-            // __CLASS__ will always give us SCA_RuntimeExcpetion even for
-            // derived classes, whereas get_class($this) will give us the
-            // class name of the derived class
-            return get_class($this) . ": " . $this->getMessage();
-        }
-    }
 
-    class SCA_AuthenticationException      extends SCA_RuntimeException {}
-    class SCA_BadRequestException          extends SCA_RuntimeException {}
-    class SCA_ConflictException            extends SCA_RuntimeException {}
-    class SCA_InternalServerErrorException extends SCA_RuntimeException {}
-    class SCA_MethodNotAllowedException    extends SCA_RuntimeException {}
-    class SCA_NotFoundException            extends SCA_RuntimeException {}
-    class SCA_ServiceUnavailableException  extends SCA_RuntimeException {}
-    class SCA_UnauthorizedException        extends SCA_RuntimeException {}
+class SCA_RuntimeException extends Exception
+{
+    public function __toString()
+    {
+        // NOTE we use get_class() and not __CLASS__ because
+        // __CLASS__ will always give us SCA_RuntimeExcpetion even for
+        // derived classes, whereas get_class($this) will give us the
+        // class name of the derived class
+        return get_class($this) . ": " . $this->getMessage();
+    }
 }
-?>
+
+class SCA_AuthenticationException      extends SCA_RuntimeException {}
+class SCA_BadRequestException          extends SCA_RuntimeException {}
+class SCA_ConflictException            extends SCA_RuntimeException {}
+class SCA_InternalServerErrorException extends SCA_RuntimeException {}
+class SCA_MethodNotAllowedException    extends SCA_RuntimeException {}
+class SCA_NotFoundException            extends SCA_RuntimeException {}
+class SCA_ServiceUnavailableException  extends SCA_RuntimeException {}
+class SCA_UnauthorizedException        extends SCA_RuntimeException {}

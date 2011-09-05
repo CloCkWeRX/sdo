@@ -20,14 +20,14 @@
 +----------------------------------------------------------------------+
 $Id$
 */
-include 'SCA/Bindings/restresource/ResourceTemplate.php';
+require_once 'SCA/Bindings/restresource/ResourceTemplate.php';
 
 /**
- * An example resource based service that provides access using the 
+ * An example resource based service that provides access using the
  * restresource binding. The reosurces here are XML objects read from
  * and written to file using SDO. This does not have to be the case
  * of course and any resource management scheme can be used.
- * 
+ *
  * @service
  * @binding.restresource
  * @types urn::orderNS Orders.xsd
@@ -37,7 +37,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
     private $xmldas = null;
     private $doc    = null;
     private $orders = null;
-            
+
     /**
      * The constructure here loads the resource collection
      * from the file system
@@ -47,7 +47,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
         SCA::$logger->log("Entering constructor");
         $this->readOrders();
     }
-    
+
    /**
      * Insert $resource into the resource collection
      *
@@ -62,7 +62,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
         $resource_id = "order" . rand();
         $resource->orderId = $resource_id;
         $this->writeOrders();
-        
+
         // return the absolute URL of where this new resource
         // can be found
         $resource_url =  "http://" .
@@ -78,20 +78,20 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
      * returns the resource identified by $id
      *
      * @param string $id
-     * @return OrderType urn::orderNS    
+     * @return OrderType urn::orderNS
      *
      **/
     public function retrieve($id){
-        SCA::$logger->log("retrieve resource $id"); 
-        
+        SCA::$logger->log("retrieve resource $id");
+
         $return_order = null;
-        
+
         foreach($this->orders->order as $order){
           if ( $order->orderId == $id ){
               $return_order = $order;
           }
-        }  
-         
+        }
+
         // return the successfully retrieve resource
         // or null otherwise
         return $return_order;
@@ -102,87 +102,87 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
      * is the new version of the resource for this id
      * returns an sdo
      *
-     * @param string $id     
-     * @param OrderType $resource urn::orderNS     
+     * @param string $id
+     * @param OrderType $resource urn::orderNS
      **/
     public function update($id, $resource){
         SCA::$logger->log("update resource");
-        
+
         // make sure that the id has not been changed
         $resource->orderId = $id;
-        
+
         $orderIndex = 0;
         foreach($this->orders->order as $order){
           if ( $order->orderId == $id ){
               $this->orders->order[$orderIndex] = $resource;
           }
           $orderIndex = $orderIndex + 1;
-        }       
-        $this->writeOrders();    
-        
+        }
+        $this->writeOrders();
+
         // return true to indicate that the resource
         // was successfully updated or false otherwise
-        return true;     
+        return true;
     }
 
     /**
-     * Deletes the resource for $id 
+     * Deletes the resource for $id
      * returns void
      *
-     * @param string $id    
-     **/        
+     * @param string $id
+     **/
     public function delete($id){
         SCA::$logger->log("delete resource");
-        
+
         $orderIndex = 0;
         foreach($this->orders->order as $order){
           if ( $order->orderId == $id ){
               unset($this->orders->order[$orderIndex]);
           }
           $orderIndex = $orderIndex + 1;
-        }       
-        $this->writeOrders(); 
-        
+        }
+        $this->writeOrders();
+
         // return true to indicate that the resource was
         // successfully deleted or false otherwise
         return true;
     }
 
     /**
-     * Returns all of the resources 
+     * Returns all of the resources
      *
      * @return OrdersType urn::orderNS
      *
-     **/ 
+     **/
     public function enumerate(){
         SCA::$logger->log("enumerate resource collection");
-        
+
         // return the collection of resources or null if the
         // collection is not available
         return $this->orders;
     }
-    
-    /** 
+
+    /**
      * a helper method to read all of the orders in from file
      */
     private function readOrders(){
         $this->xmldas = SDO_DAS_XML::create("./Orders.xsd");
         $this->doc    = $this->xmldas->loadFile("./Orders.xml");
-        $this->orders = $this->doc->getRootDataObject(); 
-    }   
-    
-    /** 
+        $this->orders = $this->doc->getRootDataObject();
+    }
+
+    /**
      * a helper method to write all of the orders out to file
      */
     private function writeOrders(){
-        $this->xmldas->saveFile($this->doc, "./Orders.xml"); 
-    }      
-	
+        $this->xmldas->saveFile($this->doc, "./Orders.xml");
+    }
+
 }
 
 // There is a issue with the PHP class_exists test when a class implements
-// an interface. I.e. PHP doesn't think the class exists untile after it is 
+// an interface. I.e. PHP doesn't think the class exists untile after it is
 // declared in the script. Moving the SCA include to below our service
 // declaration allows SCA to work normally
-include 'SCA/SCA.php';
-?>
+require_once 'SCA/SCA.php';
+

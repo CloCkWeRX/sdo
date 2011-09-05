@@ -31,51 +31,49 @@ include "SCA/Bindings/soap/Mapper.php";
 include "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
 
 if ( ! extension_loaded('soap')) {
-    trigger_error("Cannot use SCA soap binding as soap extension is not loaded",E_USER_WARNING);
-    return;
+trigger_error("Cannot use SCA soap binding as soap extension is not loaded",E_USER_WARNING);
+return;
 }
 
 
-if (! class_exists('SCA_Bindings_soap_ServiceRequestHandler', false)) {
-    class SCA_Bindings_soap_ServiceRequestHandler
+
+class SCA_Bindings_soap_ServiceRequestHandler
+{
+
+    public function handle($calling_component_filename, $service_description)
     {
+        SCA::$logger->log('Entering');
 
-        public function handle($calling_component_filename, $service_description)
-        {
-            SCA::$logger->log('Entering');
+        $class_name = SCA_Helper::guessClassName($calling_component_filename);
 
-            $class_name = SCA_Helper::guessClassName($calling_component_filename);
+        $wsdl_filename = str_replace('.php', '.wsdl', $calling_component_filename);
 
-            $wsdl_filename = str_replace('.php', '.wsdl', $calling_component_filename);
-
-            if (!file_exists($wsdl_filename)) {
-                file_put_contents($wsdl_filename,
-                SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description));
-            }
-
-            $handler = new SCA_Bindings_soap_Mapper("SoapServer");
-            try {
-                SCA::$logger->log("Wsdl Type = {$wsdl_filename}");
-                $handler->setWSDLTypes($wsdl_filename);
-            } catch( SCA_RuntimeException $wsdlerror ) {
-                echo $wsdlerror->exceptionString() . "\n" ;
-            }
-
-            if (SCA_Helper::wsdlWasGeneratedForAnScaComponent($wsdl_filename)) {
-                $options = $service_description->binding_config;
-                $options['typemap'] = $handler->getTypeMap();
-                $server = new SoapServer($wsdl_filename, $options);
-            } else {
-                $server = new SoapServer($wsdl_filename, $service_description->binding_config);
-            }
-
-            $class_name    = SCA_Helper::guessClassName($calling_component_filename);
-            $service_wrapper = new SCA_Bindings_soap_Wrapper($class_name, $handler);
-            $server->setObject($service_wrapper);
-            global $HTTP_RAW_POST_DATA;
-            $server->handle($HTTP_RAW_POST_DATA);
+        if (!file_exists($wsdl_filename)) {
+            file_put_contents($wsdl_filename,
+            SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description));
         }
 
+        $handler = new SCA_Bindings_soap_Mapper("SoapServer");
+        try {
+            SCA::$logger->log("Wsdl Type = {$wsdl_filename}");
+            $handler->setWSDLTypes($wsdl_filename);
+        } catch( SCA_RuntimeException $wsdlerror ) {
+            echo $wsdlerror->exceptionString() . "\n" ;
+        }
+
+        if (SCA_Helper::wsdlWasGeneratedForAnScaComponent($wsdl_filename)) {
+            $options = $service_description->binding_config;
+            $options['typemap'] = $handler->getTypeMap();
+            $server = new SoapServer($wsdl_filename, $options);
+        } else {
+            $server = new SoapServer($wsdl_filename, $service_description->binding_config);
+        }
+
+        $class_name    = SCA_Helper::guessClassName($calling_component_filename);
+        $service_wrapper = new SCA_Bindings_soap_Wrapper($class_name, $handler);
+        $server->setObject($service_wrapper);
+        global $HTTP_RAW_POST_DATA;
+        $server->handle($HTTP_RAW_POST_DATA);
     }
+
 }
-?>

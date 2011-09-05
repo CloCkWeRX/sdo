@@ -22,31 +22,31 @@
 $Id$
 */
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * A service that adds a surname to a name then calls a HelloService
- * 
+ *
  * @service
  */
-class SurnameService 
+class SurnameService
 {
-    
+
     /**
      * A reference to a remote HelloService
-     * 
+     *
      * @reference
      * @binding.soap ./HelloService.wsdl
      * */
      public $helloService;
-    
+
     /**
      * Method that adds surname 'Fish' and passes on request
-     * 
+     *
      * @param string $name The name to say hello to
      * @return string The string "Hello <name> Fish"
      */
-    function sayHello($name) 
+    function sayHello($name)
     {
         return $this->helloService->sayHello($name . ' Fish');
     }

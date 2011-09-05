@@ -7,7 +7,7 @@ display_errors=off
     phpversion('sdo') < '0.7.1') print "skip"; ?>
 --FILE--
 <?php 
-include "test.inc";
+require_once "test.inc";
 
 $rdo = new SDO_Model_ReflectionDataObject($company);
 print $rdo; 

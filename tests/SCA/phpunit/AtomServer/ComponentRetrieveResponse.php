@@ -1,6 +1,5 @@
 <?php
-
-require "SCA/SCA.php";
+require_once "SCA/SCA.php";
 
 /**
  * @service
@@ -9,7 +8,7 @@ require "SCA/SCA.php";
 class ComponentRetrieveResponse {
 
     /**
-	 * Just indicate that the input got here and matched the input sent by the client. 
+	 * Just indicate that the input got here and matched the input sent by the client.
 	 *
 	 */
     function retrieve($in)
@@ -35,5 +34,3 @@ EOF;
 
 
 }
-
-?>

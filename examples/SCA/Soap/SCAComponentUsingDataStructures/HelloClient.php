@@ -29,7 +29,7 @@ $Id$
 
 <?php
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 echo '<p>Calling BatchService locally</p>';
 

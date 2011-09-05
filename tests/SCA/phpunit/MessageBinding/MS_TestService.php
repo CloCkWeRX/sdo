@@ -1,12 +1,10 @@
 <?php
-
-
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * @service
  * @binding.message
- * 
+ *
  * @protocol stomp
  * @host localhost
  * @port 61613
@@ -41,4 +39,4 @@ class MS_TestService
     }
 
 
-}?>
+}

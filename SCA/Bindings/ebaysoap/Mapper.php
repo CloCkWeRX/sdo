@@ -26,42 +26,41 @@
 $Id: Mapper.php 238265 2007-06-22 14:32:40Z mfp $
 */
 
-if ( ! class_exists('SCA_Bindings_ebaysoap_Mapper', false) ) {
-    class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper 
+
+class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper
+{
+   /**
+     * Load the WSDL and hence initialise the SDO model
+     *
+     * @param string $wsdl
+     * @throws  SCA_RuntimeException
+     */
+    public function setWSDLTypes($wsdl)
     {
-       /**
-         * Load the WSDL and hence initialise the SDO model
-         *
-         * @param string $wsdl
-         * @throws  SCA_RuntimeException
-         */
-        public function setWSDLTypes($wsdl)
-        {
-            SCA::$logger->log('Entering');
-            SCA::$logger->log("wsdl is $wsdl");
-            try {
-                $this->xmldas = @SDO_DAS_XML::create($wsdl,"WEARETHEEBAYSOAPBINDING");
-            } catch ( Exception $e ) {
-                $problem = $e->getMessage();
-                SCA::$logger->log("exception thrown from create(): $problem");
+        SCA::$logger->log('Entering');
+        SCA::$logger->log("wsdl is $wsdl");
+        try {
+            $this->xmldas = @SDO_DAS_XML::create($wsdl,"WEARETHEEBAYSOAPBINDING");
+        } catch ( Exception $e ) {
+            $problem = $e->getMessage();
+            SCA::$logger->log("exception thrown from create(): $problem");
 
 
-                if ( $e instanceof SDO_Exception )
-                $problem = "SDO_Exception in setWSDLTypes : " . $problem ;
+            if ( $e instanceof SDO_Exception )
+            $problem = "SDO_Exception in setWSDLTypes : " . $problem ;
 
-                /**
-                     * Depending on whether the function is being used on the
-                     * client side or the server side either report the problem
-                     * to the client, or record the problem in the error.log
-                     */
-                trigger_error($problem);
+            /**
+                 * Depending on whether the function is being used on the
+                 * client side or the server side either report the problem
+                 * to the client, or record the problem in the error.log
+                 */
+            trigger_error($problem);
 
-                /* When the 'TypeHandler is being used by the Soap Server */
-                if ( strcmp($this->association, self::SERVER) === 0 )
-                throw new SoapFault("Client", "Invalid WSDL Type");
-            }
-
+            /* When the 'TypeHandler is being used by the Soap Server */
+            if ( strcmp($this->association, self::SERVER) === 0 )
+            throw new SoapFault("Client", "Invalid WSDL Type");
         }
 
-    }/* End instance check                                                         */
-}/* End SCA_Bindings_soap_SDO_TypeHandler class                                                      */
+    }
+
+}/* End instance check                                                         */

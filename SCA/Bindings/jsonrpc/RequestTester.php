@@ -26,42 +26,40 @@
 $Id: RequestTester.php 254122 2008-03-03 17:56:38Z mfp $
 */
 
-if ( ! class_exists('SCA_Bindings_Jsonrpc_RequestTester', false) ) {
 
-    class SCA_Bindings_Jsonrpc_RequestTester
+
+class SCA_Bindings_Jsonrpc_RequestTester
+{
+    public function isServiceDescriptionRequest($calling_component_filename)
     {
-        public function isServiceDescriptionRequest($calling_component_filename)
-        {
-            SCA::$logger->log('Entering');
-            if ( isset($_SERVER['REQUEST_METHOD']) ) {
-                if ( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
-                    $p1 = realpath($calling_component_filename);
-                    $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
-                    if (($p1 == $p2) && (isset($_GET['smd']) || isset($_GET['system-describe']) ||
-                        ((isset($_SERVER[ 'PATH_INFO' ])) && $_SERVER[ 'PATH_INFO' ] == '/system.describe'))) {
-                        return true;
-                    }
+        SCA::$logger->log('Entering');
+        if ( isset($_SERVER['REQUEST_METHOD']) ) {
+            if ( $_SERVER['REQUEST_METHOD'] == 'GET' ) {
+                $p1 = realpath($calling_component_filename);
+                $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
+                if (($p1 == $p2) && (isset($_GET['smd']) || isset($_GET['system-describe']) ||
+                    ((isset($_SERVER[ 'PATH_INFO' ])) && $_SERVER[ 'PATH_INFO' ] == '/system.describe'))) {
+                    return true;
                 }
             }
-            return false;
         }
+        return false;
+    }
 
-        public function isServiceRequest($calling_component_filename)
-        {
-            SCA::$logger->log('Entering');
-            if ( isset($_SERVER['HTTP_HOST']) ) {
-                if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
-                    $p1           = realpath($calling_component_filename); // the component who called us
-                    $p2           = realpath($_SERVER['SCRIPT_FILENAME']); // from the URL
-                    $content_type = isset($_SERVER['CONTENT_TYPE']) ?
-                    $_SERVER['CONTENT_TYPE'] : null;
-                    if ( $p1 == $p2 && strstr($content_type, "application/json-rpc") ) {
-                        return true;
-                    }
+    public function isServiceRequest($calling_component_filename)
+    {
+        SCA::$logger->log('Entering');
+        if ( isset($_SERVER['HTTP_HOST']) ) {
+            if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
+                $p1           = realpath($calling_component_filename); // the component who called us
+                $p2           = realpath($_SERVER['SCRIPT_FILENAME']); // from the URL
+                $content_type = isset($_SERVER['CONTENT_TYPE']) ?
+                $_SERVER['CONTENT_TYPE'] : null;
+                if ( $p1 == $p2 && strstr($content_type, "application/json-rpc") ) {
+                    return true;
                 }
             }
-            return false;
         }
+        return false;
     }
 }
-?>

@@ -26,66 +26,63 @@
 $Id: ServiceRequestHandler.php 234945 2007-05-04 15:05:53Z mfp $
 */
 
-require "SCA/Bindings/jsonrpc/SCA_ServiceWrapperJson.php";
-require "SCA/Bindings/jsonrpc/SCA_JsonRpcServer.php";
-require 'SCA/Bindings/jsonrpc/SCA_GenerateSmd.php';
+require_once "SCA/Bindings/jsonrpc/SCA_ServiceWrapperJson.php";
+require_once "SCA/Bindings/jsonrpc/SCA_JsonRpcServer.php";
+require_once 'SCA/Bindings/jsonrpc/SCA_GenerateSmd.php';
 
-if ( ! class_exists('SCA_Bindings_Jsonrpc_ServiceRequestHandler', false) ) {
 
-    class SCA_Bindings_Jsonrpc_ServiceRequestHandler
+
+class SCA_Bindings_Jsonrpc_ServiceRequestHandler
+{
+    public function handle($calling_component_filename, $service_description)
     {
-        public function handle($calling_component_filename, $service_description)
-        {
-            SCA::$logger->log("Entering");
-            try {
-                $smd_filename = str_replace('.php', '.smd', $calling_component_filename);
+        SCA::$logger->log("Entering");
+        try {
+            $smd_filename = str_replace('.php', '.smd', $calling_component_filename);
 
-                if (!file_exists($smd_filename)) {
-                    file_put_contents($smd_filename,
-                    SCA_GenerateSmd::generateSmd($service_description));
-                    //                    ,self::generateSMD($calling_component_filename)
-                    //                    );
-                }
-
-                $wsdl_filename = null;
-
-                // create a wrapper, which in turn creates a service
-                // instance and fills in all of the references
-                $class_name      = SCA_Helper::guessClassName($calling_component_filename);
-                $instance        = SCA::createInstance($class_name);
-                $service_wrapper = new SCA_ServiceWrapperJson($instance, $class_name, $wsdl_filename);
-
-                // create the jsonrpc server that will process the input message
-                // and generate the result message
-                $jsonrpc_server = new SCA_JsonRpcServer($service_wrapper);
-                $jsonrpc_server->handle();
-            } catch ( Exception $ex ) {
-                // A catch all exception just in case something drastic goes wrong
-                // This can often be the case in constructors of the JSON infsatructure
-                // classes where SMD files can be read over remote connections. We
-                // still want to send a sensible error back to the client
-
-                // TODO extend the JSON service to expose this kind of function
-                //      through public methods
-                $response = "{\"id\":\"";
-                $response = $response . SCA_JsonRpcServer::getRequest()->id;
-                $response = $response . "\",\"error\":\"" . $ex->getMessage();
-                $response = $response . "\",\"version\":\"1.0\"}";
-                // TODO what to do about id? We can catch errors before the
-                //      input is parsed
-
-                // some debugging
-                //                file_put_contents("json_messages.txt",
-                //                "Response at JSONRPC server = " . $response . "\n",
-                //                FILE_APPEND);
-
-                header('Content-type: application/json-rpc');
-
-                echo $response;
+            if (!file_exists($smd_filename)) {
+                file_put_contents($smd_filename,
+                SCA_GenerateSmd::generateSmd($service_description));
+                //                    ,self::generateSMD($calling_component_filename)
+                //                    );
             }
-            return ;
+
+            $wsdl_filename = null;
+
+            // create a wrapper, which in turn creates a service
+            // instance and fills in all of the references
+            $class_name      = SCA_Helper::guessClassName($calling_component_filename);
+            $instance        = SCA::createInstance($class_name);
+            $service_wrapper = new SCA_ServiceWrapperJson($instance, $class_name, $wsdl_filename);
+
+            // create the jsonrpc server that will process the input message
+            // and generate the result message
+            $jsonrpc_server = new SCA_JsonRpcServer($service_wrapper);
+            $jsonrpc_server->handle();
+        } catch ( Exception $ex ) {
+            // A catch all exception just in case something drastic goes wrong
+            // This can often be the case in constructors of the JSON infsatructure
+            // classes where SMD files can be read over remote connections. We
+            // still want to send a sensible error back to the client
+
+            // TODO extend the JSON service to expose this kind of function
+            //      through public methods
+            $response = "{\"id\":\"";
+            $response = $response . SCA_JsonRpcServer::getRequest()->id;
+            $response = $response . "\",\"error\":\"" . $ex->getMessage();
+            $response = $response . "\",\"version\":\"1.0\"}";
+            // TODO what to do about id? We can catch errors before the
+            //      input is parsed
+
+            // some debugging
+            //                file_put_contents("json_messages.txt",
+            //                "Response at JSONRPC server = " . $response . "\n",
+            //                FILE_APPEND);
+
+            header('Content-type: application/json-rpc');
+
+            echo $response;
         }
+        return ;
     }
 }
-
-?>

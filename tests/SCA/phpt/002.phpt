@@ -19,7 +19,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
 </SOAP-ENV:Envelope>
 EOF;
 
-require "SCA/SCA.php";
+require_once "SCA/SCA.php";
 $component_file = dirname(__FILE__).'/Component.php';
 
 // make it look to the component as if it is on the receiving end of a SOAP request

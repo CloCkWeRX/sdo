@@ -1,6 +1,5 @@
 <?php
-
-require "SCA/SCA.php";
+require_once "SCA/SCA.php";
 
 /**
  * @service
@@ -9,7 +8,7 @@ require "SCA/SCA.php";
 class ComponentEnumerateFeedFormat {
 
     /**
-	 * Just indicate that the input got here and matched the input sent by the client. 
+	 * Just indicate that the input got here and matched the input sent by the client.
 	 *
 	 */
     function enumerate()
@@ -20,7 +19,7 @@ class ComponentEnumerateFeedFormat {
     <id>http://paddy.hursley.ibm.com/Demos/PHPQuebec2007/contactsyndication/ContactFeed.php</id>
     <link href="http://paddy.hursley.ibm.com/Demos/PHPQuebec2007/contactsyndication/ContactFeed.php" rel="self"/>
     <title type="text">Contact Details</title>
-    <subtitle>Atom feed of contact details</subtitle>    
+    <subtitle>Atom feed of contact details</subtitle>
     <updated>2006-12-19 12:06:50</updated>
     <entry>
       <id>http://paddy.hursley.ibm.com/Demos/PHPQuebec2007/contactsyndication/ContactFeed.php/1</id>
@@ -375,9 +374,7 @@ EOF;
 
 
     function retrieve($in){
-       
+
         //nothing in here at the moment - just here so that enumerate() can be reached
     }
 }
-
-?>

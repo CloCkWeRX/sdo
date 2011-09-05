@@ -36,11 +36,11 @@ switch ($_GET['type']) {
  	*/
 	case 'database':
 		echo '<b>Retrieving from database</b><br/><br/>';
-		require '../contacts/contacts_data.inc.php';
+		require_once '../contacts/contacts_data.inc.php';
 		$root = retrieve_contact('shifty');
-		$contact = $root->contact[0];	
+		$contact = $root->contact[0];
 		break;
-	
+
 	/**
  	* Load the contact from XML
  	*/
@@ -48,13 +48,13 @@ switch ($_GET['type']) {
 		echo '<b>Retrieving from XML</b><br/><br/>';
 		$xmldas = SDO_DAS_XML::create('contacts.xsd');
 		$doc = $xmldas->loadFile('contacts.xml');
-		$contact = $doc->getRootDataObject();	
+		$contact = $doc->getRootDataObject();
 		break;
 	default:
 		echo '<b>Invalid data source type (use database or XML)</b><br/><br/>';
 		return false;
 		break;
-		
+
 }
 
 
@@ -107,7 +107,7 @@ foreach ($address as $name => $value) {
 }
 
 /**
- * Print or var_dump of a data object 
+ * Print or var_dump of a data object
  */
 echo '<br/><b>Print/var_dump output</b><br/>';
 print "$address <br/>";

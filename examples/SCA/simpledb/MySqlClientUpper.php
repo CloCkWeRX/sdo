@@ -21,9 +21,9 @@
 $Id$
 */
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
-$dbservice = SCA::getService('contact', 'simpledb', 
+$dbservice = SCA::getService('contact', 'simpledb',
                              array('config' => 'config/mysql_config.ini',
                                    'case' => 'upper'));
 

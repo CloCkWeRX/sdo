@@ -6,7 +6,7 @@ display_errors=off
 <?php if (!extension_loaded("sdo")) print "skip"; ?>
 --FILE--
 <?php 
-include "test.inc";
+require_once "test.inc";
 
 var_dump($company);
 

@@ -29,7 +29,7 @@ class SCA_Bindings_soap_HandlerTest extends PHPUnit_Framework_TestCase {
         $php = <<<PHP
 <?php
 
-require "SCA/SCA.php";
+require_once "SCA/SCA.php";
 
 /**
  * @service
@@ -86,12 +86,12 @@ public function testSoapHandlerProcessesCorrectCallCorrectly()
 
     $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
                    xmlns:ns1="http://SoapHandlerTestComponent">
   <SOAP-ENV:Body>
-    <ns1:reverse xmlns="http://SoapHandlerTestComponent" 
-                 xmlns:tns="http://SoapHandlerTestComponent" 
-                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    <ns1:reverse xmlns="http://SoapHandlerTestComponent"
+                 xmlns:tns="http://SoapHandlerTestComponent"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xsi:type="reverse">
       <in>IBM</in>
     </ns1:reverse>

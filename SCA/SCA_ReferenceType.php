@@ -31,94 +31,91 @@ $Id: SCA_ReferenceType.php 234864 2007-05-03 18:23:57Z mfp $
  * of a reference
  */
 
-if (!class_exists('SCA_ReferenceType', false)) {
+class SCA_ReferenceType
+{
+    private $binding_type;
+    private $binding;
+    private $types;
+    private $class_name;
+    private $binding_config;
 
-    class SCA_ReferenceType
+    public function __construct()
     {
-        private $binding_type;
-        private $binding;
-        private $types;
-        private $class_name;
-        private $binding_config;
+        $this->binding = null;
+        $this->types   = null;
+        $this->binding_type = null;
+    }
 
-        public function __construct()
-        {
-            $this->binding = null;
-            $this->types   = null;
-            $this->binding_type = null;
-        }
+    public function addClassName($class_name)
+    {
+        $this->class_name = $class_name;
+    }
 
-        public function addClassName($class_name)
-        {
-            $this->class_name = $class_name;
-        }
+    public function getClassName()
+    {
+        return $this->class_name;
+    }
 
-        public function getClassName()
-        {
-            return $this->class_name;
-        }
+    public function addTypes($types)
+    {
+        $this->types = $types;
+    }
 
-        public function addTypes($types)
-        {
-            $this->types = $types;
-        }
+    public function getTypes()
+    {
+        return $this->types;
+    }
 
-        public function getTypes()
-        {
-            return $this->types;
-        }
+    public function addBinding($binding)
+    {
+        $this->binding = $binding;
+    }
 
-        public function addBinding($binding)
-        {
-            $this->binding = $binding;
-        }
+    public function getBinding()
+    {
+        return $this->binding;
+    }
 
-        public function getBinding()
-        {
-            return $this->binding;
-        }
+    public function setBindingType($binding_type)
+    {
+        $this->binding_type = $binding_type;
+    }
 
-        public function setBindingType($binding_type)
-        {
-            $this->binding_type = $binding_type;
-        }
+    /**
+     * Set any other binding specific configuration (e.g. @id 12 would
+     * result in an entry in binding config equivalent to array('id' => 12).
+     *
+     * @param array $binding_config
+     */
+    public function setBindingConfig($binding_config)
+    {
+        $this->binding_config = $binding_config;
+    }
 
-        /**
-         * Set any other binding specific configuration (e.g. @id 12 would
-         * result in an entry in binding config equivalent to array('id' => 12).
-         *
-         * @param array $binding_config
-         */
-        public function setBindingConfig($binding_config)
-        {
-            $this->binding_config = $binding_config;
-        }
+    public function getBindingConfig()
+    {
+        return $this->binding_config;
+    }
 
-        public function getBindingConfig()
-        {
-            return $this->binding_config;
-        }
+    public function getBindingType()
+    {
+        return $this->binding_type;
+    }
 
-        public function getBindingType()
-        {
-            return $this->binding_type;
-        }
-
-        public function getXmlDas()
-        {
-            $xsds   = $this->types;
-            $xmldas = SDO_DAS_XML::create();
-            foreach ($xsds as $index => $xsds) {
-                list($namespace, $xsdfile) = $xsds;
-                if (SCA_Helper::isARelativePath($xsdfile)) {
-                    $xsd = SCA_Helper::constructAbsolutePath($xsdfile, $this->class_name);
-                    $xmldas->addTypes($xsd);
-                }
+    public function getXmlDas()
+    {
+        $xsds   = $this->types;
+        $xmldas = SDO_DAS_XML::create();
+        foreach ($xsds as $index => $xsds) {
+            list($namespace, $xsdfile) = $xsds;
+            if (SCA_Helper::isARelativePath($xsdfile)) {
+                $xsd = SCA_Helper::constructAbsolutePath($xsdfile, $this->class_name);
+                $xmldas->addTypes($xsd);
             }
-            return $xmldas;
         }
+        return $xmldas;
+    }
 
 
 
-    }/* End SCA_ReferenceType class */
-}/* End instance check */
+}/* End SCA_ReferenceType class */

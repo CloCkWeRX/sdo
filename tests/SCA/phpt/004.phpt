@@ -3,8 +3,8 @@ Generate a service description (WSDL)
 --FILE--
 <?php
 
-require "SCA/SCA.php";
-require "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
+require_once "SCA/SCA.php";
+require_once "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
 $component_file = str_replace('004.php', 'Component.php', __FILE__);
 $service_description = SCA::constructServiceDescription($component_file);
 $wsdl = SCA_Bindings_soap_ServiceDescriptionGenerator::generateDocumentLiteralWrappedWsdl($service_description);

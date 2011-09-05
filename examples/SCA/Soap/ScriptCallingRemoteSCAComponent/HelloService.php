@@ -22,22 +22,22 @@
 $Id$
 */
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * @service
  * @binding.soap
  */
-class HelloService 
+class HelloService
 {
 
     /**
      * A method that says hello to a name
-     * 
+     *
      * @param string $name The name to say hello to
      * @return string The string "Hello <name>"
      */
-    function sayHello($name) 
+    function sayHello($name)
     {
         return "Hello $name";
     }

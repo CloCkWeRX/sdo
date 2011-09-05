@@ -13,7 +13,7 @@ class SCA_Bindings_soap_MapperTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        if ( ! class_exists('SCA_Bindings_soap_Proxy')) {
+        if (!class_exists('SCA_Bindings_soap_Proxy')) {
             $this->markTestSkipped("Cannot execute any SCA soap tests as the SCA soap binding is not loaded");
             return;
         }

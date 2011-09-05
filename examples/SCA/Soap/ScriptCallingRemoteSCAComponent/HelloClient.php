@@ -28,7 +28,7 @@ $Id$
 <h3>Calling a remote SCA component using a PHP script.</h3>
 
 <?php
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 echo '<p>Attempting to access HelloService, to trigger the automatic generation of WSDL for this component...</p>';
 $f = file_get_contents('http://localhost/examples/SCA/Soap/ScriptCallingRemoteSCAComponent/HelloService.php?wsdl');

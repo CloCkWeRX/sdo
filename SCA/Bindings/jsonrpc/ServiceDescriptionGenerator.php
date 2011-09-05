@@ -26,29 +26,26 @@
 $Id: ServiceDescriptionGenerator.php 234945 2007-05-04 15:05:53Z mfp $
 */
 
-require 'SCA/Bindings/jsonrpc/SCA_GenerateSmd.php';
+require_once 'SCA/Bindings/jsonrpc/SCA_GenerateSmd.php';
 
-if ( ! class_exists('SCA_Bindings_Jsonrpc_ServiceDescriptionGenerator', false) ) {
 
-    class SCA_Bindings_Jsonrpc_ServiceDescriptionGenerator
+
+class SCA_Bindings_Jsonrpc_ServiceDescriptionGenerator
+{
+    public function generate($service_description)
     {
-        public function generate($service_description)
+        SCA::$logger->log( "Entering");
+        try
         {
-            SCA::$logger->log( "Entering");
-            try
-            {
-                $smd_str = SCA_GenerateSmd::generateSmd($service_description);
-                SCA::sendHttpHeader('Content-type: text/plain');
-                echo $smd_str;
-            } catch (SCA_RuntimeException $se ) {
-                echo $se->exceptionString() . "\n" ;
-            } catch( SDO_DAS_XML_FileException $e) {
-                throw new SCA_RuntimeException("{$e->getMessage()} in {$e->getFile()}");
-            }
-            return;
+            $smd_str = SCA_GenerateSmd::generateSmd($service_description);
+            SCA::sendHttpHeader('Content-type: text/plain');
+            echo $smd_str;
+        } catch (SCA_RuntimeException $se ) {
+            echo $se->exceptionString() . "\n" ;
+        } catch( SDO_DAS_XML_FileException $e) {
+            throw new SCA_RuntimeException("{$e->getMessage()} in {$e->getFile()}");
         }
-
+        return;
     }
-}
 
-?>
+}

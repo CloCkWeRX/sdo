@@ -27,173 +27,170 @@ $Id: SCA_LogFactory.php 254122 2008-03-03 17:56:38Z mfp $
 */
 
 /**
- * Purpose:
- * The SCA_LogFactory class can be used in one of several modes -
- *  1) Load the SCA_Logger using default settings.
- *  2) Allow users to change the SCA_Logger to a different logger ( limited to
- *     the supported loggers below ) without effecting the log entries in SCA.
+* Purpose:
+* The SCA_LogFactory class can be used in one of several modes -
+*  1) Load the SCA_Logger using default settings.
+*  2) Allow users to change the SCA_Logger to a different logger ( limited to
+*     the supported loggers below ) without effecting the log entries in SCA.
 
- * In order to use a different logger, a mapping layer that conforms to the
- * SCA_LogInterface must be created to passthe log commands used in the SCA4PHP
- * Components to the desired logger.
- *
- * For the 'LogFactory to recognize this the following configuration items must
- * be set in 'php.ini -
- *
- * ; Enable a different logger to masquerade as the SCA_Logger
- * ;   sca.logger : "path/filename.php" of the mapping file ( path can be omitted )
- * ;   sca.logger.parameters : ordered comma delimited list (param1,param2,param3)
- *
- * sca.logger=SCA_PHPZero_Map.php
- * sca.logger.parameters=param1,param2,param3
- *
- *  Note : All the loggers are instantiated using the singleton pattern to ensure
- *         multiple instances of the loggers are inhibited.
- *
- * Public Methods:
- * SCA_LogFactory()      - construct the link to the logger.
- * create()              - a static method to provide and instance of the logger.
- *
- * Private Methods:
- * _logger_mode()       - Are the masquerade settings in the configuration file
- * _linklog()           - Invoke the requested class.
- * _findclassname()     - extract the class name from the string.
- * _stringtoarray       - convert a comma delimited string to an array
- *
- */
+* In order to use a different logger, a mapping layer that conforms to the
+* SCA_LogInterface must be created to passthe log commands used in the SCA4PHP
+* Components to the desired logger.
+*
+* For the 'LogFactory to recognize this the following configuration items must
+* be set in 'php.ini -
+*
+* ; Enable a different logger to masquerade as the SCA_Logger
+* ;   sca.logger : "path/filename.php" of the mapping file ( path can be omitted )
+* ;   sca.logger.parameters : ordered comma delimited list (param1,param2,param3)
+*
+* sca.logger=SCA_PHPZero_Map.php
+* sca.logger.parameters=param1,param2,param3
+*
+*  Note : All the loggers are instantiated using the singleton pattern to ensure
+*         multiple instances of the loggers are inhibited.
+*
+* Public Methods:
+* SCA_LogFactory()      - construct the link to the logger.
+* create()              - a static method to provide and instance of the logger.
+*
+* Private Methods:
+* _logger_mode()       - Are the masquerade settings in the configuration file
+* _linklog()           - Invoke the requested class.
+* _findclassname()     - extract the class name from the string.
+* _stringtoarray       - convert a comma delimited string to an array
+*
+*/
 
-if ( ! (class_exists( 'SCA_LogFactory', false )) ) {
 
-    class SCA_LogFactory {
 
-        /* Instance of the logger class                                       */
-        private  static      $thelogger          = null ;
+class SCA_LogFactory {
 
-        /* The logger masquerading as the SCA_Logger                          */
-        private  static      $logger             = null ;
-        private  static      $paramargs          = null ;
+    /* Instance of the logger class                                       */
+    private  static      $thelogger          = null ;
 
-         /**
-         * create an instance of a logger.
-         * The default logger is the SCA_Logger, unless the php.ini contains a sca.logger entry
-         * in which case this logger instantiated.
-         *
-         * @param array             array of arguments
-         * @return object           Instance of the selected logger
-         */
-        public static function create()
-        {
-            self::$logger = self::_loggingmode() ;
+    /* The logger masquerading as the SCA_Logger                          */
+    private  static      $logger             = null ;
+    private  static      $paramargs          = null ;
 
-            include_once self::$logger ;
+     /**
+     * create an instance of a logger.
+     * The default logger is the SCA_Logger, unless the php.ini contains a sca.logger entry
+     * in which case this logger instantiated.
+     *
+     * @param array             array of arguments
+     * @return object           Instance of the selected logger
+     */
+    public static function create()
+    {
+        self::$logger = self::_loggingmode() ;
 
-            self::$thelogger = self::_linkLog( self::_findclassname( self::$logger ));
-            return self::$thelogger ;
+        include_once self::$logger ;
 
-        }/* End sca log constructor                                           */
+        self::$thelogger = self::_linkLog( self::_findclassname( self::$logger ));
+        return self::$thelogger ;
 
-        /**
-         * Link to the selected logger
-         *
-         * @param string  $class_name       classname to be invoked
-         * @return object                   invoked class
-         */
-        private static function _linkLog( $class_name )
-        {
-            $link       = array() ;
+    }/* End sca log constructor                                           */
 
-            /* build the correct callback for the selected logger             */
-            if ( $class_name === 'SCA_Logger' ) {
-                $link = array( $class_name, 'singleSCA_Logger' ) ;
+    /**
+     * Link to the selected logger
+     *
+     * @param string  $class_name       classname to be invoked
+     * @return object                   invoked class
+     */
+    private static function _linkLog( $class_name )
+    {
+        $link       = array() ;
 
-            } else {
-                $link = array( $class_name, 'loadLogger' ) ;
-            }
+        /* build the correct callback for the selected logger             */
+        if ( $class_name === 'SCA_Logger' ) {
+            $link = array( $class_name, 'singleSCA_Logger' ) ;
 
-            /* link in the logger                                             */
-            // Passing in empty array() to suppress warning
-            return call_user_func_array( $link, /*null*/array()) ;
+        } else {
+            $link = array( $class_name, 'loadLogger' ) ;
+        }
 
-        }/* End link log function                                             */
+        /* link in the logger                                             */
+        // Passing in empty array() to suppress warning
+        return call_user_func_array( $link, /*null*/array()) ;
 
-        /**
-         * Find out which logger to load, and the parameters needed to run it.
-         *
-         * @return string               The filepath of the logger
-         */
-        private static function _loggingmode()
-        {
-            if ( false !== ($logger = get_cfg_var( 'sca.logger' )) ) {
-                return $logger ;
-            }else{
-                return 'SCA/SCA_Logger.php';
+    }/* End link log function                                             */
 
-            }
+    /**
+     * Find out which logger to load, and the parameters needed to run it.
+     *
+     * @return string               The filepath of the logger
+     */
+    private static function _loggingmode()
+    {
+        if ( false !== ($logger = get_cfg_var( 'sca.logger' )) ) {
+            return $logger ;
+        }else{
+            return 'SCA/SCA_Logger.php';
 
-            if ( false !== ($params = get_cfg_var( 'sca.logger.parameters' )) ) {
-                self::$paramargs = self::_stringtoarray( $params ) ;
-            }
+        }
 
-        }/* End in php zero function                                          */
+        if ( false !== ($params = get_cfg_var( 'sca.logger.parameters' )) ) {
+            self::$paramargs = self::_stringtoarray( $params ) ;
+        }
 
-        /**
-         * Find the classname of the php file.
-         *
-         * @param string $candidate             instance name of the php file
-         * @return string                       candidate class name
-         */
-        private static function _findclassname( $candidate )
-        {
-            $instance   = "" ;
+    }/* End in php zero function                                          */
 
-            //replace any backslash with forward slash
-            $line         = str_replace( "\\", "/", $candidate );
-            $arrayOfLine  = explode('/', (trim($line)));
-            $bits         = count( $arrayOfLine ) ;
+    /**
+     * Find the classname of the php file.
+     *
+     * @param string $candidate             instance name of the php file
+     * @return string                       candidate class name
+     */
+    private static function _findclassname( $candidate )
+    {
+        $instance   = "" ;
 
-            if ( ($last = strrpos( $arrayOfLine[ --$bits ], '.php' )) > 0 ) {
-                $instance = substr( $arrayOfLine[ $bits ], 0, $last ) ;
+        //replace any backslash with forward slash
+        $line         = str_replace( "\\", "/", $candidate );
+        $arrayOfLine  = explode('/', (trim($line)));
+        $bits         = count( $arrayOfLine ) ;
 
-            }
+        if ( ($last = strrpos( $arrayOfLine[ --$bits ], '.php' )) > 0 ) {
+            $instance = substr( $arrayOfLine[ $bits ], 0, $last ) ;
 
-            return $instance ;
+        }
 
-        }/* End find class name                                               */
+        return $instance ;
 
-        /**
-         * Convert a comma delimited parameter string from the configuration file
-         * to an array.
-         *
-         * 'strvalues' can look like -
-         *      "parameter1, parameter2, ....., parameterN"
-         *      "parameter1,parameter2, .....,parameterN"
-         *      "parametervalue"
-         *
-         * Note : if the parameter string is not comma delimited only a single
-         *        value will be returned.
-         *
-         * @param string $strvalues
-         * @return array
-         */
-        private static function _stringtoarray( $cdstring ) {
-            $token      = "," ;
-            $array      = array() ;
+    }/* End find class name                                               */
 
-            $parameter  = strtok( $cdstring, $token ) ;
+    /**
+     * Convert a comma delimited parameter string from the configuration file
+     * to an array.
+     *
+     * 'strvalues' can look like -
+     *      "parameter1, parameter2, ....., parameterN"
+     *      "parameter1,parameter2, .....,parameterN"
+     *      "parametervalue"
+     *
+     * Note : if the parameter string is not comma delimited only a single
+     *        value will be returned.
+     *
+     * @param string $strvalues
+     * @return array
+     */
+    private static function _stringtoarray( $cdstring ) {
+        $token      = "," ;
+        $array      = array() ;
 
-            for ( $i = 0 ; $parameter !== false ;  $i++ ) {
-                $parameter   = trim( $parameter ) ;
-                $array[ $i ] = $parameter ;
-                $parameter   = strtok( $token ) ;
+        $parameter  = strtok( $cdstring, $token ) ;
 
-            }
+        for ( $i = 0 ; $parameter !== false ;  $i++ ) {
+            $parameter   = trim( $parameter ) ;
+            $array[ $i ] = $parameter ;
+            $parameter   = strtok( $token ) ;
 
-            return $array ;
+        }
 
-        }/* End string to array function                                      */
+        return $array ;
 
-    }/* End of SCA_LogFactory Class                                           */
+    }/* End string to array function                                      */
 
-}/* End of exists check                                                       */
+}/* End of SCA_LogFactory Class                                           */
 
-?>

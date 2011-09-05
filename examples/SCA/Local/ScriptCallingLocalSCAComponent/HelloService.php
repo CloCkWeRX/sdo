@@ -22,17 +22,17 @@
 $Id$
 */
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * An SCA Component which says "Hello" to a given name.
- * 
+ *
  * @service
  */
-class HelloService 
+class HelloService
 {
 
-    function sayHello($name) 
+    function sayHello($name)
     {
         return "Hello $name";
     }

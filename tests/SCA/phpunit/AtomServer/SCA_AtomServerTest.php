@@ -2,10 +2,10 @@
 
 require_once "PHPUnit/Framework/TestCase.php";
 require_once "PHPUnit/Framework/TestSuite.php";
-require "SCA/Bindings/atom/SCA_AtomServer.php";
-require "SCA/Bindings/atom/SCA_ServiceWrapperAtom.php";
-require "SCA/SCA.php";
-require "SCA/SCA_HttpHeaderCatcher.php";
+require_once "SCA/Bindings/atom/SCA_AtomServer.php";
+require_once "SCA/Bindings/atom/SCA_ServiceWrapperAtom.php";
+require_once "SCA/SCA.php";
+require_once "SCA/SCA_HttpHeaderCatcher.php";
 
 
 

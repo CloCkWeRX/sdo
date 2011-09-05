@@ -1,6 +1,5 @@
 <?php
-
-require "SCA/SCA.php";
+require_once "SCA/SCA.php";
 
 /**
  * @service
@@ -9,7 +8,7 @@ require "SCA/SCA.php";
 class ComponentEnumerateResponse {
 
     /**
-	 * Just indicate that the input got here and matched the input sent by the client. 
+	 * Just indicate that the input got here and matched the input sent by the client.
 	 *
 	 */
     function enumerate()
@@ -62,9 +61,7 @@ EOF;
 
 
     function retrieve($in){
-       
+
         //nothing in here at the moment - just here so that enumerate() can be reached
     }
 }
-
-?>

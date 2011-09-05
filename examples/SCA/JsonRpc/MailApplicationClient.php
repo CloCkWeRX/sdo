@@ -28,24 +28,24 @@ $Id$
 <h3>Calling a remote SCA component using a PHP script.</h3>
 
 <?php
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 echo "<p>Attempting to access MailApplicationService, to trigger the automatic generation of SMD for this component...</p>\n";
 $f = file_get_contents('http://localhost/examples/SCA/JsonRpc/MailApplicationService.php?smd');
 
-// write contents locally to get round the SCA cache 
+// write contents locally to get round the SCA cache
 file_put_contents("MailApplicationService.smd", $f);
 
 echo "<p>Attempting to access EmailService, to trigger the automatic generation of SMD for this component...</p>\n";
 $f = file_get_contents('http://localhost/examples/SCA/JsonRpc/EmailService.php?smd');
 
-// write contents locally to get round the SCA cache 
+// write contents locally to get round the SCA cache
 file_put_contents("EmailService.smd", $f);
 
 echo "<p>Attempting to access WebService, to trigger the automatic generation of WSDL for this component...</p>\n";
 $f = file_get_contents('http://localhost/examples/SCA/JsonRpc/WebService.php?wsdl');
 
-// write contents locally to get round the SCA cache 
+// write contents locally to get round the SCA cache
 file_put_contents("WebService.wsdl", $f);
 
 echo "<p>Calling MailApplicationService as a json rpc service...</p>\n";

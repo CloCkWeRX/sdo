@@ -15,7 +15,7 @@ else {
 ?>
 --FILE--
 <?php
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 try {
     $service = SCA::getService('http://api.urbandictionary.com/soap?wsdl');

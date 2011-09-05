@@ -24,7 +24,7 @@ $Id$
 <title>Script calling a local SCA component</title>
 <?php
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 echo '<h3>Calling HelloService locally</h3>';
 

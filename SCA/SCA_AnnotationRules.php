@@ -36,262 +36,259 @@ $Id: SCA_AnnotationRules.php 234945 2007-05-04 15:05:53Z mfp $
 *
 */
 
-if ( ! class_exists('SCA_AnnotationRules', false)) {
-    class SCA_AnnotationRules {
-        const PARAM            = "@param"  ;
-        const RETRN            = "@return" ;
-        const NAME             = "@name" ;
-        const TYPES            = "@types" ;
-        const AT               = "@" ;
-        const DOLLAR           = "\$" ;
-        const BACKSLASH        = "\\" ;
-        const FORESLASH        = "/" ;
-        const DOT              = "." ;
-        const SPACE            = " " ;
-        const LEFTBRACKET      = "(" ;
-        const RIGHTBRACKET     = ")" ;
-        const BRACKETS         = "()" ;
-        const STAR             = "*" ;
 
-        const   PARAM_ANNOTATION        = 'parameters' ;
-        const   RETRN_ANNOTATION        = 'return' ;
+class SCA_AnnotationRules {
+    const PARAM            = "@param"  ;
+    const RETRN            = "@return" ;
+    const NAME             = "@name" ;
+    const TYPES            = "@types" ;
+    const AT               = "@" ;
+    const DOLLAR           = "\$" ;
+    const BACKSLASH        = "\\" ;
+    const FORESLASH        = "/" ;
+    const DOT              = "." ;
+    const SPACE            = " " ;
+    const LEFTBRACKET      = "(" ;
+    const RIGHTBRACKET     = ")" ;
+    const BRACKETS         = "()" ;
+    const STAR             = "*" ;
 
-        private $token         = self::DOLLAR ;
+    const   PARAM_ANNOTATION        = 'parameters' ;
+    const   RETRN_ANNOTATION        = 'return' ;
 
-        // TODO make this the right list
-        private $dataTypeArray = array ( 'boolean'
-        , 'bool'
-        , 'string'
-        , 'integer'
-        , 'array'
-        , 'float'
-        , 'double'
-        , 'real'
-        ) ;
+    private $token         = self::DOLLAR ;
 
-        /**
-         * Constructor for SCA_AnnotationRules
-         * @returns object handle
-         */
-        public function __construct()
-        {
+    // TODO make this the right list
+    private $dataTypeArray = array ( 'boolean'
+    , 'bool'
+    , 'string'
+    , 'integer'
+    , 'array'
+    , 'float'
+    , 'double'
+    , 'real'
+    ) ;
 
-        }/* End constructor function                                               */
+    /**
+     * Constructor for SCA_AnnotationRules
+     * @returns object handle
+     */
+    public function __construct()
+    {
 
-        /**
-         * Is there any method annotations at the beginning of the line
-         *
-         * @param string $line
-         * @return boolean
-         */
-        public function isMethodAnnotation( $line )
-        {
-            return ( $this->isParameter($line) || $this->isReturn($line) ||
-                     $this->isName($line)) ? 
-                true : false ;
+    }/* End constructor function                                               */
 
-        }/* End is parameter function                                              */
+    /**
+     * Is there any method annotations at the beginning of the line
+     *
+     * @param string $line
+     * @return boolean
+     */
+    public function isMethodAnnotation( $line )
+    {
+        return ( $this->isParameter($line) || $this->isReturn($line) ||
+                 $this->isName($line)) ?
+            true : false ;
 
-        /**
-         * Is the parameter annotation at the beginning of the line
-         *
-         * @param string $line
-         * @return boolean
-         */
-        public function isParameter( $line )
-        {
-            return ( strpos($line, self::PARAM) != false ) ? true : false ;
-        }/* End is parameter function                                              */
+    }/* End is parameter function                                              */
 
-        /**
-         * Is the return annotation at the beginning of the line
-         *
-         * @param string $line
-         * @return boolean
-         */
-        public function isReturn( $line )
-        {
-            return ( strpos($line, self::RETRN) != false ) ? true : false ;
-        }/* End is return function                                                 */
+    /**
+     * Is the parameter annotation at the beginning of the line
+     *
+     * @param string $line
+     * @return boolean
+     */
+    public function isParameter( $line )
+    {
+        return ( strpos($line, self::PARAM) != false ) ? true : false ;
+    }/* End is parameter function                                              */
 
-        /**
-         * Is the name annotation at the beginning of the line
-         *
-         * @param string $line
-         * @return boolean
-         */
-        public function isName( $line )
-        {
-            return ( strpos($line, self::NAME) != false ) ? true : false ;
-        }/* End is name function                                                   */
+    /**
+     * Is the return annotation at the beginning of the line
+     *
+     * @param string $line
+     * @return boolean
+     */
+    public function isReturn( $line )
+    {
+        return ( strpos($line, self::RETRN) != false ) ? true : false ;
+    }/* End is return function                                                 */
 
-        /**
-         * Is the data type defined as an object.
-         *
-         * @param string $word
-         * @return boolean
-         */
-        public function isDataObject( $word )
-        {
-            return ( !$this->isSupportedPrimitiveType($word));
-        }/* End is data object function                                            */
+    /**
+     * Is the name annotation at the beginning of the line
+     *
+     * @param string $line
+     * @return boolean
+     */
+    public function isName( $line )
+    {
+        return ( strpos($line, self::NAME) != false ) ? true : false ;
+    }/* End is name function                                                   */
 
-        /**
-         * Does the word start with an '$' sign denoting a variable definition
-         *
-         * @param string $word
-         * @return boolean
-         */
-        public function isVariable( $word )
-        {
-            return  ( strpos($word, self::DOLLAR) === 0 ) ? true : false ;
+    /**
+     * Is the data type defined as an object.
+     *
+     * @param string $word
+     * @return boolean
+     */
+    public function isDataObject( $word )
+    {
+        return ( !$this->isSupportedPrimitiveType($word));
+    }/* End is data object function                                            */
 
-        }/* End is variable function                                               */
+    /**
+     * Does the word start with an '$' sign denoting a variable definition
+     *
+     * @param string $word
+     * @return boolean
+     */
+    public function isVariable( $word )
+    {
+        return  ( strpos($word, self::DOLLAR) === 0 ) ? true : false ;
 
-        /**
-         * Check that the name given for the xsd definition is the same as the
-         * variable name.
-         *
-         * @param string $name
-         * @param string $variableName
-         * @return boolean
-         */
-        public function matchXsdName( $name, $variableName )
-        {
-            $namepart = trim($variableName, $this->token);
+    }/* End is variable function                                               */
 
-            return ( strcmp($name, $namepart) === 0 ) ? true : false ;
+    /**
+     * Check that the name given for the xsd definition is the same as the
+     * variable name.
+     *
+     * @param string $name
+     * @param string $variableName
+     * @return boolean
+     */
+    public function matchXsdName( $name, $variableName )
+    {
+        $namepart = trim($variableName, $this->token);
 
-        }/* End match xsd name function                                            */
+        return ( strcmp($name, $namepart) === 0 ) ? true : false ;
 
-        /**
-         * Does the word resemble a namespace definition ( does it have some 'slash
-         * characters somewhere inside the word ).
-         *
-         * @param string $word
-         * @return boolean
-         */
-        public function looksLikeNamespace( $word )
-        {
-            return (  ( strpos($word, self::BACKSLASH) >= 0 )
-            || ( strpos($word, self::FORESLASH) >= 0 ) ) ? true : false ;
+    }/* End match xsd name function                                            */
 
-        }/* End looks like namespace function                                      */
+    /**
+     * Does the word resemble a namespace definition ( does it have some 'slash
+     * characters somewhere inside the word ).
+     *
+     * @param string $word
+     * @return boolean
+     */
+    public function looksLikeNamespace( $word )
+    {
+        return (  ( strpos($word, self::BACKSLASH) >= 0 )
+        || ( strpos($word, self::FORESLASH) >= 0 ) ) ? true : false ;
 
-        /**
-         * Check that the type of data is a supported data type.
-         *
-         * @param string $type
-         * @return boolean
-         */
-        public function isSupportedPrimitiveType( $type )
-        {
-            $return = false ;
+    }/* End looks like namespace function                                      */
 
-            /* Is there a value worth testing?                                     */
-            if ( strlen($type) > 0 ) {
-                foreach ($this->dataTypeArray as $dataType ) {
-                    if ( strpos($dataType, $type) !== false ) {
-                        $return = true ;
-                        break ;
-                    }/* End match                                                  */
-                }/* End all supported types                                        */
-            }/* End something to test                                              */
+    /**
+     * Check that the type of data is a supported data type.
+     *
+     * @param string $type
+     * @return boolean
+     */
+    public function isSupportedPrimitiveType( $type )
+    {
+        $return = false ;
 
-            return $return ;
+        /* Is there a value worth testing?                                     */
+        if ( strlen($type) > 0 ) {
+            foreach ($this->dataTypeArray as $dataType ) {
+                if ( strpos($dataType, $type) !== false ) {
+                    $return = true ;
+                    break ;
+                }/* End match                                                  */
+            }/* End all supported types                                        */
+        }/* End something to test                                              */
 
-        }/* End parse type function                                                */
+        return $return ;
 
-        /**
-         * An annotation may be 'formatted' with extra spaces and/or tab chars. These
-         * characters are removed, placing the words in a line into an array.
-         * The function also makes sure that any comment ( delimited by brackets )
-         * remains as a string, and that extranious characters, and php variable
-         * symbols are removed.
-         *
-         * @param string The line to be parsed
-         * @return array Containing elements of the parsed line
-         */
-        public static function parseAnnotation( $line )
-        {
-            $thesePieces  = null ;
-            $i            = 0 ;
-            $comment      = false ;
-            $commentArray = null ;
-            $j            = 0 ;
-            $line         = preg_replace("{[ \t]+}", " ", $line);
-            $arrayOfLine  = explode(' ', (trim($line)));
+    }/* End parse type function                                                */
 
-            /**
-             * Make up an array containing only words reserved words, and if there is
-             * a comment filter it out into a separate array.
-             */
-            foreach ( $arrayOfLine as $element ) {
-                /* When the the array captured a 'space'                           */
-                if ( strlen($element) !== 0 ) {
-                    /* .. and the contents are not the comment-star                */
-                    if ( $element !== self::STAR ) {
-                        /* Alter the flow when the word is not a reserved word     */
-                        if ( ( strpos($element, self::LEFTBRACKET) ) !== false )
-                        $comment = true ;
-
-                        /* Put the 'word' into either the comment or the definitions array  */
-                        if  ( $comment === true )
-                        $commentArray[ $j++ ] = $element ;
-                        else
-                        $thesePieces[ $i++ ] = trim($element);
-
-                    }/* End not star                                               */
-
-                }/* End no string ( was a space )                                  */
-
-            }/* End all of the pieces                                              */
-
-            /* Putting back the comment into a single element                      */
-            if ( $commentArray !== null )
-            $thesePieces[ $i ] = trim((implode(' ', $commentArray)), self::BRACKETS);
-
-
-            return $thesePieces ;
-
-        }/*End parse annotation function                                           */
+    /**
+     * An annotation may be 'formatted' with extra spaces and/or tab chars. These
+     * characters are removed, placing the words in a line into an array.
+     * The function also makes sure that any comment ( delimited by brackets )
+     * remains as a string, and that extranious characters, and php variable
+     * symbols are removed.
+     *
+     * @param string The line to be parsed
+     * @return array Containing elements of the parsed line
+     */
+    public static function parseAnnotation( $line )
+    {
+        $thesePieces  = null ;
+        $i            = 0 ;
+        $comment      = false ;
+        $commentArray = null ;
+        $j            = 0 ;
+        $line         = preg_replace("{[ \t]+}", " ", $line);
+        $arrayOfLine  = explode(' ', (trim($line)));
 
         /**
-         * Make sure that there are enough definitions to make up a wsdl entry
-         *
-         * @param array $inThisArray
-         * @return boolean
+         * Make up an array containing only words reserved words, and if there is
+         * a comment filter it out into a separate array.
          */
-        public static function enoughPieces( $inThisArray )
-        {
-            $entries = count($inThisArray);
+        foreach ( $arrayOfLine as $element ) {
+            /* When the the array captured a 'space'                           */
+            if ( strlen($element) !== 0 ) {
+                /* .. and the contents are not the comment-star                */
+                if ( $element !== self::STAR ) {
+                    /* Alter the flow when the word is not a reserved word     */
+                    if ( ( strpos($element, self::LEFTBRACKET) ) !== false )
+                    $comment = true ;
 
-            /* Enough entries for something                                        */
-            // TODO looks like we missed something here
-            // This is only ever going to return true, I think :-)
-            // I think the person who wrote this meant ||
-            // but it's only a crude check of the parameter and return
-            // lines anyway and not right 
-            return ( ( $entries < 2 && $entries > 4 ) ? false : true ) ;
+                    /* Put the 'word' into either the comment or the definitions array  */
+                    if  ( $comment === true )
+                    $commentArray[ $j++ ] = $element ;
+                    else
+                    $thesePieces[ $i++ ] = trim($element);
 
-        }/* End enough pieces function                                             */
+                }/* End not star                                               */
 
-        /**
-         * Make the empty set of annotation conversions
-         *
-         * @return array
-         */
-        public static function createEmptyAnnotationArray()
-        {
-            $emptySet                           = array() ;
-            $emptySet[ self::PARAM_ANNOTATION ] = array() ;
-            $emptySet[ self::RETRN_ANNOTATION ] = null ;
+            }/* End no string ( was a space )                                  */
 
-            return $emptySet ;
-        }/*End create empty annotation array                                       */
-        
-    }/* End annotation rules class                                                 */
-    
-}/* End instance test                                                              */
+        }/* End all of the pieces                                              */
 
-?>
+        /* Putting back the comment into a single element                      */
+        if ( $commentArray !== null )
+        $thesePieces[ $i ] = trim((implode(' ', $commentArray)), self::BRACKETS);
+
+
+        return $thesePieces ;
+
+    }/*End parse annotation function                                           */
+
+    /**
+     * Make sure that there are enough definitions to make up a wsdl entry
+     *
+     * @param array $inThisArray
+     * @return boolean
+     */
+    public static function enoughPieces( $inThisArray )
+    {
+        $entries = count($inThisArray);
+
+        /* Enough entries for something                                        */
+        // TODO looks like we missed something here
+        // This is only ever going to return true, I think :-)
+        // I think the person who wrote this meant ||
+        // but it's only a crude check of the parameter and return
+        // lines anyway and not right
+        return ( ( $entries < 2 && $entries > 4 ) ? false : true ) ;
+
+    }/* End enough pieces function                                             */
+
+    /**
+     * Make the empty set of annotation conversions
+     *
+     * @return array
+     */
+    public static function createEmptyAnnotationArray()
+    {
+        $emptySet                           = array() ;
+        $emptySet[ self::PARAM_ANNOTATION ] = array() ;
+        $emptySet[ self::RETRN_ANNOTATION ] = null ;
+
+        return $emptySet ;
+    }/*End create empty annotation array                                       */
+
+}/* End annotation rules class                                                 */
+

@@ -21,55 +21,50 @@
 $Id: SCA_BindingFactory.php 254122 2008-03-03 17:56:38Z mfp $
 */
 
-if (!class_exists('SCA_Binding_Factory', false)) {
-
-    class SCA_Binding_Factory
+class SCA_Binding_Factory
+{
+    public static function createRequestTester($binding_string)
     {
-        public static function createRequestTester($binding_string)
-        {
-            $tester_class_name = self::_generateClassNameAndLoadClass(
-            $binding_string, 
-            'RequestTester');
-            return new $tester_class_name();
-        }
+        $tester_class_name = self::_generateClassNameAndLoadClass(
+        $binding_string,
+        'RequestTester');
+        return new $tester_class_name();
+    }
 
-        public static function createServiceDescriptionGenerator($binding_string)
-        {
-            $tester_class_name = self::_generateClassNameAndLoadClass(
-            $binding_string, 
-            'ServiceDescriptionGenerator');
-            return new $tester_class_name();
-        }
+    public static function createServiceDescriptionGenerator($binding_string)
+    {
+        $tester_class_name = self::_generateClassNameAndLoadClass(
+        $binding_string,
+        'ServiceDescriptionGenerator');
+        return new $tester_class_name();
+    }
 
-        public static function createServiceRequestHandler($binding_string)
-        {
-            $tester_class_name = self::_generateClassNameAndLoadClass(
-            $binding_string, 
-            'ServiceRequestHandler');
-            return new $tester_class_name();
-        }
+    public static function createServiceRequestHandler($binding_string)
+    {
+        $tester_class_name = self::_generateClassNameAndLoadClass(
+        $binding_string,
+        'ServiceRequestHandler');
+        return new $tester_class_name();
+    }
 
-        public static function createProxy($binding_string, $target, 
-                                           $base_path_for_relative_paths, $binding_config)
-        {
-            SCA::$logger->log('Entering');
-            SCA::$logger->log("binding_string = $binding_string, target = $target");
-            $proxy_class_name = self::_generateClassNameAndLoadClass(
-            $binding_string, 
-            'Proxy');
-            return new $proxy_class_name($target, $base_path_for_relative_paths, $binding_config);
-        }
+    public static function createProxy($binding_string, $target,
+                                       $base_path_for_relative_paths, $binding_config)
+    {
+        SCA::$logger->log('Entering');
+        SCA::$logger->log("binding_string = $binding_string, target = $target");
+        $proxy_class_name = self::_generateClassNameAndLoadClass(
+        $binding_string,
+        'Proxy');
+        return new $proxy_class_name($target, $base_path_for_relative_paths, $binding_config);
+    }
 
-        private static function _generateClassNameAndLoadClass($binding_string, $class)
-        {
-            $full_class_name = "SCA_Bindings_{$binding_string}_{$class}";
-            if (!class_exists($full_class_name, false)) {
-                $class_filename = "SCA/Bindings/{$binding_string}/$class.php";
-                require $class_filename;
-            }
-            return $full_class_name;
+    private static function _generateClassNameAndLoadClass($binding_string, $class)
+    {
+        $full_class_name = "SCA_Bindings_{$binding_string}_{$class}";
+        if (!class_exists($full_class_name, false)) {
+            $class_filename = "SCA/Bindings/{$binding_string}/$class.php";
+            require_once $class_filename;
         }
+        return $full_class_name;
     }
 }
-
-?>

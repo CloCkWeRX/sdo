@@ -1,5 +1,4 @@
 <?php
-
 require_once "PHPUnit/Framework/TestCase.php";
 require_once "PHPUnit/Framework/TestSuite.php";
 
@@ -12,7 +11,7 @@ class SCA_Bindings_soap_ProxyTest extends PHPUnit_Framework_TestCase {
 
     public function setUp()
     {
-        if ( ! class_exists('SCA_Bindings_soap_Proxy')) {
+        if (!class_exists('SCA_Bindings_soap_Proxy')) {
             $this->markTestSkipped("Cannot execute any SCA soap tests as the SCA soap binding is not loaded");
             return;
         }
@@ -87,5 +86,3 @@ if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "SCA_Bindings_soap_ProxyTest::main");
     SCA_Bindings_soap_ProxyTest::main();
 }
-
-?>

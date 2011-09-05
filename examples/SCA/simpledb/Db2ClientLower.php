@@ -21,9 +21,9 @@
 $Id$
 */
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
-$dbservice = SCA::getService('CHARTERS.CONTACT', 'simpledb', 
+$dbservice = SCA::getService('CHARTERS.CONTACT', 'simpledb',
                              array('config' => 'config/db2_config.ini'));
 
 $contact = $dbservice->createDataObject('http://example.org', 'contact');

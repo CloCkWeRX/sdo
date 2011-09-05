@@ -27,74 +27,71 @@ $Id: SCA_TuscanyProxy.php 234945 2007-05-04 15:05:53Z mfp $
 */
 
 /**
- *
- */
+*
+*/
 
-if ( ! class_exists('SCA_TuscanyProxy', false) ) {
-    class SCA_TuscanyProxy {
 
-        private $containing_class_name          = null ;
-        private $reference_name                 = null ;
+class SCA_TuscanyProxy {
 
-        /**
-          * Create the local proxy to the service given as an argument.
-          *
-          * @param string $absolute_path_to_component
-          */
-        public function __construct($reference_name)
-        {
-            $this->reference_name = $reference_name;
+    private $containing_class_name          = null ;
+    private $reference_name                 = null ;
 
-        } 
+    /**
+      * Create the local proxy to the service given as an argument.
+      *
+      * @param string $absolute_path_to_component
+      */
+    public function __construct($reference_name)
+    {
+        $this->reference_name = $reference_name;
 
-        /**
-         * The infrastructure provides us with an object that 
-         * represents the whole doc comment that this proxy 
-         * is configured with. We don't use it here at the 
-         * moment. 
-         */
-        public function addReferenceType($reference_type)
-        {
-        }   
+    }
 
-        public function addContainingClassName($class_name)
-        {
-            $this->containing_class_name = $class_name;
-        }        
+    /**
+     * The infrastructure provides us with an object that
+     * represents the whole doc comment that this proxy
+     * is configured with. We don't use it here at the
+     * moment.
+     */
+    public function addReferenceType($reference_type)
+    {
+    }
 
-        /**
-         * Invoke the method name in the target service.
-         *
-         * @param string $method_name
-         * @param array $arguments
-         * @return mixed
-         */
-        public function __call($method_name, $arguments)
-        {
-            // Invoke the Tuscany service
-            
-            $return = SCA_Tuscany::invoke( $this->containing_class_name,
-                                         $this->reference_name,
-                                         $method_name,
-                                         $arguments);         
-            return $return;
+    public function addContainingClassName($class_name)
+    {
+        $this->containing_class_name = $class_name;
+    }
+
+    /**
+     * Invoke the method name in the target service.
+     *
+     * @param string $method_name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($method_name, $arguments)
+    {
+        // Invoke the Tuscany service
+
+        $return = SCA_Tuscany::invoke( $this->containing_class_name,
+                                     $this->reference_name,
+                                     $method_name,
+                                     $arguments);
+        return $return;
+    }
+
+    public function createDataObject( $namespace_uri, $type_name )
+    {
+        try {
+            return SCA_Helper::createDataObject(
+                $namespace_uri, $type_name, $this->component_class_name);
+        } catch( Exception $e ) {
+            throw new SCA_RuntimeException($e->getMessage());
         }
-
-        public function createDataObject( $namespace_uri, $type_name )
-        {
-            try {
-                return SCA_Helper::createDataObject(
-                    $namespace_uri, $type_name, $this->component_class_name);
-            } catch( Exception $e ) {
-                throw new SCA_RuntimeException($e->getMessage());
-            }
-            // following return logically unecessary but keeps the ZS code 
-            // analyzer happy
-            return null;
-        }
-
+        // following return logically unecessary but keeps the ZS code
+        // analyzer happy
+        return null;
     }
 
 }
 
-?>

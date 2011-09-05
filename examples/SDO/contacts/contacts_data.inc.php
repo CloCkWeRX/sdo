@@ -23,9 +23,9 @@ $Id$
 
 function retrieve_contact($shortname) {
 
-	require '../contacts/contacts_schema.inc.php';
-	require '../contacts/db_config.inc.php';
-	require 'SDO/DAS/Relational.php';
+	require_once '../contacts/contacts_schema.inc.php';
+	require_once '../contacts/db_config.inc.php';
+	require_once 'SDO/DAS/Relational.php';
 
 	$dbh = new PDO(PDO_DSN, DATABASE_USER, DATABASE_PASSWORD);
 	$das = new SDO_DAS_Relational ($table_schema, 'contact', array($address_reference));
@@ -40,9 +40,9 @@ function retrieve_contact($shortname) {
 
 function update_contact($root) {
 
-	require './contacts_schema.inc.php';
-	require './db_config.inc.php';
-	require 'SDO/DAS/Relational.php';
+	require_once './contacts_schema.inc.php';
+	require_once './db_config.inc.php';
+	require_once 'SDO/DAS/Relational.php';
 
 	$dbh = new PDO(PDO_DSN, DATABASE_USER, DATABASE_PASSWORD);
 	$das = new SDO_DAS_Relational ($table_schema, 'contact', array($address_reference));

@@ -27,7 +27,7 @@ $Id$
 <h3>SCA Component calling remote SCA Component using xmlrpc</h3>
 
 <?php
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 echo '<p>Requesting service description from HelloService Component</p>';
 

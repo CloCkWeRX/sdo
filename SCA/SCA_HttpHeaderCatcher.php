@@ -22,38 +22,37 @@ $Id: SCA_HttpHeaderCatcher.php 234864 2007-05-03 18:23:57Z mfp $
 */
 
 /**
- * This class exists so that we can unit test code with calls that want to emit
- * htpp headers. Unit tests that want to check that certain headers have been emitted
- * create an instance of ths class and pass it to SCA::setHttpHeaderCatcher
- * That will override the normal behaviour of SCA::sendHttpHeader so that this
- * class's catchHeader method will be called instead
- * Later the unit test can call AtLeastOneHeaderContains to check whether any of the
- * headers contained a given string
- */
-if (!class_exists('SCA_HttpHeaderCatcher', false)) {
-    class SCA_HttpHeaderCatcher
+* This class exists so that we can unit test code with calls that want to emit
+* htpp headers. Unit tests that want to check that certain headers have been emitted
+* create an instance of ths class and pass it to SCA::setHttpHeaderCatcher
+* That will override the normal behaviour of SCA::sendHttpHeader so that this
+* class's catchHeader method will be called instead
+* Later the unit test can call AtLeastOneHeaderContains to check whether any of the
+* headers contained a given string
+*/
+
+class SCA_HttpHeaderCatcher
+{
+    public $headers = null;
+
+    public function catchHeader($header) // NB cannot call this method catch as reserved name
     {
-        public $headers = null;
+        $this->headers[] = $header;
+    }
 
-        public function catchHeader($header) // NB cannot call this method catch as reserved name
-        {
-            $this->headers[] = $header;
-        }
-
-        public function AtLeastOneHeaderContains($needle)
-        {
-            if ($this->headers === null) {
-                return false;
-            }
-
-            foreach ($this->headers as $header) {
-                if (strstr($header, $needle)) {
-                    return true;
-                }
-            }
-
+    public function AtLeastOneHeaderContains($needle)
+    {
+        if ($this->headers === null) {
             return false;
         }
 
+        foreach ($this->headers as $header) {
+            if (strstr($header, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
+
 }

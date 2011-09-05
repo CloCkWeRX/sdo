@@ -23,10 +23,10 @@ $Id$
 include 'SCA/Bindings/restresource/ResourceTemplate.php';
 
 /**
- * An example resource based service that provides access using the 
- * restresource binding and exercises a reference with the 
+ * An example resource based service that provides access using the
+ * restresource binding and exercises a reference with the
  * restresource binding
- * 
+ *
  * @service
  * @binding.restresource
  * @types urn::orderNS Orders.xsd
@@ -39,7 +39,7 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      * @types urn::orderNS Orders.xsd
      */
     public $orders_service;
-            
+
     /**
      * The constructure here loads the resource collection
      * from the file system
@@ -48,7 +48,7 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
     {
         SCA::$logger->log("Entering constructor");
     }
-    
+
    /**
      * Insert $resource into the resource collection
      *
@@ -65,11 +65,11 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      * returns the resource identified by $id
      *
      * @param string $id
-     * @return OrderType urn::orderNS    
+     * @return OrderType urn::orderNS
      *
      **/
     public function retrieve($id){
-        SCA::$logger->log("retrieve resource $id"); 
+        SCA::$logger->log("retrieve resource $id");
         return $this->orders_service->retrieve($id);
     }
 
@@ -78,40 +78,40 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      * is the new version of the resource for this id
      * returns an sdo
      *
-     * @param string $id     
-     * @param OrderType $resource urn::orderNS     
+     * @param string $id
+     * @param OrderType $resource urn::orderNS
      **/
     public function update($id, $resource){
         SCA::$logger->log("update resource");
-        return $this->orders_service->update($id, $resource);          
+        return $this->orders_service->update($id, $resource);
     }
 
     /**
-     * Deletes the resource for $id 
+     * Deletes the resource for $id
      * returns void
      *
-     * @param string $id    
-     **/        
+     * @param string $id
+     **/
     public function delete($id){
         SCA::$logger->log("delete resource");
         return $this->orders_service->delete($id);
     }
 
     /**
-     * Returns all of the resources 
+     * Returns all of the resources
      *
      * @return OrdersType urn::orderNS
      *
-     **/ 
+     **/
     public function enumerate(){
         SCA::$logger->log("enumerate resource collection");
         return $this->orders_service->enumerate();
-    }   
+    }
 }
 
 // There is a issue with the PHP class_exists test when a class implements
-// an interface. I.e. PHP doesn't think the class exists untile after it is 
+// an interface. I.e. PHP doesn't think the class exists untile after it is
 // declared in the script. Moving the SCA include to below our service
 // declaration allows SCA to work normally
-include 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 ?>

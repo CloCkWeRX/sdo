@@ -22,29 +22,29 @@
 $Id$
 */
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * A service that adds a surname to a name then calls a HelloService
- * 
+ *
  * @service
  */
-class SurnameService 
+class SurnameService
 {
-    
+
     /**
      * A reference to a local HelloService
-     * 
+     *
      * @reference
      * @binding.php ./HelloService.php
      */
      public $helloService;
-    
-    function sayHello($name) 
+
+    function sayHello($name)
     {
         // Add the surname "Beetle"
         $newName = "$name Beetle";
-        
+
         // Call the local HelloService
         return $this->helloService->sayHello($newName);
     }

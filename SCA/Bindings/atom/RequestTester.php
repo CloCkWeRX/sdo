@@ -26,48 +26,45 @@
 $Id: RequestTester.php 254122 2008-03-03 17:56:38Z mfp $
 */
 
-if ( ! class_exists('SCA_Bindings_Atom_RequestTester', false) ) {
-    class SCA_Bindings_Atom_RequestTester
+class SCA_Bindings_Atom_RequestTester
+{
+    public function isServiceDescriptionRequest($calling_component_filename)
     {
-        public function isServiceDescriptionRequest($calling_component_filename)
-        {
-            // there is no equivalent to WSDL, SMD, system.describe for atom
-            return false;
-        }
-
-        //example requests for Atom:
-        //GET http://localhost:1112/examples/SCA/Atom/ContactFeed.php
-        //GET http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
-        //POST http://localhost:1112/examples/SCA/Atom/ContactFeed.php
-        //PUT http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
-        //DELETE http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
-        //Only Atom supports GET requests that go directly to SCA components, so if a GET request is destined directly for an SCA component, it must be an Atom request.
-
-        public function isServiceRequest($calling_component_filename)
-        {
-            //Should be the case for POST and PUT that the content type will be set.
-            //Delete does not require it though, and although the atompub spec requires GET requests to specify the Accept header, this is not always observed.
-            if (isset($_SERVER['HTTP_HOST'])) {
-                if ($_SERVER['REQUEST_METHOD'] == 'POST'
-                || $_SERVER['REQUEST_METHOD'] == 'GET'
-                || $_SERVER['REQUEST_METHOD'] == 'PUT'
-                || $_SERVER['REQUEST_METHOD'] == 'DELETE') {
-                    $p1 = realpath($calling_component_filename);
-                    $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
-                    if ($p1 == $p2) {
-                        /*&&
-                        (isset($_SERVER['CONTENT_TYPE']) &&
-                        strpos($_SERVER['CONTENT_TYPE'], 'application/atom+xml') !== FALSE) ||
-                        (isset($_SERVER['HTTP_ACCEPT']) &&
-                        strpos($_SERVER['HTTP_ACCEPT'], 'application/atom+xml') !== FALSE)*/
-                        return true;
-                    }
-                }
-
-            }
-            return false;
-        }
-
+        // there is no equivalent to WSDL, SMD, system.describe for atom
+        return false;
     }
+
+    //example requests for Atom:
+    //GET http://localhost:1112/examples/SCA/Atom/ContactFeed.php
+    //GET http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
+    //POST http://localhost:1112/examples/SCA/Atom/ContactFeed.php
+    //PUT http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
+    //DELETE http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
+    //Only Atom supports GET requests that go directly to SCA components, so if a GET request is destined directly for an SCA component, it must be an Atom request.
+
+    public function isServiceRequest($calling_component_filename)
+    {
+        //Should be the case for POST and PUT that the content type will be set.
+        //Delete does not require it though, and although the atompub spec requires GET requests to specify the Accept header, this is not always observed.
+        if (isset($_SERVER['HTTP_HOST'])) {
+            if ($_SERVER['REQUEST_METHOD'] == 'POST'
+            || $_SERVER['REQUEST_METHOD'] == 'GET'
+            || $_SERVER['REQUEST_METHOD'] == 'PUT'
+            || $_SERVER['REQUEST_METHOD'] == 'DELETE') {
+                $p1 = realpath($calling_component_filename);
+                $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
+                if ($p1 == $p2) {
+                    /*&&
+                    (isset($_SERVER['CONTENT_TYPE']) &&
+                    strpos($_SERVER['CONTENT_TYPE'], 'application/atom+xml') !== FALSE) ||
+                    (isset($_SERVER['HTTP_ACCEPT']) &&
+                    strpos($_SERVER['HTTP_ACCEPT'], 'application/atom+xml') !== FALSE)*/
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
 }
-?>

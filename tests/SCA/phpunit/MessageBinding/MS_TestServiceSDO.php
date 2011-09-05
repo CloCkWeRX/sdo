@@ -1,7 +1,5 @@
 <?php
-
-
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * @service
@@ -9,7 +7,7 @@ require 'SCA/SCA.php';
  * @protocol stomp
  * @response queue://reqponsequeue
  * @correlationScheme None
- * 
+ *
  * @types http://example.org/names ./names.xsd
  */
 class MS_TestserviceSDO

@@ -22,18 +22,18 @@
 $Id$
 */
 
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * A services which takes a list of names and return the list
  * with "Hello" prepended to each.
- * 
+ *
  * @service
  * @binding.soap
  * @types http://example.org/names ./names.xsd
- * 
+ *
  */
-class BatchService 
+class BatchService
 {
 
     /**
@@ -44,7 +44,7 @@ class BatchService
      * @param people $names http://example.org/names
      * @return people http://example.org/names
      */
-    function sayHello($names) 
+    function sayHello($names)
     {
 
         /*********************************************************************/

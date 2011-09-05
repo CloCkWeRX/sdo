@@ -1,15 +1,14 @@
 <?php
+require_once "SCA/SCA.php";
 
-require "SCA/SCA.php";
-
-/**    
+/**
  * @service
  * @binding.atom
  */
 class ComponentDeleteReturnTrueResponse {
 
 	/**
-	 * Just indicate that the input got here and matched the input sent by the client. 
+	 * Just indicate that the input got here and matched the input sent by the client.
 	 *
 	 */
 	function delete($in)
@@ -19,5 +18,3 @@ class ComponentDeleteReturnTrueResponse {
 
 
 }
-
-?>

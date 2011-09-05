@@ -35,18 +35,18 @@ require_once 'SDO/DAS/Relational/DatabaseHelper.php';
 
 /**
  * SDO Relational Data Access Service.
- * 
+ *
  * The SDO Relational Data Access Service (SDO_DAS_Relational) moves data in the form of an SDO
  * data graph back and forth between the application and a relational database
- * 
+ *
  * The necessary tasks are:
  * -  Given an SQL query, retrieve the data and present it to the application as an SDO data graph
  * -  Given an SDO data graph containing a change summary, apply the changes back to the database
  *
  * There is also an assumption of "optimistic concurrency": if the data has been
- * modified by another process while it was out of the database, then this will be detected and 
+ * modified by another process while it was out of the database, then this will be detected and
  * the changes will not be applied.
- * 
+ *
  */
 
 class SDO_DAS_Relational {
@@ -75,7 +75,7 @@ class SDO_DAS_Relational {
             $containment_references_metadata = array();
         }
         $this->database_model           = new SDO_DAS_Relational_DatabaseModel($database_metadata);
-/*        
+/*
         if ($application_root_type == null) {
             $all_tables_names = $this->database_model->getAllTableNames();
             if (count($all_tables_names) == 1) {
@@ -150,7 +150,7 @@ class SDO_DAS_Relational {
     }
 
     /**
-     * Given an SQL query in the form of a prepared PDO statement and a value list, execute it, 
+     * Given an SQL query in the form of a prepared PDO statement and a value list, execute it,
      * normalise the result set into a data graph and return it.
      */
     public function executePreparedQuery($dbh, $pdo_stmt, $value_list, $column_specifier = null)
@@ -335,7 +335,7 @@ class SDO_DAS_Relational {
 
     }
 
-    private static function displaySettingsList($cs,$cdo) 
+    private static function displaySettingsList($cs,$cdo)
     {
         $settings = $cs->getOldValues($cdo);
         echo "    the settings list contains " . count($settings) . " old values:\n";
@@ -406,7 +406,7 @@ class SDO_DAS_Relational {
         return $df->create(SDO_DAS_Relational::DAS_NAMESPACE, SDO_DAS_Relational::DAS_ROOT_TYPE);
     }
 
-    public function getObjectModel() 
+    public function getObjectModel()
     {
         return $this->object_model;
     }

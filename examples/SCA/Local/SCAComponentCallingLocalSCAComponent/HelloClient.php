@@ -25,7 +25,7 @@ $Id$
 <body>
 
 <?php
-require 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 echo '<h3>Calling SurnameService locally</h3>';
 

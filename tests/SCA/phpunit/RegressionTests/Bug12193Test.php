@@ -9,9 +9,9 @@ require_once 'SCA/Bindings/soap/ServiceDescriptionGenerator.php';
 require_once 'SCA/Bindings/soap/Proxy.php';
 
 /**
- * The essential point about this test is that the namespace for the complex 
+ * The essential point about this test is that the namespace for the complex
  * type used as an argument begins with a scheme aaa:// to push it to the front
- * of the alphabet. 
+ * of the alphabet.
  *
  */
 class Bug12193Test extends PHPUnit_Framework_TestCase {
@@ -25,7 +25,7 @@ class Bug12193Test extends PHPUnit_Framework_TestCase {
 
         $php = <<<PHP
 <?php
-include 'SCA/SCA.php';
+require_once 'SCA/SCA.php';
 
 /**
  * @service
@@ -37,8 +37,8 @@ class HelloPersonService
   /**
     * @param personType \$person aaa://PersonNamespace
     * @return string
-    */ 
-    public function hello(\$person)     
+    */
+    public function hello(\$person)
     {
         return "hello \$person->name, you were born in \$person->pob on \$person->dob" ;
     }
@@ -84,7 +84,7 @@ public function testCanCreateOperationSdoRegardlessOfAlphabeticOrder()
     $person->name = 'William Shakespeare';
     $arguments = array($person);
     $method_name = 'hello';
-    //  before the fix to 12193, the following call threw 
+    //  before the fix to 12193, the following call threw
     // SDO_UnsupportedOperationException: createDocument - cannot find element hello
     $operation_sdo = $service->getSoapOperationSdo($method_name, $arguments);
     $this->assertEquals('http://HelloPersonService',$operation_sdo->getTypeNamespaceURI());

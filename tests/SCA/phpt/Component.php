@@ -1,6 +1,5 @@
 <?php
-
-require "SCA/SCA.php";
+require_once "SCA/SCA.php";
 
 SCA::initComponent(__FILE__);
 
@@ -42,5 +41,3 @@ class Component {
 
 	}
 }
-
-?>

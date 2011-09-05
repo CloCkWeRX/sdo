@@ -27,120 +27,116 @@ $Id: Proxy.php 238265 2007-06-22 14:32:40Z mfp $
 */
 
 /**
- *
- * Purpose:
- * To ensure that the target local SCA component is initialised.
- * To ensure pass by value semantics when methods on the component are called.
- * Also acts as a data factory for complex data types.
- *
- * Methods:
- *
- * __construct()
- * This method initialises the local SCA component and ensures that any @reference
- * annotation is processed.
- *
- * __call()
- * Copies the arguments to ensure that they are always passed by value even if passed
- * by reference by caller.
- * Calls the method on the component, passing copies of the arguments.
- *
- * createDataOject()
- * This method returns an SDO conforming to the data model specified in the
- * parameters.
- *
- *
- */
+*
+* Purpose:
+* To ensure that the target local SCA component is initialised.
+* To ensure pass by value semantics when methods on the component are called.
+* Also acts as a data factory for complex data types.
+*
+* Methods:
+*
+* __construct()
+* This method initialises the local SCA component and ensures that any @reference
+* annotation is processed.
+*
+* __call()
+* Copies the arguments to ensure that they are always passed by value even if passed
+* by reference by caller.
+* Calls the method on the component, passing copies of the arguments.
+*
+* createDataOject()
+* This method returns an SDO conforming to the data model specified in the
+* parameters.
+*
+*
+*/
 
-if ( ! class_exists('SCA_Bindings_local_Proxy', false) ) {
-    class SCA_Bindings_local_Proxy {
 
-        private $instance_of_the_component            = null ;
-        private $component_class_name                 = null ;
+class SCA_Bindings_local_Proxy {
 
-        /**
-          * Create the local proxy to the service given as an argument.
-          *
-          * @param string $absolute_path_to_component
-          */
-        public function __construct($target, $base_path_for_relative_paths, $binding_config)
-        {
-            $absolute_path_to_component =
-            SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
+    private $instance_of_the_component            = null ;
+    private $component_class_name                 = null ;
 
-            $this->component_class_name =
-            SCA_Helper::guessClassName($absolute_path_to_component);
+    /**
+      * Create the local proxy to the service given as an argument.
+      *
+      * @param string $absolute_path_to_component
+      */
+    public function __construct($target, $base_path_for_relative_paths, $binding_config)
+    {
+        $absolute_path_to_component =
+        SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
 
-            if ( ! class_exists($this->component_class_name, false)) {
-                include "$absolute_path_to_component" ;
-            }
+        $this->component_class_name =
+        SCA_Helper::guessClassName($absolute_path_to_component);
 
+        if (!class_exists($this->component_class_name, false)) {
+            include_once "$absolute_path_to_component" ;
+        }
+
+        $this->instance_of_the_component = SCA::createInstance($this->component_class_name);
+        SCA::fillInReferences($this->instance_of_the_component);
+
+
+    }/* End local proxy constructor */
+
+    /**
+     * The infrastructure provides us with an object that
+     * represents the whole doc comment that this proxy
+     * is configured with. We don't use it here at the
+     * moment.
+     */
+    public function addReferenceType($reference_type)
+    {
+    }
+
+    public function addContainingClassName($class_name)
+    {
+        $this->containing_class_name = $class_name;
+    }
+
+    /**
+     * Invoke the method name in the target service.
+     *
+     * @param string $method_name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($method_name, $arguments)
+    {
+
+        if ($this->instance_of_the_component === null) {
             $this->instance_of_the_component = SCA::createInstance($this->component_class_name);
             SCA::fillInReferences($this->instance_of_the_component);
-
-
-        }/* End local proxy constructor */
-
-        /**
-         * The infrastructure provides us with an object that
-         * represents the whole doc comment that this proxy
-         * is configured with. We don't use it here at the
-         * moment.
-         */
-        public function addReferenceType($reference_type)
-        {
         }
 
-        public function addContainingClassName($class_name)
-        {
-            $this->containing_class_name = $class_name;
-        }
-
-        /**
-         * Invoke the method name in the target service.
-         *
-         * @param string $method_name
-         * @param array $arguments
-         * @return mixed
-         */
-        public function __call($method_name, $arguments)
-        {
-
-            if ($this->instance_of_the_component === null) {
-                $this->instance_of_the_component = SCA::createInstance($this->component_class_name);
-                SCA::fillInReferences($this->instance_of_the_component);
+        if ( SCA_Helper::checkMethods($method_name, $this->instance_of_the_component) ) {
+            $arguments_by_value_array = array();
+            foreach ($arguments as $arg) {
+                $arguments_by_value_array[] = is_object($arg)? clone $arg : $arg;
             }
 
-            if ( SCA_Helper::checkMethods($method_name, $this->instance_of_the_component) ) {
-                $arguments_by_value_array = array();
-                foreach ($arguments as $arg) {
-                    $arguments_by_value_array[] = is_object($arg)? clone $arg : $arg;
-                }
-
-                $return = call_user_func_array(array(&$this->instance_of_the_component, $method_name),
-                $arguments_by_value_array);
-            } else {
-                $classname = get_class($this->instance_of_the_component);
-                $msg       = "Method '{$method_name}' not found in class {$classname}";
-                throw new SCA_RuntimeException($msg);
-            }
-
-            return $return;
+            $return = call_user_func_array(array(&$this->instance_of_the_component, $method_name),
+            $arguments_by_value_array);
+        } else {
+            $classname = get_class($this->instance_of_the_component);
+            $msg       = "Method '{$method_name}' not found in class {$classname}";
+            throw new SCA_RuntimeException($msg);
         }
 
-        public function createDataObject( $namespace_uri, $type_name )
-        {
-            try {
-                return SCA_Helper::createDataObject($namespace_uri, $type_name, $this->component_class_name);
-            } catch( Exception $e ) {
-                throw new SCA_RuntimeException($e->getMessage());
-            }
-            // following return logically unecessary but keeps the ZS code
-            // analyzer happy
-            return null;
+        return $return;
+    }
+
+    public function createDataObject( $namespace_uri, $type_name )
+    {
+        try {
+            return SCA_Helper::createDataObject($namespace_uri, $type_name, $this->component_class_name);
+        } catch( Exception $e ) {
+            throw new SCA_RuntimeException($e->getMessage());
         }
+        // following return logically unecessary but keeps the ZS code
+        // analyzer happy
+        return null;
+    }
 
-    }/* End SCA_LocalProxy class                                                  */
-
-}/* End instance check                                                        */
-
-?>
+}/* End SCA_LocalProxy class                                                  */
