@@ -36,7 +36,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
                 using the ServiceDescriptionGenerator from soap binding*/
                 $str = SCA_Bindings_soap_ServiceDescriptionGenerator::
                     generateDocumentLiteralWrappedWsdl($service_description);
-            }else{
+            } else {
                 $str =  $this->generateMSD($service_description);
             }
 
@@ -103,7 +103,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
                  /*Assumed the value is an Absolute path to a MSD file*/
                  $xdoc = $xmldas->loadFile($binding_config['msd']);
                  $msdDataObject = $xdoc->getRootDataObject();
-             }else{
+             } else {
                  /*create an empty document*/
                  $xmldas = SDO_DAS_XML::create(dirname(__FILE__)."/MessageServiceDescription.xsd");
                  $msd_doc = $xmldas->createDocument();

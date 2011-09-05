@@ -125,7 +125,7 @@ class SCA_LogFactory {
     {
         if ( false !== ($logger = get_cfg_var( 'sca.logger' )) ) {
             return $logger;
-        }else{
+        } else {
             return 'SCA/SCA_Logger.php';
 
         }

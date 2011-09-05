@@ -248,7 +248,7 @@ class SCA_AtomServer {
                         //if the thing received is an sdo...
                         //convert it to xml
                         $response_sdo = $this->toXml($call_response);
-                    }else{
+                    } else {
                         $response_sdo = $call_response;
                     }
 

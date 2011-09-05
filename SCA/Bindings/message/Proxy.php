@@ -62,7 +62,7 @@ class SCA_Bindings_message_Proxy {
         if (!isset($msd_config->wsdl)) {
             throw new SCA_RuntimeException("Path to WSDL file is required to the binding configuration,
                                             or the 'wsdl' property should be stated as 'disabled' explicitly.");
-        }else{
+        } else {
             /*check if wsdl is disabled,
             if not the wsdl schema will be loaded  */
             if ($msd_config->wsdl != 'disabled') {
@@ -103,7 +103,7 @@ class SCA_Bindings_message_Proxy {
         if ($this->mapper === null) {
             // no, there should be a single prarmeter
             $msgbody = $arguments[0];
-        }else{
+        } else {
             // yes, generate XML payload according to the WSDL schema
             try
             {
@@ -128,12 +128,12 @@ class SCA_Bindings_message_Proxy {
                 if ($this->mapper === null) {
                     // no, returns message body directly
                     $rc = trim($msg_response->body);
-                }else{
+                } else {
                     // yes, unpackage XML payload and returns a sdo object
                     $response = $this->mapper->fromXML(trim($msg_response->body));
                     $rc = $response[$method_name . "Return"];
                 }
-            }else{
+            } else {
                 throw new SCA_RuntimeException('SAM Error occured when attempting to receive response: '
                                                .$this->ms_client->getLastError(0));
             }

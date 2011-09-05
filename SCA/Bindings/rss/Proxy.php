@@ -179,7 +179,7 @@ class SCA_Bindings_rss_Proxy
             }
 
         }
-        }else{
+        } else {
 
             return $sdo;
         }
@@ -245,7 +245,7 @@ class SCA_Bindings_rss_Proxy
             }
 
         }
-        }else{
+        } else {
 
             return $sdo;
         }

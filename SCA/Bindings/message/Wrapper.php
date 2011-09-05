@@ -59,7 +59,7 @@ class SCA_Bindings_message_Wrapper
         /* test the availability of the target method*/
         if (array_key_exists($method_name,$this->service_description->operations)){
             $target_operation = $this->service_description->operations[$method_name];
-        }else{
+        } else {
             throw new SCA_RuntimeException(
             "Operation ".$method_name." is undefined in the target service component");
         }
@@ -82,7 +82,7 @@ class SCA_Bindings_message_Wrapper
             if($this->mapper === null){
                 //XML not used, assume $return is simple type.
                 $response_msg = $return;
-            }else{
+            } else {
                 //generate XML Payload
                 $xmldas = $this->mapper->getXmlDas();
                 $xdoc = $xmldas->createDocument($method_name . "Response");
@@ -92,7 +92,7 @@ class SCA_Bindings_message_Wrapper
                                                             : $return;
                 $response_msg = $xmldas->saveString($xdoc, 2);
             }
-        }else{
+        } else {
             return;
         }
 
@@ -127,7 +127,7 @@ class SCA_Bindings_message_Wrapper
         if($this->mapper === null){
             //XML not used
             $params_array[] = trim($msg->body);
-        }else{
+        } else {
             $params_sdo = $this->mapper->fromXML(trim($msg->body));
             $params_array = array();
             foreach($params_sdo as $param) {

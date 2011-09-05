@@ -96,7 +96,7 @@ class SCA_Bindings_restresource_Proxy
                 throw new SCA_RuntimeException('Trying to create a resource with SDO but ' .
                                                'no types specified for reference');
             }
-        }else{
+        } else {
             $xml = $resource;
         }
 
@@ -196,7 +196,7 @@ class SCA_Bindings_restresource_Proxy
                 throw new SCA_RuntimeException('Trying to update a resource with SDO but ' .
                                                'no types specified for reference');
             }
-        }else{
+        } else {
             $xml = $resource;
         }
 

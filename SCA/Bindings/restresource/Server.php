@@ -140,7 +140,7 @@ class SCA_Bindings_restresource_Server {
                         //if the thing received is an sdo...
                         //convert it to xml
                         $response_xml = SCA_Helper::sdoToXml($this->xml_das, $call_response);
-                    }else{
+                    } else {
                         $response_xml = $call_response;
                     }
 
@@ -199,7 +199,7 @@ class SCA_Bindings_restresource_Server {
                         //if the thing received is an sdo...
                         //convert it to xml
                         $response_xml = SCA_Helper::sdoToXml($this->xml_das, $call_response);
-                    }else{
+                    } else {
                         $response_xml = $call_response;
                     }
 

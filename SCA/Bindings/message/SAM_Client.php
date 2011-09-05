@@ -119,12 +119,12 @@ class SCA_Bindings_message_SAMClient {
         if(self::$test_mode){
             $rc = $this->_testmsgput($this->request_queue,$msg,
                                      isset($options->SAM_CORRELID)?$options->SAM_CORRELID:null);
-        }else{
+        } else {
             /*sending message to a real broker*/
             SCA::$logger->log(" sending request msg to queue $this->request_queue");
             if(!$rc = $this->request_conn->send($this->request_queue, $msg, $options)){
                 SCA::$logger->log('SAM: send message failed:'.$this->getLastError());
-            }else{
+            } else {
                 if ($this->correlationScheme == 'RequestCorrelIDToCorrelID') {
                     $rc = $options->SAM_CORRELID;
                 }/*else $rc = msgid as now
@@ -169,7 +169,7 @@ class SCA_Bindings_message_SAMClient {
             SCA::$logger->log("sending response $response_msgbody to queue $response_queue");
             if(self::$test_mode){
                 $rc = $this->_testmsgput($response_queue,$response_msg);
-            }else{
+            } else {
                 /*sending message to a real broker*/
                 if(!$rc = $this->response_conn->send($response_queue, $response_msg, $options)){
                     SCA::$logger->log('SAM: send message failed:'.$this->getLastError(0));
@@ -188,7 +188,7 @@ class SCA_Bindings_message_SAMClient {
         if(self::$test_mode){
             /*in test mode, use $this::test_queueborker */
             $msg = self::$test_queueborker[$this->request_queue];
-        }else{
+        } else {
             /*receiving message from a real broker*/
             $msg = $this->request_conn->receive($this->request_queue, array(SAM_WAIT=>$timeout));
         }
@@ -208,7 +208,7 @@ class SCA_Bindings_message_SAMClient {
         if(self::$test_mode){
             /*in test mode, use $this::test_queueborker */
             $msg = self::$test_queueborker[$this->response_queue];
-        }else{
+        } else {
             /*receiving message from a real broker*/
             $options[SAM_WAIT] =  $timeout;
             if (!is_null($correlid) && $this->correlationScheme != 'None') {
@@ -224,7 +224,7 @@ class SCA_Bindings_message_SAMClient {
     public function setResponseQueue($queue){
         if (!$this->isFixedResponseQueue) {
             $this->response_queue = $queue;
-        }else{
+        } else {
             //throws exception ??
             SCA::$logger->log("response queue cannot be changed as it is fixed at the service end.");
         }
@@ -243,14 +243,14 @@ class SCA_Bindings_message_SAMClient {
         /*config request queue*/
         if (!isset($config->destination) || empty($config->destination)) {
             throw new SCA_RuntimeException('message binding configuration missing: destination.');
-        }else{
+        } else {
             $this->request_queue = $config->destination;
         }
 
         /*config connection factory for request queue and establish a connection */
         if(!isset($config->connectionFactory) || count((array)$config->connectionFactory) == 0){
             throw new SCA_RuntimeException('message binding configuration missing: connectionFactory.');
-        }else{
+        } else {
             $this->request_conn = $this->_configConnection($config->connectionFactory);
         }
 
@@ -263,11 +263,11 @@ class SCA_Bindings_message_SAMClient {
                 count((array)$config->response->connectionFactory) > 0)
             {
                 $this->response_conn = $this->_configConnection($config->response->connectionFactory);
-            }else{
+            } else {
                 /*Assume request queue and response queue is on the same broker, i.e. share the connection*/
                 $this->response_conn =  $this->request_conn;
             }
-        }else{
+        } else {
             /*by omitting the response element, the response queue can be left to
             the runtime to provide one, but has to be on the same broker as the request queue*/
             $this->response_conn =  $this->request_conn;
@@ -290,7 +290,7 @@ class SCA_Bindings_message_SAMClient {
 
         if ($conn->errno) {
             return ' ('.$conn->errno.') '.$conn->error;
-        }else{
+        } else {
             return 'There was no error occured.';
         }
     }
@@ -335,7 +335,7 @@ private:
                 self::$test_queueborker = array();
             }
             $connection = null;
-        }else{
+        } else {
             /*connecting to a real broker*/
             $connection = new SAMConnection();
             $connection->connect($protocol, $optionsarray);
