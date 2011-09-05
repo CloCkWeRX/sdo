@@ -122,7 +122,7 @@ class SDO_DAS_Relational {
             if (gettype($column_specifier) != 'array') {
                 throw new SDO_DAS_Relational_Exception('The column specifier passed to executeQuery must be an array');
             }
-            foreach($column_specifier as $cs) {
+            foreach ($column_specifier as $cs) {
                 if (gettype($cs) != 'string') {
                     throw new SDO_DAS_Relational_Exception('Each entry in the column specifier must be a string');
                 }
@@ -248,7 +248,7 @@ class SDO_DAS_Relational {
     public function breakRowIntoObjectsUsingPDOColumnNames($row)
     {
         $parsed_row = array();
-        foreach($row as $col => $value) {
+        foreach ($row as $col => $value) {
             $table_names_with_this_column = $this->object_model->getTypesByColumnNameIgnoreCase($col);
             switch (count($table_names_with_this_column)) {
                 case 0:
@@ -360,7 +360,7 @@ class SDO_DAS_Relational {
     {
         $changed_data_objects = $cs->getChangedDataObjects();
         echo "Change Summary contains " . count($changed_data_objects) . " objects:\n";
-        foreach($changed_data_objects as $cdo) {
+        foreach ($changed_data_objects as $cdo) {
             echo '  Object of type ' . SDO_DAS_Relational_DataObjectHelper::getApplicationType($cdo) . "\n";
             $change_type = $cs->getChangeType($cdo);
             switch ($change_type) {

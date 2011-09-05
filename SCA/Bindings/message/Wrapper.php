@@ -57,7 +57,7 @@ class SCA_Bindings_message_Wrapper
         SCA::$logger->log("method name = $method_name.");
 
         /* test the availability of the target method*/
-        if (array_key_exists($method_name,$this->service_description->operations)){
+        if (array_key_exists($method_name,$this->service_description->operations)) {
             $target_operation = $this->service_description->operations[$method_name];
         } else {
             throw new SCA_RuntimeException(
@@ -79,7 +79,7 @@ class SCA_Bindings_message_Wrapper
         }
 
         if (!is_null($return)) {
-            if($this->mapper === null){
+            if ($this->mapper === null) {
                 //XML not used, assume $return is simple type.
                 $response_msg = $return;
             } else {
@@ -107,7 +107,7 @@ class SCA_Bindings_message_Wrapper
      * 3. otherwise, method named 'onMessage' will be called
      *
      */
-    private function _getMethodName($msg){
+    private function _getMethodName($msg) {
         $operations = $this->service_description->operations;
         if (sizeof($operations) == 1) {
             return key($operations);
@@ -123,14 +123,14 @@ class SCA_Bindings_message_Wrapper
     /**
      * Unpackage message body.
      */
-    private function _getParametersArray($msg){
-        if($this->mapper === null){
+    private function _getParametersArray($msg) {
+        if ($this->mapper === null) {
             //XML not used
             $params_array[] = trim($msg->body);
         } else {
             $params_sdo = $this->mapper->fromXML(trim($msg->body));
             $params_array = array();
-            foreach($params_sdo as $param) {
+            foreach ($params_sdo as $param) {
                 $params_array[] = $param;
             }
         }

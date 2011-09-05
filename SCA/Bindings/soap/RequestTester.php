@@ -58,7 +58,7 @@ class SCA_Bindings_soap_RequestTester
                 $p1 = realpath($calling_component_filename);
                 $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
                 if ($p1 == $p2 &&
-                (strpos($_SERVER['CONTENT_TYPE'], 'text/xml') !== false || strpos($_SERVER['CONTENT_TYPE'], 'soap') !== false)){
+                (strpos($_SERVER['CONTENT_TYPE'], 'text/xml') !== false || strpos($_SERVER['CONTENT_TYPE'], 'soap') !== false)) {
                     return true;
                 }
             }

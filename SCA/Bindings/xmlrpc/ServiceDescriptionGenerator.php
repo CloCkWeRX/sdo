@@ -173,7 +173,7 @@ END;
 END;
 
 
-        foreach($service_description->operations as $methodName => $methodInfo) {
+        foreach ($service_description->operations as $methodName => $methodInfo) {
 
 
 
@@ -263,12 +263,12 @@ if (count($type_list) > 0) {
 $methodDesc = $methodDesc."<typeList>\n";
 
 
-foreach($type_list as $type) {
+foreach ($type_list as $type) {
     $methodDesc = $methodDesc.<<< END
 
 <typeDescription name='$type->name' basetype='struct' desc='$type->name'>
 END;
-    foreach($type->typedef->properties as $prop) {
+    foreach ($type->typedef->properties as $prop) {
         $methodDesc = $methodDesc.<<< END
 
     <value type='$prop->type' name='$prop->name'></value>

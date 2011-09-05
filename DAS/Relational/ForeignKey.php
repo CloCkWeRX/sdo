@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -23,7 +23,7 @@ $Id: ForeignKey.php 220738 2006-09-28 19:25:00Z cem $
 
 /**
 * ForeignKey encapsulates all the information about a foreign key
-* 
+*
 * 1 it has a from table name
 * 2 it has a from column
 * 3 it has a to table name (necessarily to the table's primary key)
@@ -34,7 +34,7 @@ class SDO_DAS_Relational_ForeignKey {
     private $from_column_name;
     private $to_table_name;
 
-    public function __construct($table_metadata) 
+    public function __construct($table_metadata)
     {
 
         /**
@@ -55,7 +55,7 @@ class SDO_DAS_Relational_ForeignKey {
         /*
         * Check FK metadata is an array
         */
-        if (gettype($fk_metadata) != 'array'){
+        if (gettype($fk_metadata) != 'array') {
             $msg = "The metadata for table ".$table_name." specified foreign key metadata that was not an array.";
             throw new SDO_DAS_Relational_Exception($msg);
         }
@@ -104,18 +104,18 @@ class SDO_DAS_Relational_ForeignKey {
         */
 
     }
-    
-    public function getToTableName() 
+
+    public function getToTableName()
     {
         return $this->to_table_name;
     }
 
-    public function getFromTableName() 
+    public function getFromTableName()
     {
         return $this->from_table_name;
     }
 
-    public function getFromColumnName() 
+    public function getFromColumnName()
     {
         return $this->from_column_name;
     }

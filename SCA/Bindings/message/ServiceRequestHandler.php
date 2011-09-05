@@ -37,7 +37,7 @@ class SCA_Bindings_message_ServiceRequestHandler
 
         //var_dump($service_description);
         // Guess a queue name
-        if(!isset($service_description->binding_config['destination'])){
+        if (!isset($service_description->binding_config['destination'])) {
             $service_description->binding_config['destination']
                 = 'queue://' . $service_description->class_name;
             SCA::$logger->log("Target queue not specified, SCA will use class name as default queue name");
@@ -51,7 +51,7 @@ class SCA_Bindings_message_ServiceRequestHandler
         }
 
         /*do we use WSDL schema?*/
-        if(isset($service_description->binding_config['wsdl']) &&
+        if (isset($service_description->binding_config['wsdl']) &&
                  $service_description->binding_config['wsdl'] == 'disabled')
         {
             /*No!*/

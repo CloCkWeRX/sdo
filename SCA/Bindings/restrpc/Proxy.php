@@ -103,11 +103,11 @@ class SCA_Bindings_restrpc_Proxy
         // Look to see if we have an SDO, i.e. convert to XML and do a POST
         // or just simple type params, i.e. represent as URL params and do a GET
         if ( count($arguments) == 1 &&
-             is_object($arguments[0]) ){
+             is_object($arguments[0]) ) {
             // looks like its a single SDO so convert to XML
             $obj = $arguments[0];
 
-            if($obj instanceof SDO_DataObjectImpl){
+            if ($obj instanceof SDO_DataObjectImpl) {
                 $body = $this->toXml($entry);
             } else {
                 throw new SCA_RuntimeException("Argument 0 to $method_name of type php object found. " .
@@ -178,9 +178,9 @@ class SCA_Bindings_restrpc_Proxy
         }
 
         // test the response status
-        if($response_http_code != 200){
+        if ($response_http_code != 200) {
 
-            switch($response_http_code){
+            switch($response_http_code) {
                 case 503:
                     //TODO: pick out the message from the response if there is one
                     //for now just pass back a one liner.
@@ -233,14 +233,14 @@ class SCA_Bindings_restrpc_Proxy
         return null;
     }
 
-    private function fromXml($xml){
+    private function fromXml($xml) {
         SCA::$logger->log("Entering");
         try{
             $doc = $this->xml_das->loadString($xml);
             $ret = $doc->getRootDataObject();
             return $ret;
         }
-        catch( Exception $e ){
+        catch( Exception $e ) {
             return $e->getMessage();
 
         }

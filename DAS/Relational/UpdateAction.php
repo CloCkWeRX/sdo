@@ -71,7 +71,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
         //   - we assign no meaning to unsetting a primitive or non-containment reference, so ignore it
         //   - unsetting a containment reference results in a delete appearing elsewhere in the change summary
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($do);
-        foreach($this->do as $prop => $value) {
+        foreach ($this->do as $prop => $value) {
             if ($this->object_model->isContainmentReferenceProperty($type, $prop)) {
                 // We ignore containment references - updates to them will appear as creates or deletes elsewhere in the C/S
                 continue;
@@ -97,7 +97,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
     public function convertNonContainmentReferencesFromObjectToPK()
     {
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
-        foreach($this->settings_for_set_clause as $prop => $value) {
+        foreach ($this->settings_for_set_clause as $prop => $value) {
             if ($value === null) continue;
             if ($this->object_model->isNonContainmentReferenceProperty($type, $prop)) {
                 $pk = SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model, $value);
@@ -110,7 +110,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
                 }
             }
         }
-        foreach($this->settings_for_where_clause as $prop => $value) {
+        foreach ($this->settings_for_where_clause as $prop => $value) {
             if ($value === null) continue;
             if ($this->object_model->isNonContainmentReferenceProperty($type, $prop)) {
                 $pk = SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model, $value);
@@ -133,10 +133,10 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
     public function buildValueList()
     {
         $value_list = array();
-        foreach($this->settings_for_set_clause as $name => $value) {
+        foreach ($this->settings_for_set_clause as $name => $value) {
             $value_list[] = $value;
         }
-        foreach($this->settings_for_where_clause as $name => $value) {
+        foreach ($this->settings_for_where_clause as $name => $value) {
             if ($value === null) {
                 // no-op - don't add to value list as we will have put IS NULL in the UPDATE statement
             } else {
@@ -149,7 +149,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
     private function constructSetClauseFromChangedValues($changed_properties_as_nv_pairs)
     {
         $sql_settings = array();
-        foreach($this->settings_for_set_clause as $name => $value) {
+        foreach ($this->settings_for_set_clause as $name => $value) {
             $sql_settings[] = $this->makeAnSQLSetting($name, $value);
         }
         $set_clause = 'SET ';
@@ -159,7 +159,7 @@ class SDO_DAS_Relational_UpdateAction extends SDO_DAS_Relational_Action {
 
     private function constructWhereClauseFromOriginalValues($all_original_values)
     {
-        foreach($all_original_values as $name => $value) {
+        foreach ($all_original_values as $name => $value) {
             $sql_compares[] = $this->makeAnSQLCompare($name, $value);
         }
         $where_clause = 'WHERE ';

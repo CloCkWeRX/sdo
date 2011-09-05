@@ -121,7 +121,7 @@ class SCA_AtomServer {
                 $sdo = $this->fromXml($rawHTTPContents);
                 //should now have an atom format sdo
 
-                if(!$sdo instanceof SDO_DataObjectImpl)
+                if (!$sdo instanceof SDO_DataObjectImpl)
                 {
                     SCA::sendHttpHeader("HTTP/1.1 400 Bad Request");
                     echo "Request did not contain valid atom format xml";
@@ -140,7 +140,7 @@ class SCA_AtomServer {
 
                 if ($call_response !== null) {
 
-                    if(!($call_response instanceof SDO_DataObjectImpl)){
+                    if (!($call_response instanceof SDO_DataObjectImpl)) {
                         //if the thing received is xml...
                         //convert it to sdo
                         $call_response = $this->fromXml($call_response);
@@ -164,14 +164,14 @@ class SCA_AtomServer {
                     //but
                     //can't do this because $rel won't just be null if its not there.
                     //$rel = $link->rel;
-                    //if($rel === null){
+                    //if ($rel === null) {
 
                     $location = null;
-                    foreach($call_response->link as $link){
+                    foreach ($call_response->link as $link) {
 
                         SCA::$logger->log("Found link element: $link");
 
-                        if(isset($link->rel) === false){
+                        if (isset($link->rel) === false) {
                             $location = $link->href;
                         }
 
@@ -179,7 +179,7 @@ class SCA_AtomServer {
 
                     //if the location is still null, then there might be a number of reasons why.
                     //Handle the case where the reason is that all the link elements have a rel element. Use the href of first link element by default. TODO: this is not enough: we need a way of detecting the BEST 'rel' to use.
-                    if($location === null){
+                    if ($location === null) {
                         SCA::$logger->log("Could not find a link element that did not have a rel attribute so using the first href provided as the resource location.");
                         //if there is no href then $location will still be null.
                         $location = $call_response->link[0]->href;
@@ -226,7 +226,7 @@ class SCA_AtomServer {
 
 
 
-                if($id === null){
+                if ($id === null) {
                     $method = 'enumerate';
                 }
 
@@ -244,7 +244,7 @@ class SCA_AtomServer {
 
 
 
-                    if($call_response instanceof SDO_DataObjectImpl){
+                    if ($call_response instanceof SDO_DataObjectImpl) {
                         //if the thing received is an sdo...
                         //convert it to xml
                         $response_sdo = $this->toXml($call_response);
@@ -303,29 +303,29 @@ class SCA_AtomServer {
                 }
             }
 
-        } catch(SCA_ServiceUnavailableException $ex){
+        } catch(SCA_ServiceUnavailableException $ex) {
             SCA::$logger->log("caught SCA_ServiceUnavailableException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 503 Service Unavailable");
-        } catch(SCA_ConflictException $ex){
+        } catch(SCA_ConflictException $ex) {
             SCA::$logger->log("caught SCA_ConflictException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 409 Conflict");
-        } catch(SCA_AuthenticationException $ex){
+        } catch(SCA_AuthenticationException $ex) {
             SCA::$logger->log("caught SCA_AuthenticationException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 407 Proxy Authentication Required");
-        } catch(SCA_BadRequestException $ex){
+        } catch(SCA_BadRequestException $ex) {
             SCA::$logger->log("caught SCA_BadRequestException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 400 Bad Request");
-        } catch(SCA_InternalServerErrorException $ex){
+        } catch(SCA_InternalServerErrorException $ex) {
             SCA::$logger->log("caught SCA_InternalServerErrorException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 500 Internal Server Error");
-        } catch(SCA_UnauthorizedException $ex){
+        } catch(SCA_UnauthorizedException $ex) {
             SCA::$logger->log("caught SCA_UnauthorizedException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 401 Unauthorized");
-        } catch(SCA_NotFoundException $ex){
+        } catch(SCA_NotFoundException $ex) {
             //catch problem finding the requested resource thrown by the component
             SCA::$logger->log("caught SCA_NotFoundException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 404 Not Found");
-        } catch(SCA_MethodNotAllowedException $ex){
+        } catch(SCA_MethodNotAllowedException $ex) {
             //catch problem finding the method encountered by the service wrapper.
             SCA::$logger->log("caught SCA_MethodNotAllowedException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 405 Method Not Allowed");
@@ -349,13 +349,13 @@ class SCA_AtomServer {
 
 
     //TODO: refactor these methods - also appear in SDO_Typehandler and in AtomProxy
-    private function fromXml($xml){
+    private function fromXml($xml) {
         try{
             $doc = $this->xml_das->loadString($xml);
             $ret = $doc->getRootDataObject();
             return         $ret;
         }
-        catch( Exception $e ){
+        catch( Exception $e ) {
             SCA::$logger->log("Found exception in AtomServer: ".$e->getMessage()."\n");
             return $e->getMessage();
 
@@ -374,7 +374,7 @@ class SCA_AtomServer {
             $xmlstr = $xmldas->saveString($xdoc);
             return         $xmlstr;
         }
-        catch(Exception $e){
+        catch(Exception $e) {
             SCA::$logger->log("Found exception in AtomServer: ".$e->getMessage()."\n");
             return $e->getMessage();
         }

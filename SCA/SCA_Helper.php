@@ -42,7 +42,7 @@ class SCA_Helper {
         // run out of directory path
 
         $class_name = basename($class_file, '.php');
-        if (class_exists($class_name, false)){
+        if (class_exists($class_name, false)) {
             return $class_name;
         }
 
@@ -51,9 +51,9 @@ class SCA_Helper {
         $pear_class_name = $class_name;
         $class_file = str_replace('\\', '/', $class_file);
         $dir_array = explode('/', dirname($class_file));
-        foreach( array_reverse($dir_array) as $dir){
+        foreach ( array_reverse($dir_array) as $dir) {
             $pear_class_name = $dir . '_' . $pear_class_name;
-            if (class_exists($pear_class_name, false)){
+            if (class_exists($pear_class_name, false)) {
                 return $pear_class_name;
             }
         }

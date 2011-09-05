@@ -232,7 +232,7 @@ foreach ($sdo_buffer as $line) {
     // when we find the start of the file list output
     // the sca lines
     if (strstr($line, "<filelist>")) {
-         foreach($sca_buffer as $buffer_line) {
+         foreach ($sca_buffer as $buffer_line) {
             file_put_contents("package.xml.tmp", $buffer_line, FILE_APPEND);
         }
     }

@@ -82,7 +82,7 @@ class SCA_Bindings_restresource_Server {
             $id = null;
 
             // no id is provided so if this is a GET switch the method over to enumerate
-            if ($method === "retrieve"){
+            if ($method === "retrieve") {
                 $method = "enumerate";
             }
         }
@@ -136,7 +136,7 @@ class SCA_Bindings_restresource_Server {
                 SCA::$logger->log("Response from calling the method $method is: $call_response");
 
                 if ($call_response !== null) {
-                    if($call_response instanceof SDO_DataObjectImpl){
+                    if ($call_response instanceof SDO_DataObjectImpl) {
                         //if the thing received is an sdo...
                         //convert it to xml
                         $response_xml = SCA_Helper::sdoToXml($this->xml_das, $call_response);
@@ -195,7 +195,7 @@ class SCA_Bindings_restresource_Server {
                 SCA::$logger->log("Response from calling the method $method is: $call_response");
 
                 if ($call_response !== null) {
-                    if($call_response instanceof SDO_DataObjectImpl){
+                    if ($call_response instanceof SDO_DataObjectImpl) {
                         //if the thing received is an sdo...
                         //convert it to xml
                         $response_xml = SCA_Helper::sdoToXml($this->xml_das, $call_response);
@@ -213,36 +213,36 @@ class SCA_Bindings_restresource_Server {
 
             }
         }
-        catch(SCA_ServiceUnavailableException $ex){
+        catch(SCA_ServiceUnavailableException $ex) {
             SCA::$logger->log("caught SCA_ServiceUnavailableException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 503");
         }
-        catch(SCA_ConflictException $ex){
+        catch(SCA_ConflictException $ex) {
             SCA::$logger->log("caught SCA_ConflictException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 409");
         }
-        catch(SCA_AuthenticationException $ex){
+        catch(SCA_AuthenticationException $ex) {
             SCA::$logger->log("caught SCA_AuthenticationException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 407");
         }
-        catch(SCA_BadRequestException $ex){
+        catch(SCA_BadRequestException $ex) {
             SCA::$logger->log("caught SCA_BadRequestException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 400");
         }
-        catch(SCA_InternalServerErrorException $ex){
+        catch(SCA_InternalServerErrorException $ex) {
             SCA::$logger->log("caught SCA_InternalServerErrorException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 500");
         }
-        catch(SCA_UnauthorizedException $ex){
+        catch(SCA_UnauthorizedException $ex) {
             SCA::$logger->log("caught SCA_UnauthorizedException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 401");
         }
-        catch(SCA_MethodNotAllowedException $ex){
+        catch(SCA_MethodNotAllowedException $ex) {
             //catch problem finding the method encountered by the service wrapper.
             SCA::$logger->log("caught SCA_MethodNotAllowedException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 405");
         }
-        catch(SCA_NotFoundException $ex){
+        catch(SCA_NotFoundException $ex) {
             //catch problem finding the reosurce encountered by the service wrapper.
             SCA::$logger->log("caught SCA_NotFoundException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 404");

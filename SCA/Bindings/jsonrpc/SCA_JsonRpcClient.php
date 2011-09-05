@@ -203,7 +203,7 @@ class SCA_JsonRpcClient {
         //            file_put_contents("json_messages.txt",
         //            "Request at JSONRPC client = " . $json_request . "\n",
         //            FILE_APPEND);
-        if (self::$store_test_request == false){
+        if (self::$store_test_request == false) {
             // send this string to the service url
             $request = curl_init($this->service_url);
 

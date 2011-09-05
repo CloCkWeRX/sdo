@@ -27,10 +27,10 @@ include 'SCA/Bindings/rss/RssDas.php';
 
 class SCA_Bindings_rss_ServiceRequestHandler
 {
-        
+
     public function handle($calling_component_filename)
     {
-        
+
         SCA::$logger->log("Entering");
 
         $actions = array('POST'   => array('create',   1),
@@ -94,7 +94,7 @@ class SCA_Bindings_rss_ServiceRequestHandler
                 $call_response = null;
                 try {
 
-                    if($id === null){
+                    if ($id === null) {
                         $method = 'enumerate';
                     }
 
@@ -106,7 +106,7 @@ class SCA_Bindings_rss_ServiceRequestHandler
 
                     $call_response = call_user_func_array(array(&$service_component,
                                                    $method), $id);
- 
+
                     SCA::$logger->log("Response from calling the method $method is: $call_response");
                     //TODO: make sure these tests reflect the correct return values.
                     if ($call_response !== null) {
@@ -114,7 +114,7 @@ class SCA_Bindings_rss_ServiceRequestHandler
                         $response_xml;
 
                         // Handle the different types of response (SDO, PHP Class, Raw XML)
-                        if($call_response instanceof SDO_DataObjectImpl) {
+                        if ($call_response instanceof SDO_DataObjectImpl) {
                             //if the thing received is an sdo...
                             //convert it to xml
                             $response_xml = SCA_Bindings_rss_RssDas::toXml($call_response);
@@ -139,30 +139,30 @@ class SCA_Bindings_rss_ServiceRequestHandler
                 }
                 //catch a bunch of exceptions. TODO: pull out the message in the exception and flow it back
                 //start with service unavailable and then conflict as these are least fatal
-                catch(SCA_ServiceUnavailableException $ex){
+                catch(SCA_ServiceUnavailableException $ex) {
                     header("HTTP/1.1 503");
                 }
-                catch(SCA_ConflictException $ex){
+                catch(SCA_ConflictException $ex) {
                     header("HTTP/1.1 409");
                 }
-                catch(SCA_AuthenticationException $ex){
+                catch(SCA_AuthenticationException $ex) {
                     header("HTTP/1.1 407");
                 }
-                catch(SCA_BadRequestException $ex){
+                catch(SCA_BadRequestException $ex) {
                     header("HTTP/1.1 400");
                 }
-                catch(SCA_InternalServerErrorException $ex){
+                catch(SCA_InternalServerErrorException $ex) {
                     SCA::$logger->log("Caught SCA_InternalServerErrorException in RSSServer");
                     header("HTTP/1.1 500");
                 }
-                catch(SCA_MethodNotAllowedException $ex){
+                catch(SCA_MethodNotAllowedException $ex) {
                     //note  - this one is more likely to be thrown by the server code than the component code.
                     header("HTTP/1.1 405");
                 }
-                catch(SCA_UnauthorizedException $ex){
+                catch(SCA_UnauthorizedException $ex) {
                     header("HTTP/1.1 401");
                 }
-                catch(SCA_RuntimeException $ex){
+                catch(SCA_RuntimeException $ex) {
                     SCA::$logger->log("Caught SCA_RuntimeException in RSSServer\n");
                     header("HTTP/1.1 500");
                 }
@@ -188,7 +188,7 @@ class SCA_Bindings_rss_ServiceRequestHandler
             }
 
         }
-        catch(SCA_MethodNotAllowedException $ex){
+        catch(SCA_MethodNotAllowedException $ex) {
             //catch problem finding the method encountered by the service wrapper.
             header("HTTP/1.1 405");
         }

@@ -51,7 +51,7 @@ class SDO_DAS_Relational_Table {
         /*
         * Check metadata specifies a table name and assign
         */
-        if (array_key_exists("name", $table_metadata)){
+        if (array_key_exists("name", $table_metadata)) {
             $this->table_name   = $table_metadata['name'];
         } else {
             throw new SDO_DAS_Relational_Exception('The metadata for one table did not contain a table name.');
@@ -60,14 +60,14 @@ class SDO_DAS_Relational_Table {
         /*
         * Check name is a string
         */
-        if (gettype($this->table_name) != "string"){
+        if (gettype($this->table_name) != "string") {
             throw new SDO_DAS_Relational_Exception('The metadata for table '.$table_metadata['name'].' specified a table name that was not a string.');
         }
 
         /*
         * Check table has a column list, then assign
         */
-        if (array_key_exists("columns", $table_metadata)){
+        if (array_key_exists("columns", $table_metadata)) {
             $this->columns      = $table_metadata['columns'];
         } else {
             throw new SDO_DAS_Relational_Exception('The metadata for table '.$table_metadata['name'].' did not contain a column list.');
@@ -104,7 +104,7 @@ class SDO_DAS_Relational_Table {
         /*
         * Check metadata specifies a PK and assign
         */
-        if (array_key_exists("PK", $table_metadata)){
+        if (array_key_exists("PK", $table_metadata)) {
             $this->primary_key  = $table_metadata['PK'];
         } else {
             throw new SDO_DAS_Relational_Exception('The metadata for one table did not contain a PK.');
@@ -113,14 +113,14 @@ class SDO_DAS_Relational_Table {
         /*
         * Check PK is a string
         */
-        if (gettype($this->primary_key) != "string"){
+        if (gettype($this->primary_key) != "string") {
             throw new SDO_DAS_Relational_Exception('The metadata for table '.$table_metadata['name'].' specified a PK name that was not a string.');
         }
 
         /*
         * Check PK column name is one of the columns
         */
-        if (!in_array($this->primary_key, $this->columns)){
+        if (!in_array($this->primary_key, $this->columns)) {
             throw new SDO_DAS_Relational_Exception('The metadata for table '.$table_metadata['name'].' specified a primary key with a name that was not one of the columns.');
         }
 

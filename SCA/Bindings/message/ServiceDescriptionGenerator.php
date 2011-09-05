@@ -64,7 +64,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
         $msdDataObject = $msd_doc->getRootDataObject();
 
          // Guess a queue name
-        if(!isset($service_desc->binding_config['destination'])){
+        if (!isset($service_desc->binding_config['destination'])) {
             $service_desc->binding_config['destination']
                 = 'queue://' . $service_desc->class_name;
             SCA::$logger->log("Target queue not specified, SCA will use class name as default queue name");
@@ -111,8 +111,8 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
              }
          }
 
-         foreach ($binding_config as $key => $value){
-            switch($key){
+         foreach ($binding_config as $key => $value) {
+            switch($key) {
             /*creating connection factory elements*/
             case 'protocol':
             case 'host':
@@ -144,7 +144,7 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
 
             /*response queue connection factory*/
             case (strncmp($key, 'response.', 9) == 0):
-                if(!isset($resp_ConnFactory)){
+                if (!isset($resp_ConnFactory)) {
                     if (!isset($response)) {
                         $response = $msdDataObject->createDataObject('response');
                     }

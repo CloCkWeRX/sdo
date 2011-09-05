@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -25,12 +25,12 @@ require_once 'SDO/DAS/Relational/PrimaryKey.php';
 
 /**
  * Encapsulates one SDO containment reference
- * 
+ *
  * has a parent, a child
  *
- * TODO could have a name if the user wants to specify a different name for the reference. For now it is the name of the 
- * child. 
- */ 
+ * TODO could have a name if the user wants to specify a different name for the reference. For now it is the name of the
+ * child.
+ */
 
 
 class SDO_DAS_Relational_ContainmentReference {
@@ -46,7 +46,7 @@ class SDO_DAS_Relational_ContainmentReference {
         /*
         * Check metadata specifies a parent field
         */
-        if (array_key_exists('parent', $ref_metadata)){
+        if (array_key_exists('parent', $ref_metadata)) {
             $this->parent   = $ref_metadata['parent'];
         } else {
             throw new SDO_DAS_Relational_Exception('The metadata for a reference did not contain a parent field.');
@@ -55,14 +55,14 @@ class SDO_DAS_Relational_ContainmentReference {
         /*
         * Check parent is a string
         */
-        if (gettype($this->parent) != 'string'){
+        if (gettype($this->parent) != 'string') {
             throw new SDO_DAS_Relational_Exception('The metadata for a reference specified a parent field ' . $this->parent . ' that was not a string.');
         }
 
         /*
         * Check metadata specifies a child field
         */
-        if (array_key_exists('child', $ref_metadata)){
+        if (array_key_exists('child', $ref_metadata)) {
             $this->child    = $ref_metadata['child'];
         } else {
             throw new SDO_DAS_Relational_Exception('The metadata for a reference with parent field '.$this->parent.' did not contain a child field.');
@@ -71,7 +71,7 @@ class SDO_DAS_Relational_ContainmentReference {
         /*
         * Check parent is a string
         */
-        if (gettype($this->child) != 'string'){
+        if (gettype($this->child) != 'string') {
             throw new SDO_DAS_Relational_Exception('The metadata for a reference specified a child field ' . $this->child . ' that was not a string.');
         }
 

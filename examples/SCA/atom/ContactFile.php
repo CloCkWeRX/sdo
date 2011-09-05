@@ -28,16 +28,16 @@ class ContactFile {
             //NOTE: need directory called Contact with entries 2.xml and 3.xml in it
             $first = 1;
             $last = 1;
-            while ( file_exists("Contact/$last.xml") ){ $last++; }
+            while ( file_exists("Contact/$last.xml") ) { $last++; }
             $last--;
 
             SCA::$logger->log("Feed will contain entries $first to $last");
 
             $xmldas = SDO_DAS_XML::create('contacts.xsd');
 
-            for($i=$first; $i<=$last; $i++){
+            for($i=$first; $i<=$last; $i++) {
 
-                if (file_exists("Contact/$i.xml")){
+                if (file_exists("Contact/$i.xml")) {
                     $doc = $xmldas->loadFile("Contact/$i.xml");
                     SCA::$logger->log("read in " . $xmldas->saveString($doc));
                     $root_data_object = $doc->getRootDataObject();
@@ -59,7 +59,7 @@ class ContactFile {
 
             $contactsSDO = $xmldas->createDataObject('http://example.org/contacts','contacts');
 
-            foreach($contactsArray as $contact){
+            foreach ($contactsArray as $contact) {
                 $contactsSDO->contact[] = $contact;
             }
 
@@ -69,7 +69,7 @@ class ContactFile {
 
 
         }
-        catch(Exception $e){
+        catch(Exception $e) {
             SCA::$logger->log("caught exception: ".$e->getMessage());
             throw new SCA_NotFoundException();
 
@@ -84,7 +84,7 @@ class ContactFile {
         SCA::$logger->log("Entering");
 
         //should work if receives no parameter so make $sdo optional for the moment.
-        if($contact !== null){
+        if ($contact !== null) {
 
             //TODO: Check whether what we have received IS an SDO
 
@@ -96,7 +96,7 @@ class ContactFile {
 
             $id = 1;
 
-            while ( file_exists("Contact/$id.xml") ){ $id++; }
+            while ( file_exists("Contact/$id.xml") ) { $id++; }
 
             $contact->id = $id;
             $xmldas->saveFile($doc, "Contact/$id.xml", 2);
@@ -110,14 +110,14 @@ class ContactFile {
 
             $id = 1;
 
-            while ( file_exists("Contact/$id.xml") ){
+            while ( file_exists("Contact/$id.xml") ) {
                 $id++;
             }
 
             fopen("Contact/$id.xml", 'x');
         }
 
-        if(file_exists("Contact/$id.xml")){
+        if (file_exists("Contact/$id.xml")) {
             SCA::$logger->log("Created a file called ".$id.".xml");
             return $id;
         }
@@ -130,13 +130,13 @@ class ContactFile {
     /**
      * Retrieve a contact
      */
-    function retrieve($id){
+    function retrieve($id) {
 
         SCA::$logger->log("Entering");
 
         try{
             $xmldas = SDO_DAS_XML::Create('contacts.xsd');
-            if (file_exists("Contact/$id.xml")){
+            if (file_exists("Contact/$id.xml")) {
                 $doc = $xmldas->loadFile("Contact/$id.xml");
                 //$resource = $xmldas->saveString($doc, 2);
                 $root_data_object = $doc->getRootDataObject();
@@ -151,7 +151,7 @@ class ContactFile {
 
             }
         }
-        catch(Exception $e){
+        catch(Exception $e) {
             SCA::$logger->log("caught exception: ".$e->getMessage());
             throw new SCA_NotFoundException();
         }
@@ -164,7 +164,7 @@ class ContactFile {
     /**
          * Update a contact in the database
          */
-    //    function update($id, $contact){
+    //    function update($id, $contact) {
     //        SCA::$logger->log("Got into update()");
     //        //NOTE: the next part of the code is for some reason resulting in a 200 going back to the client before any of the log statements are reached.
     //        try {
@@ -196,7 +196,7 @@ class ContactFile {
     //
     //    }
 
-    function update($id, $sdo){
+    function update($id, $sdo) {
         SCA::$logger->log("Entering with params ID: ".$id." SDO: ".$sdo);
 
         //TODO: need to make sure these are properly checked and errors are passed around as appropriate.
@@ -207,7 +207,7 @@ class ContactFile {
             $xmldas->saveFile($doc, "Contact/$id.xml");
             return true;
         }
-        catch(Exception $e){
+        catch(Exception $e) {
             SCA::$logger->log("caught exception: ".$e->getMessage());
             throw new SCA_NotFoundException();
         }
@@ -217,7 +217,7 @@ class ContactFile {
     /**
      * Delete a contact from the database.
      */
-    //    function delete($id){
+    //    function delete($id) {
     //        //triggers returning a 200
     //        try {
     //            $dbh = new PDO(PDO_DSN, DATABASE_USER, DATABASE_PASSWORD,
@@ -235,12 +235,12 @@ class ContactFile {
     //    }
 
 
-    function delete($id){
+    function delete($id) {
         //TODO: find out what an adequate check is. This is failing with a warning if given a file that doesnt exist, but returns true. Should deal with sucess, problems deleting existing file, files that are not there. Some stuff to investigate...
 
         SCA::$logger->log("dealing with file: "."Contact/$id.xml");
 
-        if (file_exists("Contact/$id.xml")){
+        if (file_exists("Contact/$id.xml")) {
 
             unlink("Contact/$id.xml");
 
@@ -248,7 +248,7 @@ class ContactFile {
         else{
             throw new SCA_NotFoundException();
         }
-        if (file_exists("Contact/$id.xml")){
+        if (file_exists("Contact/$id.xml")) {
             throw new SCA_InternalServerErrorException();
         }
         return true;

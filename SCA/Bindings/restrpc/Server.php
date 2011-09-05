@@ -69,11 +69,11 @@ class SCA_Bindings_restrpc_Server {
                 $params_array = null;
                 SCA::$logger->log("Content type = " . $_SERVER['CONTENT_TYPE']);
 
-                if (stripos($_SERVER['CONTENT_TYPE'], 'x-www-form-urlencoded')){
+                if (stripos($_SERVER['CONTENT_TYPE'], 'x-www-form-urlencoded')) {
                     // form input
                     SCA::$logger->log("Form parameters found");
                     $params_array = $this->fromRequest($_POST, $param_description);
-                } else if (stripos($_SERVER['CONTENT_TYPE'], "xml")){
+                } else if (stripos($_SERVER['CONTENT_TYPE'], "xml")) {
                     //XML input
                     SCA::$logger->log("XML Input found");
                     // Get the request body
@@ -104,7 +104,7 @@ class SCA_Bindings_restrpc_Server {
 
             if ($call_response !== null) {
 
-                if($call_response instanceof SDO_DataObjectImpl){
+                if ($call_response instanceof SDO_DataObjectImpl) {
                     //if the thing received is SDO convert it to XML
                     SCA::sendHttpHeader("Content-Type: text/xml");
                     echo $this->toXml($call_response);
@@ -114,31 +114,31 @@ class SCA_Bindings_restrpc_Server {
                 }
             }
         }
-        catch(SCA_ServiceUnavailableException $ex){
+        catch(SCA_ServiceUnavailableException $ex) {
             SCA::$logger->log("caught SCA_ServiceUnavailableException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 503");
         }
-        catch(SCA_ConflictException $ex){
+        catch(SCA_ConflictException $ex) {
             SCA::$logger->log("caught SCA_ConflictException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 409");
         }
-        catch(SCA_AuthenticationException $ex){
+        catch(SCA_AuthenticationException $ex) {
             SCA::$logger->log("caught SCA_AuthenticationException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 407");
         }
-        catch(SCA_BadRequestException $ex){
+        catch(SCA_BadRequestException $ex) {
             SCA::$logger->log("caught SCA_BadRequestException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             header("HTTP/1.1 400");
         }
-        catch(SCA_InternalServerErrorException $ex){
+        catch(SCA_InternalServerErrorException $ex) {
             SCA::$logger->log("caught SCA_InternalServerErrorException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 500");
         }
-        catch(SCA_UnauthorizedException $ex){
+        catch(SCA_UnauthorizedException $ex) {
             SCA::$logger->log("caught SCA_UnauthorizedException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 401");
         }
-        catch(SCA_MethodNotAllowedException $ex){
+        catch(SCA_MethodNotAllowedException $ex) {
             //catch problem finding the method encountered by the service wrapper.
             SCA::$logger->log("caught SCA_MethodNotAllowedException when calling method $method"); //TODO: log more info, class the method was called on, msg.
             SCA::sendHttpHeader("HTTP/1.1 405");
@@ -168,7 +168,7 @@ class SCA_Bindings_restrpc_Server {
      * extract an array of simply type parameters from the incoming
      * POST or GET request
      */
-    private function fromRequest($request, $parameter_descriptions){
+    private function fromRequest($request, $parameter_descriptions) {
 
         $param_array = array();
 
@@ -195,7 +195,7 @@ class SCA_Bindings_restrpc_Server {
         return $param_array;
     }
 
-    private function fromXml($xml){
+    private function fromXml($xml) {
         try {
             $doc = $this->xml_das->loadString($xml);
             $sdo = $doc->getRootDataObject();
@@ -219,7 +219,7 @@ class SCA_Bindings_restrpc_Server {
             $xmlstr = $this->xml_das->saveString($xdoc);
             return $xmlstr;
         }
-        catch(Exception $e){
+        catch(Exception $e) {
             SCA::$logger->log("Found exception in SCA_Binidings_restrpc_Server ".
                               "converting sdo to xml".
                               $e->getMessage()."\n");

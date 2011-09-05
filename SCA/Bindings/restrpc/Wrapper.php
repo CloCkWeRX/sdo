@@ -70,7 +70,7 @@ class SCA_Bindings_restrpc_Wrapper {
 
         $operations = $service_description->operations;
 
-        if(!array_key_exists($method_name, $operations)){
+        if (!array_key_exists($method_name, $operations)) {
             throw new SCA_MethodNotAllowedException("Method not allowed.");
         }
 

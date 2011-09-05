@@ -55,7 +55,7 @@ class SCA_Bindings_message_Proxy {
         /*parse MSD file */
         $msd_config = SCA_Bindings_message_ServiceDescriptionGenerator::parseBindingConfig($binding_config);
 
-        if(isset($msd_config->responseTimeout)){
+        if (isset($msd_config->responseTimeout)) {
             $this->waitResponseTimeout = $msd_config->responseTimeout;
         }
 
@@ -95,7 +95,7 @@ class SCA_Bindings_message_Proxy {
 
     }
 
-    public function __call($method_name, $arguments){
+    public function __call($method_name, $arguments) {
         SCA::$logger->log('entering');
         SCA::$logger->log("method name = $method_name");
 
@@ -116,14 +116,14 @@ class SCA_Bindings_message_Proxy {
         }
 
         /*sending message*/
-        if( !$correlid = $this->ms_client->sendRequest($method_name, $msgbody)){
+        if ( !$correlid = $this->ms_client->sendRequest($method_name, $msgbody)) {
             throw new SCA_RuntimeException("Send Request Failed");
         }
 
         /*waiting for the response*/
         if ($this->waitResponseTimeout >=0 ) {
             $msg_response = $this->ms_client->getResponse($correlid,$this->waitResponseTimeout);
-            if($msg_response){
+            if ($msg_response) {
                 /*do we have a WSDL schema*/
                 if ($this->mapper === null) {
                     // no, returns message body directly
@@ -146,7 +146,7 @@ class SCA_Bindings_message_Proxy {
      * function that resets the reply-to queue
      * the change will take effect from the next request
      */
-    public function setReplyQueue($queue){
+    public function setReplyQueue($queue) {
         SCA::$logger->log("setting ReplyQueue to $queue");
         $this->ms_client->setResponseQueue($queue);
     }
@@ -159,7 +159,7 @@ class SCA_Bindings_message_Proxy {
      *                      zero means wait for infinite
      *                      negative value means NOT to expect response.
      */
-    public function setWaitResponseTimeout($timeout){
+    public function setWaitResponseTimeout($timeout) {
         SCA::$logger->log("setting waitResponseTimeout to $timeout");
         $this->waitResponseTimeout = $timeout;
 

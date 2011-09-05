@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -27,15 +27,15 @@ require_once 'company_metadata.inc.php'; // will override most of this this time
 /*************************************************************************************
 * Use SDO to perform create, retrieve, update, and delete operations on a row of the employee table.
 *
-* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
-* 
-* This example works against one table with no foreign keys or containment relationships and shows how in 
-* this case the arguments to the SDO_DAS_Relational constructor and executeQuery can be simplified. 
-* 1. Since there are no FKs and no containment references there is no need to specify the third argument 
+* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database
+*
+* This example works against one table with no foreign keys or containment relationships and shows how in
+* this case the arguments to the SDO_DAS_Relational constructor and executeQuery can be simplified.
+* 1. Since there are no FKs and no containment references there is no need to specify the third argument
 *    to the SDO_DAS_Relational constructor.
-* 2. As there is only one table the application root type - the first type to appear under the root object - 
+* 2. As there is only one table the application root type - the first type to appear under the root object -
 *    is assumed to be the name of the only table, hence there is no need for the second argument to the constructor either
-* 3. Finally, with only one table in the model there can be no ambiguity in the column/property names, so there is no 
+* 3. Finally, with only one table in the model there can be no ambiguity in the column/property names, so there is no
 *    need for a column specifier to executeQuery(). Instead executeQuery() will use the column name information that it can obtain
 *    from PDO to know which column is which in the result set that comes back from the database.
 *
@@ -108,8 +108,8 @@ echo "Deleted the employee and wrote the changes back to the database\n";
 * Check the row is really gone
 *************************************************************************************/
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
-foreach($dbh->query('select * from employee') as $row) {
-  assert(false); // There had better be no such rows. 
+foreach ($dbh->query('select * from employee') as $row) {
+  assert(false); // There had better be no such rows.
 }
 echo "Checked that the table was truly empty with SELECT * FROM employee. Nothing was found so the delete was successful.\n";
 

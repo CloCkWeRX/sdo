@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005, 2007.                            |
 | All Rights Reserved.                                                 |
@@ -39,7 +39,7 @@ class SDO_DAS_Relational_DatabaseModel {
     private $tables = array(); // Set of SDO_DAS_Relational_Table
     private $foreign_keys = array(); // Set of SDO_DAS_Relational_Table
 
-    public function __construct($database_metadata) 
+    public function __construct($database_metadata)
     {
         foreach ($database_metadata as $tdef) {
 
@@ -55,20 +55,20 @@ class SDO_DAS_Relational_DatabaseModel {
         $this->checkFKsPointToValidTables();
     }
 
-    private function checkFKsPointToValidTables() 
+    private function checkFKsPointToValidTables()
     {
         foreach ($this->tables as $t) {
             $all_table_names[] = $t->getTableName();
         }
         foreach ($this->foreign_keys as $fk) {
             $to_table_name = $fk->getToTableName();
-            if (!in_array($to_table_name, $all_table_names)){
+            if (!in_array($to_table_name, $all_table_names)) {
                 throw new SDO_DAS_Relational_Exception('A foreign key specifies a to field of ' . $to_table_name . ', which is not a valid table name');
             }
         }
     }
-    
-    public function getAllTableNames() 
+
+    public function getAllTableNames()
     {
         foreach ($this->tables as $t) {
             $all_table_names[] = $t->getTableName();
@@ -76,7 +76,7 @@ class SDO_DAS_Relational_DatabaseModel {
         return $all_table_names;
     }
 
-    public function isValidTableName($name) 
+    public function isValidTableName($name)
     {
         foreach ($this->tables as $table) {
             if ($name == $table->getTableName()) {
@@ -85,7 +85,7 @@ class SDO_DAS_Relational_DatabaseModel {
         }
         return false;
     }
-    
+
     public function getParentTable($table_name)
     {
         foreach ($this->foreign_keys as $fk) {
@@ -96,7 +96,7 @@ class SDO_DAS_Relational_DatabaseModel {
         return null;
     }
 
-    public function isValidTableAndColumnPair($table_name, $column_name) 
+    public function isValidTableAndColumnPair($table_name, $column_name)
     {
         $table = $this->getTableByName($table_name);
         if ($table == null) return false;
@@ -105,7 +105,7 @@ class SDO_DAS_Relational_DatabaseModel {
         else return false;
     }
 
-    public function getTableByName($name) 
+    public function getTableByName($name)
     {
         foreach ($this->tables as $table) {
             if ($table->getTableName() == $name) {
@@ -115,9 +115,9 @@ class SDO_DAS_Relational_DatabaseModel {
         return null;
     }
 
-    public function getColumns($table_name) 
+    public function getColumns($table_name)
     {
-        foreach($this->tables as $table) {
+        foreach ($this->tables as $table) {
             if ($table->getTableName() == $table_name) {
                 return $table->getColumns();
             }
@@ -125,14 +125,14 @@ class SDO_DAS_Relational_DatabaseModel {
         return null;
     }
 
-    public function getForeignKeys() 
+    public function getForeignKeys()
     {
         return $this->foreign_keys;
     }
 
-    public function getForeignKeyByFromTableNameAndColumnName($table_name,$column_name) 
+    public function getForeignKeyByFromTableNameAndColumnName($table_name,$column_name)
     {
-        foreach($this->foreign_keys as $fk) {
+        foreach ($this->foreign_keys as $fk) {
             if ($fk->getFromTableName() == $table_name && $fk->getFromColumnName() == $column_name) {
                 return $fk;
             }
@@ -140,7 +140,7 @@ class SDO_DAS_Relational_DatabaseModel {
         return null;
     }
 
-    public function getPrimaryKeyFromTableName($table_name) 
+    public function getPrimaryKeyFromTableName($table_name)
     {
         $table = $this->getTableByName($table_name);
         assert($table != null);

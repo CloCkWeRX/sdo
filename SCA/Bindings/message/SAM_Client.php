@@ -74,16 +74,16 @@ class SCA_Bindings_message_SAMClient {
         // to avoid the 30 seconds PHP maximun execution time error
         set_time_limit(0);
 
-        while(1){
+        while(1) {
             $msg = $this->getRequest();
-            if($msg){
+            if ($msg) {
                 /*call the wrapper*/
                 $response = $this->wrapper->onMessage($msg);
-                if (isset($response)){
+                if (isset($response)) {
                     $this->sendResponse($msg,$response);
                 }
             }
-            if(self::$test_mode) break; //exit loop
+            if (self::$test_mode) break; //exit loop
         }
         return;
     }
@@ -116,13 +116,13 @@ class SCA_Bindings_message_SAMClient {
             $options[SAM_CORRELID] = sprintf ( "%s-%07d" ,"sca_correlid", mt_rand(0,9999999));
         }
 
-        if(self::$test_mode){
+        if (self::$test_mode) {
             $rc = $this->_testmsgput($this->request_queue,$msg,
                                      isset($options->SAM_CORRELID)?$options->SAM_CORRELID:null);
         } else {
             /*sending message to a real broker*/
             SCA::$logger->log(" sending request msg to queue $this->request_queue");
-            if(!$rc = $this->request_conn->send($this->request_queue, $msg, $options)){
+            if (!$rc = $this->request_conn->send($this->request_queue, $msg, $options)) {
                 SCA::$logger->log('SAM: send message failed:'.$this->getLastError());
             } else {
                 if ($this->correlationScheme == 'RequestCorrelIDToCorrelID') {
@@ -153,25 +153,25 @@ class SCA_Bindings_message_SAMClient {
 
         $response_queue = ($this->isFixedResponseQueue) ? $this->response_queue : $callback_queue;
         /*if response_queue is defined send response to the queue*/
-        if($response_queue){
+        if ($response_queue) {
             $response_msg = new SAMMessage($response_msgbody);
             @$response_msg->header->SAM_TYPE = SAM_TEXT;
 
             /*apply correlation Scheme*/
             $options = ($this->headers !== null) ? $this->headers : array();
-            if($this->correlationScheme == 'RequestCorrelIDToCorrelID'){
+            if ($this->correlationScheme == 'RequestCorrelIDToCorrelID') {
                 $options[SAM_CORRELID] = $request_msg->header->SAM_CORRELID;
             }
-            if($this->correlationScheme == 'RequestMsgIDToCorrelID'){
+            if ($this->correlationScheme == 'RequestMsgIDToCorrelID') {
                 $options[SAM_CORRELID] = $request_msg->header->SAM_MESSAGEID;
             }
 
             SCA::$logger->log("sending response $response_msgbody to queue $response_queue");
-            if(self::$test_mode){
+            if (self::$test_mode) {
                 $rc = $this->_testmsgput($response_queue,$response_msg);
             } else {
                 /*sending message to a real broker*/
-                if(!$rc = $this->response_conn->send($response_queue, $response_msg, $options)){
+                if (!$rc = $this->response_conn->send($response_queue, $response_msg, $options)) {
                     SCA::$logger->log('SAM: send message failed:'.$this->getLastError(0));
                 }
             }
@@ -184,8 +184,8 @@ class SCA_Bindings_message_SAMClient {
      * @param $timeout int wait request timeout in microseconds
      * @return SAMMessage the request message
      */
-    public function getRequest($timeout = 0){
-        if(self::$test_mode){
+    public function getRequest($timeout = 0) {
+        if (self::$test_mode) {
             /*in test mode, use $this::test_queueborker */
             $msg = self::$test_queueborker[$this->request_queue];
         } else {
@@ -201,11 +201,11 @@ class SCA_Bindings_message_SAMClient {
      * @param $timeout int  wait-response timeout in microseconds
      * @return SAMMessage the response message
      */
-    public function getResponse($correlid = null, $timeout = 0){
-        if(is_null($this->response_queue)){
+    public function getResponse($correlid = null, $timeout = 0) {
+        if (is_null($this->response_queue)) {
             throw new SCA_RuntimeException("Response queue is not specified");
         }
-        if(self::$test_mode){
+        if (self::$test_mode) {
             /*in test mode, use $this::test_queueborker */
             $msg = self::$test_queueborker[$this->response_queue];
         } else {
@@ -221,7 +221,7 @@ class SCA_Bindings_message_SAMClient {
     }
 
     //
-    public function setResponseQueue($queue){
+    public function setResponseQueue($queue) {
         if (!$this->isFixedResponseQueue) {
             $this->response_queue = $queue;
         } else {
@@ -237,7 +237,7 @@ class SCA_Bindings_message_SAMClient {
      *
      * @param $config SDO Data object
      */
-    public function config($config){
+    public function config($config) {
         SCA::$logger->log("entering");
 
         /*config request queue*/
@@ -248,7 +248,7 @@ class SCA_Bindings_message_SAMClient {
         }
 
         /*config connection factory for request queue and establish a connection */
-        if(!isset($config->connectionFactory) || count((array)$config->connectionFactory) == 0){
+        if (!isset($config->connectionFactory) || count((array)$config->connectionFactory) == 0) {
             throw new SCA_RuntimeException('message binding configuration missing: connectionFactory.');
         } else {
             $this->request_conn = $this->_configConnection($config->connectionFactory);
@@ -256,7 +256,7 @@ class SCA_Bindings_message_SAMClient {
 
         /*config response queue and connection factory
         */
-        if(isset($config->response) && isset($config->response->destination)){
+        if (isset($config->response) && isset($config->response->destination)) {
             $this->response_queue = $config->response->destination;
             $this->isFixedResponseQueue = true;
             if (isset($config->response->connectionFactory) &&
@@ -274,7 +274,7 @@ class SCA_Bindings_message_SAMClient {
         }
 
         /*config headers*/
-        if( isset($config->headers) ){
+        if ( isset($config->headers) ) {
             $this->headers = $this->_configHeaders($config->headers);
         }
 
@@ -285,7 +285,7 @@ class SCA_Bindings_message_SAMClient {
         SCA::$logger->log("exiting");
     }
 
-    public function getLastError($isRequest = true){
+    public function getLastError($isRequest = true) {
         $conn = $isRequest ? $this->request_conn : $this->response_conn;
 
         if ($conn->errno) {
@@ -296,7 +296,7 @@ class SCA_Bindings_message_SAMClient {
     }
 
 
-    public function disconnect(){
+    public function disconnect() {
         $this->request_conn->disconnect();
     }
 
@@ -313,7 +313,7 @@ private:
     private function _configConnection($connFactory)
     {
         $optionsarray = array();
-        foreach ($connFactory as $key => $value){
+        foreach ($connFactory as $key => $value) {
             switch ($key) {
             case "protocol":
                 $protocol = $value;
@@ -329,9 +329,9 @@ private:
             throw new SCA_RuntimeException('message binding configuration connectionFactory missing: protocol. ');
         }
 
-        if(self::$test_mode){
+        if (self::$test_mode) {
             /*in test mode, use $this::test_queueborker */
-            if (is_null(self::$test_queueborker)){
+            if (is_null(self::$test_queueborker)) {
                 self::$test_queueborker = array();
             }
             $connection = null;
@@ -354,7 +354,7 @@ private:
      */
     private function _configHeaders($headers)
     {
-        if(count((array)$headers) == 0) return null;
+        if (count((array)$headers) == 0) return null;
         $options = array();
         foreach ($headers as $key => $value) {
             $options[self::$samOptions[$key]] = $value;
@@ -363,12 +363,12 @@ private:
     }
 
     /*helper function for sending request/response messages in test mode*/
-    private function _testmsgput($queue, $msg, $corrid = null){
+    private function _testmsgput($queue, $msg, $corrid = null) {
         /*in test mode, use $this::test_queueborker */
-        if(is_null(self::$test_queueborker)){
+        if (is_null(self::$test_queueborker)) {
             return false;
         }else {
-            if (!is_null($corrid)){
+            if (!is_null($corrid)) {
                 $msg->header->SAM_CORRELID = $corrid;
             }
             self::$test_queueborker[$queue] = $msg;

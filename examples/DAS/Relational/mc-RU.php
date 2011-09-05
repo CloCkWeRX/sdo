@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -27,7 +27,7 @@ require_once 'company_metadata.inc.php';
 /**
  * Scenario - Retrieve and update multiple companies
  *
- * Retrieve multiple company rows from the company table. 
+ * Retrieve multiple company rows from the company table.
  */
 
 /**************************************************************
@@ -61,7 +61,7 @@ try {
 	exit();
 }
 
-foreach($companies as $company) {
+foreach ($companies as $company) {
 	echo "got " . $company->name . "\n";
 	$company->name = strrev($company->name);
 }

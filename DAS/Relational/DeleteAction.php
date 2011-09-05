@@ -49,7 +49,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($do);
 
         $old_values_of_any_changed_properties = SDO_DAS_Relational_SettingListHelper::getSettingsAsArray($old_values);
-        foreach($this->do as $prop => $value) {
+        foreach ($this->do as $prop => $value) {
             if ($this->object_model->isContainmentReferenceProperty($type, $prop)) {
                 // We ignore containment references - any changes to them appear elsewhere in the C/S
                 continue;
@@ -82,7 +82,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
     public function convertNonContainmentReferencesFromObjectToPK()
     {
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
-        foreach($this->settings_for_where_clause as $prop => $value) {
+        foreach ($this->settings_for_where_clause as $prop => $value) {
             if ($value === null) continue;
             if ($this->object_model->isNonContainmentReferenceProperty($type, $prop)) {
                 $pk = SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model, $value);
@@ -94,7 +94,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
     public function buildValueList()
     {
         $value_list = array();
-        foreach($this->settings_for_where_clause as $name => $value) {
+        foreach ($this->settings_for_where_clause as $name => $value) {
             if ($value === null) {
                 // no-op - don't add to value list as we will have put IS NULL in the UPDATE statement
             } else {
@@ -115,7 +115,7 @@ class SDO_DAS_Relational_DeleteAction extends SDO_DAS_Relational_Action {
 
     private function constructWhereClauseFromOriginalValues($original_values_as_nv_pairs)
     {
-        foreach($original_values_as_nv_pairs as $name => $value) {
+        foreach ($original_values_as_nv_pairs as $name => $value) {
             $sql_compares[] = $this->makeAnSQLCompare($name, $value);
         }
         $where_clause = 'WHERE ';

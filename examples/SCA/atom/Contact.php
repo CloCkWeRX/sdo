@@ -6,7 +6,7 @@ include_once "SCA/SCA.php";
 
 /**
  * A service for managing contact details held in a database.
- * 
+ *
  * @service
  *
  * @types http://example.org/contacts contacts.xsd
@@ -38,7 +38,7 @@ class Contact {
     /**
      * Retrieve a contact from the database
      */
-    function retrieve($id){
+    function retrieve($id) {
         try {
             $dbh = new PDO(PDO_DSN, DATABASE_USER, DATABASE_PASSWORD,
             array(PDO::ERRMODE_EXCEPTION => true));
@@ -70,7 +70,7 @@ class Contact {
     /**
      * Update a contact in the database
      */
-    function update($id, $contact){
+    function update($id, $contact) {
         try {
             $dbh = new PDO(PDO_DSN, DATABASE_USER, DATABASE_PASSWORD,
             array(PDO::ERRMODE_EXCEPTION => true));
@@ -108,7 +108,7 @@ class Contact {
     /**
      * Delete a contact from the database.
      */
-    function delete($id){
+    function delete($id) {
         try {
             $dbh = new PDO(PDO_DSN, DATABASE_USER, DATABASE_PASSWORD,
             array(PDO::ERRMODE_EXCEPTION => true));

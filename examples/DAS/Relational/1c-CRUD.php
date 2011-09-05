@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -30,7 +30,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Use SDO to perform create, retrieve, update, and delete operations on a row of the company table.
 *
-* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
+* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database
 *
 * to keep this example shorter, no try/catch blocks
 * to make it quite clear that we work disconnected, get a fresh DAS and PDO handle each time
@@ -78,7 +78,7 @@ $das -> applyChanges($dbh, $root);
 echo "Wrote back Acme with name changed to MegaCorp\n";
 
 /*************************************************************************************
-* Find it again under its new name, and delete it. 
+* Find it again under its new name, and delete it.
 * Just for a change, re-use the PDO database handle and prepared statement.
 *************************************************************************************/
 
@@ -96,8 +96,8 @@ echo "Deleted the company and wrote the changes back to the database\n";
 *************************************************************************************/
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
-foreach($dbh->query('select * from company') as $row) {
-  assert(false); // There had better be no such rows. 
+foreach ($dbh->query('select * from company') as $row) {
+  assert(false); // There had better be no such rows.
 }
 
 echo "Checked that the table was truly empty with SELECT * FROM company. Nothing was found so the delete was successful.\n";

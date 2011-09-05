@@ -497,7 +497,7 @@ class SCA_Bindings_Atom_Proxy
         }
     }
 
-    private function _fromXml($xml){
+    private function _fromXml($xml) {
         SCA::$logger->log("Entering");
 
         try {

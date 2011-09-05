@@ -55,8 +55,8 @@ class ContactEmailService {
     public function send($to, $from, $subject, $message) {
 
         // convert short names to full names using contact information
-        foreach($this->contacts as $contact_name => $contact){
-            if (strcmp($to, $contact_name)==0){
+        foreach ($this->contacts as $contact_name => $contact) {
+            if (strcmp($to, $contact_name)==0) {
                 $to = $contact[1];
             }
         }

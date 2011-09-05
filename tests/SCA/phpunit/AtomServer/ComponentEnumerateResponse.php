@@ -60,7 +60,7 @@ EOF;
     }
 
 
-    function retrieve($in){
+    function retrieve($in) {
 
         //nothing in here at the moment - just here so that enumerate() can be reached
     }

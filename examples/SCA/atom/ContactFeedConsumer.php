@@ -6,14 +6,14 @@ include_once "SCA/SCA.php";
  * A component which consumes a contact atom feed service.  This is currently
  * required because of the lack of support for SCA::getService() for atom
  * services.
- * 
+ *
  * @service
- * 
+ *
  */
 class ContactFeedConsumer {
-    
-    // Un-comment this block if you want $contact_feed to be a reference to 
-    // the local ContactFeed.php 
+
+    // Un-comment this block if you want $contact_feed to be a reference to
+    // the local ContactFeed.php
 //
 //    /**
 //     * A reference to the contact feed service.  The Atom xsd is currently
@@ -37,35 +37,35 @@ class ContactFeedConsumer {
     /**
      * We shouldn't need any additional annotations (it should always be an entry)
      */
-    function create($entry) {       
+    function create($entry) {
         return $this->contact_feed->create($entry);
     }
 
     /**
      * We shouldn't need any additional annotations (it should always be an entry)
      */
-    function retrieve($id){
+    function retrieve($id) {
         return $this->contact_feed->retrieve($id);
     }
 
     /**
      * We shouldn't need any additional annotations (it should always be an entry)
      */
-    function update($id, $entry){
+    function update($id, $entry) {
         return $this->contact_feed->update($id, $entry);
     }
 
     /**
      * We shouldn't need any additional annotations (it should always be an entry)
-     */ 
-    function delete($id){
+     */
+    function delete($id) {
         return $this->contact_feed->delete($id);
     }
 
     /**
      * We shouldn't need any additional annotations (it should always be an entry)
      */
-    function enumerate(){
+    function enumerate() {
         return $this->contact_feed->enumerate();
     }
 

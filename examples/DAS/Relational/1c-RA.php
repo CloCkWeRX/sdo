@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -28,7 +28,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Use SDO to perform create, retrieve and update operations on a row of the company table.
 *
- * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
+ * See companydb_mysql.sql and companydb_db2.sql for examples of defining the database
 *************************************************************************************/
 
 /*************************************************************************************
@@ -47,7 +47,7 @@ try {
 * Find Acme, update it, add another company, and write them both back.
 *************************************************************************************/
 $root = findCompanies($das,'Acme');
-foreach($root['company'] as $acme) {
+foreach ($root['company'] as $acme) {
 	assert($acme['name'] == 'Acme');
 	echo "Looked for Acme and found company with name = " . $acme->name . " and id " . $acme->id . "\n";
 }

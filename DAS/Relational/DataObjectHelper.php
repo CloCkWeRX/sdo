@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005, 2006.                            |
 | All Rights Reserved.                                                 |
@@ -22,7 +22,7 @@ $Id: DataObjectHelper.php 220738 2006-09-28 19:25:00Z cem $
 */
 
 /**
-* Helper routines for use on or with an SDO data object. These are logically instance methods on a data object 
+* Helper routines for use on or with an SDO data object. These are logically instance methods on a data object
 * but since we do not own the implementation of the SDO Data Object we put them in this helper class
 */
 
@@ -33,7 +33,7 @@ class SDO_DAS_Relational_DataObjectHelper
     {
         $nvpairs = array();
         $type = self::getApplicationType($data_object);
-        foreach($data_object as $prop => $value) {
+        foreach ($data_object as $prop => $value) {
             if ($object_model->isPrimitive($type, $prop)) {
                 if (isset($data_object[$prop])) {
                     $nvpairs[$prop] = $data_object[$prop];

@@ -22,20 +22,20 @@ $Id: SettingListHelper.php 220738 2006-09-28 19:25:00Z cem $
 */
 
 /**
-* Helper routines for use with an SDO_DAS_SettingList. Ideally this is behaviour 
+* Helper routines for use with an SDO_DAS_SettingList. Ideally this is behaviour
 * that belongs to the SettingList itself, but we do not own the implementation and
 * so must add the behaviour with this helper routine
 */
 
-class SDO_DAS_Relational_SettingListHelper 
+class SDO_DAS_Relational_SettingListHelper
 {
 
     public static function getSettingsAsArray(SDO_DAS_SettingList $setting_list)
     {
         $settings_as_array = array();
 
-        foreach($setting_list as $setting) {
-            if ($setting->isSet()) { 
+        foreach ($setting_list as $setting) {
+            if ($setting->isSet()) {
                 $property_name  = $setting->getPropertyName();
                 $old_value      = $setting->getValue();
                 $settings_as_array[$property_name] = $old_value;

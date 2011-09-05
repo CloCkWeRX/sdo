@@ -55,7 +55,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
      * @return string absolute URL to the new resource
      *
      **/
-    public function create($resource){
+    public function create($resource) {
         SCA::$logger->log("create resource");
         $this->orders->order[] = $resource;
         srand(time());
@@ -81,13 +81,13 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
      * @return OrderType urn::orderNS
      *
      **/
-    public function retrieve($id){
+    public function retrieve($id) {
         SCA::$logger->log("retrieve resource $id");
 
         $return_order = null;
 
-        foreach($this->orders->order as $order){
-          if ($order->orderId == $id ){
+        foreach ($this->orders->order as $order) {
+          if ($order->orderId == $id ) {
               $return_order = $order;
           }
         }
@@ -105,15 +105,15 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
      * @param string $id
      * @param OrderType $resource urn::orderNS
      **/
-    public function update($id, $resource){
+    public function update($id, $resource) {
         SCA::$logger->log("update resource");
 
         // make sure that the id has not been changed
         $resource->orderId = $id;
 
         $orderIndex = 0;
-        foreach($this->orders->order as $order){
-          if ($order->orderId == $id ){
+        foreach ($this->orders->order as $order) {
+          if ($order->orderId == $id ) {
               $this->orders->order[$orderIndex] = $resource;
           }
           $orderIndex = $orderIndex + 1;
@@ -131,12 +131,12 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
      *
      * @param string $id
      **/
-    public function delete($id){
+    public function delete($id) {
         SCA::$logger->log("delete resource");
 
         $orderIndex = 0;
-        foreach($this->orders->order as $order){
-          if ($order->orderId == $id ){
+        foreach ($this->orders->order as $order) {
+          if ($order->orderId == $id ) {
               unset($this->orders->order[$orderIndex]);
           }
           $orderIndex = $orderIndex + 1;
@@ -154,7 +154,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
      * @return OrdersType urn::orderNS
      *
      **/
-    public function enumerate(){
+    public function enumerate() {
         SCA::$logger->log("enumerate resource collection");
 
         // return the collection of resources or null if the
@@ -165,7 +165,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
     /**
      * a helper method to read all of the orders in from file
      */
-    private function readOrders(){
+    private function readOrders() {
         $this->xmldas = SDO_DAS_XML::create("./Orders.xsd");
         $this->doc    = $this->xmldas->loadFile("./Orders.xml");
         $this->orders = $this->doc->getRootDataObject();
@@ -174,7 +174,7 @@ class Orders implements SCA_Bindings_restresource_ResourceTemplate
     /**
      * a helper method to write all of the orders out to file
      */
-    private function writeOrders(){
+    private function writeOrders() {
         $this->xmldas->saveFile($this->doc, "./Orders.xml",2);
     }
 

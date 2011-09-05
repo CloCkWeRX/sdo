@@ -88,7 +88,7 @@ class SCA_Bindings_restresource_Proxy
         $headers  = array("Content-Type: application/xml ");
 
         //check whether it is an sdo or an xml string.
-        if($resource instanceof SDO_DataObjectImpl){
+        if ($resource instanceof SDO_DataObjectImpl) {
             //if the thing received is an sdo convert it to xml
             if ($this->xml_das !== null ) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
@@ -129,7 +129,7 @@ class SCA_Bindings_restresource_Proxy
 
         $response_exception = $this->buildResponseException($response_http_code, '201');
 
-        if($response_exception != null) {
+        if ($response_exception != null) {
             throw $response_exception;
         } else if (!array_key_exists('LOCATION', $this->received_headers)) {
             throw new SCA_RuntimeException('No Location: header received from create()');
@@ -167,7 +167,7 @@ class SCA_Bindings_restresource_Proxy
 
         $response_exception = $this->buildResponseException($response_http_code, '200');
 
-        if($response_exception != null) {
+        if ($response_exception != null) {
             throw $response_exception;
         } else {
             //convert the result into an sdo.
@@ -188,7 +188,7 @@ class SCA_Bindings_restresource_Proxy
     {
         SCA::$logger->log("Entering update()");
         //check whether it is an sdo or an xml string.
-        if($resource instanceof SDO_DataObjectImpl){
+        if ($resource instanceof SDO_DataObjectImpl) {
             //if the thing received is an sdo convert it to xml
             if ($this->xml_das !== null ) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
@@ -222,7 +222,7 @@ class SCA_Bindings_restresource_Proxy
 
         $response_exception = $this->buildResponseException($response_http_code, '200');
 
-        if($response_exception != null) {
+        if ($response_exception != null) {
             throw $response_exception;
         } else {
             //update does not return anything in the body
@@ -260,7 +260,7 @@ class SCA_Bindings_restresource_Proxy
 
         $response_exception = $this->buildResponseException($response_http_code, '200');
 
-        if($response_exception != null) {
+        if ($response_exception != null) {
             throw $response_exception;
         } else {
             //delete does not return a body
@@ -298,7 +298,7 @@ class SCA_Bindings_restresource_Proxy
 
         $response_exception = $this->buildResponseException($response_http_code, '200');
 
-        if($response_exception != null) {
+        if ($response_exception != null) {
             throw $response_exception;
         } else {
             //convert the result into an sdo.
@@ -347,14 +347,14 @@ class SCA_Bindings_restresource_Proxy
     }
 
 
-    private function buildResponseException($response_http_code, $expected_response_code){
+    private function buildResponseException($response_http_code, $expected_response_code) {
         $return_exception = null;
 
         //Create SCA exceptions based on the HTTP response code.
-        if($response_http_code != $expected_response_code){
+        if ($response_http_code != $expected_response_code) {
             SCA::$logger->log("HTTP error $response_http_code in proxy");
 
-            switch($response_http_code){
+            switch($response_http_code) {
                 case 503:
                     $return_exception = new SCA_ServiceUnavailableException("Service Unavailable");
                     break;

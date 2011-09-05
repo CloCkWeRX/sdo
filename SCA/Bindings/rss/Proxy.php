@@ -124,7 +124,7 @@ class SCA_Bindings_rss_Proxy
         SCA::$logger->log("Entering");
         //TODO these should all be building a setopts array not sending a lot.
 
-        if($id !== null){
+        if ($id !== null) {
             //$target is the target of the RSS binding. If there is no slash on the end of the target provided, one is added.
             $slash_if_needed =
             ('/' === $this->target[strlen($this->target)-1])?'':'/';
@@ -150,9 +150,9 @@ class SCA_Bindings_rss_Proxy
         $sdo = SCA_Bindings_rss_RssDas::fromXml($result);
 
         //TODO: confirm the correct response code for retrieve.
-        if($response_http_code != 200){{
+        if ($response_http_code != 200) {{
 
-            switch($response_http_code){
+            switch($response_http_code) {
                 // Temporary redirects
                 case 302:
                 case 307:
@@ -216,9 +216,9 @@ class SCA_Bindings_rss_Proxy
         $sdo = SCA_Bindings_rss_RssDas::fromXml($result);
 
         //TODO: confirm the correct response code for retrieve.
-        if($response_http_code != 200){{
+        if ($response_http_code != 200) {{
 
-            switch($response_http_code){
+            switch($response_http_code) {
                 // Temporary redirects
                 case 302:
                 case 307:

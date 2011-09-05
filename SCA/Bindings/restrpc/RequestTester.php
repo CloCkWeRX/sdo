@@ -41,8 +41,8 @@ class SCA_Bindings_restrpc_RequestTester
                 || $_SERVER['REQUEST_METHOD'] == 'GET') {
                 $p1 = realpath($calling_component_filename);
                 $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
-                if ($p1 == $p2 && 
-                    isset($_SERVER['PATH_INFO'])){
+                if ($p1 == $p2 &&
+                    isset($_SERVER['PATH_INFO'])) {
                     return true;
                 }
             }

@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -31,7 +31,7 @@ require_once 'company_metadata.inc.php';
 * Use SDO to perform create, retrieve, update, and delete operations on a row of the company table.
 * Here invalid SQL is used in a query to cause any invalid SQL exception to be thrown
 *
-* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
+* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database
 *
 *************************************************************************************/
 
@@ -96,8 +96,8 @@ echo "Deleted the company and wrote the changes back to the database\n";
 *************************************************************************************/
 $dbh = new PDO(PDO_DSN,DATABASE_USER,DATABASE_PASSWORD);
 
-foreach($dbh->query('select * from company') as $row) {
-  assert(false); // There had better be no such rows. 
+foreach ($dbh->query('select * from company') as $row) {
+  assert(false); // There had better be no such rows.
 }
 
 echo "Checked that the table was truly empty with SELECT * FROM company. Nothing was found so the delete was successful.\n";

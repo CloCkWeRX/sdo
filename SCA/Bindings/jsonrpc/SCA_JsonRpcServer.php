@@ -62,7 +62,7 @@ class SCA_JsonRpcServer {
         // POST
         // Get the JSON request as an SDO
         // Should really be using a schema for the JSON call here
-        if (self::$test_request == null){
+        if (self::$test_request == null) {
             $rawHTTPContents = file_get_contents("php://input");
         } else {
             $rawHTTPContents = self::$test_request;

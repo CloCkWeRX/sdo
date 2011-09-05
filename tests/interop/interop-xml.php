@@ -53,11 +53,11 @@ function compareNodeCount ($nodename, $node1, $node2, $reason )
 
   $message = $reason . "  " . $nodename . ": Node1 count = $count1   Node2 count  = $count2";
 
-  if ($count1 != $count2  ){
+  if ($count1 != $count2  ) {
       throw new Exception ($message);
   }
 
-  if ( DEBUG == "on" ){
+  if ( DEBUG == "on" ) {
      echo $message . "\n";
   }
 
@@ -74,11 +74,11 @@ function compareNodeName ($node1, $node2 )
 
   $message = "NAME Node1 name = $name1   Node2 name = $name2";
 
-  if ($name1 != $name2 ){
+  if ($name1 != $name2 ) {
     throw new Exception ($message);
   }
 
-  if ( DEBUG == "on" ){
+  if ( DEBUG == "on" ) {
      echo $message . "\n";
   }
 
@@ -92,7 +92,7 @@ function compareNodeValue ($node1, $node2 )
 
   $message = "VALUE " . $node1->getName() . ": Node1 value = " . (string)$node1 . "   Node2 value = " . (string) $node2;
 
-  if ( (string)$node1 != (string)$node2 ){
+  if ( (string)$node1 != (string)$node2 ) {
     throw new Exception ($message);
   }
 
@@ -150,7 +150,7 @@ function compareNodeAttributes ($node1, $node2, $namespace )
 
   $attributecount = $count1;
 
-  if ( DEBUG == "on" && $attributecount > 0){
+  if ( DEBUG == "on" && $attributecount > 0) {
     echo "ATTRIBUTES\n";
   }
 
@@ -173,7 +173,7 @@ function compareNodeChildren ($node1, $node2, $namespace )
 
   $reason = "CHILD COUNT FOR NAMESPACE ";
 
-  if ($namespace == NULL ){
+  if ($namespace == NULL ) {
     $reason = $reason . "DEFAULT";
   }
   else
@@ -183,7 +183,7 @@ function compareNodeChildren ($node1, $node2, $namespace )
 
   $childcount = compareNodeCount ($node1->getName(), $children1, $children2, $reason);
 
-  if ( DEBUG == "on" && $childcount > 0 ){
+  if ( DEBUG == "on" && $childcount > 0 ) {
     echo "CHILDREN\n";
   }
 

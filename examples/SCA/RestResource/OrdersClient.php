@@ -56,7 +56,7 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      * @return string
      *
      **/
-    public function create($resource){
+    public function create($resource) {
         SCA::$logger->log("create resource");
         return $this->orders_service->create($resource);
     }
@@ -68,7 +68,7 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      * @return OrderType urn::orderNS
      *
      **/
-    public function retrieve($id){
+    public function retrieve($id) {
         SCA::$logger->log("retrieve resource $id");
         return $this->orders_service->retrieve($id);
     }
@@ -81,7 +81,7 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      * @param string $id
      * @param OrderType $resource urn::orderNS
      **/
-    public function update($id, $resource){
+    public function update($id, $resource) {
         SCA::$logger->log("update resource");
         return $this->orders_service->update($id, $resource);
     }
@@ -92,7 +92,7 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      *
      * @param string $id
      **/
-    public function delete($id){
+    public function delete($id) {
         SCA::$logger->log("delete resource");
         return $this->orders_service->delete($id);
     }
@@ -103,7 +103,7 @@ class OrdersClient implements SCA_Bindings_restresource_ResourceTemplate
      * @return OrdersType urn::orderNS
      *
      **/
-    public function enumerate(){
+    public function enumerate() {
         SCA::$logger->log("enumerate resource collection");
         return $this->orders_service->enumerate();
     }

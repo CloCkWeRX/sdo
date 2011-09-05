@@ -101,7 +101,7 @@ class SCA_MessageBindingTest extends PHPUnit_Framework_TestCase
         $this->assertContains($this->mpd, $out);
     }
 
-    public function testOperationSelection(){
+    public function testOperationSelection() {
         unset($_SERVER['REQUEST_METHOD']);
 
         ob_start();

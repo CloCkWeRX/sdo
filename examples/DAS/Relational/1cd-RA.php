@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -25,7 +25,7 @@ require_once 'SDO/DAS/Relational.php';
 require_once 'company_metadata.inc.php';
 
 /**
- * Scenario - Create one company and one department 
+ * Scenario - Create one company and one department
  *
  */
 
@@ -56,7 +56,7 @@ try {
 	echo "\n".$e->getMessage();
 	exit();
 }
-foreach($root['company'] as $acme) {
+foreach ($root['company'] as $acme) {
 	echo "Looked for Acme and found company with name = " . $acme->name . " and id " . $acme->id . "\n";
 }
 $shoe = $acme['department'][0];

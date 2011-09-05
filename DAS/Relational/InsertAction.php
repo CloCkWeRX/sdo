@@ -24,11 +24,11 @@ $Id: InsertAction.php 220738 2006-09-28 19:25:00Z cem $
 /**
 * Represent an insert of a row to the database
 *
-* Holds the name of the table into which we will insert, and an array of name=>value pairs to represent the 
+* Holds the name of the table into which we will insert, and an array of name=>value pairs to represent the
 * columns that we want to set: the name is the name of the column and the value is that to which it must be set.
 * When it comes to creating the SQL statement to insert the data, most values just need to be enclosed in double quotes.
 * This works for strings, integers and floats.
-* If the value is the PHP null value, an SQL NULL will be inserted. 
+* If the value is the PHP null value, an SQL NULL will be inserted.
 * If the value is a PHP boolean true or false, it will be converted to "1" or "0".
 */
 
@@ -64,10 +64,10 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
         }
     }
 
-    public function computeSettingsForInsert() 
+    public function computeSettingsForInsert()
     {
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
-        foreach($this->do as $prop => $value) {
+        foreach ($this->do as $prop => $value) {
             if ($this->object_model->isContainmentReferenceProperty($type, $prop)) {
                 // We ignore containment references - updates to them will appear as creates or deletes elsewhere in the C/S
                 continue;
@@ -77,10 +77,10 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
     }
 
     //TODO have three copies of this method in each of I/U/D. Not happy
-    public function convertNonContainmentReferencesFromObjectToPK() 
+    public function convertNonContainmentReferencesFromObjectToPK()
     {
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($this->do);
-        foreach($this->settings_for_insert as $prop => $value) {
+        foreach ($this->settings_for_insert as $prop => $value) {
             if ($value === null) continue;
             if ($this->object_model->isNonContainmentReferenceProperty($type, $prop)) {
                 $pk = SDO_DAS_Relational_DataObjectHelper::getPrimaryKeyFromDataObject($this->object_model, $value);
@@ -107,9 +107,9 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
         return $this->spawned_actions;
     }
 
-    public function buildValueList() 
+    public function buildValueList()
     {
-        foreach($this->settings_for_insert as $name => $value) {
+        foreach ($this->settings_for_insert as $name => $value) {
             $this->value_list[] = $value;
         }
     }
@@ -131,7 +131,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
     {
         $spawned_actions = null;
         $type = SDO_DAS_Relational_DataObjectHelper::getApplicationType($do);
-        foreach($do as $prop => $value) {
+        foreach ($do as $prop => $value) {
             if ($this->object_model->isNonContainmentReferenceProperty($type, $prop)) {
                 if (isset($do[$prop])) {
                     // TODO handle null
@@ -147,7 +147,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
 
     public function toSQL()
     {
-        foreach($this->settings_for_insert as $name => $value) {
+        foreach ($this->settings_for_insert as $name => $value) {
             $name_list[] = $name;
             $placeholder_list[] = "?";
         }
@@ -170,7 +170,7 @@ class SDO_DAS_Relational_InsertAction extends SDO_DAS_Relational_Action {
             $pdo_client_version = $dbh->getAttribute(SDO_DAS_Relational_PDO_ATTR_CLIENT_VERSION);
             if (substr($pdo_client_version, 0, 4) == 'ODBC') {
                 // looks like DB2
-                foreach($dbh->query('values identity_val_local()') as $row) {
+                foreach ($dbh->query('values identity_val_local()') as $row) {
                     $last_insert_id = $row[1];
                 }
             } else {

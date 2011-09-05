@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -60,9 +60,9 @@ try {
  * List what we found
  ***************************************************************/
 echo "Names in the database look as follows:\n";
-foreach($root['company'] as $company) {
+foreach ($root['company'] as $company) {
 	echo $company->name . "\n";
-	foreach($company['department'] as $department) {
+	foreach ($company['department'] as $department) {
 		echo "  " . $department->name . "\n";
 		foreach ($department['employee'] as $employee) {
 			echo "    " . $employee->name . "\n";

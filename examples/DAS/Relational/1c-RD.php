@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
@@ -28,7 +28,7 @@ require_once 'company_metadata.inc.php';
 /*************************************************************************************
 * Use SDO to retrieve then delete row of the company table.
 *
-* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database 
+* See companydb_mysql.sql and companydb_db2.sql for examples of defining the database
 *************************************************************************************/
 
 /*************************************************************************************
@@ -57,7 +57,7 @@ try {
 	echo "\n".$e->getMessage();
 	exit();
 }
-foreach($root['company'] as $acme) {
+foreach ($root['company'] as $acme) {
 	echo "Looked for Acme and found company with name = " . $acme->name . " and id " . $acme->id . "\n";
 }
 
