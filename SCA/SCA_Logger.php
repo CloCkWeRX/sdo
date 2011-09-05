@@ -71,7 +71,7 @@ define('SCA_LOGGER_NONE', 0x00); // no types (stop logging)
  *
  * Public Methods:
  * ---------------
- * singleSCA_Logger()
+ * singleSCALogger()
  * Return a singleton SCA_Logger.
  *
  * SCA_Logger()
@@ -180,7 +180,7 @@ class SCA_Logger implements iLogInterface
      *
      * @return object           handle to the logger.
      */
-    public static function &singleSCA_Logger()
+    public static function &singleSCALogger()
     {
         /* Make only one logger                                           */
 
