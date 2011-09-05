@@ -1,77 +1,37 @@
 <?php
 /**
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller.                                                       |
-|                                                                             |
-+-----------------------------------------------------------------------------+
-$Id: SCA.php 254122 2008-03-03 17:56:38Z mfp $
-*/
-
-/**
-* Purpose:
-* To ensure that SCA components are initialised and processed, and requests
-* to them are correctly handled.
-*
-* Public Methods:
-*
-* initComponent()
-* This method is used to determine which of the three reasons why the SCA
-* component calling us has been invoked. These reasons are:
-* 1) a POST request with a SOAP request was made to the component
-* 2) a GET request for WSDL was made to the component
-* 3) the component was simply included as a component to be called locally.
-* If the request is one of 1) or 2) the requests are processed. If the
-* component was included in another SCA Component no additional processing is
-* required.
-*
-* getService()
-* createInstanceAndFillInReferences()
-* constructServiceDescription()
-* generateWSDL()
-* createDataObject()
-*
-* Private Methods:
-*
-* _isSoapRequest()
-* This method is used to determine whether a SOAP POST request was made to
-* the component. Additionally, this method detects whether the request is
-* one that has been passed on to another component.
-*
-* _wsdlRequested()
-* This is used to determine whether WSDL for the component was requested.
-*
-* _handleRequestForWSDL()
-* This method is used to handle the case where WSDL for the component was
-* requested. It echos the WSDL, and caches it locally to a file, so ?wsdl is also
-* the way to refresh the cached copy
-*
-* _handleSoapRequest()
-* This method is used to handle the SOAP request.
-*
-*
-* convertedSoapFault()
-* This method is used to convert a SOAP Fault into the appropriate
-* SCA Exception.
-*
-*/
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller.                                                       |
+ * |                                                                             |
+ * +-----------------------------------------------------------------------------+
+ * $Id: SCA.php 254122 2008-03-03 17:56:38Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA_SDO
+ * @package  SCA_SDO
+ * @author   Graham Charters <gcc@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once "SCA/SCA_Exceptions.php";
 require_once "SCA/SCA_AnnotationReader.php";
@@ -85,7 +45,60 @@ require_once "SCA/SCA_HttpHeaderCatcher.php";
 */
 require_once "SCA/Bindings/tuscany/SCA_TuscanyProxy.php";
 
-/* Service Component Architecture class                                       */
+/**
+ * Service Component Architecture class
+ *
+ * Purpose:
+ * To ensure that SCA components are initialised and processed, and requests
+ * to them are correctly handled.
+ *
+ * Public Methods:
+ *
+ * initComponent()
+ * This method is used to determine which of the three reasons why the SCA
+ * component calling us has been invoked. These reasons are:
+ * 1) a POST request with a SOAP request was made to the component
+ * 2) a GET request for WSDL was made to the component
+ * 3) the component was simply included as a component to be called locally.
+ * If the request is one of 1) or 2) the requests are processed. If the
+ * component was included in another SCA Component no additional processing is
+ * required.
+ *
+ * getService()
+ * createInstanceAndFillInReferences()
+ * constructServiceDescription()
+ * generateWSDL()
+ * createDataObject()
+ *
+ * Private Methods:
+ *
+ * _isSoapRequest()
+ * This method is used to determine whether a SOAP POST request was made to
+ * the component. Additionally, this method detects whether the request is
+ * one that has been passed on to another component.
+ *
+ * _wsdlRequested()
+ * This is used to determine whether WSDL for the component was requested.
+ *
+ * _handleRequestForWSDL()
+ * This method is used to handle the case where WSDL for the component was
+ * requested. It echos the WSDL, and caches it locally to a file, so ?wsdl is also
+ * the way to refresh the cached copy
+ *
+ * _handleSoapRequest()
+ * This method is used to handle the SOAP request.
+ *
+ *
+ * convertedSoapFault()
+ * This method is used to convert a SOAP Fault into the appropriate
+ * SCA Exception.
+ *
+ * @category SCA_SDO
+ * @package  SCA_SDO
+ * @author   Graham Charters <gcc@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 class SCA
 {
     const DEBUG = false;
@@ -93,6 +106,14 @@ class SCA
     public static $xml_das_array  = array();
 
     public static $http_header_catcher = null;
+
+    /**
+     * Send HTTP header
+     *
+     * @param string $header HTTP Header to send
+     *
+     * @return null
+     */
     public static function sendHttpHeader($header)
     {
         if (self::$http_header_catcher === null) {
@@ -103,6 +124,13 @@ class SCA
         }
     }
 
+    /**
+     * Set HTTP Header Catcher
+     *
+     * @param mixed $catcher Catcher
+     *
+     * @return null
+     */
     public static function setHttpHeaderCatcher($catcher)
     {
         self::$http_header_catcher = $catcher;
@@ -111,12 +139,27 @@ class SCA
     // When set true this flag indicates that SCA is being used
     // as an embedded component of the Tuscany C++ SCA runtime
     // and it affects how references are created on services
-    private static $is_embedded = false;
+    protected static $is_embedded = false;
 
+    /**
+     * Set is Embedded
+     *
+     * @param mixed $is_embedded Is embedded?
+     *
+     * @return null
+     */
     public static function setIsEmbedded($is_embedded)
     {
         self::$is_embedded = $is_embedded;
     }
+
+    /**
+     * Initialize component
+     *
+     * @param mixed $calling_component_filename Filename
+     *
+     * @return null
+     */
     public static function initComponent($calling_component_filename)
     {
 
@@ -183,7 +226,7 @@ class SCA
         }
 
         $service_description = self::constructServiceDescription($calling_component_filename);
-        if ( isset($_SERVER['HTTP_HOST'] ) ) {
+        if (isset($_SERVER['HTTP_HOST'] )) {
             $http_host = $_SERVER['HTTP_HOST'];
         } else {
             $http_host = "localhost";
@@ -211,14 +254,22 @@ class SCA
             }
         }
 
-       /* There are other reasons you can get to here - a component loaded
-        * locally, for example, or loaded as a result of a SOAP request
-        * but some other component is the real destination.
-        * None of them are errors though, so nothing needs to be done.
+        /*
+        There are other reasons you can get to here - a component loaded
+        locally, for example, or loaded as a result of a SOAP request
+        but some other component is the real destination.
+        None of them are errors though, so nothing needs to be done.
         */
         self::$logger->log('Request was not ATOM, JSON, SOAP, or a request for a .smd or .wsdl file.');
     }
 
+    /**
+     * Included by a client script?
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return bool
+     */
     private static function _includedByAClientScriptThatIsNotAComponent($calling_component_filename)
     {
         $class_name = SCA_Helper::guessClassName($calling_component_filename);
@@ -240,9 +291,10 @@ class SCA
      * This is where decisions about what type of service is to be made,
      * are made.
      *
-     * @param string $target the file name - could be a php file, wsdl, json smd etc
-     * @param string $type what sort of binding if ambiguous - could be local, soap, jsonrpc, atom, xmlrpc, ...
-     * @param array $binding_config array of parameters found in the annotations - ebaysoap for example needs
+     * @param string $target         the file name - could be a php file, wsdl, json smd etc
+     * @param string $type           what sort of binding if ambiguous - could be local, soap, jsonrpc, atom, xmlrpc, ...
+     * @param array  $binding_config array of parameters found in the annotations - ebaysoap for example needs
+     *
      * @return proxy
      * @throws SCA_RuntimeException if the target is null or empty string
      */
@@ -269,7 +321,7 @@ class SCA
         // there isn't really a sound reason for doing this but the following
         // path manipulation code crashes with php running in embedded mode.
         // needs further investigation
-        if (self::$is_embedded ) {
+        if (self::$is_embedded) {
             return new SCA_TuscanyProxy($target);
         }
 
@@ -307,10 +359,12 @@ class SCA
 
         SCA::$logger->log("About to create a $type proxy for target $target. Base path for relative paths is $base_path_for_relative_paths");
 
-        $proxy = SCA_Binding_Factory::createProxy($type,
-        $target,
-        $base_path_for_relative_paths,
-        $binding_config);
+        $proxy = SCA_Binding_Factory::createProxy(
+            $type,
+            $target,
+            $base_path_for_relative_paths,
+            $binding_config
+        );
 
         self::$logger->log("Exiting");
         return $proxy;
@@ -332,6 +386,7 @@ class SCA
      * if those dependencies also have dependencies
      *
      * @param string $class_name name of the class
+     *
      * @return class instance
      */
     public static function createInstanceAndFillInReferences($class_name)
@@ -351,8 +406,10 @@ class SCA
                 $reference_proxy = new SCA_TuscanyProxy($ref_value);
             } else {
                 if (SCA_Helper::isARelativePath($ref_value)) {
-                    $ref_value = SCA_Helper::constructAbsolutePath($ref_value,
-                    $class_name);
+                    $ref_value = SCA_Helper::constructAbsolutePath(
+                        $ref_value,
+                        $class_name
+                    );
                 }
                 $reference_proxy = SCA::getService($ref_value);
             }
@@ -375,7 +432,9 @@ class SCA
 
     /**
      * Instantiate the component
+     *
      * @param string $class_name class to instantiate
+     *
      * @return object instance of the class
      */
     public static function createInstance($class_name)
@@ -393,6 +452,7 @@ class SCA
      * if those dependencies also have dependencies
      *
      * @param object $instance instance of a class which may or may not contain references to other components
+     *
      * @return object instance
      */
     public static function fillInReferences($instance)
@@ -416,10 +476,12 @@ class SCA
 
             $ref_value       = $ref_type->getBinding();
             $prop            = $reflection->getProperty($ref_name);
-            $reference_proxy = SCA_Binding_Factory::createProxy($ref_type->getBindingType(),
-            $ref_value,
-            $path_to_resolve_relative_paths_against,
-            $ref_type->getBindingConfig()); // NB recursion here
+            $reference_proxy = SCA_Binding_Factory::createProxy(
+                $ref_type->getBindingType(),
+                $ref_value,
+                $path_to_resolve_relative_paths_against,
+                $ref_type->getBindingConfig()
+            ); // NB recursion here
 
 
             // add the reference information to the proxy
@@ -439,7 +501,8 @@ class SCA
      * Create an array containing the service descriptions from the annotations
      * found in the class file.
      *
-     * @param string $class_file Class file containing the service annotations )
+     * @param string $class_file Class file containing the service annotations
+     *
      * @return object The service description object
      * @throws SCA_RuntimeException ... when things go wrong
      */
@@ -477,6 +540,7 @@ class SCA
      *
      * @param string $namespace_uri Namespace identifying the xsd
      * @param string $type_name     Element being reference in the xsd
+     *
      * @return object                Empty Data Object structure
      */
     public static function createDataObject($namespace_uri, $type_name )
@@ -489,7 +553,7 @@ class SCA
         $keyname   = md5(serialize($filepath));
 
         // Check if there is a matching xsd in the xmldas array
-        if ( array_key_exists($keyname, self::$xml_das_array) ) {
+        if (array_key_exists($keyname, self::$xml_das_array)) {
             $xmldas = self::$xml_das_array[$keyname];
         } else {
             // The trap will only trigger if the Annotations cannot be found
@@ -500,11 +564,13 @@ class SCA
                 $class_name = SCA_Helper::guessClassName($filepath);
                 $xmldas     = SCA_Helper::getXmldas($class_name, null);
                 self::$xml_das_array[$keyname] = $xmldas;
-            } catch( ReflectionException $e ) {
+            } catch( ReflectionException $e) {
                 $msg =  $e->getMessage();
-                throw new SCA_RuntimeException( "A PHP ReflectionException was thrown with message $msg. "
-                . "This is usually the result of calling SCA::createDataObject from a user script. "
-                . "User scripts should only call createDataObject on an SCA Proxy object.");
+                throw new SCA_RuntimeException(
+                    "A PHP ReflectionException was thrown with message $msg. "
+                    . "This is usually the result of calling SCA::createDataObject from a user script. "
+                    . "User scripts should only call createDataObject on an SCA Proxy object."
+                );
             }
         }
 
@@ -521,6 +587,7 @@ class SCA
      * outside of the htdocs directory
      *
      * @param string $class_name The class_name that implements the target service
+     *
      * @return void
      */
     public static function dispatch($class_name)
