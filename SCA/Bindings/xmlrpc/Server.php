@@ -1,34 +1,53 @@
 <?php
-/*
-+----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                  |
-| All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
-| http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Rajini Sivaram, Simon Laws                                   |
-+----------------------------------------------------------------------+
-$Id: Server.php 234945 2007-05-04 15:05:53Z mfp $
-*/
+/**
+ * +----------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                  |
+ * | All Rights Reserved.                                                 |
+ * +----------------------------------------------------------------------+
+ * |                                                                      |
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you  |
+ * | may not use this file except in compliance with the License. You may |
+ * | obtain a copy of the License at                                      |
+ * | http://www.apache.org/licenses/LICENSE-2.0                           |
+ * |                                                                      |
+ * | Unless required by applicable law or agreed to in writing, software  |
+ * | distributed under the License is distributed on an "AS IS" BASIS,    |
+ * | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+ * | implied. See the License for the specific language governing         |
+ * | permissions and limitations under the License.                       |
+ * +----------------------------------------------------------------------+
+ * | Author: Rajini Sivaram, Simon Laws                                   |
+ * +----------------------------------------------------------------------+
+ * $Id: Server.php 234945 2007-05-04 15:05:53Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
+/**
+ * XML RPC server
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Xmlrpc_Server
+{
 
-class SCA_Bindings_Xmlrpc_Server {
-
-    private $service_wrapper = null;
+    protected $service_wrapper = null;
 
     /**
      * Constructor - create a XML RPC server to call the
      *               provided service wrapper
+     *
+     * @param string $wrapper Wrapper
      */
     public function __construct($wrapper)
     {
@@ -39,6 +58,8 @@ class SCA_Bindings_Xmlrpc_Server {
 
     /**
      * handle incoming XML RPC requests
+     *
+     * @return null
      */
     public function handle()
     {
@@ -48,9 +69,9 @@ class SCA_Bindings_Xmlrpc_Server {
             $rawHTTPContents = file_get_contents("php://input");
 
             // some debugging
-//                file_put_contents("xmlrpc_messages.txt",
-//                              "Request at XML-RPC server = " . $rawHTTPContents ."\n",
-//                              FILE_APPEND);
+            //                file_put_contents("xmlrpc_messages.txt",
+            //                              "Request at XML-RPC server = " . $rawHTTPContents ."\n",
+            //                              FILE_APPEND);
 
             // decode xmlrpc request
             $params = xmlrpc_decode_request($rawHTTPContents, $method);
@@ -69,9 +90,9 @@ class SCA_Bindings_Xmlrpc_Server {
                 $response = $this->service_wrapper->callSystemMethod($rawHTTPContents);
 
                 // some debugging
-//                    file_put_contents("xmlrpc_messages.txt",
-//                                  "Response at XML-RPC server = " . $response . "\n",
-//                                  FILE_APPEND);
+                //                    file_put_contents("xmlrpc_messages.txt",
+                //                                  "Response at XML-RPC server = " . $response . "\n",
+                //                                  FILE_APPEND);
 
 
             } else {
@@ -79,7 +100,7 @@ class SCA_Bindings_Xmlrpc_Server {
 
                 $response = $this->service_wrapper->__call($method, $params);
             }
-        } catch ( Exception $ex ) {
+        } catch (Exception $ex) {
 
             $error["faultCode"] = $ex instanceof SCA_RuntimeException ? 32000 : 32500;
             $error["faultString"] = $ex->__toString();
@@ -88,9 +109,9 @@ class SCA_Bindings_Xmlrpc_Server {
 
 
         // some debugging
-//            file_put_contents("xmlrpc_messages.txt",
-//                              "Response at XML-RPC server = " . $response . "\n",
-//                              FILE_APPEND);
+        //            file_put_contents("xmlrpc_messages.txt",
+        //                              "Response at XML-RPC server = " . $response . "\n",
+        //                              FILE_APPEND);
 
         header('Content-type: text/xml');
         echo $response;
@@ -98,9 +119,4 @@ class SCA_Bindings_Xmlrpc_Server {
         return;
     }
 
-
-
-    public function __destruct()
-    {
-    }
 }

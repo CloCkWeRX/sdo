@@ -1,41 +1,66 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws,                                                         |
-|         Rajini Sivaram                                                      |
-+-----------------------------------------------------------------------------+
-$Id: ServiceRequestHandler.php 234945 2007-05-04 15:05:53Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws,                                                         |
+ * |         Rajini Sivaram                                                      |
+ * +-----------------------------------------------------------------------------+
+ * $Id: ServiceRequestHandler.php 234945 2007-05-04 15:05:53Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once "SCA/Bindings/xmlrpc/Wrapper.php";
 require_once "SCA/Bindings/xmlrpc/Server.php";
 
+/**
+ * XMLRPC ServiceRequestHandler
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 class SCA_Bindings_Xmlrpc_ServiceRequestHandler
 {
+    /**
+     * Handle
+     *
+     * @param string $calling_component_filename Filename
+     * @param string $service_description        Service description
+     *
+     * @return mixed
+     */
     public function handle($calling_component_filename, $service_description)
     {
         SCA::$logger->log("Entering");
-        SCA::$logger->log( "_handleXmlRpcRequest - $calling_component_filename\n");
+        SCA::$logger->log("_handleXmlRpcRequest - $calling_component_filename\n");
 
         try {
 
@@ -54,7 +79,7 @@ class SCA_Bindings_Xmlrpc_ServiceRequestHandler
             // handle the current request
             $xmlrpc_server->handle();
 
-        } catch ( Exception $ex ) {
+        } catch (Exception $ex) {
             // A catch all exception just in case something drastic goes wrong
             // This can often be the case in constructors of the XML infrastructure
             // classes where XMLRPC info can be read over remote connections. We
@@ -65,14 +90,15 @@ class SCA_Bindings_Xmlrpc_ServiceRequestHandler
             $response = $response . "\",\"version\":\"1.0\"}";
 
             // some debugging
-//                file_put_contents("xmlrpc_messages.txt",
-//                "Response at XMLRPC server = " . $response . "\n",
-//                FILE_APPEND);
+            //file_put_contents("xmlrpc_messages.txt",
+            //"Response at XMLRPC server = " . $response . "\n",
+            //FILE_APPEND);
 
             header('Content-type: text/xml');
 
             echo $response;
         }
+
         return;
     }
 }

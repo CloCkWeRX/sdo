@@ -1,50 +1,62 @@
 <?php
-/*
-+----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                  |
-| All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
-| http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Rajini Sivaram, Simon Laws                                   |
-+----------------------------------------------------------------------+
-$Id: Das.php 234945 2007-05-04 15:05:53Z mfp $
-*/
+/**
+ * +----------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                  |
+ * | All Rights Reserved.                                                 |
+ * +----------------------------------------------------------------------+
+ * |                                                                      |
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you  |
+ * | may not use this file except in compliance with the License. You may |
+ * | obtain a copy of the License at                                      |
+ * | http://www.apache.org/licenses/LICENSE-2.0                           |
+ * |                                                                      |
+ * | Unless required by applicable law or agreed to in writing, software  |
+ * | distributed under the License is distributed on an "AS IS" BASIS,    |
+ * | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+ * | implied. See the License for the specific language governing         |
+ * | permissions and limitations under the License.                       |
+ * +----------------------------------------------------------------------+
+ * | Author: Rajini Sivaram, Simon Laws                                   |
+ * +----------------------------------------------------------------------+
+ * $Id: Das.php 234945 2007-05-04 15:05:53Z mfp $
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 
 /**
-* SDO XmlRpc Data Access Service.
-*
-* This is a very simple implementation of a DAS that allows
-* SDOs to be converted to and from XML-RPC. All of the hard work is done
-* by the XML-RPC extension
-*
-*/
-
-class SCA_Bindings_Xmlrpc_DAS {
+ * SDO XmlRpc Data Access Service.
+ *
+ * This is a very simple implementation of a DAS that allows
+ * SDOs to be converted to and from XML-RPC. All of the hard work is done
+ * by the XML-RPC extension
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Xmlrpc_DAS
+{
 
     //--------------------------------------------------------------------
     // Member variables
     //--------------------------------------------------------------------
 
     // Some constants uses in the decoding processing
-    private $sdo_namespace     = "commonj.sdo";
-    private $default_namespace = "";
+    protected $sdo_namespace     = "commonj.sdo";
+    protected $default_namespace = "";
 
     // The SDO models used to generate the SDO when
     // an xmlrpc typelist is decoded.
-    private $data_factory      = null;
-    private $xml_das           = null;
+    protected $data_factory      = null;
+    protected $xml_das           = null;
 
 
     //--------------------------------------------------------------------
@@ -60,19 +72,32 @@ class SCA_Bindings_Xmlrpc_DAS {
     public function __construct()
     {
         $this->data_factory = SDO_DAS_DataFactory::getDataFactory();
-        $this->data_factory->addType($this->default_namespace,
-                                     'GenericType',
-                                     array('open'=>true));
+
+        $this->data_factory->addType(
+            $this->default_namespace,
+            'GenericType',
+            array('open' => true)
+        );
     }
 
     //--------------------------------------------------------------------
     // Accessors
     //--------------------------------------------------------------------
+    /**
+     * Get Data Factory
+     *
+     * @return object
+     */
     public function getDataFactory()
     {
         return $this->data_factory;
     }
 
+    /**
+     * Get XML DAS
+     *
+     * @return object
+     */
     public function getXmlDas()
     {
         return $this->xml_das;
@@ -88,110 +113,120 @@ class SCA_Bindings_Xmlrpc_DAS {
      * These types are used by the XMLRPC proxy if it does not have access to
      * the corresponding XSDs
      *
-     * @param string $types_list      XMLRPC Typelist
-     * @param array  $namespace_map   takes the form "typename" => "namespace"
+     * @param string $types_list    XMLRPC Typelist
+     * @param array  $namespace_map takes the form "typename" => "namespace"
+     *
+     * @return null
      */
     public function addTypesXmlRpc($types_list, $namespace_map = null)
     {
 
         // check if any types have been returned by XMLRPC system.describeMethods
         // simple types map directly to the SDO basic types
-        if ($types_list != null) {
+        if ($types_list == null) {
+            return;
+        }
 
-            // iterate over the types adding types to the
-            // SDO model
-            foreach ($types_list as $type ) {
-                $type_name = $type["name"];
-                $namespace = $this->default_namespace;
+        // iterate over the types adding types to the
+        // SDO model
+        foreach ($types_list as $type) {
+            $type_name = $type["name"];
+            $namespace = $this->default_namespace;
 
-                if (strpos($type_name, "system.") === 0)
-                    continue;
+            if (strpos($type_name, "system.") === 0)
+                continue;
 
-                // look type up in namespace map
-                if ($namespace_map != null &&
-                     array_key_exists($type_name, $namespace_map) ) {
-                    $namespace = $namespace_map[$type_name];
-                }
-
-
-                // create the type
-                $this->data_factory->addType($namespace,
-                                             $type_name,
-                                             array('open'=>true));
-
-                SCA::$logger->log("addType $namespace, $type_name");
+            // look type up in namespace map
+            if ($namespace_map != null
+                && array_key_exists($type_name, $namespace_map)
+            ) {
+                $namespace = $namespace_map[$type_name];
             }
 
-            // iterate over the types adding properties to the types
-            // that have already been created. This is a two pass
-            // process because the property type must exist before
-            // we create the property of that type
-            foreach ($types_list as $type ) {
-                $type_name = $type["name"];
-                $namespace = $this->default_namespace;
 
-                // Ignore system types since they dont appear in regular method params/return.
-                if (strpos($type_name, "system.") === 0)
-                    continue;
+            // create the type
+            $this->data_factory->addType(
+                $namespace,
+                $type_name,
+                array('open'=>true)
+            );
 
-                // look type up in namespace map
-                if ($namespace_map != null &&
-                     array_key_exists($type_name, $namespace_map) ) {
-                    $namespace = $namespace_map[$type["name"]];
+            SCA::$logger->log("addType $namespace, $type_name");
+        }
+
+        // iterate over the types adding properties to the types
+        // that have already been created. This is a two pass
+        // process because the property type must exist before
+        // we create the property of that type
+        foreach ($types_list as $type) {
+            $type_name = $type["name"];
+            $namespace = $this->default_namespace;
+
+            // Ignore system types since they dont appear in regular method params/return.
+            if (strpos($type_name, "system.") === 0)
+                continue;
+
+            // look type up in namespace map
+            if ($namespace_map != null
+                && array_key_exists($type_name, $namespace_map)
+            ) {
+                $namespace = $namespace_map[$type["name"]];
+            }
+
+            // create the properties of the type
+            foreach ($type["member"] as $property) {
+                $property_name      = $property["name"];
+                $property_type      = $property["type"];
+                $property_namespace = $this->default_namespace;
+                $is_array           = false;
+
+                // work out whether the property is many
+                // valued
+                $array_pos          = strpos($property_type, "[]");
+
+                if ($array_pos !== false) {
+                    // it is an array so strip out the array
+                    // markers
+                    $property_type = substr($property_type, 0, $array_pos);
+                    $is_array      = true;
                 }
 
-                // create the properties of the type
-                foreach ($type["member"] as $property ) {
-                    $property_name      = $property["name"];
-                    $property_type      = $property["type"];
-                    $property_namespace = $this->default_namespace;
-                    $is_array           = false;
+                // strip and whitespace from begining and end of property type
+                $property_type = trim($property_type);
 
-                    // work out whether the property is many
-                    // valued
-                    $array_pos          = strpos($property_type, "[]");
+                // if this is a primitive type then we need to
+                // convert to the SDO primitive types
+                $converted_property_type = $this->xmlrpcTypeToSdoType($property_type);
 
-                    if ($array_pos !== false ) {
-                        // it is an array so strip out the array
-                        // markers
-                        $property_type = substr($property_type, 0, $array_pos);
-                        $is_array      = true;
+
+                // fix up the namespace
+                if (!$this->isPrimitiveType($property_type)) {
+                    // Map the namespace to see
+                    // if the user has told us what namespace this
+                    // typename should have
+                    if ($namespace_map != null
+                        && array_key_exists($property_type, $namespace_map)
+                    ) {
+                        $property_namespace = $namespace_map[$property_type];
                     }
-
-                    // strip and whitespace from begining and end of property type
-                    $property_type = trim($property_type);
-
-                    // if this is a primitive type then we need to
-                    // convert to the SDO primitive types
-                    $converted_property_type = $this->xmlrpcTypeToSdoType($property_type);
-
-
-                    // fix up the namespace
-                    if ( !$this->isPrimitiveType($property_type)) {
-                        // Map the namespace to see
-                        // if the user has told us what namespace this
-                        // typename should have
-                        if ($namespace_map != null &&
-                             array_key_exists($property_type, $namespace_map) ) {
-                            $property_namespace = $namespace_map[$property_type];
-                        }
-                    } else {
-                        // its a primitive type so use the SDO namespace
-                        $property_namespace = $this->sdo_namespace;
-                    }
-
-
-
-                    $this->data_factory->addPropertyToType($namespace,
-                                                           $type_name,
-                                                           $property_name,
-                                                           $property_namespace,
-                                                           $converted_property_type,
-                                                           array('containment'=>true,
-                                                                 'many'       =>$is_array));
-
-
+                } else {
+                    // its a primitive type so use the SDO namespace
+                    $property_namespace = $this->sdo_namespace;
                 }
+
+
+
+                $this->data_factory->addPropertyToType(
+                    $namespace,
+                    $type_name,
+                    $property_name,
+                    $property_namespace,
+                    $converted_property_type,
+                    array('containment'=>true,
+                          'many'       =>$is_array)
+                );
+
+
             }
         }
     }
@@ -200,17 +235,18 @@ class SCA_Bindings_Xmlrpc_DAS {
      * Add types from the supplied XSD file to the XMLDAS owned by this DAS.
      * Create an XMLDAS if one does not already exist.
      *
-     * @param string $xsd_file
+     * @param string $xsd_file XSD File
      *
+     * @return null
      */
     public function addTypesXsdFile($xsd_file)
     {
 
-        if ($this->xml_das == null ) {
+        if ($this->xml_das == null) {
             $this->xml_das = SDO_DAS_XML::create();
         }
 
-        if ($xsd_file != null ) {
+        if ($xsd_file != null) {
             $this->xml_das->addTypes($xsd_file);
         }
     }
@@ -219,11 +255,11 @@ class SCA_Bindings_Xmlrpc_DAS {
     /**
      * Convert XMLRPC type to SDO type
      *
-     * @param string $xmlrpc_type_name
-     * @return string  SDO type name
+     * @param string $xmlrpc_type_name Name
      *
+     * @return string  SDO type name
      */
-    private function xmlrpcTypeToSdoType($xmlrpc_type_name)
+    protected function xmlrpcTypeToSdoType($xmlrpc_type_name)
     {
         $sdo_type_name = $xmlrpc_type_name;
 
@@ -250,11 +286,11 @@ class SCA_Bindings_Xmlrpc_DAS {
     /**
      * Check if specified XMLRPC type corresponds to a PHP primitive type.
      *
-     * @param string $xmlrpc_type_name
-     * @return boolean True if primitive
+     * @param string $xmlrpc_type_name Name
      *
+     * @return boolean True if primitive
      */
-    private function isPrimitiveType($xmlrpc_type_name)
+    protected function isPrimitiveType($xmlrpc_type_name)
     {
         return $xmlrpc_type_name == "boolean" ||
                $xmlrpc_type_name == "string" ||
@@ -277,6 +313,12 @@ class SCA_Bindings_Xmlrpc_DAS {
      * 2) If the type was obtained from server using system.describeMethods, create
      *    object with the specified type and generic namespace
      * 3) Otherwise create object using generic type
+     *
+     * @param object $obj            Object
+     * @param string $root_namespace Root namesapce
+     * @param string $root_type      Root type
+     *
+     * @return SDO
      */
     public function decodeFromPHPArray($obj, $root_namespace = null, $root_type = null)
     {
@@ -286,7 +328,7 @@ class SCA_Bindings_Xmlrpc_DAS {
         $sdo = null;
 
         // guess the namespace if one is not provided
-        if ($root_namespace == null ) {
+        if ($root_namespace == null) {
             $root_namespace = $this->default_namespace;
         }
 
@@ -308,6 +350,7 @@ class SCA_Bindings_Xmlrpc_DAS {
                      // not specified using @types, or the xsd file could not be loaded
                 }
             }
+
             if (!$done) {
 
                 try {
@@ -351,8 +394,13 @@ class SCA_Bindings_Xmlrpc_DAS {
      *
      * If this is a performance concern, it should be possible to decode the XML returned by XMLRPC
      * directly into and SDO.
+     *
+     * @param object $obj Object
+     *
+     * @return string
      */
-    private function gettype($obj) {
+    protected function gettype($obj)
+    {
         $type = gettype($obj);
         if ($type == "array") {
 
@@ -367,10 +415,15 @@ class SCA_Bindings_Xmlrpc_DAS {
 
     /**
      * A recursive function that copies PHP objects to an SDO data graph
+     *
+     * @param object $object Object
+     * @param mixed  $sdo    SDO
+     *
+     * @return null
      */
-    private function decodeObjectToSDOTyped($object, $sdo)
+    protected function decodeObjectToSDOTyped($object, $sdo)
     {
-        foreach ($object as $param_name => $param_value ) {
+        foreach ($object as $param_name => $param_value) {
             $this->decodeToSDOTyped($param_name, $param_value, $sdo);
         }
     }
@@ -378,21 +431,27 @@ class SCA_Bindings_Xmlrpc_DAS {
 
     /**
      * A recursive function that copies PHP arrays to an SDO data graph
+     *
+     * @param string $array_name Name
+     * @param array  $array      Target array
+     * @param object $sdo        ServiceDataObject
+     *
+     * @return null
      */
-    private function decodeArrayToSDOTyped($array_name, $array, $sdo)
+    protected function decodeArrayToSDOTyped($array_name, $array, $sdo)
     {
         $array_index = 0;
-        foreach ($array as $array_entry ) {
+        foreach ($array as $array_entry) {
             $array_entry_type = $this->gettype($array_entry);
 
             // SCA::$logger->log( "Typed - Array Name: " . $array_name .
             //                      " Array Index: " . $array_index .
             //                      " Type: ". $array_entry_type . "\n");
 
-            if ($array_entry_type == "object" ) {
+            if ($array_entry_type == "object") {
                 $new_sdo = $sdo->createDataObject($array_name);
                 $this->decodeObjectToSDOTyped($array_entry, $new_sdo);
-            } else if ($array_entry_type == "array" ) {
+            } else if ($array_entry_type == "array") {
                 $new_sdo = $sdo->createDataObject($array_name);
                 $this->decodeArrayToSDO($array_name, $array_entry, $new_sdo);
             } else {
@@ -406,17 +465,23 @@ class SCA_Bindings_Xmlrpc_DAS {
     /**
      * Makes the decision on how the PHP object should be copied
      * and recurse as necessary
+     *
+     * @param string $item_name Name
+     * @param string $item      Item
+     * @param SDO    $sdo       SDO
+     *
+     * @return null
      */
-    private function decodeToSDOTyped($item_name, $item, $sdo)
+    protected function decodeToSDOTyped($item_name, $item, $sdo)
     {
         $item_type = $this->gettype($item);
 
         // SCA::$logger->log( "Typed - Name: " . $item_name .  " Type: ". $item_type . "\n");
 
-        if ($item_type == "object" ) {
+        if ($item_type == "object") {
             $new_sdo = $sdo->createDataObject($item_name);
             $this->decodeObjectToSDOTyped($item, $new_sdo);
-        } else if ($item_type == "array" ) {
+        } else if ($item_type == "array") {
             //$new_sdo = $sdo->createDataObject($item_name);
             $this->decodeArrayToSDOTyped($item_name, $item, $sdo);
         } else {
@@ -442,21 +507,32 @@ class SCA_Bindings_Xmlrpc_DAS {
      *  Pass 2 - recurse through the PHP object again creating
      *           an SDO data graph based on the type model from Pass 1
      *           and the data from the PHP oject
+     *
+     * @param object $object Object
+     * @param SDO    $sdo    SDO
+     *
+     * @return null
      */
-    private function decodeObjectToSDO($object, $sdo)
+    protected function decodeObjectToSDO($object, $sdo)
     {
-        foreach ($object as $param_name => $param_value ) {
+        foreach ($object as $param_name => $param_value) {
             $this->decodeToSDO($param_name, $param_value, $sdo);
         }
     }
 
     /**
      * A recursive function that copies PHP arrays to an SDO data graph
+     *
+     * @param string $array_name Name
+     * @param array  $array      Target array
+     * @param object $sdo        ServiceDataObject
+     *
+     * @return null
      */
-    private function decodeArrayToSDO($array_name, $array, $sdo)
+    protected function decodeArrayToSDO($array_name, $array, $sdo)
     {
         $index = 0;
-        foreach ($array as $array_entry ) {
+        foreach ($array as $array_entry) {
             $array_index = $array_name . $index;
             $this->decodeToSDO($array_index, $array_entry, $sdo);
             $index = $index + 1;
@@ -466,16 +542,22 @@ class SCA_Bindings_Xmlrpc_DAS {
     /**
      * Makes the decision on how the PHP object should be copied
      * and recurse as necessary
+     *
+     * @param string $item_name Name
+     * @param string $item      Item
+     * @param SDO    $sdo       SDO
+     *
+     * @return null
      */
-    private function decodeToSDO($item_name, $item, $sdo)
+    protected function decodeToSDO($item_name, $item, $sdo)
     {
         $item_type = $this->gettype($item);
 
-        if ($item_type == "object" ) {
+        if ($item_type == "object") {
             $new_sdo = $this->data_factory->create($this->default_namespace, 'GenericType');
             $sdo[$item_name] = $new_sdo;
             $this->decodeObjectToSDO($item, $new_sdo);
-        } else if ($item_type == "array" ) {
+        } else if ($item_type == "array") {
             $new_sdo = $this->data_factory->create($this->default_namespace, 'GenericType');
             $sdo[$item_name] = $new_sdo;
             $this->decodeArrayToSDO($item_name, $item, $new_sdo);
@@ -491,10 +573,13 @@ class SCA_Bindings_Xmlrpc_DAS {
      *    from the XMLRPC server using system.describeMethods
      * 3) If 1) and 2) fail, create an object of generic type.
      *
-     * @param string $root_namespace
-     * @param string $root_type
+     * @param string $root_namespace Root namesapce
+     * @param string $root_type      Root type
+     *
+     * @return null
      */
-    public function createDataObject($root_namespace, $root_type) {
+    public function createDataObject($root_namespace, $root_type)
+    {
 
         $done = false;
 
@@ -532,11 +617,7 @@ class SCA_Bindings_Xmlrpc_DAS {
             $sdo = $this->data_factory->create($this->default_namespace, 'GenericType');
         }
 
-       return $sdo;
+        return $sdo;
     }
 
-
-    public function __destruct()
-    {
-    }
 }

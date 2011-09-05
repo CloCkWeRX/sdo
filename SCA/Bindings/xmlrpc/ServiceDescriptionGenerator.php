@@ -1,41 +1,64 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws,                                                         |
-|         Rajini Sivaram                                                      |
-+-----------------------------------------------------------------------------+
-$Id: ServiceDescriptionGenerator.php 234945 2007-05-04 15:05:53Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws,                                                         |
+ * |         Rajini Sivaram                                                      |
+ * +-----------------------------------------------------------------------------+
+ * $Id: ServiceDescriptionGenerator.php 234945 2007-05-04 15:05:53Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once "SCA/Bindings/xmlrpc/Das.php";
 
-
+/**
+ * SCA_Bindings_Xmlrpc_ServiceDescriptionGenerator
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 class SCA_Bindings_Xmlrpc_ServiceDescriptionGenerator
 {
 
+    /**
+     * Generate
+     *
+     * @param string $service_description Service Description
+     *
+     * @return null
+     */
     public function generate($service_description)
     {
-        SCA::$logger->log( "Entering");
+        SCA::$logger->log("Entering");
 
         try
         {
@@ -59,7 +82,7 @@ END;
             header('Content-type: text/xml');
             echo $desc;
 
-        } catch (Exception $se ) {
+        } catch (Exception $se) {
             echo $se->exceptionString() . "\n";
         }
 
@@ -68,12 +91,14 @@ END;
     /**
      * Generate type information to add introspection data.
      *
-     * @param string $namespace
-     * @param string $type_name
-     * @param array  $type_list (Reference parameter containing type list)
-     * @param object $xmlrpc_das
+     * @param string $namespace  Namespace
+     * @param string $type_name  Type name
+     * @param array  &$type_list (Reference parameter containing type list)
+     * @param object $xmlrpc_das XMLRPC DAS
+     *
+     * @return null
      */
-    private function generateType($namespace, $type_name, &$type_list, $xmlrpc_das)
+    protected function generateType($namespace, $type_name, &$type_list, $xmlrpc_das)
     {
 
         if ($type_name == null || strlen($type_name) == 0)
@@ -82,7 +107,7 @@ END;
         $composite_type_name = $namespace . ":" . $type_name;
 
         // ensure that types are only written out once
-        if ( !array_key_exists($composite_type_name, $type_list) ) {
+        if (!array_key_exists($composite_type_name, $type_list)) {
 
             $type                             = new stdClass;
             $type_list[$composite_type_name] = $type;
@@ -118,7 +143,7 @@ END;
                 $property_object->type   = $this->sdoTypeToXmlRpcType($property_type_name);
 
                 // work out if this is an array or not
-                if ($property->isMany() ) {
+                if ($property->isMany()) {
                     $property_object->type .= " []";
                 }
 
@@ -141,13 +166,15 @@ END;
      * All methods are registered with the server, and introspection data
      * is added to the server.
      *
-     * @param resource $xmlrpc_server
-     * @param array $service_description
-     * @param array $method_aliases
-     * @param object $xmlrpc_das
+     * @param resource $xmlrpc_server       XML RPC server
+     * @param array    $service_description Description
+     * @param array    &$method_aliases     Aliases
+     * @param object   $xmlrpc_das          Unknown
+     *
      * @return string  Method description
      */
-    public function addIntrospectionData($xmlrpc_server, $service_description, &$method_aliases, $xmlrpc_das=null) {
+    public function addIntrospectionData($xmlrpc_server, $service_description, &$method_aliases, $xmlrpc_das=null)
+    {
 
         if ($xmlrpc_das == null) {
             $xsds     = SCA_Helper::getAllXsds($service_description->class_name);
@@ -180,9 +207,11 @@ END;
             $methodParams = "";
             $methodReturn = "";
 
-            if (array_key_exists("name", $methodInfo) && array_key_exists("name", $methodInfo["name"]) &&
-                $methodInfo["name"]["name"] != null && strlen($methodInfo["name"]["name"]) > 0) {
-
+            if (array_key_exists("name", $methodInfo)
+                && array_key_exists("name", $methodInfo["name"])
+                && $methodInfo["name"]["name"] != null
+                && strlen($methodInfo["name"]["name"]) > 0
+            ) {
                 $xmlrpcMethodName = $methodInfo["name"]["name"];
                 $method_aliases[$xmlrpcMethodName] = $methodName;
             } else {
@@ -192,7 +221,9 @@ END;
 
             xmlrpc_server_register_method($xmlrpc_server, $xmlrpcMethodName, $methodName);
 
-            if (array_key_exists("parameters", $methodInfo) && $methodInfo["parameters"] != null) {
+            if (array_key_exists("parameters", $methodInfo)
+                && $methodInfo["parameters"] != null
+            ) {
                 foreach ($methodInfo["parameters"] as $param) {
 
                     $paramName = $param["name"];
@@ -200,8 +231,7 @@ END;
                     if (array_key_exists('objectType', $param)) {
                         $paramType = $param["objectType"];
                         $this->generateType($param["namespace"], $param["objectType"], $type_list, $xmlrpc_das);
-                    }
-                    else {
+                    } else {
                         $paramType = $this->sdoTypeToXmlRpcType($param["type"]);
                     }
 
@@ -210,8 +240,7 @@ END;
                         <value type='$paramType' desc='$paramName'>
                         </value>
 END;
-
-}
+                }
             }
 
             if (array_key_exists("return", $methodInfo) && $methodInfo["return"] != null) {
@@ -220,8 +249,7 @@ END;
                     if (array_key_exists('objectType', $ret)) {
                         $retType = $ret["objectType"];
                         $this->generateType($ret["namespace"], $ret["objectType"], $type_list, $xmlrpc_das);
-                    }
-                    else {
+                    } else {
                         $retType = $this->sdoTypeToXmlRpcType($ret["type"]);
                     }
 
@@ -230,7 +258,7 @@ END;
                         <value type='$retType' desc='return'>
                         </value>
 END;
-}
+                }
             }
 
             $methodDesc = $methodDesc.<<< END
@@ -253,42 +281,41 @@ END;
 </methodDescription>
 
 END;
-}
+        }
 
 
 
-$methodDesc = $methodDesc."</methodList>\n";
+        $methodDesc = $methodDesc."</methodList>\n";
 
-if (count($type_list) > 0) {
-$methodDesc = $methodDesc."<typeList>\n";
+        if (count($type_list) > 0) {
+            $methodDesc = $methodDesc."<typeList>\n";
 
 
-foreach ($type_list as $type) {
-    $methodDesc = $methodDesc.<<< END
+            foreach ($type_list as $type) {
+                $methodDesc = $methodDesc.<<< END
 
 <typeDescription name='$type->name' basetype='struct' desc='$type->name'>
 END;
-    foreach ($type->typedef->properties as $prop) {
-        $methodDesc = $methodDesc.<<< END
+                foreach ($type->typedef->properties as $prop) {
+                    $methodDesc = $methodDesc.<<< END
 
     <value type='$prop->type' name='$prop->name'></value>
 
 END;
-}
+                }
 
-$methodDesc = $methodDesc.<<< END
+                $methodDesc = $methodDesc.<<< END
 
 </typeDescription>
 END;
-
-}
-
+            }
 
 
-$methodDesc = $methodDesc."</typeList>\n";
-}
 
-$methodDesc = $methodDesc."</introspection>\n";
+            $methodDesc = $methodDesc."</typeList>\n";
+        }
+
+        $methodDesc = $methodDesc."</introspection>\n";
 
 
         $descArray = xmlrpc_parse_method_descriptions($methodDesc);
@@ -300,36 +327,38 @@ $methodDesc = $methodDesc."</introspection>\n";
     /**
      * Convert SDO type to XMLRPC type
      *
-     * @param string $sdoTypeToXmlRpcType
+     * @param string $sdo_type_name Name
+     *
      * @return string XMLRPC type
      */
-    private function sdoTypeToXmlRpcType($sdo_type_name) {
+    protected function sdoTypeToXmlRpcType($sdo_type_name)
+    {
 
         $xmlrpc_type_name = $sdo_type_name;
 
         switch ($sdo_type_name) {
-            case "Boolean":
-                $xmlrpc_type_name = "boolean";
-                break;
-            case "Byte":
-            case "Bytes":
-            case "Character":
-            case "Date":
-            case "String":
-            case "URI":
-                $xmlrpc_type_name = "string";
-                break;
-            case "BigDecimal":
-            case "BigInteger":
-            case "Double":
-            case "Float":
-            case "Long":
-                $xmlrpc_type_name = "double";
-                break;
-            case "Integer":
-            case "Short":
-                $xmlrpc_type_name = "int";
-                break;
+        case "Boolean":
+            $xmlrpc_type_name = "boolean";
+            break;
+        case "Byte":
+        case "Bytes":
+        case "Character":
+        case "Date":
+        case "String":
+        case "URI":
+            $xmlrpc_type_name = "string";
+            break;
+        case "BigDecimal":
+        case "BigInteger":
+        case "Double":
+        case "Float":
+        case "Long":
+            $xmlrpc_type_name = "double";
+            break;
+        case "Integer":
+        case "Short":
+            $xmlrpc_type_name = "int";
+            break;
         }
 
         return $xmlrpc_type_name;

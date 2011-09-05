@@ -1,83 +1,104 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Rajini Sivaram, Simon Laws                                          |
-+-----------------------------------------------------------------------------+
-$Id: Wrapper.php 234945 2007-05-04 15:05:53Z mfp $
-*/
-
 /**
- * This class is called when an incoming xml-rpc request is for an SCA component
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Rajini Sivaram, Simon Laws                                          |
+ * +-----------------------------------------------------------------------------+
+ * $Id: Wrapper.php 234945 2007-05-04 15:05:53Z mfp $
  *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
  */
 require_once "SCA/Bindings/xmlrpc/Das.php";
 require_once "SCA/Bindings/xmlrpc/ServiceDescriptionGenerator.php";
 
 
-class SCA_Bindings_Xmlrpc_Wrapper {
+/**
+ * This class is called when an incoming xml-rpc request is for an SCA component
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Xmlrpc_Wrapper
+{
 
-    private $class_name  = null;
-    private $instance_of_the_base_class  = null;
-    private $xmlrpc_das  = null;
-    private $annotations = null;
-    private $method_aliases = array();
-    private $xmlrpc_server;
+    protected $class_name  = null;
+    protected $instance_of_the_base_class  = null;
+    protected $xmlrpc_das  = null;
+    protected $annotations = null;
+    protected $method_aliases = array();
+    protected $xmlrpc_server;
 
     /**
      * Create the service wrapper for a SCA Component.
      *
-     * @param string $class_name
-     * @param string $wsdl_filename
+     * @param object $instance      Instance
+     * @param string $class_name    Class
+     * @param string $wsdl_filename WSDL
      */
-    public function __construct($instance, $class_name, $wsdl_filename )
+    public function __construct($instance, $class_name, $wsdl_filename)
     {
-            SCA::$logger->log("Wrapper $class_name");
+        SCA::$logger->log("Wrapper $class_name");
 
-            $this->class_name = $class_name;
-            $this->instance_of_the_base_class = $instance;
-            SCA::fillInReferences($this->instance_of_the_base_class);
-            $this->annotations= new SCA_AnnotationReader($this->instance_of_the_base_class);
+        $this->class_name = $class_name;
+        $this->instance_of_the_base_class = $instance;
+        SCA::fillInReferences($this->instance_of_the_base_class);
+        $this->annotations= new SCA_AnnotationReader($this->instance_of_the_base_class);
 
-            // create an XML-RPC DAS and populate it with the valid types
-            // that this service can create.
-            $xsds     = SCA_Helper::getAllXsds($class_name);
-            $this->xmlrpc_das = new SCA_Bindings_Xmlrpc_DAS();
-            foreach ($xsds as $index => $xsds) {
-                list($namespace, $xsdfile) = $xsds;
-                if (SCA_Helper::isARelativePath($xsdfile)) {
-                    $xsd = SCA_Helper::constructAbsolutePath($xsdfile, $class_name);
-                    $this->xmlrpc_das->addTypesXsdFile($xsd);
-                }
+        // create an XML-RPC DAS and populate it with the valid types
+        // that this service can create.
+        $xsds     = SCA_Helper::getAllXsds($class_name);
+        $this->xmlrpc_das = new SCA_Bindings_Xmlrpc_DAS();
+
+        foreach ($xsds as $index => $xsds) {
+            list($namespace, $xsdfile) = $xsds;
+
+            if (SCA_Helper::isARelativePath($xsdfile)) {
+                $xsd = SCA_Helper::constructAbsolutePath($xsdfile, $class_name);
+                $this->xmlrpc_das->addTypesXsdFile($xsd);
             }
+        }
 
-            $this->xmlrpc_server   = xmlrpc_server_create();
-            $service_description = $this->annotations->reflectService();
-            $serviceDescGen = new SCA_Bindings_Xmlrpc_ServiceDescriptionGenerator();
-            $serviceDescGen->addIntrospectionData($this->xmlrpc_server, $service_description,
-                                                  $this->method_aliases, $this->xmlrpc_das);
+        $this->xmlrpc_server   = xmlrpc_server_create();
+        $service_description = $this->annotations->reflectService();
+
+        $serviceDescGen = new SCA_Bindings_Xmlrpc_ServiceDescriptionGenerator();
+        $serviceDescGen->addIntrospectionData(
+            $this->xmlrpc_server, $service_description,
+            $this->method_aliases, $this->xmlrpc_das
+        );
 
     }
 
     /**
      * Free resources allocated by this service wrapper
      *
+     * @return null
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         xmlrpc_server_destroy($this->xmlrpc_server);
     }
 
@@ -85,12 +106,12 @@ class SCA_Bindings_Xmlrpc_Wrapper {
      * Transform parameters of method to SDOs
      *
      * @param string $method_name (Method name, used to obtain method signature from annotations)
-     * @param array  $params (Array of params returned by xmlrpc_decode)
+     * @param array  $params      (Array of params returned by xmlrpc_decode)
+     *
      * @return array Array of params encoded as SDOs
      */
-    private function transformParamsToSdo($method_name, $params) {
-
-
+    protected function transformParamsToSdo($method_name, $params)
+    {
         // create an array to hold the new params
         // - numbers / strings / booleans -  remain as PHP objects
         // - objects/arrays - become SDOs, we obtain the type of each param from annotations
@@ -99,31 +120,34 @@ class SCA_Bindings_Xmlrpc_Wrapper {
         //get the list of parameter types
         $service_description = $this->annotations->reflectService();
 
-        if (isset($service_description->operations) &&
-            array_key_exists($method_name, $service_description->operations) &&
-            array_key_exists("parameters", $service_description->operations[$method_name])) {
-
+        if (isset($service_description->operations)
+            && array_key_exists($method_name, $service_description->operations)
+            && array_key_exists("parameters", $service_description->operations[$method_name])
+        ) {
             $parameter_descriptions =  $service_description->operations[$method_name]["parameters"];
         }
 
-        foreach ($params as $param_name => $param_value ) {
+        foreach ($params as $param_name => $param_value) {
 
 
-            if (isset($parameter_descriptions) && array_key_exists($param_name, $parameter_descriptions))
+            if (isset($parameter_descriptions) && array_key_exists($param_name, $parameter_descriptions)) {
                 $param_description = $parameter_descriptions[$param_name];
+            }
 
-            $param_type        = gettype($param_value);
+            $param_type = gettype($param_value);
 
 
             if ($param_type == "object" || $param_type == "array") {
-                if ( isset($param_description) &&
-                     array_key_exists('objectType', $param_description) &&
-                     array_key_exists('namespace', $param_description)) {
+                if (isset($param_description)
+                    && array_key_exists('objectType', $param_description)
+                    && array_key_exists('namespace', $param_description)
+                ) {
 
-                    $new_params_array[] = $this->xmlrpc_das->decodeFromPHPArray($param_value,
-                    $param_description["namespace"],
-                    $param_description["objectType"]);
-
+                    $new_params_array[] = $this->xmlrpc_das->decodeFromPHPArray(
+                        $param_value,
+                        $param_description["namespace"],
+                        $param_description["objectType"]
+                    );
                 } else {
 
                     $new_params_array[] = $this->xmlrpc_das->decodeFromPHPArray($param_value);
@@ -151,8 +175,9 @@ class SCA_Bindings_Xmlrpc_Wrapper {
      * Transform arguments to SDOs before call, and
      * encode the return value to send back.
      *
-     * @param string $method_name
-     * @param string $arguments
+     * @param string $method_name Method name
+     * @param string $arguments   Arguments
+     *
      * @return string Response to call encoded using XMLRPC
      */
     public function __call($method_name, $arguments)
@@ -180,18 +205,17 @@ class SCA_Bindings_Xmlrpc_Wrapper {
 
     }
 
-
-
-
     /**
      * Call an XMLRPC system method. Use XMLRPC extension to handle the system method.
      * In normal SCA operation, this method is used for system.describeMethods whenever
      * a Proxy is created. Use annotations to register methods on the server first.
      *
-     * @param string $rawHTTPContents
+     * @param string $rawHTTPContents Raw contents
+     *
      * @return string XMLRPC encoded response
      */
-    public function callSystemMethod($rawHTTPContents) {
+    public function callSystemMethod($rawHTTPContents)
+    {
 
         SCA::$logger->log("callSystemMethod $rawHTTPContents");
 
