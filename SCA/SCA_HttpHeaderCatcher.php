@@ -30,7 +30,7 @@ $Id: SCA_HttpHeaderCatcher.php 234864 2007-05-03 18:23:57Z mfp $
  * Later the unit test can call AtLeastOneHeaderContains to check whether any of the
  * headers contained a given string
  */
-if ( ! class_exists('SCA_HttpHeaderCatcher', false) ) {
+if (!class_exists('SCA_HttpHeaderCatcher', false)) {
     class SCA_HttpHeaderCatcher
     {
         public $headers = null;
@@ -42,16 +42,18 @@ if ( ! class_exists('SCA_HttpHeaderCatcher', false) ) {
 
         public function AtLeastOneHeaderContains($needle)
         {
-            if ($this->headers === null)
-            return false;
-            foreach ($this->headers as $header) {
-                if (strstr($header,$needle))
-                return true;
+            if ($this->headers === null) {
+                return false;
             }
+
+            foreach ($this->headers as $header) {
+                if (strstr($header, $needle)) {
+                    return true;
+                }
+            }
+
             return false;
         }
 
     }
 }
-
-?>

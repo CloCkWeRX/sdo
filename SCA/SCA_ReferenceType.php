@@ -27,52 +27,52 @@ $Id: SCA_ReferenceType.php 234864 2007-05-03 18:23:57Z mfp $
 */
 
 /**
- * A container for and information specified in the doc comment 
+ * A container for and information specified in the doc comment
  * of a reference
  */
 
-if ( ! class_exists('SCA_ReferenceType', false) ) {
+if (!class_exists('SCA_ReferenceType', false)) {
 
     class SCA_ReferenceType
     {
-        private $binding_type; 
-        private $binding; 
+        private $binding_type;
+        private $binding;
         private $types;
         private $class_name;
         private $binding_config;
-        
+
         public function __construct()
         {
             $this->binding = null;
             $this->types   = null;
             $this->binding_type = null;
         }
-        
+
         public function addClassName($class_name)
         {
             $this->class_name = $class_name;
         }
-        
+
         public function getClassName()
         {
             return $this->class_name;
         }
-        
+
         public function addTypes($types)
         {
             $this->types = $types;
         }
-        
+
         public function getTypes()
         {
             return $this->types;
         }
-        
+
         public function addBinding($binding)
         {
             $this->binding = $binding;
         }
-        
+
         public function getBinding()
         {
             return $this->binding;
@@ -82,9 +82,9 @@ if ( ! class_exists('SCA_ReferenceType', false) ) {
         {
             $this->binding_type = $binding_type;
         }
-        
+
         /**
-         * Set any other binding specific configuration (e.g. @id 12 would 
+         * Set any other binding specific configuration (e.g. @id 12 would
          * result in an entry in binding config equivalent to array('id' => 12).
          *
          * @param array $binding_config
@@ -93,16 +93,17 @@ if ( ! class_exists('SCA_ReferenceType', false) ) {
         {
             $this->binding_config = $binding_config;
         }
-        
+
         public function getBindingConfig()
         {
             return $this->binding_config;
         }
 
-        public function getBindingType() {
+        public function getBindingType()
+        {
             return $this->binding_type;
         }
-        
+
         public function getXmlDas()
         {
             $xsds   = $this->types;
@@ -115,11 +116,9 @@ if ( ! class_exists('SCA_ReferenceType', false) ) {
                 }
             }
             return $xmldas;
-        }       
+        }
 
-        
-        
+
+
     }/* End SCA_ReferenceType class */
 }/* End instance check */
-
-?>

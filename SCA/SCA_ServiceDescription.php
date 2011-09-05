@@ -21,12 +21,12 @@
 $Id: SCA_ServiceDescription.php 254122 2008-03-03 17:56:38Z mfp $
 */
 
-if ( ! class_exists('SCA_ServiceDescription', false) ) {
+if (!class_exists('SCA_ServiceDescription', false)) {
     class SCA_ServiceDescription
     {
 
         public $class_name;
-        
+
         /**
          * Used to restrict the operations on a service interface
          * (@service <interface_name>)
@@ -34,10 +34,10 @@ if ( ! class_exists('SCA_ServiceDescription', false) ) {
          * @var string
          */
         public $interface_name;
-        
+
         public $realpath;
         public $targetnamespace;
-        
+
         /**
          * List of bindings
          *
@@ -50,5 +50,3 @@ if ( ! class_exists('SCA_ServiceDescription', false) ) {
         public $http_host;
     }
 }
-
-?>
