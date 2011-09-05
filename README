@@ -1,7 +1,6 @@
 $Id: README 238265 2007-06-22 14:32:40Z mfp $
 
-See http://www.php.net/sdo/ for API documentation, or
-http://livedocs.php.net/livedocs/en/ref.sdo.php for the very latest version.
+See http://www.php.net/sdo/ for API documentation.
 
 See INSTALL (in this directory) for installation instructions.
 
