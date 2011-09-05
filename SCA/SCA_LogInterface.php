@@ -43,37 +43,34 @@ $Id: SCA_LogInterface.php 234864 2007-05-03 18:23:57Z mfp $
  * ----------------
  *
  */
-if ( ! interface_exists('iLogInterface', false) ) {
+if (!interface_exists('iLogInterface', false)) {
     interface iLogInterface {
 
         /**
          * Send a line of text to the log file
          *
-         * @param string $txtentry      entry for the log file
-         * @param string $file          filename containing the line originating
-         *                              the entry.
-         * @param string $line          line at wich the entry is made
-         * @param int    $level         level at which entry is recorded
+         * @param string $txtentry entry for the log file
+         * @param string $file     filename containing the line originating
+         *                         the entry.
+         * @param string $line     line at wich the entry is made
+         * @param int    $level    level at which entry is recorded
          */
-        public function log ( $txtentry
-                            , $file     = ""
-                            , $line     = ""
-                            , $level    = null
-                            ) ;
+        public function log($txtentry, $file = "", $line = "", $level = null);
 
         /**
          * Stop logging
          *
+         * @return null
          */
-        public function stopLog() ;
+        public function stopLog();
 
         /**
          * Start/Restart logging
          *
+         * @return null
          */
-        public function startLog() ;
+        public function startLog();
 
-    }/* End log interface                                                    */
+    }
 
-}/* End ensure only included once                                            */
-?>
+}
