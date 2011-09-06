@@ -1,7 +1,5 @@
 --TEST--
 SDO test for reading nillable elements
---INI--
-display_errors=off
 --SKIPIF--
 <?php 
 if (!extension_loaded("sdo")) 

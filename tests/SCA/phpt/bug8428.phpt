@@ -1,8 +1,5 @@
 --TEST--
 SCA - test for WSDL which imports schema with no schemaLocation attribute
---INI--
-display_errors=on
-
 --SKIPIF--
 <?php
 if (phpversion('sdo') <= '1.2.4')

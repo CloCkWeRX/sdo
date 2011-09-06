@@ -1,7 +1,5 @@
 --TEST--
 SDO test xpath reference to nested open properties
---INI--
-display_errors=off
 --SKIPIF--
 <?php 
 if (!extension_loaded("sdo")) 
@@ -70,6 +68,8 @@ try {
 } catch (SDO_PropertyNotFoundException $e) {
     echo "This test fails with SDO_PropertyNotFoundException because of Tuscany-988 ";
     echo "(http://issues.apache.org/jira/browse/TUSCANY-988)\n";
+
+    print $e;
 }
 
 ?>

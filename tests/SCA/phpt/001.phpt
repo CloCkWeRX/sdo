@@ -1,7 +1,5 @@
 --TEST--
 Call a local component
---INI--
-display_errors=on
 --FILE--
 <?php
 require_once "SCA/SCA.php";

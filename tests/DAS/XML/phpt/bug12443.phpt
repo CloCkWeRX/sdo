@@ -1,7 +1,5 @@
 --TEST--
 SDO_DAS_XML test for element name containing hyphen
---INI--
-display_errors=off
 --SKIPIF--
 <?php
 

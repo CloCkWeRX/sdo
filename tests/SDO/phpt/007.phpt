@@ -1,7 +1,5 @@
 --TEST--
 SDO exception test
---INI--
-display_errors=off
 --SKIPIF--
 <?php if (!extension_loaded("sdo")) print "skip"; ?>
 --FILE--

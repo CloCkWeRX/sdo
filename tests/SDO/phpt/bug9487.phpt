@@ -1,7 +1,5 @@
 --TEST--
 SDO test unstructured text in sequence is preserved when a DataObject is cloned
---INI--
-display_errors=off
 --SKIPIF--
 <?php if (!extension_loaded("sdo")) print "skip"; ?>
 --FILE--

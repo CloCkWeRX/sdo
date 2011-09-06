@@ -1,7 +1,5 @@
 --TEST--
 SDO test for copy object with property set to null
---INI--
-display_errors=off
 --SKIPIF--
 <?php if (!extension_loaded("sdo")) print "skip"; ?>
 --FILE--
