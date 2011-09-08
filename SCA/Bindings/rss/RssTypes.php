@@ -25,7 +25,7 @@ $Id: RssTypes.php 238265 2007-06-22 14:32:40Z mfp $
 
 /**
  * To represent an image in RSS
- *    
+ *
  * <xs:element name="url" type="urlType" />
  * <xs:element name="title" type="xs:string" />
  * <xs:element name="link" type="urlType" />
@@ -35,7 +35,7 @@ $Id: RssTypes.php 238265 2007-06-22 14:32:40Z mfp $
  *
  */
 class Image {
-    
+
     /**
      * Enter description here...
      *
@@ -77,18 +77,18 @@ class Image {
      * @var string
      */
     public $description;
-    
+
 }
 
 /**
  * To represent an enclosure in RSS
- * 
+ *
  * <xs:attribute name="url" type="xs:string"/>
  * <xs:attribute name="length" type="xs:positiveInteger"/>
  * <xs:attribute name="type" type="xs:string"/>
  */
 class Enclosure {
-    
+
 
     /**
      * Enter description here...
@@ -110,19 +110,19 @@ class Enclosure {
      * @var string
      */
     public $type;
-    
+
 }
 
 /**
  * To represent a text input in RSS
- * 
+ *
  * <xs:element name="title" type="xs:string" />
  * <xs:element name="description" type="xs:string" />
  * <xs:element name="name" type="xs:string" />
  * <xs:element name="link" type="urlType" />
  */
 class TextInput {
-    
+
 
     /**
      * Enter description here...
@@ -151,7 +151,7 @@ class TextInput {
      * @var string
      */
     public $link;
-    
+
 }
 
 
@@ -170,7 +170,7 @@ class TextInput {
  * <xs:element name="source" type="sourceType" />
  */
 class Item {
-    
+
 
     /**
      * Enter description here...
@@ -241,12 +241,12 @@ class Item {
      * @var Source
      */
     public $source;
-    
+
 }
 
 /**
  * To represent a source item in RSS
- * 
+ *
  * <xs:extension base="xs:string">
  *   <xs:attribute name="url" type="urlType"/>
  * </xs:extension>
@@ -272,7 +272,7 @@ class Source {
 
 /**
  * To represent a channel in RSS
- * 
+ *
  * <xs:element name="title" type="xs:string" />
  * <xs:element name="link" type="urlType" />
  * <xs:element name="description" type="xs:string" />
@@ -296,7 +296,7 @@ class Source {
 
  */
 class Channel {
-   
+
 
     /**
      * Enter description here...

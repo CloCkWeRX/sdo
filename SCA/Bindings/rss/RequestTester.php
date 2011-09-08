@@ -25,16 +25,31 @@ $Id: RequestTester.php 238265 2007-06-22 14:32:40Z mfp $
 
 class SCA_Bindings_rss_RequestTester
 {
+
+    /**
+     * isServiceDescriptionRequest ?
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return bool
+     */
     public function isServiceDescriptionRequest($calling_component_filename)
     {
         // RSS doesn't have service descriptions
         return false;
     }
 
+    /**
+     * Is service request?
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return bool
+     */
     public function isServiceRequest($calling_component_filename)
     {
         // RSS uses GET
-        if (isset($_SERVER['HTTP_HOST']) && 
+        if (isset($_SERVER['HTTP_HOST']) &&
           ($_SERVER['REQUEST_METHOD'] == 'GET')) {
             return true;
         }

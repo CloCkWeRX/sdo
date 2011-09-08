@@ -78,6 +78,10 @@ class SCA_Bindings_rss_Proxy
      * If we want additional types to be loaded, we will need to provide
      * an implementation here.
      * Note, should SCA be managing our RssDas?
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
      */
     public function addReferenceType($reference_type)
     {
@@ -88,7 +92,7 @@ class SCA_Bindings_rss_Proxy
 
         // Add type descriptions to the XML DAS. We use XSDs if they
         // are prvoided.
-        if ( count($reference_type->getTypes()) > 0 ) {
+        if (count($reference_type->getTypes()) > 0) {
         // Some XSD types are specified with the reference
         // annotation so use these XSDs to build the XMLDAS
         $this->xmldas = $reference_type->getXmlDas();

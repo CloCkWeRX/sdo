@@ -166,7 +166,7 @@ class SCA_Bindings_rss_ServiceRequestHandler
                     SCA::$logger->log("Caught SCA_RuntimeException in RSSServer\n");
                     header("HTTP/1.1 500");
                 }
-                catch ( Exception $ex ) {
+                catch ( Exception $ex) {
                     SCA::$logger->log("Caught an exception in RSSServer: ".$ex->getMessage()."\n");
                     $call_response['error'] = $ex->getMessage();
                     //TODO find out the right response
