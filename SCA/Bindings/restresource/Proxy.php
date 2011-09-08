@@ -54,13 +54,17 @@ class SCA_Bindings_restresource_Proxy
      * Once the proxy has been constructed the runtime passes in
      * the information associated with the reference that the proxy
      * represents
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
      */
     public function addReferenceType(SCA_ReferenceType $reference_type)
     {
         $this->reference_type = $reference_type;
 
         // If there are type descriptions create and XML DAS and add them
-        if ( count($reference_type->getTypes()) > 0 ) {
+        if (count($reference_type->getTypes()) > 0) {
             // Some XSD types are specified with the reference
             // annotation so use these XSDs to build the XML DAS
             $this->xml_das = $reference_type->getXmlDas();
@@ -90,7 +94,7 @@ class SCA_Bindings_restresource_Proxy
         //check whether it is an sdo or an xml string.
         if ($resource instanceof SDO_DataObjectImpl) {
             //if the thing received is an sdo convert it to xml
-            if ($this->xml_das !== null ) {
+            if ($this->xml_das !== null) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
             } else {
                 throw new SCA_RuntimeException('Trying to create a resource with SDO but ' .
@@ -190,7 +194,7 @@ class SCA_Bindings_restresource_Proxy
         //check whether it is an sdo or an xml string.
         if ($resource instanceof SDO_DataObjectImpl) {
             //if the thing received is an sdo convert it to xml
-            if ($this->xml_das !== null ) {
+            if ($this->xml_das !== null) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
             } else {
                 throw new SCA_RuntimeException('Trying to update a resource with SDO but ' .
@@ -319,7 +323,7 @@ class SCA_Bindings_restresource_Proxy
             $xmldas     = $this->reference_type->getXmlDas();
             $dataobject = $xmldas->createDataObject($namespace_uri, $type_name);
             return $dataobject;
-        } catch( Exception $e ) {
+        } catch( Exception $e) {
             throw new SCA_RuntimeException($e->getMessage());
         }
         return null;

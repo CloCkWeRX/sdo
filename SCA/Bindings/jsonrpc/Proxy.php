@@ -1,20 +1,20 @@
 <?php
 /*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
 +-----------------------------------------------------------------------------+
 | Author: Graham Charters,                                                    |
 |         Matthew Peters,                                                     |
@@ -64,6 +64,13 @@ class SCA_Bindings_Jsonrpc_Proxy {
         SCA::$logger->log('Exiting');
     }
 
+    /**
+     * Add reference type
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
+     */
     public function addReferenceType(SCA_ReferenceType $reference_type)
     {
         $this->reference_type = $reference_type;
@@ -80,7 +87,7 @@ class SCA_Bindings_Jsonrpc_Proxy {
 
         try {
             $return = call_user_func_array(array(&$this->jsonrpc_client, $method_name), $arguments);
-        } catch( Exception $ex ) {
+        } catch( Exception $ex) {
              throw $ex;
         }
         return $return;
@@ -97,7 +104,7 @@ class SCA_Bindings_Jsonrpc_Proxy {
             $xmldas     = $this->reference_type->getXmlDas();
             $dataobject = $xmldas->createDataObject($namespace_uri, $type_name);
             return $dataobject;
-        } catch( Exception $e ) {
+        } catch( Exception $e) {
             throw new SCA_RuntimeException($e->getMessage());
         }
     }

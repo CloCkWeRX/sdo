@@ -64,7 +64,7 @@ class SCA_JsonRpcClient {
         // OF A CERTAIN SIZE SO AS YOU ADD FUNCTIONS TO YOUR
         // SERVICE IT FAILS FOR NO APPARENT REASON SO I HAVE TO
         // TEST IF THE FILE IS LOCAL OR NOT
-        if ( strstr($full_smd_file_name, 'http') ) {
+        if (strstr($full_smd_file_name, 'http')) {
             // use curl to get a remote file
             $request = curl_init($full_smd_file_name);
             curl_setopt($request, CURLOPT_HEADER, false);
@@ -74,13 +74,13 @@ class SCA_JsonRpcClient {
             // Get info about the response
             $response_http_code = curl_getinfo($request, CURLINFO_HTTP_CODE);
 
-            if ($this->smd_file == null | $this->smd_file == false ) {
+            if ($this->smd_file == null | $this->smd_file == false) {
                 throw new SCA_RuntimeException("SMD file $full_smd_file_name for remote JSON service " .
                 "was not found or was empty");
             }
 
             // test the response status
-            if ($response_http_code != 200 ) {
+            if ($response_http_code != 200) {
                 throw new SCA_RuntimeException("Call to retrieve $full_smd_file_name failed with HTTP " .
                 " response code " . $response_http_code);
             }
@@ -100,6 +100,10 @@ class SCA_JsonRpcClient {
      * SMD file and access to the references so here will have to
      * do fo now. I want a cleaner abstraction of JsonRpcClient and
      * JsonProxy.
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
      */
     public function addReferenceType(SCA_ReferenceType $reference_type)
     {
@@ -108,7 +112,7 @@ class SCA_JsonRpcClient {
         // Add type descriptions to the Json DAS. We use XSDs if they
         // are prvoided. If not we used the SMD and assume the default
         // namespace provided by the JSON DAS
-        if ( count($reference_type->getTypes()) > 0 ) {
+        if (count($reference_type->getTypes()) > 0) {
             // Some XSD types are specified with the reference
             // annotation so use these XSDs to build the JSON DAS
 
@@ -146,13 +150,13 @@ class SCA_JsonRpcClient {
     {
         // check that the requested method exists
         $method = null;
-        foreach ($this->methods as $methods_entry ) {
-            if ($methods_entry->name == $method_name ) {
+        foreach ($this->methods as $methods_entry) {
+            if ($methods_entry->name == $method_name) {
                 $method = $methods_entry;
             }
         }
 
-        if ($method == null ) {
+        if ($method == null) {
             throw new SCA_RuntimeException("Trying to call $method_name on remote service " .
             "using JSONRPC and the method cannot be found. " .
             "The remote service has the following interface " .
@@ -176,14 +180,14 @@ class SCA_JsonRpcClient {
 
         // convert all the arguments into JSON strings
         $argument_id = 0;
-        foreach ($arguments as $argument ) {
+        foreach ($arguments as $argument) {
 
-            if ($argument == null ) {
+            if ($argument == null) {
                 $json_request = $json_request;
-            } else if ( is_object($argument) ) {
+            } else if (is_object($argument)) {
                 $json_request = $json_request .
                 $this->json_das->encode($argument);
-            } else if ( is_array($argument) ) {
+            } else if (is_array($argument)) {
                 throw new SCA_RuntimeException("Argument $argument_id to $method_name of type array found. " .
                 "Arguments must be either primitives or SDOs");
             } else {
@@ -192,7 +196,7 @@ class SCA_JsonRpcClient {
 
             $argument_id += 1;
 
-            if ($argument_id < count($arguments) ) {
+            if ($argument_id < count($arguments)) {
                 $json_request = $json_request . ",";
             }
         }
@@ -220,7 +224,7 @@ class SCA_JsonRpcClient {
             $response = curl_exec($request);
 
             // TODO probably need a better way of detecting PHP errors at the far end
-            if ( strchr($response,'<b>Fatal error</b>') !== false
+            if (strchr($response,'<b>Fatal error</b>') !== false
             || strchr($response,'<b>Parse error</b>') !== false) {
                 throw new SCA_RuntimeException('Bad response from jsonrpc call: ' . $response);
             }
@@ -237,13 +241,13 @@ class SCA_JsonRpcClient {
             //            FILE_APPEND);
 
             // test the response status
-            if ($response == null || $response == false  ) {
+            if ($response == null || $response == false) {
                 throw new SCA_RuntimeException("JSONRPC call to $this->service_url for method " .
                 "$method_name failed ");
             }
 
             // test the response status
-            if ($response_http_code != 200 ) {
+            if ($response_http_code != 200) {
                 throw new SCA_RuntimeException("JSONRPC call to $this->service_url for method " .
                 "$method_name failed with HTTP response code " .
                 $response_http_code);
@@ -260,7 +264,7 @@ class SCA_JsonRpcClient {
 
         // test to make sure that the id on the response matches
         // the id on the request
-        if ($id <> ($this->id - 1) ) {
+        if ($id <> ($this->id - 1)) {
             throw new SCA_RuntimeException("JSONRPC call to $this->service_url for method " .
             "$method_name failed as the id of the response $id " .
             "does not match id of the request " .
@@ -268,9 +272,9 @@ class SCA_JsonRpcClient {
         }
 
         // test to see if there is an error in the response message
-        if ( isset($json_response->error) ) {
+        if (isset($json_response->error)) {
             $error = $json_response->error;
-            if ($error != null ) {
+            if ($error != null) {
                 throw new SCA_RuntimeException("JSONRPC call to $this->service_url for method " .
                 "$method_name failed. The JSON error field contained " .
                 '"' . $error . '"');
@@ -280,7 +284,7 @@ class SCA_JsonRpcClient {
             $result        = $json_response->result;
             $return_object = null;
 
-            if ( is_object($result) ) {
+            if (is_object($result)) {
                 // decode the complex object into an SDO. The return type
                 // has come from  the SMD. If XSD files
                 // have also been specified then we guess the namespace
@@ -291,7 +295,7 @@ class SCA_JsonRpcClient {
                 $return_object    = $this->json_das->decodeFromPHPObject($result,
                 $return_type,
                 $return_namespace);
-            } else if ( is_array($result) ) {
+            } else if (is_array($result)) {
                 throw new SCA_RuntimeException("JSONRPC call to $this->service_url for method " .
                 "$method_name failed. Result of type array found. " .
                 "Return types must be either primitives or SDOs");
@@ -318,14 +322,14 @@ class SCA_JsonRpcClient {
         // first check if any types have been specified in XSDs
         // if no types are specified in XSDs a null return namspace
         // reults and the json das will use the default namespace
-        if ( isset($this->type_list) ) {
+        if (isset($this->type_list)) {
             // now match the required type name against all the
             // types specified in XSDs
-            foreach ($this->type_list as $type ) {
+            foreach ($this->type_list as $type) {
                 $type_namespace = $type[0];
                 $type_name      = $type[1];
 
-                if ($name_of_type == $type_name ) {
+                if ($name_of_type == $type_name) {
                     $return_namespace      = $type_namespace;
                     $number_of_types_found = $number_of_types_found + 1;
                 }
@@ -333,7 +337,7 @@ class SCA_JsonRpcClient {
 
             // If we can't find a matching type name then
             // raise a warning
-            if ($number_of_types_found == 0 ) {
+            if ($number_of_types_found == 0) {
                 throw new SCA_RuntimeException("Type name $name_of_type from SMD not found in the " .
                 "XSDs provided in @type annotations with the reference " .
                 "so namespace can't be determined");
@@ -343,7 +347,7 @@ class SCA_JsonRpcClient {
             // associated with a reference can specify the same type name
             // in two or more different namespaces. Raise a warning if this
             // happens
-            if ($number_of_types_found > 1 ) {
+            if ($number_of_types_found > 1) {
                 throw new SCA_RuntimeException("Type name $name_of_type from SMD appears multiple times in the " .
                 "XSDs provided in @type annotations with the reference " .
                 "The namespace chosen was $return_namespace");

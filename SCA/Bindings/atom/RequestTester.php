@@ -46,7 +46,7 @@ class SCA_Bindings_Atom_RequestTester
 {
 
     /**
-     * isServiceDescription ?
+     * isServiceDescriptionRequest ?
      *
      * @param string $calling_component_filename Filename
      *
@@ -65,6 +65,7 @@ class SCA_Bindings_Atom_RequestTester
     //PUT http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
     //DELETE http://localhost:1112/examples/SCA/Atom/ContactFeed.php/7
     //Only Atom supports GET requests that go directly to SCA components, so if a GET request is destined directly for an SCA component, it must be an Atom request.
+
     /**
      * Is service request?
      *

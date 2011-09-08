@@ -1,20 +1,20 @@
 <?php
 /*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
 +-----------------------------------------------------------------------------+
 | Author: Wangkai Zai                                                         |
 |                                                                             |
@@ -26,12 +26,20 @@ require_once "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
 
 class SCA_Bindings_message_ServiceDescriptionGenerator
 {
+
+    /**
+     * Generate
+     *
+     * @param string $service_description Service Description
+     *
+     * @return null
+     */
     public function generate($service_description)
     {
         SCA::$logger->log( "Entering");
 
         try {
-            if ( isset($_GET['wsdl']) ) {
+            if (isset($_GET['wsdl'])) {
                 /*if request url end with ?wsdl, generate a wsdl file
                 using the ServiceDescriptionGenerator from soap binding*/
                 $str = SCA_Bindings_soap_ServiceDescriptionGenerator::
@@ -96,8 +104,8 @@ class SCA_Bindings_message_ServiceDescriptionGenerator
      public static function parseBindingConfig($binding_config, $msdDataObject = null)
      {
 
-         if ( is_null($msdDataObject) ) {
-             if ( array_key_exists('msd',$binding_config) ) {
+         if (is_null($msdDataObject)) {
+             if (array_key_exists('msd',$binding_config)) {
                  /*load binding config information from the MPD file*/
                  $xmldas = SDO_DAS_XML::create(dirname(__FILE__)."/MessageServiceDescription.xsd");
                  /*Assumed the value is an Absolute path to a MSD file*/

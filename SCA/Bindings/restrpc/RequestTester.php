@@ -27,11 +27,26 @@
 
 class SCA_Bindings_restrpc_RequestTester
 {
+
+    /**
+     * isServiceDescriptionRequest ?
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return bool
+     */
     public function isServiceDescriptionRequest($calling_component_filename)
     {
         return false;
     }
 
+    /**
+     * Is service request?
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return bool
+     */
     public function isServiceRequest($calling_component_filename)
     {
         // check if the request is a GET or a POST and that

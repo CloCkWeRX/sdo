@@ -1,20 +1,20 @@
 <?php
 /*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
 +-----------------------------------------------------------------------------+
 | Author: Graham Charters,                                                    |
 |         Matthew Peters,                                                     |
@@ -34,6 +34,14 @@ require_once 'SCA/Bindings/jsonrpc/SCA_GenerateSmd.php';
 
 class SCA_Bindings_Jsonrpc_ServiceRequestHandler
 {
+    /**
+     * Handle
+     *
+     * @param string $calling_component_filename Filename
+     * @param string $service_description        Service description
+     *
+     * @return mixed
+     */
     public function handle($calling_component_filename, $service_description)
     {
         SCA::$logger->log("Entering");
@@ -59,7 +67,7 @@ class SCA_Bindings_Jsonrpc_ServiceRequestHandler
             // and generate the result message
             $jsonrpc_server = new SCA_JsonRpcServer($service_wrapper);
             $jsonrpc_server->handle();
-        } catch ( Exception $ex ) {
+        } catch (Exception $ex) {
             // A catch all exception just in case something drastic goes wrong
             // This can often be the case in constructors of the JSON infsatructure
             // classes where SMD files can be read over remote connections. We

@@ -1,20 +1,20 @@
 <?php
 /*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
 +-----------------------------------------------------------------------------+
 | Author: Wangkai Zai                                                         |
 |                                                                             |
@@ -43,11 +43,11 @@ class SCA_Bindings_message_Proxy {
         SCA::$logger->log('entering');
 
         //check if SAM extensions is loaded
-        if ( ! (in_array('sam', get_loaded_extensions())) ) {
+        if (! (in_array('sam', get_loaded_extensions()))) {
             throw new SCA_RuntimeException("The SAM extension must be loaded");
         }
 
-        if ($binding_config === null ) {
+        if ($binding_config === null) {
             $binding_config = array();
         }
         $binding_config['msd'] = $path_to_msd;
@@ -73,7 +73,7 @@ class SCA_Bindings_message_Proxy {
                 try {
                     $this->mapper->setWSDLTypes($path_to_wsdl);
                     //$xmldas = $this->mapper->getXmlDas();
-                } catch( SCA_RuntimeException $se ) {
+                } catch( SCA_RuntimeException $se) {
                     if (substr($path_to_wsdl, 0, 5) == 'http:'
                     && strpos($se->getMessage(), 'SDO_Exception') !== false
                     && strpos($se->getMessage(), 'Unable to parse') !== false
@@ -116,12 +116,12 @@ class SCA_Bindings_message_Proxy {
         }
 
         /*sending message*/
-        if ( !$correlid = $this->ms_client->sendRequest($method_name, $msgbody)) {
+        if (!$correlid = $this->ms_client->sendRequest($method_name, $msgbody)) {
             throw new SCA_RuntimeException("Send Request Failed");
         }
 
         /*waiting for the response*/
-        if ($this->waitResponseTimeout >=0 ) {
+        if ($this->waitResponseTimeout >=0) {
             $msg_response = $this->ms_client->getResponse($correlid,$this->waitResponseTimeout);
             if ($msg_response) {
                 /*do we have a WSDL schema*/
@@ -165,6 +165,13 @@ class SCA_Bindings_message_Proxy {
 
     }
 
+    /**
+     * Add reference type
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
+     */
     public function addReferenceType($reference_type)
     {
         //SCA::$logger->log('entering');
@@ -176,7 +183,7 @@ class SCA_Bindings_message_Proxy {
             $xmldas = $this->mapper->getXmlDas();
             $object = $xmldas->createDataObject($namespace_uri, $type_name);
             return  $object;
-        } catch( Exception $e ) {
+        } catch( Exception $e) {
             throw new SCA_RuntimeException($e->getMessage());
         }
     }

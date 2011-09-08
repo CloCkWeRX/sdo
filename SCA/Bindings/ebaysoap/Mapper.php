@@ -41,7 +41,7 @@ class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper
         SCA::$logger->log("wsdl is $wsdl");
         try {
             $this->xmldas = @SDO_DAS_XML::create($wsdl,"WEARETHEEBAYSOAPBINDING");
-        } catch ( Exception $e ) {
+        } catch (Exception $e) {
             $problem = $e->getMessage();
             SCA::$logger->log("exception thrown from create(): $problem");
 
@@ -57,7 +57,7 @@ class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper
             trigger_error($problem);
 
             /* When the 'TypeHandler is being used by the Soap Server */
-            if ( strcmp($this->association, self::SERVER) === 0 )
+            if (strcmp($this->association, self::SERVER) === 0 )
             throw new SoapFault("Client", "Invalid WSDL Type");
         }
 

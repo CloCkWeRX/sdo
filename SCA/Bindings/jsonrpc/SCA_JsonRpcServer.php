@@ -101,7 +101,7 @@ class SCA_JsonRpcServer {
         //get the list of parameter types
         $parameter_descriptions = $this->service_wrapper->getParametersForMethod($method);
 
-        foreach ($params as $param_name => $param_value ) {
+        foreach ($params as $param_name => $param_value) {
 
             $param_description = $parameter_descriptions[$param_name];
             $param_type        = gettype($param_value);
@@ -118,9 +118,9 @@ class SCA_JsonRpcServer {
             FILE_APPEND);
             */
 
-            if ($param_type == "object" ) {
-                if ( array_key_exists('objectType', $param_description) &&
-                array_key_exists('namespace', $param_description) ) {
+            if ($param_type == "object") {
+                if (array_key_exists('objectType', $param_description) &&
+                array_key_exists('namespace', $param_description)) {
                     $new_params_array[] = $this->service_wrapper->getJsonDas()->decodeFromPHPObject($param_value,
                     $param_description["objectType"],
                     $param_description["namespace"]);
@@ -130,7 +130,7 @@ class SCA_JsonRpcServer {
                     "@param description element as the type and " .
                     "namespace are not both defined");
                 }
-            } else if ($param_type == "array" ) {
+            } else if ($param_type == "array") {
                 throw new SCA_RuntimeException("Parameter $param_name of type array found as " .
                 "a top level parameter of incoming message $rawHTTPContents " .
                 " message parameters must be either primitives or SDOs");
@@ -145,7 +145,7 @@ class SCA_JsonRpcServer {
         $call_response = $this->service_wrapper->__call($method, $new_params_array);
         $response      = $response . "\"result\":" . $call_response;
         }
-        catch ( Exception $ex ) {
+        catch ( Exception $ex) {
         $response     = $response . "\"error\":" . json_encode($ex->getMessage());
         }
         */
@@ -155,7 +155,7 @@ class SCA_JsonRpcServer {
 
         try {
             $call_response = $this->service_wrapper->__call($method, $new_params_array);
-        } catch ( Exception $ex ) {
+        } catch (Exception $ex) {
             $error_response = json_encode($ex->getMessage());
         }
 

@@ -27,11 +27,26 @@
 
 class SCA_Bindings_restresource_RequestTester
 {
+
+    /**
+     * isServiceDescriptionRequest ?
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return bool
+     */
     public function isServiceDescriptionRequest($calling_component_filename)
     {
         return false;
     }
 
+    /**
+     * Is service request?
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return bool
+     */
     public function isServiceRequest($calling_component_filename)
     {
         if (isset($_SERVER['HTTP_HOST'])) {
@@ -41,7 +56,7 @@ class SCA_Bindings_restresource_RequestTester
                 || $_SERVER['REQUEST_METHOD'] == 'DELETE') {
                 $p1 = realpath($calling_component_filename);
                 $p2 = realpath($_SERVER['SCRIPT_FILENAME']);
-                if ($p1 == $p2 ) {
+                if ($p1 == $p2) {
                     return true;
                 }
             }

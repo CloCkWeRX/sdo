@@ -64,13 +64,17 @@ class SCA_Bindings_restrpc_Proxy
      * Once the proxy has been constructed the runtime passes in
      * the information associated with the reference that the proxy
      * represents
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
      */
     public function addReferenceType(SCA_ReferenceType $reference_type)
     {
         $this->reference_type = $reference_type;
 
         // If there are type descriptions create and XML DAS and add them
-        if ( count($reference_type->getTypes()) > 0 ) {
+        if (count($reference_type->getTypes()) > 0) {
             // Some XSD types are specified with the reference
             // annotation so use these XSDs to build the XML DAS
             $this->xml_das = $reference_type->getXmlDas();
@@ -102,8 +106,8 @@ class SCA_Bindings_restrpc_Proxy
 
         // Look to see if we have an SDO, i.e. convert to XML and do a POST
         // or just simple type params, i.e. represent as URL params and do a GET
-        if ( count($arguments) == 1 &&
-             is_object($arguments[0]) ) {
+        if (count($arguments) == 1 &&
+             is_object($arguments[0])) {
             // looks like its a single SDO so convert to XML
             $obj = $arguments[0];
 
@@ -122,13 +126,13 @@ class SCA_Bindings_restrpc_Proxy
             // form params.
             $argument_id = 0;
             $no_of_arguments = count($arguments);
-            foreach ($arguments as $argument ) {
-                if ($argument == null ) {
+            foreach ($arguments as $argument) {
+                if ($argument == null) {
                     // ignore null parameters
-                } else if ( is_object($argument) ) {
+                } else if (is_object($argument)) {
                     throw new SCA_RuntimeException("Argument $argument_id to $method_name of type object found. " .
                                                    "Arguments must be either primitives or a single SDO");
-                } else if ( is_array($argument) ) {
+                } else if (is_array($argument)) {
                     throw new SCA_RuntimeException("Argument $argument_id to $method_name of type array found. " .
                                                    "Arguments must be either primitives or SDOs");
                 } else {
@@ -156,7 +160,7 @@ class SCA_Bindings_restrpc_Proxy
         $response = curl_exec($request);
 
         // TODO probably need a better way of detecting PHP errors at the far end
-        if ( strchr($response,'<b>Fatal error</b>') !== false
+        if (strchr($response,'<b>Fatal error</b>') !== false
             || strchr($response,'<b>Parse error</b>') !== false) {
             SCA::$logger->log('Bad response from restrpc call: ' . $response);
             throw new SCA_RuntimeException('Bad response from restrpc call: ' . $response);
@@ -170,7 +174,7 @@ class SCA_Bindings_restrpc_Proxy
         curl_close($request);
 
         // test the response status
-        if ($response == null || $response == false  ) {
+        if ($response == null || $response == false) {
             SCA::$logger->log("restrpc call to $this->target_url for method " .
                                            "$method_name failed ");
             throw new SCA_RuntimeException("restrpc call to $this->target_url for method " .
@@ -227,7 +231,7 @@ class SCA_Bindings_restrpc_Proxy
         try {
             $dataobject = $this->xml_das->createDataObject($namespace_uri, $type_name);
             return $dataobject;
-        } catch( Exception $e ) {
+        } catch( Exception $e) {
             throw new SCA_RuntimeException($e->getMessage());
         }
         return null;
@@ -240,7 +244,7 @@ class SCA_Bindings_restrpc_Proxy
             $ret = $doc->getRootDataObject();
             return $ret;
         }
-        catch( Exception $e ) {
+        catch( Exception $e) {
             return $e->getMessage();
 
         }

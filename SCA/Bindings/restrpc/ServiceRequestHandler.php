@@ -30,6 +30,14 @@ include "SCA/Bindings/restrpc/Server.php";
 
 class SCA_Bindings_restrpc_ServiceRequestHandler
 {
+    /**
+     * Handle
+     *
+     * @param string $calling_component_filename Filename
+     * @param string $service_description        Service description
+     *
+     * @return mixed
+     */
     public function handle($calling_component_filename, $service_description)
     {
         SCA::$logger->log('Entering');

@@ -40,6 +40,11 @@ class SCA_Bindings_restresource_Server {
         SCA::$logger->log("Exiting constructor");
     }
 
+    /**
+     * Handle
+     *
+     * @return mixed
+     */
     public function handle()
     {
         SCA::$logger->log("Entering");

@@ -1,20 +1,20 @@
 <?php
 /*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
 +-----------------------------------------------------------------------------+
 | Author: Graham Charters,                                                    |
 |         Matthew Peters,                                                     |
@@ -62,7 +62,7 @@ class SCA_GenerateSmd {
         // work out what the hostname is so that the
         // url can be constructed
         $http_host = null;
-        if ( isset($_SERVER['HTTP_HOST']) ) {
+        if (isset($_SERVER['HTTP_HOST'])) {
             $http_host = $_SERVER['HTTP_HOST'];
         } else {
             $http_host = "localhost";
@@ -74,7 +74,7 @@ class SCA_GenerateSmd {
         $smd->serviceURL  = str_replace(' ', '%20', "http://" . $http_host . $_SERVER['SCRIPT_NAME']);
         $smd->methods     = array();
 
-        foreach ($service_desc->operations as $operation_name => $operation ) {
+        foreach ($service_desc->operations as $operation_name => $operation) {
             $method              = new stdClass;
             $method->name        = $operation_name;
             $method->parameters  = array();
@@ -83,10 +83,10 @@ class SCA_GenerateSmd {
             if (array_key_exists("parameters", $operation) &&
             $operation["parameters"]) {
                 // create the method parameters entries
-                foreach ($operation["parameters"] as $parameter ) {
+                foreach ($operation["parameters"] as $parameter) {
                     $param                = new stdClass;
                     $param->name          = $parameter["name"];
-                    if ( array_key_exists('objectType', $parameter) ) {
+                    if (array_key_exists('objectType', $parameter)) {
                         $param->type      = $parameter["objectType"];
                         self::generateSmdType($smd,
                         $parameter["objectType"],
@@ -99,12 +99,12 @@ class SCA_GenerateSmd {
                 }
             }
 
-            if ( array_key_exists("return", $operation) &&
-            $operation["return"] ) {
+            if (array_key_exists("return", $operation) &&
+            $operation["return"]) {
                 // create the method return type entries
-                foreach ($operation["return"] as $return ) {
+                foreach ($operation["return"] as $return) {
                     $rtn = new stdClass;
-                    if ( array_key_exists('objectType', $return) ) {
+                    if (array_key_exists('objectType', $return)) {
                         $rtn->type = $return["objectType"];
                         self::generateSmdType($smd,
                         $return["objectType"],
@@ -137,14 +137,14 @@ class SCA_GenerateSmd {
         // ensure that there is a types array. We only generate
         // a types array at this late stage so that we only generate
         // one if there are types to add to it
-        if ( isset($smd->types) == false ) {
+        if (isset($smd->types) == false) {
             $smd->types       = array();
         }
 
         $composite_type_name = $namespace . ":" . $type_name;
 
         // ensure that types are only written out once
-        if ( !array_key_exists($composite_type_name, $type_array) ) {
+        if (!array_key_exists($composite_type_name, $type_array)) {
             $type                             = new stdClass;
             $smd->types[]                     = $type;
             $type_array[$composite_type_name] = $type;
@@ -183,7 +183,7 @@ class SCA_GenerateSmd {
                 $property_object->type   = self::sdoTypeToSmdType($property_type_name);
 
                 // work out if this is an array or not
-                if ($property->isMany() ) {
+                if ($property->isMany()) {
                     $property_object->type .= " []";
                 }
 

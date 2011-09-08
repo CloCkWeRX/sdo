@@ -36,10 +36,10 @@ class SCA_Bindings_ebaysoap_Proxy extends SCA_Bindings_soap_Proxy {
     protected $sdo_type_handler_class_name = "SCA_Bindings_ebaysoap_Mapper";
 
     public static function dependenciesLoaded() {
-        $dependenciesLoaded = FALSE;
+        $dependenciesLoaded = false;
 
         if (extension_loaded('openssl')) {
-            $dependenciesLoaded = TRUE;
+            $dependenciesLoaded = true;
         }
 
         return $dependenciesLoaded;
