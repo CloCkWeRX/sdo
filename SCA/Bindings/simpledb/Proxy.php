@@ -60,12 +60,12 @@ class SCA_Bindings_simpledb_Proxy
             if (array_key_exists('username', $this->config))
                 $username = $this->config['username'];
             else
-                $username = NULL;
+                $username = null;
 
             if (array_key_exists('password', $this->config))
                 $password = $this->config['password'];
             else
-                $password = NULL;
+                $password = null;
 
             if (array_key_exists('namespace', $this->config))
                 $this->namespace = $this->config['namespace'];
@@ -93,7 +93,7 @@ class SCA_Bindings_simpledb_Proxy
                 $this->isIBM = true;
 
                 // Table could be of format schemaName.tableName
-                $schemaName = NULL;
+                $schemaName = null;
                 if (($pos = strrpos($tableName, '.')) !== false) {
                     $schemaName = substr($tableName, 0, $pos);
                     $tableName = substr($tableName, $pos+1);
@@ -113,7 +113,7 @@ class SCA_Bindings_simpledb_Proxy
                 $db2TableName = strtoupper($tableName);
 
                 $conn = db2_connect($database, $username, $password);
-                $stmt = db2_primary_keys($conn, NULL, $schemaName, $db2TableName);
+                $stmt = db2_primary_keys($conn, null, $schemaName, $db2TableName);
                 $keys = db2_fetch_array($stmt);
                 if (count($keys) > 3)
                     $this->primary_key = $keys[3];
@@ -224,6 +224,10 @@ class SCA_Bindings_simpledb_Proxy
 
     /**
      * Add reference type - this is not used by this proxy
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
      */
     public function addReferenceType(SCA_ReferenceType $reference_type)
     {
@@ -238,7 +242,7 @@ class SCA_Bindings_simpledb_Proxy
         $success = $stmt->execute(array($id));
 
         // Test if the SQL execute was successful
-        if ( 0 == $success ) {
+        if (0 == $success) {
             // there is a problem so get the SQL error code and report it
             throw new SCA_RuntimeException(self::__getPDOError($stmt, "retrieve"));
         }
@@ -488,15 +492,13 @@ END;
 
     }
 
-
-
     /**
      * Allows the reference user to create a data object
      * based on a type that is expected to form part of
      * a message to reference
      *
-     * @param string $namespace_uri
-     * @param string $type_name
+     * @param string $namespace_uri Namespace URI
+     * @param string $type_name     Type name
      *
      * @return SDO
      */
@@ -508,7 +510,7 @@ END;
             $root = $this->__createRoot();
             return $root->createDataObject($type_name);
 
-        } catch( Exception $e ) {
+        } catch( Exception $e) {
             throw new SCA_RuntimeException($e->getMessage());
         }
         return null;
