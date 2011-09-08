@@ -1,40 +1,55 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Rajini Sivaram,                                                     |
-|         Graham Charters                                                     |
-+-----------------------------------------------------------------------------+
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Rajini Sivaram,                                                     |
+ * |         Graham Charters                                                     |
+ * +-----------------------------------------------------------------------------+
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
-
-
-class SCA_Bindings_simpledb_Proxy
+/**
+ * Proxy
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Simpledb_Proxy
 {
-    private $datafactory;
-    private $table;
-    private $primary_key;
-    private $config;
-    private $pdo;
-    private $pdo_driver;
-    private $namespace = '';
-    private $isIBM = false;
-    private $table_name;
-    private $case;
+    protected $datafactory;
+    protected $table;
+    protected $primary_key;
+    protected $config;
+    protected $pdo;
+    protected $pdo_driver;
+    protected $namespace = '';
+    protected $isIBM = false;
+    protected $table_name;
+    protected $case;
 
     const ROOT_NS   = 'urn:rootns';
     const ROOT_TYPE = 'RootType';
@@ -44,6 +59,9 @@ class SCA_Bindings_simpledb_Proxy
      * Use the values from the configuration file provided to create a PDO for the database
      * Query the database to obtain column metadata and primary key
      *
+     * @param string $target                     Target
+     * @param string $immediate_caller_directory Directory
+     * @param string $binding_config             Config
      */
     public function __construct($target, $immediate_caller_directory, $binding_config)
     {
@@ -53,9 +71,10 @@ class SCA_Bindings_simpledb_Proxy
 
             $this->table = $target;
 
-            $this->config =
-                SCA_Helper::mergeBindingIniAndConfig($binding_config,
-                                                     $immediate_caller_directory);
+            $this->config = SCA_Helper::mergeBindingIniAndConfig(
+                $binding_config,
+                $immediate_caller_directory
+            );
 
             if (array_key_exists('username', $this->config))
                 $username = $this->config['username'];
@@ -87,8 +106,7 @@ class SCA_Bindings_simpledb_Proxy
             // Hence primary key for IBM databases has to be obtained using
             // db2_primary_key.
 
-            if (strpos($this->config["dsn"], "ibm:") === 0 ||
-            strpos($this->config["dsn"], "IBM:") === 0) {
+            if (strpos($this->config["dsn"], "ibm:") === 0 || strpos($this->config["dsn"], "IBM:") === 0) {
 
                 $this->isIBM = true;
 
@@ -103,8 +121,7 @@ class SCA_Bindings_simpledb_Proxy
                 // Both can be passed onto db2_connect. Remove the dsn prefix if specified
 
                 $database = substr($this->config["dsn"], 4);
-                if (strpos($database, "dsn=") === 0 ||
-                strpos($database, "DSN=") === 0) {
+                if (strpos($database, "dsn=") === 0 || strpos($database, "DSN=") === 0) {
 
                     $database = substr($database, 4);
                 }
@@ -121,7 +138,7 @@ class SCA_Bindings_simpledb_Proxy
                     throw new SCA_RuntimeException("Table '$tableName' does not appear to have a primary key.");
 
             }
-            $this->table_name = $this->__getName($tableName);
+            $this->table_name = $this->_getName($tableName);
 
             if ($username != null)
               $this->pdo = new PDO($this->config["dsn"], $username, $password, $this->config);
@@ -133,7 +150,7 @@ class SCA_Bindings_simpledb_Proxy
 
             $stmt = $this->pdo->prepare('SELECT * FROM '.$this->table);
             if (!$stmt->execute()) {
-                throw new SCA_RuntimeException(self::__getPDOError($stmt, "select"));
+                throw new SCA_RuntimeException(self::_getPDOError($stmt, "select"));
             }
 
 
@@ -141,7 +158,7 @@ class SCA_Bindings_simpledb_Proxy
             for ($i = 0; $i < $stmt->columnCount(); $i++) {
                 $meta = $stmt->getColumnMeta($i);
 
-                $name = $this->__getName($meta["name"]);
+                $name = $this->_getName($meta["name"]);
 
                 if (in_array("primary_key",  $meta["flags"], true)) {
                     $this->primary_key = $name;
@@ -152,7 +169,7 @@ class SCA_Bindings_simpledb_Proxy
 
             }
 
-            //$pk = $this->__getName($this->primary_key);
+            //$pk = $this->_getName($this->primary_key);
 
             SCA::$logger->log("Table $tableName PrimaryKey $this->primary_key");
 
@@ -161,26 +178,31 @@ class SCA_Bindings_simpledb_Proxy
             'name' => $this->table_name,
             'columns' => $columns,
             'PK' => $pk
-           );
+            );
             */
 
             $this->datafactory = SDO_DAS_DataFactory::getDataFactory();
 
             // Define the model on the data factory (from the database)
-            $this->datafactory->addType(SCA_Bindings_simpledb_Proxy::ROOT_NS,
-                                        SCA_Bindings_simpledb_Proxy::ROOT_TYPE);
+            $this->datafactory->addType(
+                SCA_Bindings_simpledb_Proxy::ROOT_NS,
+                SCA_Bindings_simpledb_Proxy::ROOT_TYPE
+            );
             $this->datafactory->addType($this->namespace, $this->table_name);
 
             foreach ($columns as $name) {
-                $this->datafactory->
-                addPropertyToType($this->namespace, $this->table_name,
-                $name, 'commonj.sdo', 'String');
+                $this->datafactory->addPropertyToType(
+                    $this->namespace, $this->table_name,
+                    $name, 'commonj.sdo', 'String'
+                );
             }
 
-            $this->datafactory->addPropertyToType(SCA_Bindings_simpledb_Proxy::ROOT_NS,
-                                                  SCA_Bindings_simpledb_Proxy::ROOT_TYPE,
-                                                  $this->table_name, $this->namespace,
-                                                  $this->table_name, array('many' => true));
+            $this->datafactory->addPropertyToType(
+                SCA_Bindings_simpledb_Proxy::ROOT_NS,
+                SCA_Bindings_simpledb_Proxy::ROOT_TYPE,
+                $this->table_name, $this->namespace,
+                $this->table_name, array('many' => true)
+            );
 
 
         } catch (Exception $e) {
@@ -195,30 +217,27 @@ class SCA_Bindings_simpledb_Proxy
      * Implements the name mangling rules based on configuration (e.g. lower case)
      *
      * @param string $name The input property name
+     *
      * @return string The mangled name
      */
-    private function __getName($name) {
+    private function _getName($name)
+    {
 
         if (strlen($name) == 0)
             return $name;
 
         switch ($this->case) {
-           case "upper":
-               return strtoupper($name);
-               break;
-           case "mixed":
-               $tmpname = strtolower($name);
-               $tmpname[0] = strtoupper($tmpname[0]);
-               return $tmpname;
-               break;
-           default: // lower
-               return strtolower($name);
-       }
-    }
-
-    private function __createRoot() {
-        return $this->datafactory->create(SCA_Bindings_simpledb_Proxy::ROOT_NS,
-                                          SCA_Bindings_simpledb_Proxy::ROOT_TYPE);
+        case "upper":
+            return strtoupper($name);
+            break;
+        case "mixed":
+            $tmpname = strtolower($name);
+            $tmpname[0] = strtoupper($tmpname[0]);
+            return $tmpname;
+            break;
+        default: // lower
+            return strtolower($name);
+        }
     }
 
 
@@ -237,14 +256,23 @@ class SCA_Bindings_simpledb_Proxy
 
     }
 
-    private function __executePreparedQuery($stmt, $id) {
+    /**
+     * Execute prepared query
+     *
+     * @param object $stmt Statement
+     * @param object $id   ID
+     *
+     * @return mixed
+     */
+    private function _executePreparedQuery($stmt, $id)
+    {
 
         $success = $stmt->execute(array($id));
 
         // Test if the SQL execute was successful
         if (0 == $success) {
             // there is a problem so get the SQL error code and report it
-            throw new SCA_RuntimeException(self::__getPDOError($stmt, "retrieve"));
+            throw new SCA_RuntimeException(self::_getPDOError($stmt, "retrieve"));
         }
 
         $rows_affected = $stmt->rowCount();
@@ -256,7 +284,10 @@ class SCA_Bindings_simpledb_Proxy
             throw new SCA_NotFoundException("Entry $id was not found.");
         }
 
-        $root = $this->__createRoot();
+        $root = $this->datafactory->create(
+            SCA_Bindings_simpledb_Proxy::ROOT_NS,
+            SCA_Bindings_simpledb_Proxy::ROOT_TYPE
+        );
 
         if ($all_rows) {
 
@@ -265,7 +296,7 @@ class SCA_Bindings_simpledb_Proxy
                 $sdo = $root->createDataObject($this->table_name);
 
                 foreach ($row as $name => $value) {
-                    $property = $this->__getName($name);
+                    $property = $this->_getName($name);
                     $sdo[$property] = $value;
                 }
             }
@@ -276,7 +307,16 @@ class SCA_Bindings_simpledb_Proxy
     }
 
 
-    private static function __getPDOError($stmt, $op) {
+    /**
+     * Get PDO error
+     *
+     * @param object $stmt Statement
+     * @param object $op   Op
+     *
+     * @return string
+     */
+    private static function _getPDOError($stmt, $op)
+    {
 
         $errorInfo = $stmt->errorInfo();
 
@@ -294,7 +334,7 @@ END;
     /**
      * Create an entry in the table
      *
-     * @param SDO_DataObjectImpl $entry
+     * @param SDO_DataObjectImpl $entry Entry
      *
      * @return mixed Value of primary key of entry created
      */
@@ -335,7 +375,7 @@ END;
             $stmt = $this->pdo->prepare($statement);
 
             if (!$stmt->execute($values)) {
-                $exception = new SCA_RuntimeException(self::__getPDOError($stmt, "create"));
+                $exception = new SCA_RuntimeException(self::_getPDOError($stmt, "create"));
                 $this->pdo->rollback();
                 throw $exception;
             }
@@ -385,7 +425,7 @@ END;
             $stmt = $this->pdo->prepare('SELECT * FROM '.$this->table.' WHERE '.$this->primary_key.' = ?');
 
             // Use executePreparedQuery on the DAS to directly create an SDO
-            $sdo = $this->__executePreparedQuery($stmt, $id);
+            $sdo = $this->_executePreparedQuery($stmt, $id);
 
             if ($sdo instanceof SDO_DataObjectImpl && array_key_exists($this->table_name, $sdo)) {
                 $sdo = $sdo[$this->table_name];
@@ -408,7 +448,7 @@ END;
     /**
      * Update an entry
      *
-     * @param mixed $id Value of primary key of entry to be updated
+     * @param mixed              $id    Value of primary key of entry to be updated
      * @param SDO_DataObjectImpl $entry New value for entry
      *
      * @return bool
@@ -441,7 +481,7 @@ END;
             $stmt = $this->pdo->prepare($statement);
 
             if (!$stmt->execute($values)) {
-                $exception = new SCA_RuntimeException(self::__getPDOError($stmt, "update"));
+                $exception = new SCA_RuntimeException(self::_getPDOError($stmt, "update"));
                 $this->pdo->rollback();
                 throw $exception;
             }
@@ -476,7 +516,7 @@ END;
             $stmt = $this->pdo->prepare('DELETE FROM '.$this->table.' WHERE '.$this->primary_key.' = ?');
 
             if (!$stmt->execute(array($id))) {
-                $exception = new SCA_RuntimeException(self::__getPDOError($stmt, "delete"));
+                $exception = new SCA_RuntimeException(self::_getPDOError($stmt, "delete"));
                 $this->pdo->rollback();
                 throw $exception;
             }
@@ -507,16 +547,28 @@ END;
         SCA::$logger->log("Entering");
 
         try {
-            $root = $this->__createRoot();
+            $root = $this->datafactory->create(
+                SCA_Bindings_simpledb_Proxy::ROOT_NS,
+                SCA_Bindings_simpledb_Proxy::ROOT_TYPE
+            );
             return $root->createDataObject($type_name);
 
-        } catch( Exception $e) {
+        } catch (Exception $e) {
             throw new SCA_RuntimeException($e->getMessage());
         }
         return null;
     }
 
-    public function __call($method_name, $arguments) {
+    /**
+     * Invoke the method name in the target.
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
+     */
+    public function __call($method_name, $arguments)
+    {
         SCA::$logger->log("Call to invalid method $method_name.");
         throw SCA_MethodNotAllowedException("Call to invalid method $method_name.");
     }
