@@ -1,30 +1,38 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
-+-----------------------------------------------------------------------------+
-$Id: Proxy.php 254122 2008-03-03 17:56:38Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws                                                          |
+ * +-----------------------------------------------------------------------------+
+ * $Id: Proxy.php 254122 2008-03-03 17:56:38Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once "SCA/SCA_Exceptions.php";
 require_once "SCA/Bindings/soap/Mapper.php";
@@ -80,57 +88,72 @@ require_once "SCA/Bindings/soap/Mapper.php";
  * This method is used to convert a SOAP Fault into the appropriate SCA Exception.
  *
  */
-
-if ( ! extension_loaded('soap')) {
-    trigger_error("Cannot use SCA soap binding as soap extension is not loaded",E_USER_WARNING);
+if (!extension_loaded('soap')) {
+    trigger_error("Cannot use SCA soap binding as soap extension is not loaded", E_USER_WARNING);
     return;
 }
 
 
 /**
-  * Callback Error Handler to trap trigger_error calls from the SDO_TypHandler
-  * any other trigger_error event will be handled by the default handler in
-  * the normal manner.
-  *
-  * @param int $errno        Error Level
-  * @param string $errstr    Error Message
-  * @param string $errfile   File in which the error occured
-  * @param string $errline   Line number on which the error occured
-  * @return boolean          'false' to chain to default handler
-  */
-function errorHandler(  $errno, $errstr, $errfile, $errline )
+ * Callback Error Handler to trap trigger_error calls from the SDO_TypHandler
+ * any other trigger_error event will be handled by the default handler in
+ * the normal manner.
+ *
+ * @param int    $errno   Error Level
+ * @param string $errstr  Error Message
+ * @param string $errfile File in which the error occured
+ * @param string $errline Line number on which the error occured
+ *
+ * @return boolean 'false' to chain to default handler
+ */
+function errorHandler($errno, $errstr, $errfile, $errline)
 {
-    if ( strpos($errstr, "SDO_Exception") !== false )
-    throw new SCA_RuntimeException($errstr);
+    if (strpos($errstr, "SDO_Exception") !== false) {
+        throw new SCA_RuntimeException($errstr);
+    }
 
     return false;
 
 }/* End callback error handler                                                 */
 
-
-class SCA_Bindings_soap_Proxy extends SoapClient
+/**
+ * SOAP Proxy
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Soap_Proxy extends SoapClient
 {
     const SERIALIZED_EXCEPTION_HEADER = "Here follows a serialized and byte64-encoded PHP exception, placed here by SCA for PHP: ";
-    private $wsdl_file_name;
-    private $soap_headers = null;
-    private $query_params = null;
-    private $handler;
-    private $location = null;
+
+    protected $wsdl_file_name;
+    protected $soap_headers = null;
+    protected $query_params = null;
+    protected $handler;
+    protected $location = null;
     protected $config = null;
     protected $sdo_type_handler_class_name = "SCA_Bindings_soap_Mapper";
 
     //TODO Chris says error handler does not work any longer ....
-    private $previousErrorHandler;
+    protected $previousErrorHandler;
 
-    public function __construct($target, $base_path_for_relative_paths,
-    $binding_config)
+    /**
+     * Proxy
+     *
+     * @param string $target                       Target
+     * @param string $base_path_for_relative_paths Base path
+     * @param array  $binding_config               Config
+     */
+    public function __construct($target, $base_path_for_relative_paths, $binding_config)
     {
         SCA::$logger->log('Entering');
 
         SCA_Helper::checkSoapExtensionLoaded();
 
-        $absolute_path_to_target_wsdl =
-        SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
+        $absolute_path_to_target_wsdl = SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
 
         // Store the location now see subsequent sets will override it
         $this->config = $binding_config;
@@ -146,24 +169,28 @@ class SCA_Bindings_soap_Proxy extends SoapClient
 
         try {
             $this->handler->setWSDLTypes($absolute_path_to_target_wsdl);
-//                $xmldas = $this->handler->getXmlDas();
-        } catch( SCA_RuntimeException $se ) {
+            //$xmldas = $this->handler->getXmlDas();
+        } catch( SCA_RuntimeException $se) {
             if (substr($absolute_path_to_target_wsdl, 0, 5) == 'http:'
-            && strpos($se->getMessage(), 'SDO_Exception') !== false
-            && strpos($se->getMessage(), 'Unable to parse') !== false
-            && strpos($se->getMessage(), 'Document is empty') !== false) {
-                throw new SCA_RuntimeException('A call to SCA specified a URL: '
-                . $absolute_path_to_target_wsdl
-                . " The document returned was empty. One explanation for this may be apache bug 39662. See http://issues.apache.org/bugzilla/show_bug.cgi?id=36692. You may need to obtain the WSDL in a browser and save it as a local file.");
+                && strpos($se->getMessage(), 'SDO_Exception') !== false
+                && strpos($se->getMessage(), 'Unable to parse') !== false
+                && strpos($se->getMessage(), 'Document is empty') !== false
+            ) {
+                throw new SCA_RuntimeException(
+                    'A call to SCA specified a URL: '
+                    . $absolute_path_to_target_wsdl
+                    . " The document returned was empty. One explanation for this may be apache bug 39662. See http://issues.apache.org/bugzilla/show_bug.cgi?id=36692. You may need to obtain the WSDL in a browser and save it as a local file."
+                );
             }
             throw $se;
 
         }
         try {
-            @parent::__construct($absolute_path_to_target_wsdl,
-            array ( "trace" => 1, "exceptions" => 1,
-            'typemap' => $this->handler->getTypeMap()));
-        }catch (Exception $e) {
+            parent::__construct(
+                $absolute_path_to_target_wsdl,
+                array("trace" => 1, "exceptions" => 1, 'typemap' => $this->handler->getTypeMap())
+            );
+        } catch (Exception $e) {
             throw new SCA_RuntimeException("Creation of Soap Client for target $absolute_path_to_target_wsdl failed.");
         }
 
@@ -176,6 +203,10 @@ class SCA_Bindings_soap_Proxy extends SoapClient
      * represents the whole doc comment that this proxy
      * is configured with. We don;t use it here are the
      * moment.
+     *
+     * @param SCA_ReferenceType $reference_type Reference type
+     *
+     * @return null
      */
     public function addReferenceType($reference_type)
     {
@@ -195,6 +226,11 @@ class SCA_Bindings_soap_Proxy extends SoapClient
      * wsdl, and that this order is in turn the same as the order of the
      * parameters in the call. This relies on the user to put the @param
      * annotations in the right order in the annotations.
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
      */
     public function __call($method_name, $arguments)
     {
@@ -214,8 +250,7 @@ class SCA_Bindings_soap_Proxy extends SoapClient
                 throw new SCA_RuntimeException($sdoe->getMessage());
             }
             $operation_array = array($operation_sdo);
-            $return          = $this->_passTheCallToTheSoapClient($method_name,
-            $operation_array);
+            $return = $this->_passTheCallToTheSoapClient($method_name, $operation_array);
 
 
             return $return[$method_name.'Return'];
@@ -225,6 +260,14 @@ class SCA_Bindings_soap_Proxy extends SoapClient
         }
     }
 
+    /**
+     * Pass the call to the soap client
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
+     */
     private function _passTheCallToTheSoapClient($method_name, $arguments)
     {
         try
@@ -259,30 +302,49 @@ class SCA_Bindings_soap_Proxy extends SoapClient
      * Public version of the private method that follows
      * introduced to test bug 12193 does not come back
      *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
      */
-    public function getSoapOperationSdo($method_name, $arguments) {
+    public function getSoapOperationSdo($method_name, $arguments)
+    {
         return $this->_getSoapOperationSdo($method_name, $arguments);
     }
 
+    /**
+     * Get Operation
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
+     */
     private function _getSoapOperationSdo($method_name, $arguments)
     {
         $xmldas        = $this->handler->getXmlDas();
         $namespace     = $this->_getNamespaceForMethodName($xmldas, $method_name);
-        $xdoc          = $xmldas->createDocument($namespace,$method_name);
+        $xdoc          = $xmldas->createDocument($namespace, $method_name);
         $operation_sdo = $xdoc->getRootDataObject();
         $operation_sdo = $this->_copyPositionalArgumentsIntoSdoProperties($operation_sdo, $arguments);
-        return         $operation_sdo;
+
+        return $operation_sdo;
     }
 
     /**
-     * seek out the namespace for the component from
+     * Seek out the namespace for the component from
      * the wsdl which is loaded in the xml das.
      * The line we are looking for looks like this:
      *    - hello (http://HelloPersonService#hello)
      * where 'hello' is the method name
      *
+     * @param string $xmldas      XML DAS
+     * @param string $method_name Method name
+     *
+     * @return string
      */
-    private function _getNamespaceForMethodName($xmldas, $method_name) {
+    private function _getNamespaceForMethodName($xmldas, $method_name)
+    {
         $regexp_str = '/\((.*)#' . $method_name . '\)/';
         ob_start();
         print $xmldas;
@@ -293,6 +355,14 @@ class SCA_Bindings_soap_Proxy extends SoapClient
         return $namespace;
     }
 
+    /**
+     * _copyPositionalArgumentsIntoSdoProperties
+     *
+     * @param unknown $operation_sdo Operation SDO
+     * @param array   $arguments     Argument
+     *
+     * @return unknown
+     */
     private function _copyPositionalArgumentsIntoSdoProperties($operation_sdo, $arguments)
     {
         $reflection = new SDO_Model_ReflectionDataObject($operation_sdo);
@@ -312,47 +382,72 @@ class SCA_Bindings_soap_Proxy extends SoapClient
     //SoapClient was checked when created, so it must be there.
     //Four methods used to forward requests to the equivalent method on the soap client:
     //names are derived from the soap client methods: add 'soap' and remove __
+    /**
+     * Get Last Soap Response
+     *
+     * @return mixed
+     */
     public function getLastSoapResponse()
     {
         $response = $this->__getLastResponse();
         return    $response;
     }
 
+    /**
+     * Get Last Soap Response Headers
+     *
+     * @return mixed
+     */
     public function getLastSoapResponseHeaders()
     {
         $response = $this->__getLastResponseHeaders();
         return    $response;
     }
 
+    /**
+     * Get Last Soap Request
+     *
+     * @return mixed
+     */
     public function getLastSoapRequest()
     {
         $response = $this->__getLastRequest();
         return    $response;
     }
 
+    /**
+     * Get Last Soap Request Headers
+     *
+     * @return mixed
+     */
     public function getLastSoapRequestHeaders()
     {
         $response = $this->__getLastRequestHeaders();
         return    $response;
     }
 
+    // @codingStandardsIgnoreStart
+
     /**
      * Set the URL query parameters as an array.
      *
      * @param array $query_params
      */
-    public function __setQueryParams($query_params) {
+    public function __setQueryParams($query_params)
+    {
         $this->query_params = http_build_query($query_params);
     }
+
 
     /**
      * Set the soap header
      *
      * @param SDO_DataObjectImpl $header_sdo An SDO containin the data to go in the header
-     * @param string $ns The namespace of the soap header element
-     * @param string $name The name of the soap header element
+     * @param string             $ns         The namespace of the soap header element
+     * @param string             $name       The name of the soap header element
      */
-    public function __setSoapHeader($header_sdo, $ns, $name) {
+    public function __setSoapHeader($header_sdo, $ns, $name)
+    {
         $xmldas = $this->handler->getXmlDas();
         $doc = $xmldas->createDocument($ns, $name, $header_sdo);
         $header_xml_doc = $xmldas->saveString($doc);
@@ -364,17 +459,39 @@ class SCA_Bindings_soap_Proxy extends SoapClient
 
     }
 
-    public function __setLocation($location = null) {
+
+
+    /**
+     * @bug Surely this breaks SoapClient::__setLocation?
+     *
+     * @param string $location Location
+     *
+     * @return null
+     */
+    public function __setLocation($location = null)
+    {
         $this->location = $location;
     }
 
+    // @codingStandardsIgnoreEnd
+
+    /**
+     * Allows the reference user to create a data object
+     * based on a type that is expected to form part of
+     * a message to reference
+     *
+     * @param string $namespace_uri Namespace URI
+     * @param string $type_name     Type name
+     *
+     * @return SDO
+     */
     public function createDataObject($namespace_uri, $type_name)
     {
         try {
             $xmldas = $this->handler->getXmlDas();
             $object = $xmldas->createDataObject($namespace_uri, $type_name);
             return  $object;
-        } catch( Exception $e ) {
+        } catch( Exception $e) {
             throw new SCA_RuntimeException($e->getMessage());
         }
     }
@@ -383,54 +500,67 @@ class SCA_Bindings_soap_Proxy extends SoapClient
      * Convert the Soap Fault to the Exception that is serialized in
      * the 'faultstring'
      *
-     * @param  SoapFault  ( Contains a serialized exception )
-     * @return  Exception   ( Unserialized Exception  or  an Exception about an Exception )
+     * @param SoapFault $fault Contains a serialized exception
+     *
+     * @return Exception  Unserialized Exception  or  an Exception about an Exception )
      */
-    private function _convertedSoapFault($fault )
+    private function _convertedSoapFault($fault)
     {
         $unable_to_deserialize_msg = "A remote SCA component threw an exception. "
         . "An attempt was made to pass back the exception and rethrow it but this failed. "
         . "Sometimes this is because the definition of the exception is not known at the calling end. "
         . "The text of the original exception was: \n";
+
         $soap_client_noretry_error_msg = "The PHP SOAP client threw an exception with faultcode HTTP "
         . "and faultstring Client Error. This usually indicates this request "
         . "is not worth retrying. "
         . "The faultstring from the soap fault was: \n";
+
         $soap_client_retryable_error_msg = "The PHP SOAP client threw an exception with faultcode HTTP "
         . "but the fault string did not say Client. "
         . "This indicates the request may be worth retrying. "
         . "The faultstring from the soap fault was: \n";
+
         $remote_service_threw_soap_fault = "The remote service threw a soap fault. "
         . "The text of the response was: \n";
 
         // might be "SOAP-ENV:Client" if thrown by soap extension, or "Client" if thrown by SCA_ServiceWrapper
-        if ( strpos($fault->faultcode, "Client") !== false) {
+        if (strpos($fault->faultcode, "Client") !== false) {
             if (isset($fault->detail) && strpos($fault->detail, "SCA for PHP") !== false) {
                 $headerlen            = strlen(self::SERIALIZED_EXCEPTION_HEADER);
                 $serialized_exception = substr($fault->detail, $headerlen);
                 $recreateExpn         = unserialize(base64_decode($serialized_exception));
-                if ($recreateExpn instanceof Exception ) {
+                if ($recreateExpn instanceof Exception) {
                     return $recreateExpn;
                 } else { // we were unable to de-serialize it - likely because no definition exists at this end
-                    return new SCA_RuntimeException($unable_to_deserialize_msg
-                    . $fault->faultstring);
+                    return new SCA_RuntimeException(
+                        $unable_to_deserialize_msg
+                        . $fault->faultstring
+                    );
                 }
             } else { // the soap fault did not contain a serialized exception
-                return new SCA_RuntimeException($remote_service_threw_soap_fault
-                . $this->getLastSoapResponse());
+                return new SCA_RuntimeException(
+                    $remote_service_threw_soap_fault
+                    . $this->getLastSoapResponse()
+                );
             }
-        } else if ( strpos($fault->faultcode, "HTTP") !== false) {
+        } else if (strpos($fault->faultcode, "HTTP") !== false) {
             if (strpos($fault->faultstring, "Client") !== false) {
-                return new SCA_RuntimeException($soap_client_noretry_error_msg
-                . $fault->faultstring);
+                return new SCA_RuntimeException(
+                    $soap_client_noretry_error_msg
+                    . $fault->faultstring
+                );
             } else {
-                return new SCA_ServiceUnavailableException($soap_client_retryable_error_msg
-                . $fault->faultstring);
+                return new SCA_ServiceUnavailableException(
+                    $soap_client_retryable_error_msg
+                    . $fault->faultstring
+                );
             }
         } else {
-            return new SCA_RuntimeException($remote_service_threw_soap_fault
-            . $fault->faultstring);
+            return new SCA_RuntimeException(
+                $remote_service_threw_soap_fault
+                . $fault->faultstring
+            );
         }
     }
-}/* End soap proxy class                                                       */
-
+}

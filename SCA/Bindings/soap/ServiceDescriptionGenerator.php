@@ -1,34 +1,57 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
-+-----------------------------------------------------------------------------+
-$Id: ServiceDescriptionGenerator.php 254122 2008-03-03 17:56:38Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws                                                          |
+ * +-----------------------------------------------------------------------------+
+ * $Id: ServiceDescriptionGenerator.php 254122 2008-03-03 17:56:38Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
-
-class SCA_Bindings_soap_ServiceDescriptionGenerator
+/**
+ * SCA_Bindings_Soap_ServiceDescriptionGenerator
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Soap_ServiceDescriptionGenerator
 {
+    /**
+     * Generate
+     *
+     * @param string $service_description Service Description
+     *
+     * @return null
+     */
     public function generate($service_description)
     {
         SCA::$logger->log('Entering');
@@ -52,6 +75,13 @@ class SCA_Bindings_soap_ServiceDescriptionGenerator
     const COLON          = ':';
     const XS             = 'xs';
 
+    /**
+     * Generate Document/Literal Wrapped Wsdl
+     *
+     * @param string $service_desc Service Desc
+     *
+     * @return string
+     */
     public static function generateDocumentLiteralWrappedWsdl($service_desc)
     {
 
@@ -59,10 +89,11 @@ class SCA_Bindings_soap_ServiceDescriptionGenerator
         * Get a DAS, initialise a wsdl document, get the document element
         ***********************************************************************/
         $xmldas = SDO_DAS_XML::create(
-        array(
-        dirname(__FILE__) . '/2003-02-11.xsd',
-        dirname(__FILE__) . '/soap/2003-02-11.xsd'
-        )           );
+            array(
+                dirname(__FILE__) . '/2003-02-11.xsd',
+                dirname(__FILE__) . '/soap/2003-02-11.xsd'
+            )
+        );
         // expect to find xsds along with the SCA code
         $wsdl_doc = $xmldas->createDocument();
         $wsdl     = $wsdl_doc->getRootDataObject();

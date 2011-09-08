@@ -1,44 +1,71 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006, 2007.                                   |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
-+-----------------------------------------------------------------------------+
-$Id: Mapper.php 254122 2008-03-03 17:56:38Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006, 2007.                                   |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws                                                          |
+ * +-----------------------------------------------------------------------------+
+ * $Id: Mapper.php 254122 2008-03-03 17:56:38Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 
-class SCA_Bindings_soap_Mapper {
+/**
+ * SCA_Bindings_soap_Mapper
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Soap_Mapper
+{
 
     const   SERVER     = "SoapServer";
     const   CLIENT     = "SoapClient";
 
-    private $association  = null;
+    const   EOL               = "\n";
+
+    protected $association  = null;
     protected $xmldas       = null;
 
-    public function __construct($association )
+    /**
+     * Mapper
+     *
+     * @param mixed $association Association
+     */
+    public function __construct($association)
     {
-        if ($association != self::CLIENT && $association != self::SERVER )
-        throw new SoapFault('Client', 'SCA_Bindings_soap_Mapper should be initialised with an association of SoapServer or SoapClient');
+        if ($association != self::CLIENT && $association != self::SERVER) {
+            throw new SoapFault('Client', 'SCA_Bindings_soap_Mapper should be initialised with an association of SoapServer or SoapClient');
+        }
+
         $this->association = $association;
 
     }
@@ -48,45 +75,54 @@ class SCA_Bindings_soap_Mapper {
      *
      * @return SDO_DAS_XML
      */
-    public function getXmlDas() {
+    public function getXmlDas()
+    {
         return  $this->xmldas;
     }
 
     /**
      * Load the WSDL and hence initialise the SDO model
      *
-     * @param string $wsdl
+     * @param string $wsdl WSDL
+     *
      * @throws  SCA_RuntimeException
+     * @return null
      */
     public function setWSDLTypes($wsdl)
     {
         SCA::$logger->log('Entering');
         SCA::$logger->log("wsdl is $wsdl");
         try {
-            $this->xmldas = @SDO_DAS_XML::create($wsdl);
-        } catch ( Exception $e ) {
+            $this->xmldas = SDO_DAS_XML::create($wsdl);
+        } catch (Exception $e) {
             $problem = $e->getMessage();
             SCA::$logger->log("exception thrown from create(): $problem");
 
 
-            if ($e instanceof SDO_Exception )
-            $problem = "SDO_Exception in setWSDLTypes : " . $problem;
+            if ($e instanceof SDO_Exception) {
+                $problem = "SDO_Exception in setWSDLTypes : " . $problem;
+            }
 
             /**
-                 * Depending on whether the function is being used on the
-                 * client side or the server side either report the problem
-                 * to the client, or record the problem in the error.log
-                 */
+             * Depending on whether the function is being used on the
+             * client side or the server side either report the problem
+             * to the client, or record the problem in the error.log
+             */
             trigger_error($problem);
 
             /* When the 'TypeHandler is being used by the Soap Server */
-            if ( strcmp($this->association, self::SERVER) === 0 )
-            throw new SoapFault("Client", "Invalid WSDL Type");
+            if (strcmp($this->association, self::SERVER) === 0) {
+                throw new SoapFault("Client", "Invalid WSDL Type");
+            }
         }
     }
 
     /**
      * Called to convert the content in an incoming request or response
+     *
+     * @param string $xml XML
+     *
+     * @return object
      */
     public function fromXML($xml)
     {
@@ -112,20 +148,24 @@ class SCA_Bindings_soap_Mapper {
             trigger_error($problem);
 
             /* When the 'TypeHandler is being used by the Soap Server          */
-            if (strcmp($this->association, self::SERVER) === 0)
-            throw new SoapFault("Client",
-             "Unable to decode the SOAP message from XML. The problem was: ".$problem);
+            if (strcmp($this->association, self::SERVER) === 0) {
+                throw new SoapFault(
+                    "Client",
+                    "Unable to decode the SOAP message from XML. The problem was: ".$problem
+                );
+            }
 
-        }/* End trap the problem                                               */
-
-
-    }/* End fromXML function                                                   */
+        }
+    }
 
     /**
-    * Called to convert contents (eg.SDOs) to an XML string to generate something
-    * that represents the SOAP operation for outgoing request or response
-    *
-    */
+     * Called to convert contents (eg.SDOs) to an XML string to generate something
+     * that represents the SOAP operation for outgoing request or response
+     *
+     * @param SDO $sdo SDO
+     *
+     * @return string
+     */
     public function toXML($sdo)
     {
         SCA::$logger->log('Entering');
@@ -165,7 +205,7 @@ class SCA_Bindings_soap_Mapper {
              * always being the first attribute which is a bit dodgy, but it
              * always is.
              */
-            $xmlstr = preg_replace('/BOGUS xsi:type="[^"]*"/','BOGUS',$xmlstr);
+            $xmlstr = preg_replace('/BOGUS xsi:type="[^"]*"/', 'BOGUS', $xmlstr);
 
             SCA::$logger->log("xml = $xmlstr");
             return         $xmlstr;
@@ -173,8 +213,9 @@ class SCA_Bindings_soap_Mapper {
         catch( Exception $e )
         {
             $problem = $e->getMessage();
-            if ($e instanceof SDO_Exception )
-            $problem = "SDO_Exception in toXML : " . $problem;
+            if ($e instanceof SDO_Exception) {
+                $problem = "SDO_Exception in toXML : " . $problem;
+            }
 
             /**
              * Depending on whether the function is being used on the client side
@@ -184,18 +225,22 @@ class SCA_Bindings_soap_Mapper {
             trigger_error($problem);
 
             /* When the 'TypeHandler is being used by the Soap Server          */
-            if ( strcmp($this->association, self::SERVER) === 0)
-            throw new SoapFault("Client", "Unable to encode to XML");
+            if (strcmp($this->association, self::SERVER) === 0) {
+                throw new SoapFault("Client", "Unable to encode to XML");
+            }
 
-        }/* End trap problem                                                   */
-    }/* End toXML function                                                     */
-
-
+        }
+    }
 
     /**
-    * Provide access to the createDataObject method of our encapsulated XML DAS,
-    * so that the client or server can create the SDOs they want to send.
-    */
+     * Provide access to the createDataObject method of our encapsulated XML DAS,
+     * so that the client or server can create the SDOs they want to send.
+     *
+     * @param string $ns       Namespace URI
+     * @param string $typename Type name
+     *
+     * @return SDO
+     */
     public function createDataObject($ns, $typename)
     {
         try
@@ -220,13 +265,15 @@ class SCA_Bindings_soap_Mapper {
             if (strcmp($this->association, self::SERVER) === 0)
             throw new SoapFault("Client", "Unable to create data object");
 
-        }/* End of trap                                                        */
+        }
 
-    }/* End create data object function                                        */
+    }
 
     /**
-    * Returns array of type handlers
-    */
+     * Returns array of type handlers
+     *
+     * @return  array
+     */
     public function getTypeMap()
     {
         SCA::$logger->log('Entering');
@@ -238,18 +285,21 @@ class SCA_Bindings_soap_Mapper {
         $ret = array();
         foreach ($types as $type) {
             SCA::$logger->log("Adding callback for $type[0]#$type[1]");
-            $ret[] =
-            array(
-            "type_ns"    => $type[0],
-            "type_name"  => $type[1],
-            "to_xml"     => $encoder_callback,
-            "from_xml"   => $decoder_callback);
+            $ret[] = array(
+                "type_ns"    => $type[0],
+                "type_name"  => $type[1],
+                "to_xml"     => $encoder_callback,
+                "from_xml"   => $decoder_callback
+            );
         }
         return $ret;
     }
 
-    const   EOL               = "\n";
-
+    /**
+     * Returns array of all types
+     *
+     * @return  array
+     */
     public function getAllTypes()
     {
         $str   = $this->xmldas->__toString();
@@ -258,7 +308,7 @@ class SCA_Bindings_soap_Mapper {
         $line = strtok(self::EOL); // skip line that says this is an SDO
         $line = strtok(self::EOL); // skip line that says nn types have been defined
 
-        while ($line !== false && strpos($line,'commonj.sdo')) {
+        while ($line !== false && strpos($line, 'commonj.sdo')) {
             $line = strtok(self::EOL);
         }
         while ($line !== false && $line != '}') {
@@ -280,4 +330,4 @@ class SCA_Bindings_soap_Mapper {
         return $types;
     }
 
-}/* End instance check                                                         */
+}
