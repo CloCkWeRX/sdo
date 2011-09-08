@@ -1,7 +1,5 @@
 --TEST--
 SDO test for alphabetical type order bug
---INI--
-display_errors=off
 --SKIPIF--
 <?php 
 if (!extension_loaded("sdo")) 

@@ -26,9 +26,9 @@
 $Id: ServiceRequestHandler.php 241789 2007-08-24 15:20:26Z mfp $
 */
 
-include "SCA/Bindings/soap/Wrapper.php";
-include "SCA/Bindings/soap/Mapper.php";
-include "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
+require_once "SCA/Bindings/soap/Wrapper.php";
+require_once "SCA/Bindings/soap/Mapper.php";
+require_once "SCA/Bindings/soap/ServiceDescriptionGenerator.php";
 
 if ( ! extension_loaded('soap')) {
 trigger_error("Cannot use SCA soap binding as soap extension is not loaded",E_USER_WARNING);

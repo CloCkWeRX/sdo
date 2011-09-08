@@ -101,7 +101,7 @@ class SCA_LogFactory
 
         /* build the correct callback for the selected logger             */
         if ($class_name === 'SCA_Logger') {
-            $link = array($class_name, 'singleSCA_Logger');
+            $link = array($class_name, 'singleSCALogger');
         } else {
             $link = array($class_name, 'loadLogger');
         }

@@ -641,12 +641,12 @@ namespace commonj
 
             case DataTypeInfo::TDTfloat:
             {
-               sprintf(buffer , "%.3e", sourceValue.Float);
+               sprintf(buffer , "%.*g", SDODataConverter::precision, sourceValue.Float);
                break;
             }
             case DataTypeInfo::TDTdouble:
             {
-               sprintf(buffer , "%.3Le", sourceValue.Double);
+               sprintf(buffer , "%.*Lg", SDODataConverter::precision, sourceValue.Double);
                break;
             }
             case DataTypeInfo::TDTSDODate:
@@ -812,7 +812,7 @@ namespace commonj
                char tmpstr[SDODataConverter::MAX_TRANSIENT_SIZE];
                unsigned int j = 0;
                
-               sprintf(tmpstr, "%.3e", sourceValue.Float);
+               sprintf(tmpstr, "%.*g", SDODataConverter::precision, sourceValue.Float);
                size_t tmplen = strlen(tmpstr);
                if ((tmplen > max_length) || (outptr == 0))
                {
@@ -830,7 +830,7 @@ namespace commonj
                char tmpstr[SDODataConverter::MAX_TRANSIENT_SIZE];
                unsigned int j = 0;
                
-               sprintf(tmpstr, "%.3Le", sourceValue.Double);
+               sprintf(tmpstr, "%.*Lg", SDODataConverter::precision, sourceValue.Double);
                size_t tmplen = strlen(tmpstr);
                if ((tmplen > max_length) || (outptr == 0))
                {
@@ -1033,7 +1033,7 @@ namespace commonj
                char tmpstr[SDODataConverter::MAX_TRANSIENT_SIZE];
                unsigned int j = 0;
                
-               sprintf(tmpstr, "%.3e", sourceValue.Float);
+               sprintf(tmpstr, "%.*g", SDODataConverter::precision, sourceValue.Float);
                size_t tmplen = strlen(tmpstr);
                if ((tmplen > max_length) || (outptr == 0))
                {
@@ -1051,7 +1051,7 @@ namespace commonj
                char tmpstr[SDODataConverter::MAX_TRANSIENT_SIZE];
                unsigned int j = 0;
                
-               sprintf(tmpstr, "%.3Le", sourceValue.Double);
+               sprintf(tmpstr, "%.*Lg", SDODataConverter::precision, sourceValue.Double);
                size_t tmplen = strlen(tmpstr);
                if ((tmplen > max_length) || (outptr == 0))
                {
@@ -1127,5 +1127,6 @@ namespace commonj
             }
          }
       }
+	  unsigned int SDODataConverter::precision = 6;
    }
 }

@@ -151,7 +151,7 @@ class SCA_AnnotationReader
     public function reflectXsdTypes()
     {
 
-        $reflection = $this->__getReflection();
+        $reflection = $this->_getReflection();
         $reader     = new SCA_CommentReader($reflection->getDocComment());
 
         // may be an empty array if none to be found

@@ -1,7 +1,5 @@
 --TEST--
 test for bug #9243 - unnecessary warning messages loading remote schema
---INI--
-display_errors=off
 --SKIPIF--
 <?php
 
