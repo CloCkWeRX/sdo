@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * +-----------------------------------------------------------------------------+
  * | (c) Copyright IBM Corporation 2006, 2007.                                   |
  * | All Rights Reserved.                                                        |
@@ -24,7 +24,15 @@
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id: SCA_ServiceWrapperJson.php 234945 2007-05-04 15:05:53Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 /**
 * This class is always called when an incoming soap request is for an SCA component
@@ -96,6 +104,11 @@ class SCA_ServiceWrapperJson
      * Then pass to the method
      * Then wrap the return value back into an SDO. The element name is ...Response with a
      * property ...Return which contains the return value.
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
      */
     public function __call($method_name, $arguments)
     {

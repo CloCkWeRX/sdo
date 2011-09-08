@@ -1,35 +1,50 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2007.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Megan Beynon,                                                       |
-|         Caroline Maynard                                                    |
-+-----------------------------------------------------------------------------+
-$Id: Proxy.php 238265 2007-06-22 14:32:40Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2007.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Megan Beynon,                                                       |
+ * |         Caroline Maynard                                                    |
+ * +-----------------------------------------------------------------------------+
+ * $Id: Proxy.php 238265 2007-06-22 14:32:40Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once "SCA/SCA_Exceptions.php";
 require_once "SCA/Bindings/rss/RssDas.php";
 
 
-
-
-class SCA_Bindings_rss_Proxy
+/**
+ * SCA_Bindings_Rss_Proxy
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Rss_Proxy
 {
 
     /**
@@ -37,35 +52,44 @@ class SCA_Bindings_rss_Proxy
      *
      * @var string
      */
-    private $target;
+    protected $target;
 
     /**
      * Hold headers from curl
      */
-    private $received_headers;
+    protected $received_headers;
 
-    public function __construct($target,
-                                $base_path_for_relative_paths,
-                                $binding_config)
+    /**
+     * Constructor
+     *
+     * @param string $target                       Target URI
+     * @param string $base_path_for_relative_paths Base path
+     * @param string $binding_config               Config
+     */
+    public function __construct($target, $base_path_for_relative_paths, $binding_config)
     {
         SCA::$logger->log("Entering constructor");
         $this->target = $target;
         SCA::$logger->log("Exiting constructor");
     }
 
-    /*
-    * Callback set by CURL_HEADERFUNCTION
-    * Receives header lines from the response.
-    */
-    private function _headerCallback ($handle, $header)
+    /**
+     * Callback set by CURL_HEADERFUNCTION
+     * Receives header lines from the response.
+     *
+     * @param string $handle Handle
+     * @param string $header Header
+     *
+     * @return int
+     */
+    private function _headerCallback($handle, $header)
     {
         SCA::$logger->log("Entering");
         SCA::$logger->log("header = $header");
         /* split the header on the first : */
         $split_header = preg_split('/\s*:\s*/', trim($header), 2);
         if (count($split_header) > 1) {
-            $this->received_headers[strtoupper($split_header[0])] =
-            $split_header[1];
+            $this->received_headers[strtoupper($split_header[0])] = $split_header[1];
         } else if (!empty($split_header[0])) {
             $this->received_headers[] = $split_header[0];
         }
@@ -114,6 +138,11 @@ class SCA_Bindings_rss_Proxy
     /**
      * Rss has fixed methods to retrieve a channel or items __call
      * is implemented to catch any problem cases.
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
      */
     public function __call($method_name, $arguments)
     {
@@ -121,7 +150,13 @@ class SCA_Bindings_rss_Proxy
         throw SCA_MethodNotAllowedException("Call to invalid method $method_name.  RSS only supports retrieve() or enumerate()");
     }
 
-
+    /**
+     * Retrieve
+     *
+     * @param string $id ID
+     *
+     * @return mixed
+     */
     public function retrieve($id=null)
     {
 
@@ -130,12 +165,10 @@ class SCA_Bindings_rss_Proxy
 
         if ($id !== null) {
             //$target is the target of the RSS binding. If there is no slash on the end of the target provided, one is added.
-            $slash_if_needed =
-            ('/' === $this->target[strlen($this->target)-1])?'':'/';
+            $slash_if_needed = ('/' === $this->target[strlen($this->target)-1])?'':'/';
 
             $handle = curl_init($this->target.$slash_if_needed."$id");
-        }
-        else{
+        } else {
             $handle = curl_init($this->target);
         }
         curl_setopt($handle, CURLOPT_HEADER, false);
@@ -151,38 +184,37 @@ class SCA_Bindings_rss_Proxy
         curl_close($handle);
 
         //convert the result into an sdo.
-        $sdo = SCA_Bindings_rss_RssDas::fromXml($result);
+        $sdo = SCA_Bindings_Rss_RssDas::fromXml($result);
 
         //TODO: confirm the correct response code for retrieve.
-        if ($response_http_code != 200) {{
+        if ($response_http_code != 200) {
 
             switch($response_http_code) {
-                // Temporary redirects
-                case 302:
-                case 307:
-                    // FOLLOWLOCATION is on, so we should not get here
-                    throw new SCA_RuntimeException('enumerate() status code '. $response_http_code . ' when 200 expected');
-                case 503:
-                    //TODO: pick out the message from the response if there is one
-                    //for now just pass back a one liner.
-                    throw new SCA_ServiceUnavailableException("Service Unavailable");
-                case 409:
-                    throw new SCA_ConflictException("Conflict");
-                case 407:
-                    throw new SCA_AuthenticationException("Authentication Required");
-                case 400:
-                    throw new SCA_BadRequestException("Bad Request");
-                case 500:
-                    throw new SCA_InternalServerErrorException("Internal Server Error");
-                case 405:
-                    throw new SCA_MethodNotAllowedException("Method Not Allowed");
-                case 401:
-                    throw new SCA_UnauthorizedException("Unauthorized");
-                default:
-                    throw new SCA_RuntimeException('retrieve() status code '. $response_http_code . ' when 200 expected');
+            // Temporary redirects
+            case 302:
+            case 307:
+                // FOLLOWLOCATION is on, so we should not get here
+                throw new SCA_RuntimeException('enumerate() status code '. $response_http_code . ' when 200 expected');
+            case 503:
+                //TODO: pick out the message from the response if there is one
+                //for now just pass back a one liner.
+                throw new SCA_ServiceUnavailableException("Service Unavailable");
+            case 409:
+                throw new SCA_ConflictException("Conflict");
+            case 407:
+                throw new SCA_AuthenticationException("Authentication Required");
+            case 400:
+                throw new SCA_BadRequestException("Bad Request");
+            case 500:
+                throw new SCA_InternalServerErrorException("Internal Server Error");
+            case 405:
+                throw new SCA_MethodNotAllowedException("Method Not Allowed");
+            case 401:
+                throw new SCA_UnauthorizedException("Unauthorized");
+            default:
+                throw new SCA_RuntimeException('retrieve() status code '. $response_http_code . ' when 200 expected');
             }
 
-        }
         } else {
 
             return $sdo;
@@ -191,7 +223,11 @@ class SCA_Bindings_rss_Proxy
     }
 
 
-
+    /**
+     * Enumerate
+     *
+     * @return SDO
+     */
     public function enumerate()
     {
 
@@ -217,38 +253,36 @@ class SCA_Bindings_rss_Proxy
         curl_close($handle);
 
         //convert the result into an sdo.
-        $sdo = SCA_Bindings_rss_RssDas::fromXml($result);
+        $sdo = SCA_Bindings_Rss_RssDas::fromXml($result);
 
         //TODO: confirm the correct response code for retrieve.
-        if ($response_http_code != 200) {{
+        if ($response_http_code != 200) {
 
             switch($response_http_code) {
-                // Temporary redirects
-                case 302:
-                case 307:
-                    // FOLLOWLOCATION is on, so we should not get here
-                    throw new SCA_RuntimeException('enumerate() status code '. $response_http_code . ' when 200 expected');
-                case 503:
-                    //TODO: pick out the message from the response if there is one
-                    //for now just pass back a one liner.
-                    throw new SCA_ServiceUnavailableException("Service Unavailable");
-                case 409:
-                    throw new SCA_ConflictException("Conflict");
-                case 407:
-                    throw new SCA_AuthenticationException("Authentication Required");
-                case 400:
-                    throw new SCA_BadRequestException("Bad Request");
-                case 500:
-                    throw new SCA_InternalServerErrorException("Internal Server Error");
-                case 405:
-                    throw new SCA_MethodNotAllowedException("Method Not Allowed");
-                case 401:
-                    throw new SCA_UnauthorizedException("Unauthorized");
-                default:
-                    throw new SCA_RuntimeException('enumerate() status code '. $response_http_code . ' when 200 expected');
+            // Temporary redirects
+            case 302:
+            case 307:
+                // FOLLOWLOCATION is on, so we should not get here
+                throw new SCA_RuntimeException('enumerate() status code '. $response_http_code . ' when 200 expected');
+            case 503:
+                //TODO: pick out the message from the response if there is one
+                //for now just pass back a one liner.
+                throw new SCA_ServiceUnavailableException("Service Unavailable");
+            case 409:
+                throw new SCA_ConflictException("Conflict");
+            case 407:
+                throw new SCA_AuthenticationException("Authentication Required");
+            case 400:
+                throw new SCA_BadRequestException("Bad Request");
+            case 500:
+                throw new SCA_InternalServerErrorException("Internal Server Error");
+            case 405:
+                throw new SCA_MethodNotAllowedException("Method Not Allowed");
+            case 401:
+                throw new SCA_UnauthorizedException("Unauthorized");
+            default:
+                throw new SCA_RuntimeException('enumerate() status code '. $response_http_code . ' when 200 expected');
             }
-
-        }
         } else {
 
             return $sdo;

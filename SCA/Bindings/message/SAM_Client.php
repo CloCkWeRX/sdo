@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * +-----------------------------------------------------------------------------+
  * | (c) Copyright IBM Corporation 2006, 2007.                                   |
  * | All Rights Reserved.                                                        |
@@ -21,7 +21,8 @@
 +-----------------------------------------------------------------------------+
 */
 
-class SCA_Bindings_message_SAMClient {
+class SCA_Bindings_message_SAMClient
+{
 
     // set to turn-on test mode, then $test_queueborker will be used as the message provider.
     public static $test_mode = false;

@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                         |
 | All Rights Reserved.                                                        |
@@ -26,7 +26,8 @@
 */
 
 
-class SCA_Bindings_restresource_Server {
+class SCA_Bindings_restresource_Server
+{
 
     private $service_wrapper = null;
     private $xml_das         = null;

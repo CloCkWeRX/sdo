@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * +-----------------------------------------------------------------------------+
  * | (c) Copyright IBM Corporation 2006, 2007.                                   |
  * | All Rights Reserved.                                                        |
@@ -24,7 +24,15 @@
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id: Proxy.php 238265 2007-06-22 14:32:40Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 /**
 *
@@ -44,7 +52,8 @@ require_once "SCA/SCA_ReferenceType.php";
 
 
 
-class SCA_Bindings_Jsonrpc_Proxy {
+class SCA_Bindings_Jsonrpc_Proxy
+{
     private $smd_file_name;
     private $jsonrpc_client;
     private $reference_type;
@@ -81,6 +90,11 @@ class SCA_Bindings_Jsonrpc_Proxy {
     /**
      * Not much goes on here but I've followed the pattern of having
      * separate proxy and server classes from the SOAP code just in case
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
      */
     public function __call($method_name, $arguments)
     {

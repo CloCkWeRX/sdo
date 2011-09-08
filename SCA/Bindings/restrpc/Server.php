@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                  |
 | All Rights Reserved.                                                 |
@@ -28,7 +28,8 @@
 require_once "SCA/SCA_Exceptions.php";
 
 
-class SCA_Bindings_restrpc_Server {
+class SCA_Bindings_restrpc_Server
+{
 
     private $service_wrapper = null;
     private $xml_das         = null;

@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * +-----------------------------------------------------------------------------+
  * | (c) Copyright IBM Corporation 2006, 2007.                                   |
  * | All Rights Reserved.                                                        |
@@ -24,12 +24,21 @@
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id: SCA_GenerateSmd.php 235424 2007-05-11 15:53:57Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 require_once 'SCA/SCA_ServiceDescription.php';
 
 
 
-class SCA_GenerateSmd {
+class SCA_GenerateSmd
+{
 
     private static $xmldas;
 

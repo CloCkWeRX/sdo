@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                         |
 | All Rights Reserved.                                                        |
@@ -58,17 +58,17 @@ interface SCA_Bindings_restresource_ResourceTemplate
     public function update($id, $resource);
 
     /**
-     * Deletes the resource for $id 
+     * Deletes the resource for $id
      * returns void
      *
-     **/        
+     **/
     public function delete($id);
 
     /**
-     * Returns a collection of resource id's that this  
+     * Returns a collection of resource id's that this
      * returns void
      *
-     **/ 
+     **/
     public function enumerate();
 }
 

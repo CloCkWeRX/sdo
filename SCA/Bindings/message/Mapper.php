@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * +-----------------------------------------------------------------------------+
  * | (c) Copyright IBM Corporation 2006, 2007.                                   |
  * | All Rights Reserved.                                                        |
@@ -30,13 +30,10 @@
 */
 
 
-class SCA_Bindings_message_Mapper {
+class SCA_Bindings_message_Mapper
+{
 
     protected $xmldas       = null;
-
-    public function __construct()
-    {
-    }
 
     /**
      * Provide access to the XML Data Access Service

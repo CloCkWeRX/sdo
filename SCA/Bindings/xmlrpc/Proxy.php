@@ -41,7 +41,6 @@ require_once "SCA/Bindings/xmlrpc/Das.php";
  * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
  * @link     http://www.osoa.org/display/PHP/
  */
-
 class SCA_Bindings_Xmlrpc_Proxy
 {
 

@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +----------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006, 2007.                            |
 | All Rights Reserved.                                                 |
@@ -19,7 +19,15 @@
 | Author: SL                                                           |
 +----------------------------------------------------------------------+
 $Id: SCA_JsonRpcClient.php 234945 2007-05-04 15:05:53Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 /**
 * SCA JSON-RPC client
@@ -35,7 +43,8 @@ $Id: SCA_JsonRpcClient.php 234945 2007-05-04 15:05:53Z mfp $
 require_once "SDO/DAS/Json.php";
 
 
-class SCA_JsonRpcClient {
+class SCA_JsonRpcClient
+{
 
     // stores the request in testing scenarios so that
     // the test can look at it
@@ -145,6 +154,11 @@ class SCA_JsonRpcClient {
     /**
      * Call the remote JSON service method using CURL to
      * send the HTTP request
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
      */
     public function __call($method_name, $arguments)
     {

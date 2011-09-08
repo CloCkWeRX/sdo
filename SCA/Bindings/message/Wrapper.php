@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * +-----------------------------------------------------------------------------+
  * | (c) Copyright IBM Corporation 2006, 2007.                                   |
  * | All Rights Reserved.                                                        |
@@ -48,7 +48,6 @@ class SCA_Bindings_message_Wrapper
      *
      * And pass the call on to the business method.
      * just like the __call() method in other binding's wrapper class
-     *
      */
     public function onMessage($msg)
     {

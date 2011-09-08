@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * +-----------------------------------------------------------------------------+
  * | (c) Copyright IBM Corporation 2006, 2007.                                   |
  * | All Rights Reserved.                                                        |
@@ -27,7 +27,8 @@ require_once 'SCA/Bindings/message/ServiceDescriptionGenerator.php';
 
 
 
-class SCA_Bindings_message_Proxy {
+class SCA_Bindings_message_Proxy
+{
 
     private $ms_client    = null;
     private $mapper       = null;
@@ -95,7 +96,16 @@ class SCA_Bindings_message_Proxy {
 
     }
 
-    public function __call($method_name, $arguments) {
+    /**
+     * Invoke the method name in the target service.
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
+     */
+    public function __call($method_name, $arguments)
+    {
         SCA::$logger->log('entering');
         SCA::$logger->log("method name = $method_name");
 

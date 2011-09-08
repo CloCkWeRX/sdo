@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2007.                                         |
 | All Rights Reserved.                                                        |
@@ -19,7 +19,15 @@
 | Author: Graham Charters, Caroline Maynard                                   |
 +-----------------------------------------------------------------------------+
 $Id: Proxy.php 254122 2008-03-03 17:56:38Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once 'SCA/SCA_Exceptions.php';
 require_once 'SCA/SCA_Helper.php';
@@ -32,7 +40,8 @@ if (!class_exists('SCA_Bindings_soap_Proxy', false)) {
 }
 
 
-class SCA_Bindings_ebaysoap_Proxy extends SCA_Bindings_soap_Proxy {
+class SCA_Bindings_ebaysoap_Proxy extends SCA_Bindings_soap_Proxy
+{
     protected $sdo_type_handler_class_name = "SCA_Bindings_ebaysoap_Mapper";
 
     public static function dependenciesLoaded() {

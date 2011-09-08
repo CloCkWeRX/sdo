@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                         |
 | All Rights Reserved.                                                        |
@@ -90,6 +90,11 @@ class SCA_Bindings_restrpc_Proxy
 
     /**
      * Call the remote method using CURL to send the HTTP request
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
      */
     public function __call($method_name, $arguments)
     {

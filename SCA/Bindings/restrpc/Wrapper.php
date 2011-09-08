@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006.                                         |
 | All Rights Reserved.                                                        |
@@ -26,7 +26,8 @@
 */
 
 
-class SCA_Bindings_restrpc_Wrapper {
+class SCA_Bindings_restrpc_Wrapper
+{
 
     private $class_name     = null;
     private $class_instance = null;

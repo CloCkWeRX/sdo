@@ -1,33 +1,57 @@
 <?php
-/*
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2007.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Megan Beynon,                                                       |
-|         Caroline Maynard                                                    |
-+-----------------------------------------------------------------------------+
-$Id: ServiceRequestHandler.php 238265 2007-06-22 14:32:40Z mfp $
-*/
+/**
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2007.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Megan Beynon,                                                       |
+ * |         Caroline Maynard                                                    |
+ * +-----------------------------------------------------------------------------+
+ * $Id: ServiceRequestHandler.php 238265 2007-06-22 14:32:40Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
-include 'SCA/Bindings/rss/RssDas.php';
+require_once 'SCA/Bindings/rss/RssDas.php';
 
-class SCA_Bindings_rss_ServiceRequestHandler
+/**
+ * SCA_Bindings_Rss_ServiceRequestHandler
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Rss_ServiceRequestHandler
 {
 
+    /**
+     * Handle
+     *
+     * @param string $calling_component_filename Filename
+     *
+     * @return null
+     */
     public function handle($calling_component_filename)
     {
 
@@ -104,8 +128,9 @@ class SCA_Bindings_rss_ServiceRequestHandler
                     $service_component = SCA::createInstance($class_name);
                     SCA::fillInReferences($service_component);
 
-                    $call_response = call_user_func_array(array(&$service_component,
-                                                   $method), $id);
+                    $call_response = call_user_func_array(
+                        array(&$service_component, $method), $id
+                    );
 
                     SCA::$logger->log("Response from calling the method $method is: $call_response");
                     //TODO: make sure these tests reflect the correct return values.
@@ -117,7 +142,7 @@ class SCA_Bindings_rss_ServiceRequestHandler
                         if ($call_response instanceof SDO_DataObjectImpl) {
                             //if the thing received is an sdo...
                             //convert it to xml
-                            $response_xml = SCA_Bindings_rss_RssDas::toXml($call_response);
+                            $response_xml = SCA_Bindings_Rss_RssDas::toXml($call_response);
                         } else if ($call_response Instanceof Channel) {
                             // TODO: write the mapping from php classes to XML...
                             SCA::$logger->log("TODO: write the mapping from php rss classes to xml.");

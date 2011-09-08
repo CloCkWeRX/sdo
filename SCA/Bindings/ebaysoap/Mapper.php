@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2007.                                         |
 | All Rights Reserved.                                                        |
@@ -24,7 +24,15 @@
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id: Mapper.php 238265 2007-06-22 14:32:40Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 
 class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper

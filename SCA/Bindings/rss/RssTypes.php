@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2007.                                         |
 | All Rights Reserved.                                                        |
@@ -21,7 +21,15 @@
 |         Caroline Maynard                                                    |
 +-----------------------------------------------------------------------------+
 $Id: RssTypes.php 238265 2007-06-22 14:32:40Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 /**
  * To represent an image in RSS
@@ -33,8 +41,17 @@ $Id: RssTypes.php 238265 2007-06-22 14:32:40Z mfp $
  * <xs:element name="height" type="xs:positiveInteger" minOccurs="0" />
  * <xs:element name="description" type="xs:string" minOccurs="0" />
  *
+ *
+ * Request tester
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
  */
-class Image {
+class Image
+{
 
     /**
      * Enter description here...
@@ -86,8 +103,15 @@ class Image {
  * <xs:attribute name="url" type="xs:string"/>
  * <xs:attribute name="length" type="xs:positiveInteger"/>
  * <xs:attribute name="type" type="xs:string"/>
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
  */
-class Enclosure {
+class Enclosure
+{
 
 
     /**
@@ -120,8 +144,15 @@ class Enclosure {
  * <xs:element name="description" type="xs:string" />
  * <xs:element name="name" type="xs:string" />
  * <xs:element name="link" type="urlType" />
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
  */
-class TextInput {
+class TextInput
+{
 
 
     /**
@@ -168,8 +199,15 @@ class TextInput {
  * <xs:element name="guid" type="guidType" minOccurs="0" />
  * <xs:element name="pubDate" type="xs:string" minOccurs="0" />
  * <xs:element name="source" type="sourceType" />
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
  */
-class Item {
+class Item
+{
 
 
     /**
@@ -251,8 +289,14 @@ class Item {
  *   <xs:attribute name="url" type="urlType"/>
  * </xs:extension>
  *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
  */
-class Source {
+class Source
+{
 
 
     /**
@@ -293,9 +337,15 @@ class Source {
  * <xs:element name="skipHours" type="skipHoursType" minOccurs="0" />
  * <xs:element name="skipDays" type="skipDaysType" minOccurs="0" />
  * <xs:element name="item" type="itemType" minOccurs="0" maxOccurs="unbounded" />
-
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
  */
-class Channel {
+class Channel
+{
 
 
     /**
@@ -439,5 +489,3 @@ class Channel {
     public $item;
 
 }
-
-?>
