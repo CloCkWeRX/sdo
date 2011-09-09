@@ -23,12 +23,29 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
-include "SCA/Bindings/restresource/Wrapper.php";
-include "SCA/Bindings/restresource/Server.php";
+require_once "SCA/Bindings/restresource/Wrapper.php";
+require_once "SCA/Bindings/restresource/Server.php";
 
-class SCA_Bindings_restresource_ServiceRequestHandler
+/**
+ * SCA_Bindings_restresource_ServiceRequestHandler
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Restresource_ServiceRequestHandler
 {
     /**
      * Handle

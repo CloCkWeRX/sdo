@@ -1,49 +1,66 @@
 <?php
 /**
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
-+-----------------------------------------------------------------------------+
-*/
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws                                                          |
+ * +-----------------------------------------------------------------------------+
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 /**
-* Proxy for restresource requests. This uses Curl to create the appropriate
-* HTTP request for each of the create, retrieve, update, delete and
-* enumerate functions.
-*
-*/
-
-class SCA_Bindings_restresource_Proxy
+ * Proxy for restresource requests. This uses Curl to create the appropriate
+ * HTTP request for each of the create, retrieve, update, delete and
+ * enumerate functions.
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Restresource_Proxy
 {
-    private $target_url;
-    private $reference_type;
-    private $xml_das;
-    private $type_list;
-    private $received_headers;
-    private $resource_class;
+    protected $target_url;
+    protected $reference_type;
+    protected $xml_das;
+    protected $type_list;
+    protected $received_headers;
+    protected $resource_class;
 
-    public function __construct($target,
-                                $base_path_for_relative_paths,
-                                $binding_config)
+    /**
+     * Proxy constructor
+     *
+     * @param string $target                       Target URI
+     * @param string $base_path_for_relative_paths Base path
+     * @param string $binding_config               Config
+     */
+    public function __construct($target, $base_path_for_relative_paths, $binding_config)
     {
         SCA::$logger->log("Entering constructor");
         $this->target_url = SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
@@ -81,10 +98,10 @@ class SCA_Bindings_restresource_Proxy
     /**
      * create a new resource.
      *
-     * @param $entry can be an sdo or xml string
-     * @return string
+     * @param SDO|string $resource can be an sdo or xml string
      *
-     **/
+     * @return string
+     */
     public function create($resource)
     {
 
@@ -97,8 +114,10 @@ class SCA_Bindings_restresource_Proxy
             if ($this->xml_das !== null) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
             } else {
-                throw new SCA_RuntimeException('Trying to create a resource with SDO but ' .
-                                               'no types specified for reference');
+                throw new SCA_RuntimeException(
+                    'Trying to create a resource with SDO but ' .
+                    'no types specified for reference'
+                );
             }
         } else {
             $xml = $resource;
@@ -124,8 +143,7 @@ class SCA_Bindings_restresource_Proxy
 
         if ($result === false) {
             //TODO placeholder for error handling
-            throw new SCA_RuntimeException(curl_error($handle),
-                                           curl_errno($handle));
+            throw new SCA_RuntimeException(curl_error($handle), curl_errno($handle));
         }
 
         $response_http_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
@@ -146,9 +164,9 @@ class SCA_Bindings_restresource_Proxy
      * retrieve an existing resource.
      *
      * @param string $id the resource id to retrieve
-     * @return string
      *
-     **/
+     * @return string
+     */
     public function retrieve($id)
     {
 
@@ -183,11 +201,11 @@ class SCA_Bindings_restresource_Proxy
     /**
      * update an existing resource.
      *
-     * @param string $id the resource id to retrieve
-     * @param sdo    $sdo the updated resource
-     * @return boolean
+     * @param string $id       the resource id to retrieve
+     * @param SDO    $resource the updated resource
      *
-     **/
+     * @return boolean
+     */
     public function update($id, $resource)
     {
         SCA::$logger->log("Entering update()");
@@ -197,8 +215,10 @@ class SCA_Bindings_restresource_Proxy
             if ($this->xml_das !== null) {
                 $xml = SCA_Helper::sdoToXml($this->xml_das, $resource);
             } else {
-                throw new SCA_RuntimeException('Trying to update a resource with SDO but ' .
-                                               'no types specified for reference');
+                throw new SCA_RuntimeException(
+                    'Trying to update a resource with SDO but ' .
+                    'no types specified for reference'
+                );
             }
         } else {
             $xml = $resource;
@@ -237,10 +257,10 @@ class SCA_Bindings_restresource_Proxy
     /**
      * delete an existing resource.
      *
-     * @param string $id the resource id to delte
-     * @return boolean
+     * @param string $id the resource id to delete
      *
-     **/
+     * @return bool
+     */
     public function delete($id)
     {
 
@@ -276,8 +296,7 @@ class SCA_Bindings_restresource_Proxy
      * get all of the existing resources.
      *
      * @return an SDO representing the collection
-     *
-     **/
+     */
     public function enumerate()
     {
 
@@ -315,8 +334,13 @@ class SCA_Bindings_restresource_Proxy
      * Allows the reference user to create a data object
      * based on a type that is expected to form part of
      * a message to reference
+     *
+     * @param string $namespace_uri Namespace URI
+     * @param string $type_name     Type name
+     *
+     * @return SDO
      */
-    public function createDataObject($namespace_uri, $type_name )
+    public function createDataObject($namespace_uri, $type_name)
     {
         SCA::$logger->log("Entering");
         try {
@@ -330,19 +354,23 @@ class SCA_Bindings_restresource_Proxy
     }
 
 
-    /*
-    * Callback set by CURL_HEADERFUNCTION
-    * Receives header lines from the response.
-    */
-    private function _headerCallback ($handle, $header)
+    /**
+     * Callback set by CURL_HEADERFUNCTION
+     * Receives header lines from the response.
+     *
+     * @param string $handle Handle
+     * @param string $header Header
+     *
+     * @return int
+     */
+    private function _headerCallback($handle, $header)
     {
         SCA::$logger->log("Entering");
         SCA::$logger->log("header = $header");
         /* split the header on the first : */
         $split_header = preg_split('/\s*:\s*/', trim($header), 2);
         if (count($split_header) > 1) {
-            $this->received_headers[strtoupper($split_header[0])] =
-            $split_header[1];
+            $this->received_headers[strtoupper($split_header[0])] = $split_header[1];
         } else if (!empty($split_header[0])) {
             $this->received_headers[] = $split_header[0];
         }
@@ -351,7 +379,18 @@ class SCA_Bindings_restresource_Proxy
     }
 
 
-    private function buildResponseException($response_http_code, $expected_response_code) {
+    /**
+     * Allows the reference user to create a data object
+     * based on a type that is expected to form part of
+     * a message to reference
+     *
+     * @param string $response_http_code     Response code
+     * @param string $expected_response_code Expected response code
+     *
+     * @return Exception
+     */
+    protected function buildResponseException($response_http_code, $expected_response_code)
+    {
         $return_exception = null;
 
         //Create SCA exceptions based on the HTTP response code.
@@ -359,37 +398,39 @@ class SCA_Bindings_restresource_Proxy
             SCA::$logger->log("HTTP error $response_http_code in proxy");
 
             switch($response_http_code) {
-                case 503:
-                    $return_exception = new SCA_ServiceUnavailableException("Service Unavailable");
-                    break;
-                case 409:
-                    $return_exception = new SCA_ConflictException("Conflict");
-                    break;
-                case 407:
-                    $return_exception = new SCA_AuthenticationException("Authentication Required");
-                    break;
-                case 400:
-                    $return_exception = new SCA_BadRequestException("Bad Request");
-                    break;
-                case 500:
-                    $return_exception = new SCA_InternalServerErrorException("Internal Server Error");
-                    break;
-                case 405:
-                    $return_exception = new SCA_MethodNotAllowedException("Method Not Allowed");
-                    break;
-                case 401:
-                    $return_exception = new SCA_UnauthorizedException("Unauthorized");
-                    break;
-                case 404:
-                    $return_exception = new SCA_NotFoundException("Resource not found");
-                    break;
-                default:
-                    $return_exception = new SCA_RuntimeException('status code '.
-                                                                 $response_http_code .
-                                                                 ' found ' .
-                                                                 $expected_response_code .
-                                                                 ' expected');
-                    break;
+            case 503:
+                $return_exception = new SCA_ServiceUnavailableException("Service Unavailable");
+                break;
+            case 409:
+                $return_exception = new SCA_ConflictException("Conflict");
+                break;
+            case 407:
+                $return_exception = new SCA_AuthenticationException("Authentication Required");
+                break;
+            case 400:
+                $return_exception = new SCA_BadRequestException("Bad Request");
+                break;
+            case 500:
+                $return_exception = new SCA_InternalServerErrorException("Internal Server Error");
+                break;
+            case 405:
+                $return_exception = new SCA_MethodNotAllowedException("Method Not Allowed");
+                break;
+            case 401:
+                $return_exception = new SCA_UnauthorizedException("Unauthorized");
+                break;
+            case 404:
+                $return_exception = new SCA_NotFoundException("Resource not found");
+                break;
+            default:
+                $return_exception = new SCA_RuntimeException(
+                    'status code '.
+                    $response_http_code .
+                    ' found ' .
+                    $expected_response_code .
+                    ' expected'
+                );
+                break;
             }
         }
         return $return_exception;

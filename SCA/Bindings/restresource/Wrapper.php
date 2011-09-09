@@ -23,21 +23,38 @@
 |         Caroline Maynard,                                                   |
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
+/**
+ * Wrapper
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Restresource_Wrapper
+{
 
-class SCA_Bindings_restresource_Wrapper {
-
-    private $class_name     = null;
-    private $class_instance = null;
-    private $xml_das        = null;
+    protected $class_name     = null;
+    protected $class_instance = null;
+    protected $xml_das        = null;
 
     /**
      * Create the service wrapper for an SCA Component. In the event that the
      * mapping of the SCA Component methods the base_class and xmldas types are
      * set to null.
      *
-     * @param string $class_name
+     * @param string $class_name Class name
      */
     public function __construct($class_name)
     {
@@ -56,14 +73,25 @@ class SCA_Bindings_restresource_Wrapper {
 
         SCA::$logger->log("Exiting Constructor");
 
-    }/* End service wrapper constructor  */
+    }
 
-
+    /**
+     * Get XML DAS
+     *
+     * @return XML_DAS
+     */
     public function getXmlDas()
     {
         return $this->xml_das;
     }
 
+    /**
+     * Determine parameters for method
+     *
+     * @param string $method_name method to call
+     *
+     * @return mixed
+     */
     public function getParametersForMethod($method_name)
     {
         $reader              = new SCA_AnnotationReader($this->class_instance);
@@ -86,8 +114,13 @@ class SCA_Bindings_restresource_Wrapper {
      * Then pass to the method
      * Then wrap the return value back into an SDO. The element name is ...Response with a
      * property ...Return which contains the return value.
-    */
-    public function __call($method_name, $arguments=null)
+     *
+     * @param string $method_name Method
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
+     */
+    public function __call($method_name, $arguments = null)
     {
         SCA::$logger->log("Entering __call");
         SCA::$logger->log("about to call method $method_name on $this->class_name");
@@ -96,15 +129,17 @@ class SCA_Bindings_restresource_Wrapper {
         //allowing null so that method that takes no args can be called
 
         SCA::$logger->log("About to do call_user_func_array with method $method_name and arguments $arguments \n");
-        $return = call_user_func_array(array(&$this->class_instance,
-                                             $method_name),
-                                       $arguments);
+        $return = call_user_func_array(
+            array(&$this->class_instance, $method_name),
+            $arguments
+        );
+
         SCA::$logger->log("Got return back from call_user_func_array: $return");
 
         SCA::$logger->log("Exiting __call");
 
         return $return;
-    }/* End of call function                                                  */
+    }
 
-}/* End Service Wrapper class                                                 */
+}
 
