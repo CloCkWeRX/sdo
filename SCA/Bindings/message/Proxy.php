@@ -187,6 +187,12 @@ class SCA_Bindings_message_Proxy
         //SCA::$logger->log('entering');
     }
 
+    /**
+     * @param string $namespace_uri Namespace identifying the xsd
+     * @param string $type_name     Element being reference in the xsd
+     *
+     * @return object                Empty Data Object structure
+     */
     public function createDataObject($namespace_uri, $type_name)
     {
         try {

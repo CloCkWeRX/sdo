@@ -88,6 +88,13 @@ class SCA_ServiceWrapperJson
         return $this->json_das;
     }
 
+    /**
+     * Determine parameters for method
+     *
+     * @param string $method_name method to call
+     *
+     * @return mixed
+     */
     public function getParametersForMethod($method_name)
     {
         $reader              = new SCA_AnnotationReader($this->instance_of_the_base_class);

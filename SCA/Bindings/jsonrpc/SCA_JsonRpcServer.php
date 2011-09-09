@@ -52,6 +52,8 @@ class SCA_JsonRpcServer
     /**
      * Constructor - create a JSON RPC server to call the
      *               provided service wrapper
+     *
+     * @param mixed $wrapper Wrapper
      */
     public function __construct($wrapper)
     {

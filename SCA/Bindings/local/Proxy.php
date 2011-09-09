@@ -24,9 +24,9 @@
  * |         Simon Laws                                                          |
  * +-----------------------------------------------------------------------------+
  * $Id: Proxy.php 238265 2007-06-22 14:32:40Z mfp $
- * 
+ *
  * PHP Version 5
- * 
+ *
  * @category SCA_SDO
  * @package  SCA_SDO
  * @author   Matthew Peters <mfp@php.net>
@@ -96,7 +96,7 @@ class SCA_Bindings_Local_Proxy
      * moment.
      *
      * @param mixed $reference_type Reference Type
-     * 
+     *
      * @return null
      */
     public function addReferenceType($reference_type)

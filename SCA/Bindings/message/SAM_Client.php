@@ -55,8 +55,9 @@ class SCA_Bindings_message_SAMClient
 
     /**
      * Constructor -
+     *
      * @param $wrapper instance of the wrapper
-     *               which should implement an onMessage method
+     *                 which should implement an onMessage method
      */
     public function __construct($wrapper)
     {

@@ -543,7 +543,7 @@ class SCA
      *
      * @return object                Empty Data Object structure
      */
-    public static function createDataObject($namespace_uri, $type_name )
+    public static function createDataObject($namespace_uri, $type_name)
     {
         // Find out who/what called this function so that the type annotations
         // that define the xml used to create a 'das' can be scanned.

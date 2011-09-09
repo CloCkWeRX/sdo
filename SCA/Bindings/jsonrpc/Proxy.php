@@ -62,6 +62,10 @@ class SCA_Bindings_Jsonrpc_Proxy
     /**
      * Constructor - create a JRON RPC proxy based on the full pathname of
      *               an SMD file
+     *
+     * @param string $target                       Target URI
+     * @param string $base_path_for_relative_paths Base path
+     * @param string $binding_config               Config
      */
     public function __construct($target, $base_path_for_relative_paths, $binding_config)
     {
