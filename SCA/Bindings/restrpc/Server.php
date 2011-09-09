@@ -1,40 +1,59 @@
 <?php
 /**
-+----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                  |
-| All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+
-|                                                                      |
-| Licensed under the Apache License, Version 2.0 (the "License"); you  |
-| may not use this file except in compliance with the License. You may |
-| obtain a copy of the License at                                      |
-| http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      |
-| Unless required by applicable law or agreed to in writing, software  |
-| distributed under the License is distributed on an "AS IS" BASIS,    |
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
-| implied. See the License for the specific language governing         |
-| permissions and limitations under the License.                       |
-+----------------------------------------------------------------------+
-| Author: Graham Charters,                                             |
-|         Matthew Peters,                                              |
-|         Megan Beynon,                                                |
-|         Chris Miller,                                                |
-|         Caroline Maynard,                                            |
-|         Simon Laws                                                   |
-+----------------------------------------------------------------------+
-*/
-
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters,                                                    |
+ * |         Matthew Peters,                                                     |
+ * |         Megan Beynon,                                                       |
+ * |         Chris Miller,                                                       |
+ * |         Caroline Maynard,                                                   |
+ * |         Simon Laws                                                          |
+ * +-----------------------------------------------------------------------------+
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 require_once "SCA/SCA_Exceptions.php";
 
-
-class SCA_Bindings_restrpc_Server
+/**
+ * Server
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Matthew Peters <mfp@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Restrpc_Server
 {
 
-    private $service_wrapper = null;
-    private $xml_das         = null;
+    protected $service_wrapper = null;
+    protected $xml_das         = null;
 
-
+    /**
+     * Constructor
+     *
+     * @param mixed $wrapper Wrapper
+     */
     public function __construct($wrapper)
     {
         SCA::$logger->log("Entering constructor");
@@ -66,7 +85,7 @@ class SCA_Bindings_restrpc_Server
 
             $verb = $_SERVER['REQUEST_METHOD'];
 
-             if ($verb === 'POST') {
+            if ($verb === 'POST') {
                 SCA::$logger->log("Processing POST");
 
                 // decide what the input type is and pull out the
@@ -173,8 +192,14 @@ class SCA_Bindings_restrpc_Server
     /**
      * extract an array of simply type parameters from the incoming
      * POST or GET request
+     *
+     * @param array $request                Request
+     * @param array $parameter_descriptions Description
+     *
+     * @return array
      */
-    private function fromRequest($request, $parameter_descriptions) {
+    protected function fromRequest($request, $parameter_descriptions)
+    {
 
         $param_array = array();
 
@@ -201,7 +226,15 @@ class SCA_Bindings_restrpc_Server
         return $param_array;
     }
 
-    private function fromXml($xml) {
+    /**
+     * From XML
+     *
+     * @param string $xml XML
+     *
+     * @return mixed
+     */
+    protected function fromXml($xml)
+    {
         try {
             $doc = $this->xml_das->loadString($xml);
             $sdo = $doc->getRootDataObject();
@@ -209,15 +242,24 @@ class SCA_Bindings_restrpc_Server
             $param_array = array($sdo);
             return $param_array;
         } catch (Exception $e) {
-            SCA::$logger->log("Found exception in SCA_Binidings_restrpc_Server ".
-                              "convertind xml to sdo: ".
-                              $e->getMessage()."\n");
+            SCA::$logger->log(
+                "Found exception in SCA_Binidings_restrpc_Server " .
+                "convertind xml to sdo: ".
+                $e->getMessage()."\n"
+            );
 
             return $e->getMessage();
         }
     }
 
-    private function toXml($sdo)
+    /**
+     * To XML
+     *
+     * @param SDO $sdo SDO
+     *
+     * @return mixed
+     */
+    protected function toXml($sdo)
     {
         try{
             $type   = $sdo->getTypeName();
@@ -226,9 +268,12 @@ class SCA_Bindings_restrpc_Server
             return $xmlstr;
         }
         catch(Exception $e) {
-            SCA::$logger->log("Found exception in SCA_Binidings_restrpc_Server ".
-                              "converting sdo to xml".
-                              $e->getMessage()."\n");
+            SCA::$logger->log(
+                "Found exception in SCA_Bindings_restrpc_Server ".
+                "converting sdo to xml".
+                $e->getMessage()."\n"
+            );
+
             return $e->getMessage();
         }
     }

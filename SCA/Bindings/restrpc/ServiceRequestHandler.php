@@ -23,6 +23,7 @@
  * |         Caroline Maynard,                                                   |
  * |         Simon Laws                                                          |
  * +-----------------------------------------------------------------------------+
+ *
  * PHP Version 5
  *
  * @category SCA
@@ -67,5 +68,3 @@ class SCA_Bindings_Restrpc_ServiceRequestHandler
         $server->handle();
     }
 }
-
-?>

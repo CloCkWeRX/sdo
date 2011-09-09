@@ -1,59 +1,65 @@
 <?php
 /**
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2006.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters,                                                    |
-|         Matthew Peters,                                                     |
-|         Megan Beynon,                                                       |
-|         Chris Miller,                                                       |
-|         Caroline Maynard,                                                   |
-|         Simon Laws                                                          |
-+-----------------------------------------------------------------------------+
-*/
-
-/**
-*
-* TODO: think about the name 'proxy' : proxy for what? 'for a service that is
-* going to be called locally.' or remotely.
-* do we like the word proxy?
-*
-*/
-
+ * +----------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2006.                                  |
+ * | All Rights Reserved.                                                 |
+ * +----------------------------------------------------------------------+
+ * |                                                                      |
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you  |
+ * | may not use this file except in compliance with the License. You may |
+ * | obtain a copy of the License at                                      |
+ * | http://www.apache.org/licenses/LICENSE-2.0                           |
+ * |                                                                      |
+ * | Unless required by applicable law or agreed to in writing, software  |
+ * | distributed under the License is distributed on an "AS IS" BASIS,    |
+ * | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+ * | implied. See the License for the specific language governing         |
+ * | permissions and limitations under the License.                       |
+ * +----------------------------------------------------------------------+
+ * | Author: Rajini Sivaram, Simon Laws                                   |
+ * +----------------------------------------------------------------------+
+ * $Id: Server.php 234945 2007-05-04 15:05:53Z mfp $
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 require_once "SCA/SCA_Exceptions.php";
 
 /**
-*
-*
-*/
-
-
-
-class SCA_Bindings_restrpc_Proxy
+ * SCA_Bindings_Restrpc_Proxy
+ *
+ * TODO: think about the name 'proxy' : proxy for what? 'for a service that is
+ * going to be called locally.' or remotely.
+ * do we like the word proxy?
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Restrpc_Proxy
 {
-    private $target_url;
-    private $reference_type;
-    private $xml_das;
-    private $type_list;
-    private $received_headers;
+    protected $target_url;
+    protected $reference_type;
+    protected $xml_das;
+    protected $type_list;
+    protected $received_headers;
 
-    public function __construct($target,
-                                $base_path_for_relative_paths,
-                                $binding_config)
+    /**
+     * Proxy constructor
+     *
+     * @param string $target                       Target URI
+     * @param string $base_path_for_relative_paths Base path
+     * @param string $binding_config               Config
+     */
+    public function __construct($target, $base_path_for_relative_paths, $binding_config)
     {
         SCA::$logger->log("Entering constructor");
         $this->target_url = SCA_Helper::constructAbsoluteTarget($target, $base_path_for_relative_paths);
@@ -111,16 +117,17 @@ class SCA_Bindings_restrpc_Proxy
 
         // Look to see if we have an SDO, i.e. convert to XML and do a POST
         // or just simple type params, i.e. represent as URL params and do a GET
-        if (count($arguments) == 1 &&
-             is_object($arguments[0])) {
+        if (count($arguments) == 1 && is_object($arguments[0])) {
             // looks like its a single SDO so convert to XML
             $obj = $arguments[0];
 
             if ($obj instanceof SDO_DataObjectImpl) {
                 $body = $this->toXml($entry);
             } else {
-                throw new SCA_RuntimeException("Argument 0 to $method_name of type php object found. " .
-                                               "Arguments must be either primitives or a single SDO");
+                throw new SCA_RuntimeException(
+                    "Argument 0 to $method_name of type php object found. " .
+                    "Arguments must be either primitives or a single SDO"
+                );
             }
 
             curl_setopt($request, CURLOPT_POST, true);
@@ -135,11 +142,15 @@ class SCA_Bindings_restrpc_Proxy
                 if ($argument == null) {
                     // ignore null parameters
                 } else if (is_object($argument)) {
-                    throw new SCA_RuntimeException("Argument $argument_id to $method_name of type object found. " .
-                                                   "Arguments must be either primitives or a single SDO");
+                    throw new SCA_RuntimeException(
+                        "Argument $argument_id to $method_name of type object found. " .
+                        "Arguments must be either primitives or a single SDO"
+                    );
                 } else if (is_array($argument)) {
-                    throw new SCA_RuntimeException("Argument $argument_id to $method_name of type array found. " .
-                                                   "Arguments must be either primitives or SDOs");
+                    throw new SCA_RuntimeException(
+                        "Argument $argument_id to $method_name of type array found. " .
+                        "Arguments must be either primitives or SDOs"
+                    );
                 } else {
                     $body = $body . "param" . $argument_id . "=" . urlencode($argument);
                 }
@@ -165,8 +176,9 @@ class SCA_Bindings_restrpc_Proxy
         $response = curl_exec($request);
 
         // TODO probably need a better way of detecting PHP errors at the far end
-        if (strchr($response,'<b>Fatal error</b>') !== false
-            || strchr($response,'<b>Parse error</b>') !== false) {
+        if (strchr($response, '<b>Fatal error</b>') !== false
+            || strchr($response, '<b>Parse error</b>') !== false
+        ) {
             SCA::$logger->log('Bad response from restrpc call: ' . $response);
             throw new SCA_RuntimeException('Bad response from restrpc call: ' . $response);
         }
@@ -180,36 +192,41 @@ class SCA_Bindings_restrpc_Proxy
 
         // test the response status
         if ($response == null || $response == false) {
-            SCA::$logger->log("restrpc call to $this->target_url for method " .
-                                           "$method_name failed ");
-            throw new SCA_RuntimeException("restrpc call to $this->target_url for method " .
-                                           "$method_name failed ");
+            SCA::$logger->log(
+                "restrpc call to $this->target_url for method " .
+                "$method_name failed "
+            );
+
+            throw new SCA_RuntimeException(
+                "restrpc call to $this->target_url for method " .
+                "$method_name failed "
+            );
         }
 
         // test the response status
         if ($response_http_code != 200) {
 
-            switch($response_http_code) {
-                case 503:
-                    //TODO: pick out the message from the response if there is one
-                    //for now just pass back a one liner.
-                    throw new SCA_ServiceUnavailableException("Target service $url - Service Unavailable");
-                case 409:
-                    throw new SCA_ConflictException("Target service $url - Conflict");
-                case 407:
-                    throw new SCA_AuthenticationException("Target service $url - Authentication Required");
-                case 400:
-                    throw new SCA_BadRequestException("Target service $url - Bad Request");
-                case 500:
-                    throw new SCA_InternalServerErrorException("Target service $url - Internal Server Error");
-                case 405:
-                    throw new SCA_MethodNotAllowedException("Target service $url - Method Not Allowed");
-                case 401:
-                    throw new SCA_UnauthorizedException("Target service $url - Unauthorized");
-                case 404:
-                    throw new SCA_NotFoundException("Target service $url - not found");
-                default:
-                    throw new SCA_RuntimeException("Target service $url - status code $response_http_code when 200 expected");
+            switch ($response_http_code) {
+            case 503:
+                //TODO: pick out the message from the response if there is one
+                //for now just pass back a one liner.
+                throw new SCA_ServiceUnavailableException("Target service $url - Service Unavailable");
+            case 409:
+                throw new SCA_ConflictException("Target service $url - Conflict");
+            case 407:
+                throw new SCA_AuthenticationException("Target service $url - Authentication Required");
+            case 400:
+                throw new SCA_BadRequestException("Target service $url - Bad Request");
+            case 500:
+                throw new SCA_InternalServerErrorException("Target service $url - Internal Server Error");
+            case 405:
+                throw new SCA_MethodNotAllowedException("Target service $url - Method Not Allowed");
+            case 401:
+                throw new SCA_UnauthorizedException("Target service $url - Unauthorized");
+            case 404:
+                throw new SCA_NotFoundException("Target service $url - not found");
+            default:
+                throw new SCA_RuntimeException("Target service $url - status code $response_http_code when 200 expected");
             }
         }
 
@@ -229,6 +246,11 @@ class SCA_Bindings_restrpc_Proxy
      * Allows the reference user to create a data object
      * based on a type that is expected to form part of
      * a message to reference
+     *
+     * @param string $namespace_uri Namespace identifying the xsd
+     * @param string $type_name     Element being reference in the xsd
+     *
+     * @return object                Empty Data Object structure
      */
     public function createDataObject($namespace_uri, $type_name)
     {
@@ -242,7 +264,16 @@ class SCA_Bindings_restrpc_Proxy
         return null;
     }
 
-    private function fromXml($xml) {
+
+    /**
+     * From XML
+     *
+     * @param string $xml XML
+     *
+     * @return mixed
+     */
+    protected function fromXml($xml)
+    {
         SCA::$logger->log("Entering");
         try{
             $doc = $this->xml_das->loadString($xml);
