@@ -35,40 +35,51 @@ $Id: Mapper.php 238265 2007-06-22 14:32:40Z mfp $
  */
 
 
-class SCA_Bindings_ebaysoap_Mapper extends SCA_Bindings_soap_Mapper
+/**
+ * SCA_Bindings_ebaysoap_Mapper
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Ebaysoap_Mapper extends SCA_Bindings_Soap_Mapper
 {
-   /**
+    /**
      * Load the WSDL and hence initialise the SDO model
      *
-     * @param string $wsdl
-     * @throws  SCA_RuntimeException
+     * @param string $wsdl WSDL
+     *
+     * @throws SCA_RuntimeException
+     * @return null
      */
     public function setWSDLTypes($wsdl)
     {
         SCA::$logger->log('Entering');
         SCA::$logger->log("wsdl is $wsdl");
         try {
-            $this->xmldas = @SDO_DAS_XML::create($wsdl,"WEARETHEEBAYSOAPBINDING");
+            $this->xmldas = @SDO_DAS_XML::create($wsdl, "WEARETHEEBAYSOAPBINDING");
         } catch (Exception $e) {
             $problem = $e->getMessage();
             SCA::$logger->log("exception thrown from create(): $problem");
 
 
-            if ($e instanceof SDO_Exception )
-            $problem = "SDO_Exception in setWSDLTypes : " . $problem;
+            if ($e instanceof SDO_Exception ) {
+                $problem = "SDO_Exception in setWSDLTypes : " . $problem;
+            }
 
             /**
-                 * Depending on whether the function is being used on the
-                 * client side or the server side either report the problem
-                 * to the client, or record the problem in the error.log
-                 */
+             * Depending On Whether The Function Is Being Used On The
+             * Client Side Or The Server Side Either Report The Problem
+             * To The Client, Or Record The Problem In The Error.Log
+             */
             trigger_error($problem);
 
             /* When the 'TypeHandler is being used by the Soap Server */
-            if (strcmp($this->association, self::SERVER) === 0 )
-            throw new SoapFault("Client", "Invalid WSDL Type");
+            if (strcmp($this->association, self::SERVER) === 0) {
+                throw new SoapFault("Client", "Invalid WSDL Type");
+            }
         }
-
     }
-
-}/* End instance check                                                         */
+}

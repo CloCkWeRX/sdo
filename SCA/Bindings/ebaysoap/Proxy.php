@@ -1,24 +1,24 @@
 <?php
 /**
-+-----------------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2007.                                         |
-| All Rights Reserved.                                                        |
-+-----------------------------------------------------------------------------+
-| Licensed under the Apache License, Version 2.0 (the "License"); you may not |
-| use this file except in compliance with the License. You may obtain a copy  |
-| of the License at -                                                         |
-|                                                                             |
-|                   http://www.apache.org/licenses/LICENSE-2.0                |
-|                                                                             |
-| Unless required by applicable law or agreed to in writing, software         |
-| distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
-| WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
-| See the License for the specific language governing  permissions and        |
-| limitations under the License.                                              |
-+-----------------------------------------------------------------------------+
-| Author: Graham Charters, Caroline Maynard                                   |
-+-----------------------------------------------------------------------------+
-$Id: Proxy.php 254122 2008-03-03 17:56:38Z mfp $
+ * +-----------------------------------------------------------------------------+
+ * | (c) Copyright IBM Corporation 2007.                                         |
+ * | All Rights Reserved.                                                        |
+ * +-----------------------------------------------------------------------------+
+ * | Licensed under the Apache License, Version 2.0 (the "License"); you may not |
+ * | use this file except in compliance with the License. You may obtain a copy  |
+ * | of the License at -                                                         |
+ * |                                                                             |
+ * |                   http://www.apache.org/licenses/LICENSE-2.0                |
+ * |                                                                             |
+ * | Unless required by applicable law or agreed to in writing, software         |
+ * | distributed under the License is distributed on an "AS IS" BASIS, WITHOUT   |
+ * | WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.            |
+ * | See the License for the specific language governing  permissions and        |
+ * | limitations under the License.                                              |
+ * +-----------------------------------------------------------------------------+
+ * | Author: Graham Charters, Caroline Maynard                                   |
+ * +-----------------------------------------------------------------------------+
+ * $Id: Proxy.php 254122 2008-03-03 17:56:38Z mfp $
  *
  * PHP Version 5
  *
@@ -35,16 +35,30 @@ require_once 'SCA/Bindings/soap/Proxy.php';
 require_once 'SCA/Bindings/ebaysoap/Mapper.php';
 
 if (!class_exists('SCA_Bindings_soap_Proxy', false)) {
-	trigger_error("Cannot use SCA ebay soap binding as the SCA soap binding is not loaded",E_USER_WARNING);
-	return;
+    trigger_error("Cannot use SCA ebay soap binding as the SCA soap binding is not loaded", E_USER_WARNING);
+    return;
 }
 
-
-class SCA_Bindings_ebaysoap_Proxy extends SCA_Bindings_soap_Proxy
+/**
+ * SCA_Bindings_ebaysoap_Proxy
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
+class SCA_Bindings_Ebaysoap_Proxy extends SCA_Bindings_Soap_Proxy
 {
     protected $sdo_type_handler_class_name = "SCA_Bindings_ebaysoap_Mapper";
 
-    public static function dependenciesLoaded() {
+    /**
+     * Determine if dependencies are available
+     *
+     * @return bool
+     */
+    public static function dependenciesLoaded()
+    {
         $dependenciesLoaded = false;
 
         if (extension_loaded('openssl')) {
@@ -54,17 +68,22 @@ class SCA_Bindings_ebaysoap_Proxy extends SCA_Bindings_soap_Proxy
         return $dependenciesLoaded;
     }
 
-    public function __construct($target, $base_path_for_relative_paths,
-                                $binding_config) {
+    /**
+     * Proxy constructor
+     *
+     * @param string $target                       Target URI
+     * @param string $base_path_for_relative_paths Base path
+     * @param string $binding_config               Config
+     */
+    public function __construct($target, $base_path_for_relative_paths, $binding_config)
+    {
         SCA::$logger->log('Entering');
         if (!SCA_Bindings_ebaysoap_Proxy::dependenciesLoaded()) {
             SCA::$logger->log('eBay soap binding requires the openssl extension, but it is not loaded.');
             throw new SCA_RuntimeException('eBay soap binding requires the openssl extension, but it is not loaded.');
         }
 
-        $binding_config =
-            SCA_Helper::mergeBindingIniAndConfig($binding_config,
-                                                 $base_path_for_relative_paths);
+        $binding_config = SCA_Helper::mergeBindingIniAndConfig($binding_config, $base_path_for_relative_paths);
 
         // Check that all the required configuration has been provided
         if (!key_exists('siteid', $binding_config) || empty($binding_config['siteid'])) {
@@ -103,7 +122,16 @@ class SCA_Bindings_ebaysoap_Proxy extends SCA_Bindings_soap_Proxy
         SCA::$logger->log('Leaving');
     }
 
-    public function __call($method_name, $arguments) {
+    /**
+     * Call
+     *
+     * @param string $method_name Method name
+     * @param array  $arguments   Arguments
+     *
+     * @return mixed
+     */
+    public function __call($method_name, $arguments)
+    {
         SCA::$logger->log('Entering');
 
         // Build up the Url Query String Paramters
@@ -115,17 +143,21 @@ class SCA_Bindings_ebaysoap_Proxy extends SCA_Bindings_soap_Proxy
         parent::__setQueryParams($query_params);
 
         // Build up the security header
-        $requester_credentials =
-        $this->createDataObject('urn:ebay:apis:eBLBaseComponents',
-        'CustomSecurityHeaderType');
+        $requester_credentials = $this->createDataObject('urn:ebay:apis:eBLBaseComponents', 'CustomSecurityHeaderType');
+
         $requester_credentials->eBayAuthToken = $this->config['authtoken'];
+
         $credentials = $requester_credentials->createDataObject('Credentials');
+
         $credentials->AppId    = $this->config['appid'];
         $credentials->DevId    = $this->config['devid'];
         $credentials->AuthCert = $this->config['authcert'];
-        parent::__setSoapHeader($requester_credentials,
-        'urn:ebay:apis:eBLBaseComponents',
-        'RequesterCredentials');
+
+        parent::__setSoapHeader(
+            $requester_credentials,
+            'urn:ebay:apis:eBLBaseComponents',
+            'RequesterCredentials'
+        );
 
         $return = parent::__call($method_name, $arguments);
         return $return;
