@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 +-----------------------------------------------------------------------------+
 | (c) Copyright IBM Corporation 2006, 2007.                                   |
 | All Rights Reserved.                                                        |
@@ -24,7 +24,15 @@
 |         Simon Laws                                                          |
 +-----------------------------------------------------------------------------+
 $Id: SCA_LogFactory.php 254122 2008-03-03 17:56:38Z mfp $
-*/
+ *
+ * PHP Version 5
+ *
+ * @category SCA
+ * @package  SCA_SDO
+ * @author   Simon Laws <slaws@php.net>
+ * @license  Apache http://www.apache.org/licenses/LICENSE-2.0
+ * @link     http://www.osoa.org/display/PHP/
+ */
 
 /**
  * Purpose:
