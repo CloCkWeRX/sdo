@@ -153,7 +153,7 @@ public:
     virtual SDO_API void insert (unsigned int index, const SDODate d) = 0;
     virtual SDO_API void append (const SDODate d) = 0;
 
-#if __WORDSIZE !=64
+#if 32 !=64
     virtual SDO_API void insert (unsigned int index, long d) = 0;
     virtual SDO_API void append (long d) = 0;
 #endif

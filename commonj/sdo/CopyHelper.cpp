@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- *   
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -60,7 +60,7 @@ namespace sdo{
         case Type::CharacterType:
             to->setCharacter( p, from->getCharacter(p));
             break;
-        case Type::IntegerType: 
+        case Type::IntegerType:
             to->setInteger( p, from->getInteger(p));
             break;
         case Type::ShortType:
@@ -78,8 +78,8 @@ namespace sdo{
         case Type::DateType:
             to->setDate( p, from->getDate(p));
             break;
-        case Type::BigDecimalType: 
-        case Type::BigIntegerType: 
+        case Type::BigDecimalType:
+        case Type::BigIntegerType:
         case Type::UriType:
         case Type::StringType:
             {
@@ -135,12 +135,12 @@ namespace sdo{
             case Type::CharacterType:
                 to.append(from.getCharacter(i));
                 break;
-#if __WORDSIZE ==64
-            case Type::IntegerType: 
+#if 32 ==64
+            case Type::IntegerType:
                 to.append((int64_t)(from.getInteger(i)));
                 break;
 #else
-            case Type::IntegerType: 
+            case Type::IntegerType:
                 to.append(from.getInteger(i));
                 break;
 #endif
@@ -159,13 +159,13 @@ namespace sdo{
             case Type::DateType:
                 to.append(from.getDate(i));
                 break;
-            case Type::BigDecimalType: 
-            case Type::BigIntegerType: 
+            case Type::BigDecimalType:
+            case Type::BigIntegerType:
             case Type::UriType:
             case Type::StringType:
                 {
                     unsigned int siz = from.getLength(i);
-                    if (siz > 0) 
+                    if (siz > 0)
                     {
                         wchar_t * buf = new wchar_t[siz];
                         from.getString(i,buf,siz);
@@ -183,7 +183,7 @@ namespace sdo{
             case Type::BytesType:
                 {
                     unsigned int siz = from.getLength(i);
-                    if (siz > 0) 
+                    if (siz > 0)
                     {
                         char * buf = new char[siz];
                         from.getBytes(i,buf,siz);
@@ -219,7 +219,7 @@ namespace sdo{
         case Type::CharacterType:
             to->addCharacter( p, from->getCharacterValue(index));
             break;
-        case Type::IntegerType: 
+        case Type::IntegerType:
             to->addInteger( p, from->getIntegerValue(index));
             break;
         case Type::ShortType:
@@ -237,8 +237,8 @@ namespace sdo{
         case Type::DateType:
             to->addDate( p, from->getDateValue(index));
             break;
-        case Type::BigDecimalType: 
-        case Type::BigIntegerType: 
+        case Type::BigDecimalType:
+        case Type::BigIntegerType:
         case Type::UriType:
         case Type::StringType:
             {
@@ -288,7 +288,7 @@ namespace sdo{
     DataObjectPtr CopyHelper::copyShallow(DataObjectPtr dataObject)
     {
         return internalCopy(dataObject, false);
-        
+
     }
 
     /** CopyHelper provides static copying helper functions.
@@ -322,25 +322,25 @@ namespace sdo{
         {
             Sequence* fromSequence = dataObject->getSequence();
             int sequence_length = fromSequence->size();
-            
+
             Sequence* toSequence = newob->getSequence();
-            
+
             for (int i=0;i < sequence_length; i++)
             {
                 if ( fromSequence->isText(i) )
                 {
                     const char *text = fromSequence->getCStringValue(i);
                     toSequence->addText(i, text);
-                } 
-                else 
+                }
+                else
                 {
-                    const Property& seqProperty = fromSequence->getProperty(i); 
+                    const Property& seqProperty = fromSequence->getProperty(i);
                     SDOXMLString seqPropertyName = seqProperty.getName();
                     const Type& seqPropertyType = seqProperty.getType();
 
                     if (seqPropertyType.isDataObjectType())
-                    {                                
-                        if (!fullCopy) 
+                    {
+                        if (!fullCopy)
                         {
                             continue;
                         }
@@ -358,7 +358,7 @@ namespace sdo{
                             {
                                 dob = dataObject->getDataObject(seqProperty);
                             }
-                              
+
                             // do the copying of referencing
                             if (dob)
                             {
@@ -381,7 +381,7 @@ namespace sdo{
                                 }
                             }
                         }
-                    } 
+                    }
                     else
                     {
                         // Sequence member is a primitive
@@ -389,8 +389,8 @@ namespace sdo{
                                              fromSequence,
                                              seqProperty,
                                              i);
-                                                
-                    } 
+
+                    }
                 } // is it a text element
             } // for all elements in sequence
         }
@@ -402,9 +402,9 @@ namespace sdo{
                 if (dataObject->isSet(pl[i]))
                 {
                     // data objects are only copied in the deep copy case
-                    if (pl[i].getType().isDataObjectType()) 
+                    if (pl[i].getType().isDataObjectType())
                     {
-                        if (!fullCopy) 
+                        if (!fullCopy)
                         {
                             continue;
                         }
@@ -415,10 +415,10 @@ namespace sdo{
                                 DataObjectList& dolold = dataObject->getList(pl[i]);
                                 DataObjectList& dolnew = newob->getList(pl[i]);
                                 for (unsigned int li=0;li< dolold.size(); li++)
-                                {    
+                                {
                                     // references are maintained to the old object if it
                                     // is outside of the copy tree
-                                    if (pl[i].isReference()) 
+                                    if (pl[i].isReference())
                                     {
                                         // have to resolve references in a 2nd pass
                                     }
@@ -428,15 +428,15 @@ namespace sdo{
                                     }
                                 }
                             }
-                            else 
+                            else
                             {
 								if (dataObject->isNull(pl[i])) {
 									newob->setNull(pl[i]);
 									continue;
 								}
-								
+
                                 DataObjectPtr dob = dataObject->getDataObject(pl[i]);
-                                if (pl[i].isReference()) 
+                                if (pl[i].isReference())
                                 {
                                     // have to resolve references in a 2nd pass
                                 }
@@ -447,7 +447,7 @@ namespace sdo{
                             }
                         }
                     }
-                    else 
+                    else
                     {
                         if (pl[i].isMany())
                         {
@@ -455,13 +455,13 @@ namespace sdo{
                             DataObjectList& dolnew = newob->getList(pl[i]);
                             transferlist(dolnew,dolold, pl[i].getTypeEnum());
                         }
-                        else 
+                        else
                         {
                             transferitem(newob,dataObject, pl[i]);
                         }
                     } // else
-                } 
-            } 
+                }
+            }
         }
 
         return newob;
@@ -486,19 +486,19 @@ namespace sdo{
         {
             Sequence* fromSequence = obj->getSequence();
             int sequence_length = fromSequence->size();
-            
+
             Sequence* toSequence = newObj->getSequence();
-            
+
             for (int i=0;i < sequence_length; i++)
             {
                 if (!fromSequence->isText(i) )
                 {
-                    const Property& seqProperty = fromSequence->getProperty(i); 
+                    const Property& seqProperty = fromSequence->getProperty(i);
                     SDOXMLString seqPropertyName = seqProperty.getName();
                     const Type& seqPropertyType = seqProperty.getType();
 
                     if (seqProperty.isReference())
-                    {  
+                    {
                         DataObjectPtr ref = findReference(oldDO, newDO, fromSequence->getDataObjectValue(i));
                         if (ref)
                         {
@@ -519,10 +519,10 @@ namespace sdo{
                         findReferences(oldDO, newDO, fromSequence->getDataObjectValue(i), toSequence->getDataObjectValue(i));
                     }
                 }
- 
+
              } // for all elements in sequence
- 
-        }       
+
+        }
         else
         {
             PropertyList pl = obj->getInstanceProperties();
@@ -554,7 +554,7 @@ namespace sdo{
                         }
                     }
                 }
-                else 
+                else
                 {
                     if (pl[i].isReference())
                     {

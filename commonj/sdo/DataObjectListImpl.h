@@ -133,7 +133,7 @@ public:
     virtual  void insert (unsigned int index, const SDODate d) ;
     virtual  void append (const SDODate d) ;
 
-#if __WORDSIZE !=64
+#if 32 !=64
     virtual  void insert (unsigned int index, long d) ;
     virtual  void append (long d) ;
 #endif

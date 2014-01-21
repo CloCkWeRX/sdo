@@ -89,7 +89,7 @@ public:
      unsigned int convert(            void ** value,const char c) const; 
      unsigned int convert(            void ** value,const wchar_t c) const; 
      unsigned int convert(            void ** value,const short s) const;
-#if __WORDSIZE !=64
+#if 32 !=64
      unsigned int convert(            void ** value,const long i) const; 
 #endif
      unsigned int convert(            void ** value,const int64_t l) const; 

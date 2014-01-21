@@ -335,7 +335,7 @@ public:
 
 
 
-#if __WORDSIZE !=64
+#if 32 !=64
     virtual void setDefault(
         const Type& t, 
         const char* propname , 
@@ -472,7 +472,7 @@ public:
         const SDOString& propname , 
         short s) ;
 
-#if __WORDSIZE !=64
+#if 32 !=64
     virtual void setDefault(
         const char* typuri, 
         const char* typnam, 

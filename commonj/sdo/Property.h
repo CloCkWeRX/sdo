@@ -163,7 +163,7 @@ class Property
     virtual SDO_API void setDefault(char* c) = 0;
     virtual SDO_API void setDefault(const SDOString& c) = 0;
     virtual SDO_API void setDefault(short s) = 0;
-#if __WORDSIZE !=64
+#if 32 !=64
     virtual SDO_API void setDefault(long l) = 0;
 #endif
     virtual SDO_API void setDefault(int64_t i) = 0;

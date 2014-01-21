@@ -678,7 +678,7 @@ void DataObjectListImpl::append (short d)
 }
 
 
-#if __WORDSIZE !=64
+#if 32 !=64
 void DataObjectListImpl::insert (unsigned int index, long d)
 {
     if (theFactory == 0) return;

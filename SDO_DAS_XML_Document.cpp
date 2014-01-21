@@ -54,7 +54,7 @@ ZEND_END_ARG_INFO();
  *
  * Every method of SDO_DAS_XML_Document class needs to be defined here
  */
-function_entry sdo_das_xml_document_methods[] = {
+zend_function_entry sdo_das_xml_document_methods[] = {
     ZEND_ME(SDO_DAS_XML_Document, getRootDataObject, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, getRootElementURI, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, getRootElementName, 0, ZEND_ACC_PUBLIC)
@@ -64,7 +64,7 @@ function_entry sdo_das_xml_document_methods[] = {
             sdo_xmldoc_setXMLVersion_args, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_DAS_XML_Document, setEncoding,
             sdo_xmldoc_setEncoding_args, ZEND_ACC_PUBLIC)
-   	ZEND_ME(SDO_DAS_XML_Document, __toString, 0, 
+   	ZEND_ME(SDO_DAS_XML_Document, __toString, 0,
    			ZEND_ACC_PUBLIC)
     {NULL, NULL, NULL}
 };
@@ -79,7 +79,7 @@ SDO_DEBUG_DESTROY(das_xml_document)
 
 /* {{{ sdo_das_xml_document_object_free_storage
  */
-void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC) 
+void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC)
 {
 	SDO_DEBUG_FREE(object);
 
@@ -101,22 +101,27 @@ void sdo_das_xml_document_object_free_storage(void *object TSRMLS_DC)
 
 /* {{{ sdo_das_xml_document_object_create
  */
-zend_object_value sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC) 
+zend_object_value sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS_DC)
 {
     zend_object_value    retval;
     zval				*tmp;
     xmldocument_object	*xmldocument;
-	
+
 	xmldocument = (xmldocument_object *)emalloc(sizeof(xmldocument_object));
     memset(xmldocument, 0, sizeof(xmldocument_object));
-	
+
     xmldocument->zo.ce = ce;
 	xmldocument->zo.guards = NULL;
     ALLOC_HASHTABLE(xmldocument->zo.properties);
     zend_hash_init(xmldocument->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-    zend_hash_copy(xmldocument->zo.properties, &ce->default_properties,
-		(copy_ctor_func_t) zval_add_ref, (void *) &tmp,
-		sizeof(zval *));
+//   zend_hash_copy(xmldocument->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+    #if PHP_VERSION_ID < 50399
+	  zend_hash_copy(xmldocument->zo.properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	#else
+	  object_properties_init(&xmldocument->zo, ce);
+	#endif
+
     retval.handle = zend_objects_store_put(xmldocument, SDO_FUNC_DESTROY(das_xml_document),
 		sdo_das_xml_document_object_free_storage,
 		NULL TSRMLS_CC);
@@ -127,7 +132,7 @@ zend_object_value sdo_das_xml_document_object_create(zend_class_entry *ce TSRMLS
 /* }}} */
 
 /* {{{ sdo_das_xml_document_cast_object
-*/ 
+*/
 #if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
 static int sdo_das_xml_document_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
@@ -139,29 +144,29 @@ static int sdo_das_xml_document_cast_object(zval *readobj, zval *writeobj, int t
     xmldocument_object *xmldocument;
 	ostringstream	 print_buf;
 	int              rc = SUCCESS;
-	
+
     xmldocument = (xmldocument_object *) zend_object_store_get_object(readobj TSRMLS_CC);
-	
-	try {	
-		/* I don't think Tuscany provides a way to get back to the original 
+
+	try {
+		/* I don't think Tuscany provides a way to get back to the original
 		 * DataFactory from the XML document, so I'm (expensively and probably
 		 * inaccurately) creating a temporary one.
 		 */
 	    DataFactoryPtr dataFactoryPtr = DataFactory::getDataFactory();
-        XMLHelperPtr xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr); 	
+        XMLHelperPtr xmlHelperPtr = HelperProvider::getXMLHelper((DataFactory *)dataFactoryPtr);
 		print_buf << xmlHelperPtr->save(xmldocument->xmlDocumentPtr);
-		
+
 		std::string print_string = print_buf.str();
-		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);			
-		
+		ZVAL_STRINGL(writeobj, (char *)print_string.c_str(), print_string.length(), 1);
+
 	} catch (SDORuntimeException e) {
 		ZVAL_NULL(writeobj);
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
 		rc = FAILURE;
 	}
-	
+
 	return rc;
-			
+
 }
 /* }}} */
 
@@ -169,10 +174,10 @@ static int sdo_das_xml_document_cast_object(zval *readobj, zval *writeobj, int t
  *
  * Initializes SDO_DAS_XML_Document class
  */
-void sdo_das_xml_document_minit(TSRMLS_D) 
+void sdo_das_xml_document_minit(TSRMLS_D)
 {
     zend_class_entry ce;
-    
+
     INIT_CLASS_ENTRY(ce, "SDO_DAS_XML_Document", sdo_das_xml_document_methods);
     ce.create_object = sdo_das_xml_document_object_create;
     sdo_das_xml_document_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
@@ -189,19 +194,19 @@ void sdo_das_xml_document_minit(TSRMLS_D)
 /* {{{ proto SDO_DataObject SDO_DAS_XML_Document::getRootDataObject()
  Returns the root SDO_DataObject.
  */
-PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject) 
+PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject)
 {
     xmldocument_object	*xmldocument;
     DataObjectPtr		 root_do;
-	char				*class_name, *space;
+//	char				*class_name, *space;
 
     xmldocument = (xmldocument_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
     try {
         root_do = xmldocument->xmlDocumentPtr->getRootDataObject();
 		if (!root_do) {
-			class_name = get_active_class_name (&space TSRMLS_CC);
-            php_error(E_ERROR, "%s%s%s(): internal error(%i) - root DataObject is NULL", 
+			const char *space, *class_name = get_active_class_name (&space TSRMLS_CC);
+            php_error(E_ERROR, "%s%s%s(): internal error(%i) - root DataObject is NULL",
 				class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
             RETURN_NULL();
         }
@@ -216,7 +221,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootDataObject)
 /* {{{ proto string SDO_DAS_XML_Document::getRootElementURI()
   Returns root element URI string.
  */
-PHP_METHOD(SDO_DAS_XML_Document, getRootElementURI) 
+PHP_METHOD(SDO_DAS_XML_Document, getRootElementURI)
 {
     xmldocument_object *xmldocument;
 
@@ -239,7 +244,7 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootElementURI)
 /* {{{ proto string SDO_DAS_XML_Document::getRootElementName()
   Returns root element name.
  */
-PHP_METHOD(SDO_DAS_XML_Document, getRootElementName) 
+PHP_METHOD(SDO_DAS_XML_Document, getRootElementName)
 {
     xmldocument_object *xmldocument;
 
@@ -260,11 +265,11 @@ PHP_METHOD(SDO_DAS_XML_Document, getRootElementName)
 /* {{{ proto void SDO_DAS_XML_Document::setXMLDeclaration(bool xmlDeclatation)
   Sets the xml declaration.
  */
-PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration) 
+PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration)
 {
     zend_bool			 xml_declaration;
     xmldocument_object  *xmldocument;
-	char				*class_name, *space;
+//	char				*class_name, *space;
 
     if (ZEND_NUM_ARGS() != 1) {
         WRONG_PARAM_COUNT;
@@ -274,8 +279,8 @@ PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration)
     }
     xmldocument = (xmldocument_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
     if (!xmldocument) {
-		class_name = get_active_class_name (&space TSRMLS_CC);
-		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DAS_XML_Document not found in store", 
+		const char *space, *class_name = get_active_class_name (&space TSRMLS_CC);
+		php_error(E_ERROR, "%s%s%s(): internal error (%i) - SDO_DAS_XML_Document not found in store",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
         RETURN_FALSE;
     }
@@ -291,7 +296,7 @@ PHP_METHOD(SDO_DAS_XML_Document, setXMLDeclaration)
 /* {{{ proto void SDO_DAS_XML_Document::setXMLVersion(string xmlVersion)
  Sets the given string as xml version.
  */
-PHP_METHOD(SDO_DAS_XML_Document, setXMLVersion) 
+PHP_METHOD(SDO_DAS_XML_Document, setXMLVersion)
 {
     char				*xml_version;
     int 				 xml_version_len;
@@ -317,7 +322,7 @@ PHP_METHOD(SDO_DAS_XML_Document, setXMLVersion)
 /* {{{ proto void SDO_DAS_XML_Document::setEncoding(string encoding)
  Sets the given string as encoding.
  */
-PHP_METHOD(SDO_DAS_XML_Document, setEncoding) 
+PHP_METHOD(SDO_DAS_XML_Document, setEncoding)
 {
     char				*encoding;
     int 				 encoding_len;
@@ -331,7 +336,7 @@ PHP_METHOD(SDO_DAS_XML_Document, setEncoding)
         RETURN_FALSE;
     }
     xmldocument = (xmldocument_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+
     try {
         xmldocument->xmlDocumentPtr->setEncoding(encoding);
     } catch (SDORuntimeException e) {
@@ -347,7 +352,7 @@ PHP_METHOD(SDO_DAS_XML_Document, __toString)
 {
 #if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
 	sdo_das_xml_document_cast_object(getThis(), return_value, IS_STRING TSRMLS_CC);
-#else	
+#else
 	sdo_das_xml_document_cast_object(getThis(), return_value, IS_STRING, 0 TSRMLS_CC);
 #endif
 }

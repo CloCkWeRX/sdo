@@ -231,7 +231,7 @@ namespace commonj{
     {
         setDefaultShort(s);
     }
-#if __WORDSIZE !=64
+#if 32 !=64
     void PropertyImpl::setDefault(long i )
     {
         setDefaultInteger(i);
@@ -551,7 +551,7 @@ namespace commonj{
     void PropertyImpl::setDefaultInteger( const long i    )
     {
         bDefaulted=true;
-#if __WORDSIZE ==64
+#if 32 ==64
         defvaluelength = getTypeImpl()->convert(&defvalue,(int64_t)i); 
 #else
         defvaluelength = getTypeImpl()->convert(&defvalue,i); 
