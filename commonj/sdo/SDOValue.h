@@ -78,7 +78,7 @@ namespace commonj
             {
                value.Short = inValue;
             }
-#if __WORDSIZE != 64
+#if 32 != 64
             SDO_API SDOValue(long inValue) : 
                typeOfValue(DataTypeInfo::SDOlong), transient_buffer(0)
             {

@@ -123,7 +123,7 @@ extern PHP_SDO_API zval *sdo_throw_exception(zend_class_entry *ce, const char *m
 extern PHP_SDO_API zval *sdo_throw_exception_ex(zend_class_entry *ce, long code, zval *z_cause TSRMLS_DC, char *format, ...);
 extern PHP_SDO_API void sdo_exception_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_exception_new(zval *me, zend_class_entry *ce, const char *message, long code, zval *cause TSRMLS_DC);
-extern PHP_SDO_API function_entry *sdo_exception_get_methods();
+extern PHP_SDO_API zend_function_entry *sdo_exception_get_methods();
 extern PHP_SDO_API zval *sdo_throw_runtimeexception(SDORuntimeException *e TSRMLS_DC);
 extern PHP_SDO_API void sdo_cppexception_minit(zend_class_entry *tmp TSRMLS_DC);
 extern PHP_SDO_API void sdo_cppexception_new(zval *me, SDORuntimeException *cpp_exception TSRMLS_DC);

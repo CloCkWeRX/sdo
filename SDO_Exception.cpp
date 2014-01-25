@@ -53,8 +53,13 @@ static zend_object_value sdo_exception_create_object(zend_class_entry *ce TSRMLS
 
 	ALLOC_HASHTABLE(object->properties);
 	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
-		(void *)&tmp, sizeof(zval *));
+//	zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
+	#if PHP_VERSION_ID < 50399
+	  zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
+	#else
+	  object_properties_init(object, ce);
+	#endif
+
 
 	zend_update_property_string(exception_class_entry, &z_object,
 		"file", sizeof("file") - 1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
@@ -105,11 +110,11 @@ void sdo_exception_minit(zend_class_entry *ce TSRMLS_DC)
  */
 void sdo_exception_new(zval *z_ex, zend_class_entry *ce, const char *message, long code, zval *z_cause TSRMLS_DC)
 {
-	char *class_name, *space;
+//	char *class_name, *space;
 
 	Z_TYPE_P(z_ex) = IS_OBJECT;
 	if (object_init_ex(z_ex, ce) == FAILURE) {
-		class_name = get_active_class_name(&space TSRMLS_CC);
+		const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		return;

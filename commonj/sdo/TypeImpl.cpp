@@ -936,7 +936,7 @@ namespace sdo{
 
     unsigned int TypeImpl::convert(void** value,const char c) const
     {
-#if __WORDSIZE ==64
+#if 32 ==64
         return convert(value,(int64_t)c);
 #else
         return convert(value,(long)c);
@@ -945,7 +945,7 @@ namespace sdo{
 
     unsigned int TypeImpl::convert(void** value,const wchar_t c) const
     {
-#if __WORDSIZE ==64
+#if 32 ==64
         return convert(value,(int64_t)c);
 #else
         return convert(value,(long)c);
@@ -1506,7 +1506,7 @@ namespace sdo{
     
     unsigned int TypeImpl::convert(void** value,const short s) const
     {
-#if __WORDSIZE ==64
+#if 32 ==64
         return convert(value,(int64_t)s);
 #else
         return convert(value,(long)s);
@@ -1531,7 +1531,7 @@ namespace sdo{
             break;
             }
         default:
-#if __WORDSIZE ==64
+#if 32 ==64
             return convert(value, (int64_t)(i.getTime()));
 #else
             return convert(value, (long)(i.getTime()));
@@ -1539,7 +1539,7 @@ namespace sdo{
         }
     }
 
-#if __WORDSIZE !=64
+#if 32 !=64
     // setInteger
     unsigned int TypeImpl::convert(void** value,const long i) const
     {

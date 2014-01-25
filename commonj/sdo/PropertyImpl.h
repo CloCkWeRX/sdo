@@ -125,7 +125,7 @@ class PropertyImpl :public DASProperty
     virtual SDO_API void setDefault(char* c);
     virtual SDO_API void setDefault(const SDOString& c);
     virtual SDO_API void setDefault(short s);
-#if __WORDSIZE !=64
+#if 32 !=64
     virtual SDO_API void setDefault(long l);
 #endif
     virtual SDO_API void setDefault(int64_t i);

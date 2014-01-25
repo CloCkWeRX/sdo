@@ -1,22 +1,22 @@
-/* 
+/*
 +----------------------------------------------------------------------+
-| (c) Copyright IBM Corporation 2005.                                  | 
+| (c) Copyright IBM Corporation 2005.                                  |
 | All Rights Reserved.                                                 |
-+----------------------------------------------------------------------+ 
-|                                                                      | 
-| Licensed under the Apache License, Version 2.0 (the "License"); you  | 
-| may not use this file except in compliance with the License. You may | 
-| obtain a copy of the License at                                      | 
++----------------------------------------------------------------------+
+|                                                                      |
+| Licensed under the Apache License, Version 2.0 (the "License"); you  |
+| may not use this file except in compliance with the License. You may |
+| obtain a copy of the License at                                      |
 | http://www.apache.org/licenses/LICENSE-2.0                           |
-|                                                                      | 
-| Unless required by applicable law or agreed to in writing, software  | 
-| distributed under the License is distributed on an "AS IS" BASIS,    | 
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      | 
-| implied. See the License for the specific language governing         | 
-| permissions and limitations under the License.                       | 
-+----------------------------------------------------------------------+ 
-| Author: Caroline Maynard                                             | 
-+----------------------------------------------------------------------+ 
+|                                                                      |
+| Unless required by applicable law or agreed to in writing, software  |
+| distributed under the License is distributed on an "AS IS" BASIS,    |
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or      |
+| implied. See the License for the specific language governing         |
+| permissions and limitations under the License.                       |
++----------------------------------------------------------------------+
+| Author: Caroline Maynard                                             |
++----------------------------------------------------------------------+
 
 */
 
@@ -49,28 +49,28 @@ void sdo_make_long_class_constant(zend_class_entry *ce, char *name, long value)
 /* }}} */
 
 /* {{{ sdo_parse_offset_param
- * internal function to get an sdo property offset from a zval parameter. 
+ * internal function to get an sdo property offset from a zval parameter.
  * The value may have been passed as a SDO_Model_Property, an xpath or a property index.
  * Calling functions should catch SDORuntimeException.
  */
-int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset, 
+int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset,
 	const Property **return_property, const char **return_xpath,
-	int property_required, 
+	int property_required,
 	int quiet TSRMLS_DC) {
-	
+
 	long			 prop_index;
 	const Property  *property_p;
 	const char		*xpath;
-	char			*class_name;
-	char		    *space;
-	
+//	char			*class_name;
+//	char		    *space;
+
 
 	if (!z_offset) {
 		/* get here with a statement like $sdo[] = 'some value'; */
 		if (!quiet) {
-			class_name = get_active_class_name(&space TSRMLS_CC);
+			const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 			sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
-				"%s%s%s(): cannot append a value - this object is not many-valued", 
+				"%s%s%s(): cannot append a value - this object is not many-valued",
 				class_name, space, get_active_function_name(TSRMLS_C));
 		}
 		return FAILURE;
@@ -79,15 +79,15 @@ int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset,
 	switch(Z_TYPE_P(z_offset)) {
 	case IS_NULL:
 		if (!quiet) {
-			class_name = get_active_class_name(&space TSRMLS_CC);
+			const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 			sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
-				"%s%s%s(): parameter is NULL", 
+				"%s%s%s(): parameter is NULL",
 				class_name, space, get_active_function_name(TSRMLS_C));
 		}
 		return FAILURE;
-	case IS_STRING:	
+	case IS_STRING:
 		xpath = Z_STRVAL_P(z_offset);
-		
+
 		/* If the type is open, then it's OK for the xpath offset to
 		 * specify an unknown property. But even an open type may have
 		 * defined properties, so we still need to try for one.
@@ -105,9 +105,9 @@ int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset,
 	case IS_DOUBLE:
 		if (Z_TYPE_P(z_offset) == IS_DOUBLE) {
 			if (!quiet) {
-				class_name = get_active_class_name(&space TSRMLS_CC);
-				php_error(E_WARNING, "%s%s%s(): double parameter %f rounded to %i", 
-					class_name, space, get_active_function_name(TSRMLS_C), 
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
+				php_error(E_WARNING, "%s%s%s(): double parameter %f rounded to %i",
+					class_name, space, get_active_function_name(TSRMLS_C),
 					Z_DVAL_P(z_offset), (long)Z_DVAL_P(z_offset));
 			}
 			prop_index =(long)Z_DVAL_P(z_offset);
@@ -123,10 +123,10 @@ int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset,
 	case IS_OBJECT:
 		if (!instanceof_function(Z_OBJCE_P(z_offset), sdo_model_property_class_entry TSRMLS_CC)) {
 			if (!quiet) {
-				class_name = get_active_class_name(&space TSRMLS_CC);		
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 				sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
 					"%s%s%s(): expects object parameter to be SDO_Model_Property, %s given",
-					class_name, space, get_active_function_name(TSRMLS_C), 
+					class_name, space, get_active_function_name(TSRMLS_C),
 					Z_OBJCE_P(z_offset)->name);
 			}
 			return FAILURE;
@@ -136,9 +136,9 @@ int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset,
 		break;
 	default:
 		if (!quiet) {
-			class_name = get_active_class_name(&space TSRMLS_CC);
-			php_error(E_ERROR, "%s%s%s(): internal error - invalid dimension type %i", 
-				class_name, space, get_active_function_name(TSRMLS_C), 
+			const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
+			php_error(E_ERROR, "%s%s%s(): internal error - invalid dimension type %i",
+				class_name, space, get_active_function_name(TSRMLS_C),
 				Z_TYPE_P(z_offset));
 		}
 		return FAILURE;
@@ -157,7 +157,7 @@ int sdo_parse_offset_param (DataObjectPtr dop, zval *z_offset,
 /* }}} */
 
 /* {{{ sdo_map_zval_type
- * internal function to get an sdo property type from a zval parameter. 
+ * internal function to get an sdo property type from a zval parameter.
  * This is needed when the zval is to be assigned into an open type, that is,
  * when the target SDO property type is not predetermined by the model.
  */

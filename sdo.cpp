@@ -92,7 +92,7 @@ ZEND_BEGIN_ARG_INFO(arginfo___set, 0)
     ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_propertyaccess_methods[] = {
+zend_function_entry sdo_propertyaccess_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_PropertyAccess, __get, arginfo___get)
 	ZEND_ABSTRACT_ME(SDO_PropertyAccess, __set, arginfo___set)
 	{NULL, NULL, NULL}
@@ -104,7 +104,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_sdo_dataobject_createdataobject, 0)
     ZEND_ARG_INFO(0, identifier)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_dataobject_methods[] = {
+zend_function_entry sdo_dataobject_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_DataObject, getTypeName, 0)
 	ZEND_ABSTRACT_ME(SDO_DataObject, getTypeNamespaceURI, 0)
 	ZEND_ABSTRACT_ME(SDO_DataObject, getSequence, 0)
@@ -131,7 +131,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_sequence_insert, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, property_identifier)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_sequence_methods[] = {
+zend_function_entry sdo_sequence_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_Sequence, getProperty, arginfo_sdo_sequence_getproperty)
 	ZEND_ABSTRACT_ME(SDO_Sequence, move, arginfo_sdo_sequence_move)
 	ZEND_ABSTRACT_ME(SDO_Sequence, insert, arginfo_sdo_sequence_insert)
@@ -146,7 +146,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_list_insert, 0, ZEND_RETURN_VALUE, 1)
     ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_list_methods[] = {
+zend_function_entry sdo_list_methods[] = {
 	ZEND_ME(SDO_List, __construct, 0, ZEND_ACC_PRIVATE)
 	ZEND_ME(SDO_List, insert, arginfo_sdo_list_insert, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_List, count, 0, ZEND_ACC_PUBLIC)
@@ -160,14 +160,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_sdo_datafactory_create, 0)
     ZEND_ARG_INFO(0, type_name)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_datafactory_methods[] = {
+zend_function_entry sdo_datafactory_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_DataFactory, create, arginfo_sdo_datafactory_create)
 	{NULL, NULL, NULL}
 };
 /* }}} */
 
 /* {{{ SDO_DAS_DataObject methods */
-function_entry sdo_das_dataobject_methods[] = {
+zend_function_entry sdo_das_dataobject_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_DAS_DataObject, getChangeSummary, 0)
 	{NULL, NULL, NULL}
 };
@@ -189,7 +189,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_das_datafactory_addPropertyToType, 0, ZEND_RE
     ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_das_datafactory_methods[] = {
+zend_function_entry sdo_das_datafactory_methods[] = {
 	ZEND_ME(SDO_DAS_DataFactory, getDataFactory, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ABSTRACT_ME(SDO_DAS_DataFactory, addType, arginfo_sdo_das_datafactory_addType)
 	ZEND_ABSTRACT_ME(SDO_DAS_DataFactory, addPropertyToType, arginfo_sdo_das_datafactory_addPropertyToType)
@@ -198,7 +198,7 @@ function_entry sdo_das_datafactory_methods[] = {
 /* }}} */
 
 /* {{{SDO_DAS_ChangeSummary methods */
-function_entry sdo_das_changesummary_methods[] = {
+zend_function_entry sdo_das_changesummary_methods[] = {
 	ZEND_ME(SDO_DAS_ChangeSummary, beginLogging, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_ChangeSummary, endLogging, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_ChangeSummary, isLogging, 0, ZEND_ACC_PUBLIC)
@@ -211,7 +211,7 @@ function_entry sdo_das_changesummary_methods[] = {
 /* }}} */
 
 /* {{{ SDO_DASSetting methods */
-function_entry sdo_das_setting_methods[] = {
+zend_function_entry sdo_das_setting_methods[] = {
 	ZEND_ME(SDO_DAS_Setting, getPropertyIndex, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_Setting, getPropertyName, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_Setting, getValue, 0, ZEND_ACC_PUBLIC)
@@ -222,7 +222,7 @@ function_entry sdo_das_setting_methods[] = {
 /* }}} */
 
 /* {{{ SDO_DAS_DataFactoryImpl methods */
-function_entry sdo_das_df_methods[] = {
+zend_function_entry sdo_das_df_methods[] = {
 	ZEND_ME(SDO_DAS_DataFactoryImpl, create, arginfo_sdo_datafactory_create, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_DataFactoryImpl, addType, arginfo_sdo_das_datafactory_addType, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DAS_DataFactoryImpl, addPropertyToType, arginfo_sdo_das_datafactory_addPropertyToType, ZEND_ACC_PUBLIC)
@@ -231,7 +231,7 @@ function_entry sdo_das_df_methods[] = {
 /* }}} */
 
 /* {{{ SDO_DataObjectImpl methods */
-function_entry sdo_dataobjectimpl_methods[] = {
+zend_function_entry sdo_dataobjectimpl_methods[] = {
 	ZEND_ME(SDO_DataObjectImpl, __construct, 0, ZEND_ACC_PRIVATE) /* can't be newed */
 	ZEND_ME(SDO_DataObjectImpl, __get, arginfo___get, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_DataObjectImpl, __set, arginfo___set, ZEND_ACC_PUBLIC)
@@ -250,7 +250,7 @@ function_entry sdo_dataobjectimpl_methods[] = {
 /* }}} */
 
 /* {{{ SDO_SequenceImpl methods */
-function_entry sdo_sequenceimpl_methods[] = {
+zend_function_entry sdo_sequenceimpl_methods[] = {
 	ZEND_ME(SDO_SequenceImpl, getProperty, arginfo_sdo_sequence_getproperty, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, move, arginfo_sdo_sequence_move, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_SequenceImpl, insert, arginfo_sdo_sequence_insert, ZEND_ACC_PUBLIC)
@@ -264,7 +264,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_sdo_model_type_identifier, 0)
     ZEND_ARG_INFO(0, identifier)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_model_type_methods[] = {
+zend_function_entry sdo_model_type_methods[] = {
 	ZEND_ABSTRACT_ME(SDO_Model_Type, getName, 0)
 	ZEND_ABSTRACT_ME(SDO_Model_Type, getNamespaceURI, 0)
 	ZEND_ABSTRACT_ME(SDO_Model_Type, isInstance, arginfo_sdo_dataobject)
@@ -278,7 +278,7 @@ function_entry sdo_model_type_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-function_entry sdo_model_typeimpl_methods[] = {
+zend_function_entry sdo_model_typeimpl_methods[] = {
  	ZEND_ME(SDO_Model_TypeImpl, __construct, 0, ZEND_ACC_PRIVATE) /* can't be newed */
 	ZEND_ME(SDO_Model_TypeImpl, getName, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_Model_TypeImpl, getNamespaceURI, 0, ZEND_ACC_PUBLIC)
@@ -295,7 +295,7 @@ function_entry sdo_model_typeimpl_methods[] = {
 /* }}} */
 
 /* {{{ SDO_Model_Property methods */
-function_entry sdo_model_property_methods[] = {
+zend_function_entry sdo_model_property_methods[] = {
     ZEND_ABSTRACT_ME(SDO_Model_Property, getName, 0)
     ZEND_ABSTRACT_ME(SDO_Model_Property, getType, 0)
     ZEND_ABSTRACT_ME(SDO_Model_Property, isMany, 0)
@@ -307,7 +307,7 @@ function_entry sdo_model_property_methods[] = {
 	{NULL, NULL, NULL}
 };
 
-function_entry sdo_model_propertyimpl_methods[] = {
+zend_function_entry sdo_model_propertyimpl_methods[] = {
     ZEND_ME(SDO_Model_PropertyImpl, __construct, 0, ZEND_ACC_PRIVATE) /* can't be newed */
     ZEND_ME(SDO_Model_PropertyImpl, getName, 0, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_PropertyImpl, getType, 0, ZEND_ACC_PUBLIC)
@@ -327,12 +327,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sdo_model_reflectiondataobject_export, 0, ZEND_RE
     ZEND_ARG_INFO(0, return_output)
 ZEND_END_ARG_INFO();
 
-function_entry sdo_model_reflectiondataobject_methods[] = {
+zend_function_entry sdo_model_reflectiondataobject_methods[] = {
     ZEND_ME(SDO_Model_ReflectionDataObject, __construct, arginfo_sdo_dataobject, ZEND_ACC_PUBLIC)
     ZEND_ME(SDO_Model_ReflectionDataObject, __toString, 0, ZEND_ACC_PUBLIC)
 /*  ZEND_ME(SDO_Model_ReflectionDataObject, export, arginfo_sdo_model_reflectiondataobject_export, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC) */
     /* The above definition fails on some (but not all) platforms.
-	 * For me, on Linux AMD_64 non-debug build, the export method (and 
+	 * For me, on Linux AMD_64 non-debug build, the export method (and
 	 * hence the entire class) gets defined as abstract.
      * The variants below works round this.
      */
@@ -349,14 +349,14 @@ function_entry sdo_model_reflectiondataobject_methods[] = {
 /* }}} */
 
 /* {{{ SDO_Exception methods */
-function_entry sdo_exception_methods[] = {
+zend_function_entry sdo_exception_methods[] = {
 	ZEND_ME(SDO_Exception, getCause, 0, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 /* }}} */
 
 /* {{{ SDO_CPPException methods */
-function_entry sdo_cppexception_methods[] = {
+zend_function_entry sdo_cppexception_methods[] = {
 	ZEND_ME(SDO_CPPException, getClass, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_CPPException, getFile, 0, ZEND_ACC_PUBLIC)
 	ZEND_ME(SDO_CPPException, getLine, 0, ZEND_ACC_PUBLIC)
@@ -370,7 +370,7 @@ function_entry sdo_cppexception_methods[] = {
 
 /* {{{ sdo_exception_get_methods
  */
-PHP_SDO_API function_entry *sdo_exception_get_methods()
+PHP_SDO_API zend_function_entry *sdo_exception_get_methods()
 {
     return sdo_exception_methods;
 }
@@ -393,7 +393,7 @@ zend_module_dep sdo_deps[] = {
 */
 zend_module_entry sdo_module_entry = {
 #if ZEND_MODULE_API_NO >= 20050922
-    STANDARD_MODULE_HEADER_EX, 
+    STANDARD_MODULE_HEADER_EX,
 	NULL,
     sdo_deps,
 #else
@@ -432,7 +432,7 @@ PHP_MINIT_FUNCTION(sdo)
 		php_error (E_WARNING, "SDO: incompatible versions of SDO extension and Tuscany SDO C++ library. Expected 00:09:0004, found %s",
 			SdoRuntime::getVersion());
 	}
-	
+
 	/*
 	 * The sdo_das_xml was formerly shipped as a separate extension.
 	 * Make sure the old extension is not loaded.
@@ -574,7 +574,7 @@ PHP_MINIT_FUNCTION(sdo)
     sdo_das_xml_document_minit(TSRMLS_C);
     sdo_das_xml_parserexception_minit(TSRMLS_C);
     sdo_das_xml_fileexception_minit(TSRMLS_C);
-      
+
    return SUCCESS;
 
 }
@@ -589,7 +589,7 @@ PHP_RINIT_FUNCTION(sdo)
    if (precision > 0) {
        SDODataConverter::precision = precision;
    }
-   
+
    return SUCCESS;
 }
 /* }}} */

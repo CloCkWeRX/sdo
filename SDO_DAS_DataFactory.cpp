@@ -95,8 +95,14 @@ static zend_object_value sdo_das_df_object_create(zend_class_entry *ce TSRMLS_DC
 	my_object->zo.guards = NULL;
 	ALLOC_HASHTABLE(my_object->zo.properties);
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
-		(void *)&tmp, sizeof(zval *));
+//	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
+
+	#if PHP_VERSION_ID < 50399
+	  zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
+	#else
+	  object_properties_init(&my_object->zo, ce);
+	#endif
+
 	retval.handle = zend_objects_store_put(my_object, SDO_FUNC_DESTROY(das_df), sdo_das_df_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &sdo_das_df_object_handlers;
 	SDO_DEBUG_ALLOCATE(retval.handle, my_object);
@@ -125,11 +131,11 @@ DataFactoryPtr sdo_das_df_get(zval *me TSRMLS_DC)
 void sdo_das_df_new(zval *me, DataFactoryPtr dfp TSRMLS_DC)
 {
 	sdo_das_df_object *my_object;
-	char *class_name, *space;
+//	char *class_name, *space;
 
 	Z_TYPE_P(me) = IS_OBJECT;
 	if (object_init_ex(me, sdo_das_datafactoryimpl_class_entry) == FAILURE) {
-		class_name = get_active_class_name(&space TSRMLS_CC);
+		const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		return;
@@ -253,7 +259,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 	char *basetype_uri;
 	char *basetype_name;
 
-	char *class_name, *space;
+//	char *class_name, *space;
 
 	if (ZEND_NUM_ARGS() < 2)
 		WRONG_PARAM_COUNT;
@@ -294,7 +300,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 					*/
 					is_derived = true;
 					if (Z_TYPE_PP(value) != IS_ARRAY) {
-						class_name = get_active_class_name(&space TSRMLS_CC);
+						const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 						sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
 							"%s%s%s(): %s argument should be an array",
 							class_name, space, get_active_function_name(TSRMLS_C), key_string);
@@ -303,7 +309,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 
 					basetype_hash = Z_ARRVAL_PP(value);
 					if (zend_hash_num_elements(basetype_hash) != 2) {
-						class_name = get_active_class_name(&space TSRMLS_CC);
+						const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 						sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
 							"%s%s%s(): %s array should have exactly two elements",
 							class_name, space, get_active_function_name(TSRMLS_C), key_string);
@@ -314,7 +320,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 						Z_TYPE_PP(z_basetype_uri) == IS_STRING) {
 						basetype_uri = Z_STRVAL_PP(z_basetype_uri);
 					} else {
-						class_name = get_active_class_name(&space TSRMLS_CC);
+						const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 						sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
 							"%s%s%s(): invalid value for %s type namespace URI",
 							class_name, space, get_active_function_name(TSRMLS_C), key_string);
@@ -325,7 +331,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 						Z_TYPE_PP(z_basetype_name) == IS_STRING) {
 						basetype_name = Z_STRVAL_PP(z_basetype_name);
 					} else {
-						class_name = get_active_class_name(&space TSRMLS_CC);
+						const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 						sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
 							"%s%s%s(): invalid value for %s type name",
 							class_name, space, get_active_function_name(TSRMLS_C), key_string);
@@ -334,13 +340,13 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addType)
 					continue;
 				} 	/* end basetype */
 
-				class_name = get_active_class_name(&space TSRMLS_CC);
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 				sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
 					"%s%s%s(): unrecognized option %s in parameter array",
 					class_name, space, get_active_function_name(TSRMLS_C), key_string);
 
 			} else {
-				class_name = get_active_class_name(&space TSRMLS_CC);
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 				sdo_throw_exception_ex (sdo_unsupportedoperationexception_class_entry, 0, 0 TSRMLS_CC,
 					"%s%s%s(): option name must be a string in parameter array #%i",
 					class_name, space, get_active_function_name(TSRMLS_C), key_index);
@@ -400,7 +406,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 	zval	  *default_value = NULL;
 
 	sdo_das_df_object *my_object;
-	char	*class_name, *space;
+//	char	*class_name, *space;
 
 	if (ZEND_NUM_ARGS() < 5)
 		WRONG_PARAM_COUNT;
@@ -425,7 +431,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 				}
 				if (strcmp(key_string, "readonly") == SUCCESS) {
 					read_only = sdo_get_boolean_value (*value);
-					class_name = get_active_class_name(&space TSRMLS_CC);
+					const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 					php_error(E_WARNING, "%s%s%s(): option %s not yet implemented",
 						class_name, space, get_active_function_name(TSRMLS_C), key_string);
 					continue;
@@ -435,7 +441,7 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 					continue;
 				}
 				if (strcmp(key_string, "opposite") == SUCCESS) {
-					class_name = get_active_class_name(&space TSRMLS_CC);
+					const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 					php_error(E_WARNING, "%s%s%s(): option %s not yet implemented",
 						class_name, space, get_active_function_name(TSRMLS_C), key_string);
 					continue;
@@ -479,51 +485,72 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 				const Type& parentType = my_object->dfp->getType(parent_type_uri, parent_type_name);
 				switch (type.getTypeEnum()) {
 				case Type::OtherTypes:
-					class_name = get_active_class_name(&space TSRMLS_CC);
+				{
+					const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'",
 						class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 					break;
+				}
 				case Type::BigDecimalType:
 				case Type::BigIntegerType:
+				{
 					convert_to_string(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, Z_STRVAL(temp_zval));
 					break;
+				}
 				case Type::BooleanType:
+				{
 					convert_to_boolean(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, (bool)ZEND_TRUTH(Z_BVAL(temp_zval)));
 					break;
+				}
 				case Type::ByteType:
+				{
 					convert_to_long(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, (char)Z_LVAL(temp_zval));
 					break;
+				}
 				case Type::BytesType:
+				{
 					convert_to_string(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, Z_STRVAL(temp_zval), Z_STRLEN(temp_zval));
 					break;
+				}
 				case Type::CharacterType:
+				{
 					convert_to_string(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, (char)(Z_STRVAL(temp_zval)[0]));
 					break;
+				}
 				case Type::DateType:
+				{
 					convert_to_long(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, (SDODate)Z_LVAL(temp_zval));
 					break;
+				}
 				case Type::DoubleType:
+				{
 					convert_to_double(&temp_zval);
 					/*TODO this may need more work. On Windows, simply omitting the cast, or casting to double,
 					* leads to an ambiguous overloaded function message. But some platforms may baulk at long double.
 					*/
 					my_object->dfp->setDefault(parentType, property_name,  (long double)Z_DVAL(temp_zval));
 					break;
+				}
 				case Type::FloatType:
+				{
 					convert_to_double(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, (float)Z_DVAL(temp_zval));
 					break;
+				}
 				case Type::IntegerType:
+				{
 					convert_to_long(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, (long)Z_LVAL(temp_zval));
 					break;
+				}
 				case Type::LongType:
+				{
 					if (Z_TYPE(temp_zval) == IS_LONG) {
 						my_object->dfp->setDefault(parentType, property_name, (int64_t)Z_LVAL(temp_zval));
 					} else {
@@ -531,32 +558,43 @@ PHP_METHOD(SDO_DAS_DataFactoryImpl, addPropertyToType)
 						my_object->dfp->setDefault(parentType, property_name, Z_STRVAL(temp_zval));
 					}
 					break;
+				}
 				case Type::ShortType:
+				{
 					convert_to_long(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, (short)Z_LVAL(temp_zval));
 					break;
+				}
 				case Type::StringType:
 				case Type::UriType:
 				case Type::TextType:
+				{
 					convert_to_string(&temp_zval);
 					my_object->dfp->setDefault(parentType, property_name, Z_STRVAL(temp_zval));
 					break;
+				}
 				case Type::DataObjectType:
-				case Type::OpenDataObjectType:			
+				case Type::OpenDataObjectType:
+				{
 					zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC,
 						"DataObject property %s cannot have a default value",
 						property_name);
 					break;
+				}
 				case Type::ChangeSummaryType:
+				{
 					zend_throw_exception_ex(sdo_unsupportedoperationexception_class_entry, 0 TSRMLS_CC,
 						"ChangeSummary property %s cannot have a default value",
 						property_name);
 					break;
+				}
 				default:
-					class_name = get_active_class_name(&space TSRMLS_CC);
+				{
+					const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 					php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'",
 						class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 						type.getName(), property_name);
+				}
 				}
 
 				zval_dtor(&temp_zval);

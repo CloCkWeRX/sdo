@@ -93,8 +93,13 @@ static zend_object_value sdo_das_setting_object_create(zend_class_entry *ce TSRM
 	my_object->zo.guards = NULL;
 	ALLOC_HASHTABLE(my_object->zo.properties);
 	zend_hash_init(my_object->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
-		(void *)&tmp, sizeof(zval *));
+//	zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
+
+	#if PHP_VERSION_ID < 50399
+	  zend_hash_copy(my_object->zo.properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
+	#else
+	  object_properties_init(&my_object->zo, ce);
+	#endif
 	retval.handle = zend_objects_store_put(my_object, SDO_FUNC_DESTROY(das_setting), sdo_das_setting_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &sdo_das_setting_object_handlers;
 	SDO_DEBUG_ALLOCATE(retval.handle, my_object);
@@ -108,11 +113,11 @@ static zend_object_value sdo_das_setting_object_create(zend_class_entry *ce TSRM
 void sdo_das_setting_new(zval *me, Setting *setting TSRMLS_DC)
 {
 	sdo_das_setting_object *my_object;
-	char *class_name, *space;
+//	char *class_name, *space;
 
 	Z_TYPE_P(me) = IS_OBJECT;
 	if (object_init_ex(me, sdo_das_setting_class_entry) == FAILURE) {
-		class_name = get_active_class_name(&space TSRMLS_CC);
+		const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		return;
@@ -134,7 +139,7 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 	wchar_t		 wchar_value;
 	DataObjectPtr doh_value;
 	zval		*return_value;
-	char		*class_name, *space;
+//	char		*class_name, *space;
 
 	MAKE_STD_ZVAL(return_value);
 	try {
@@ -143,63 +148,76 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 		} else {
 			const Property& property = setting->getProperty();
 			switch(property.getTypeEnum()) {
-			case Type::OtherTypes:
-				class_name = get_active_class_name(&space TSRMLS_CC);
+			case Type::OtherTypes: {
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'OtherTypes'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
+			}
 			case Type::BigDecimalType:
-			case Type::BigIntegerType:
+			case Type::BigIntegerType: {
 				RETVAL_STRING((char *)setting->getCStringValue(), 1);
 				break;
-			case Type::BooleanType:
+			}
+			case Type::BooleanType: {
 				RETVAL_BOOL(setting->getBooleanValue());
 				break;
-			case Type::ByteType:
+			}
+			case Type::ByteType: {
 				RETVAL_LONG(setting->getByteValue());
 				break;
-			case Type::BytesType:
+			}
+			case Type::BytesType: {
 				bytes_len = setting->getLength();
 				bytes_value = (char *)emalloc(1 + bytes_len);
 				bytes_len = setting->getBytesValue(bytes_value, bytes_len);
 				bytes_value[bytes_len] = '\0';
 				RETVAL_STRINGL(bytes_value, bytes_len, 0);
 				break;
-			case Type::CharacterType:
+			}
+			case Type::CharacterType: {
 				wchar_value = setting->getCharacterValue();
 				if (wchar_value > INT_MAX) {
-					class_name = get_active_class_name(&space TSRMLS_CC);
+					const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 					php_error(E_WARNING, "%s%s%s(): wide character data lost for '%s'",
 						class_name, space, get_active_function_name(TSRMLS_C), property.getName());
 				}
 				char_value = setting->getByteValue();
 				RETVAL_STRINGL(&char_value, 1, 1);
 				break;
-			case Type::DateType:
+			}
+			case Type::DateType: {
 				RETVAL_LONG(setting->getDateValue().getTime());
 				break;
-			case Type::DoubleType:
+			}
+			case Type::DoubleType: {
 				RETVAL_DOUBLE(setting->getDoubleValue());
 				break;
-			case Type::FloatType:
+			}
+			case Type::FloatType: {
 				RETVAL_DOUBLE(setting->getFloatValue());
 				break;
-			case Type::IntegerType:
+			}
+			case Type::IntegerType: {
 				RETVAL_LONG(setting->getIntegerValue());
 				break;
-			case Type::LongType:
+			}
+			case Type::LongType: {
 				/* An SDO long (64 bits) may overflow a PHP int, so we return it as a string */
 				RETVAL_STRING((char *)setting->getCStringValue(), 1);
 				break;
-			case Type::ShortType:
+			}
+			case Type::ShortType: {
 				RETVAL_LONG(setting->getShortValue());
 				break;
+			}
 			case Type::StringType:
-			case Type::UriType:
+			case Type::UriType: {
 				RETVAL_STRING((char *)setting->getCStringValue(), 1);
 				break;
+			}
 			case Type::DataObjectType:
-			case Type::OpenDataObjectType:
+			case Type::OpenDataObjectType: {
 				doh_value = setting->getDataObjectValue();
 				if (!doh_value) {
 					/* An old value may legitimately be null */
@@ -208,22 +226,26 @@ static zval *sdo_das_setting_read_value (sdo_das_setting_object *my_object TSRML
 					sdo_do_new(return_value, doh_value TSRMLS_CC);
 				}
 				break;
-			case Type::ChangeSummaryType:
-				class_name = get_active_class_name(&space TSRMLS_CC);
+			}
+			case Type::ChangeSummaryType: {
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'ChangeSummaryType'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
-			case Type::TextType:
-				class_name = get_active_class_name(&space TSRMLS_CC);
+			}
+			case Type::TextType: {
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type 'TextType'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__);
 				break;
-			default:
-				class_name = get_active_class_name(&space TSRMLS_CC);
+			}
+			default: {
+				const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
 				php_error(E_ERROR, "%s%s%s(): internal error (%i) - unexpected DataObject type '%s' for property '%s'",
 					class_name, space, get_active_function_name(TSRMLS_C), __LINE__,
 					property.getType().getName(), property.getName());
 			}
+		}
 		}
 	} catch (SDORuntimeException e) {
 		sdo_throw_runtimeexception(&e TSRMLS_CC);
@@ -319,20 +341,25 @@ static int sdo_das_setting_cast_object(zval *readobj, zval *writeobj, int type, 
 	}
 
 	switch(type) {
-	case IS_STRING:
+	case IS_STRING: {
 		convert_to_string(writeobj);
 		break;
-	case IS_BOOL:
+	}
+	case IS_BOOL: {
 		convert_to_boolean(writeobj);
 		break;
-	case IS_LONG:
+	}
+	case IS_LONG: {
 		convert_to_long(writeobj);
 		break;
-	case IS_DOUBLE:
+	}
+	case IS_DOUBLE: {
 		convert_to_double(writeobj);
 		break;
-	default:
+	}
+	default: {
 		rc = FAILURE;
+	}
 	}
 
 	if (should_free) {

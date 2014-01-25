@@ -87,8 +87,14 @@ static zend_object_value sdo_cppexception_create_object(zend_class_entry *ce TSR
 
 	ALLOC_HASHTABLE(object->properties);
 	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref,
-		(void *)&tmp, sizeof(zval *));
+// 	zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t)zval_add_ref, (void *)&tmp, sizeof(zval *));
+
+	#if PHP_VERSION_ID < 50399
+	  zend_hash_copy(object->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &temp, sizeof(zval *));
+	#else
+	  object_properties_init(object, ce);
+	#endif
+
 
 	return z_object.value.obj;
 }
@@ -96,7 +102,7 @@ static zend_object_value sdo_cppexception_create_object(zend_class_entry *ce TSR
 
 /* {{{ sdo_cppexception_get_property
  */
-static void sdo_cppexception_get_property(zval *me, char *name, long name_len, zval *return_value TSRMLS_DC)
+static void sdo_cppexception_get_property(zval *me, const char *name, long name_len, zval *return_value TSRMLS_DC)
 {
 	zval *value;
 
@@ -112,11 +118,11 @@ static void sdo_cppexception_get_property(zval *me, char *name, long name_len, z
 /* {{{ sdo_cppexception_cast_object
 */
 #if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
-static int sdo_cppexception_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC) 
+static int sdo_cppexception_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
 	int should_free = 0;
 #else
-static int sdo_cppexception_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) 
+static int sdo_cppexception_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 #endif
 	ostringstream print_buf;
@@ -196,7 +202,7 @@ void sdo_cppexception_new(zval *me, SDORuntimeException *cpp_exception TSRMLS_DC
 	const char *message = cpp_exception->getMessageText();
 	const char *file = cpp_exception->getFileName();
 	long line = cpp_exception->getLineNumber();
-	char *class_name, *space;
+//	char *class_name, *space;
 
 	long severity;
 
@@ -218,7 +224,8 @@ void sdo_cppexception_new(zval *me, SDORuntimeException *cpp_exception TSRMLS_DC
 	}
 
 	if (object_init_ex(me, sdo_cppexception_class_entry) == FAILURE) {
-		class_name = get_active_class_name(&space TSRMLS_CC);
+		const char *space, *class_name = get_active_class_name(&space TSRMLS_CC);
+//		class_name = get_active_class_name(&space TSRMLS_CC);
 		php_error(E_ERROR, "%s%s%s(): internal error (%i) - failed to instantiate %s object",
 			class_name, space, get_active_function_name(TSRMLS_C), __LINE__, CLASS_NAME);
 		return;
@@ -342,7 +349,7 @@ PHP_METHOD(SDO_CPPException, __toString)
 {
 #if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1)
 	sdo_cppexception_cast_object(getThis(), return_value, IS_STRING TSRMLS_CC);
-#else	
+#else
 	sdo_cppexception_cast_object(getThis(), return_value, IS_STRING, 0 TSRMLS_CC);
 #endif
 }
